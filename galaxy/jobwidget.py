@@ -4,7 +4,7 @@ from urllib.error import HTTPError
 from ipywidgets import Dropdown, Button, VBox, HBox
 
 
-from galaxygp.shim import get_permissions, set_permissions, get_token
+from galaxy.shim import get_permissions, set_permissions, get_token
 from nbtools import UIOutput, EventManager, ToolManager
 from .util import DEFAULT_COLOR, DEFAULT_LOGO
 
