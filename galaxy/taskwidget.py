@@ -47,8 +47,8 @@ class GalaxyTaskWidget(UIBuilder):
             self.job = display(GalaxyJobWidget(self.job, gi))
             ###########################Job run ######################### 
 
-         
-        submit_job.__qualname_ = tool.wrapped['description']
+        submit_job.__qualname__ = tool.wrapped['name']
+        submit_job.__doc__ = tool.wrapped['description']
 
         params = []
         hdn = tool.wrapped['inputs']
