@@ -3,13 +3,13 @@ from bioblend import galaxy
 
 class SessionList:
     """
-    Keeps a list of all currently registered GenePattern server sessions
+    Keeps a list of all currently registered Galaxy server sessions
     """
     sessions = []
 
     def register(self, server, username, password):
         """
-        Register a new GenePattern server session for the provided
+        Register a new Galaxy  server session for the provided
         server, username and password. Return the session.
         :param server:
         :param username:
@@ -18,7 +18,7 @@ class SessionList:
         """
 
         # Create the session
-        #session = gp.GPServer(server, username, password)
+        #session = GalaxyInstance(server, email=username, password=password, verify=True)
         session = galaxy.GalaxyInstance(server, email=username, password=password, verify=True)
 
         #print (session)
@@ -44,7 +44,7 @@ class SessionList:
 
     def get(self, server):
         """
-        Returns a registered GPServer object with a matching GenePattern server url or index
+        Returns a registered GalaxyServer object with a matching Galaxy server url or index
         Returns None if no matching result was found
         :param server:
         :return:
@@ -66,14 +66,14 @@ class SessionList:
 
     def clean(self):
         """
-        Clear all GenePattern sessions from the sessions list
+        Clear all Galaxy sessions from the sessions list
         :return:
         """
         self.sessions = []
 
     def _get_index(self, server_url):
         """
-        Returns a registered GPServer object with a matching GenePattern server url
+        Returns a registered GalaxyServer object with a matching Galaaxy server url
         Returns -1 if no matching result was found
         :param server_url:
         :return:
@@ -85,12 +85,10 @@ class SessionList:
         return -1
 
 """
-GenePattern Sessions Singleton
+Galaxy Sessions Singleton
 """
 session = SessionList()
 
 
 def get_session(index):
-    """genepattern.get_session shim added for the purposes of backward compatibility"""
-    warnings.warn("genepattern.get_session() has been deprecated. Please use genepattern.session.get() instead.", UserWarning)
     return session.get(index)

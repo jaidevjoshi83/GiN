@@ -1,14 +1,14 @@
 import inspect
 import os
 import tempfile
-from IPython.display import display
-from .jobwidget import GPJobWidget
+from .display import display
+from .jobwidget import GalaxyJobWidget
 from nbtools import NBTool, UIBuilder, python_safe, EventManager
-from .shim import get_task, get_kinds
+from .shim import  get_kinds
 from .util import DEFAULT_COLOR, DEFAULT_LOGO
 
-class GPTaskWidget(UIBuilder):
-    """A widget for representing the status of a GenePattern job"""
+class GalaxyTaskWidget(UIBuilder):
+    """A widget for representing the status of a Galaxy job"""
     #default_color = 'rgba(10, 45, 105, 0.80)'
     default_color = DEFAULT_COLOR
     default_logo = DEFAULT_LOGO
@@ -23,10 +23,10 @@ class GPTaskWidget(UIBuilder):
 
     def create_function_wrapper(self, tool):
         gi = tool.gi.gi #tool.gi is oo gi, gi.gi is original gi
-        """Create a function that accepts the expected input and submits a GenePattern job"""
+        """Create a function that accepts the expected input and submits a Galaxy job"""
         #if task is None or task.server_data is None: return lambda: None  # Dummy function for null task
-        name_map = {}  # Map of Python-safe parameter names to GP parameter names
-        # Function for submitting a new GenePattern job based on the task form
+        name_map = {}  # Map of Python-safe parameter names to Galaxy parameter names
+        # Function for submitting a new Galaxy job based on the task form
 
         def submit_job(**kwargs):
             tool_id  = tool.wrapped['id']
@@ -44,7 +44,7 @@ class GPTaskWidget(UIBuilder):
             ###########################Job run ######################### 
             self.job = gi.tools.run_tool(history_id=History_ID, tool_id=tool_id, tool_inputs=inputs)
             ###########################Job run######################### 
-            self.job = display(GPJobWidget(self.job, gi))
+            self.job = display(GalaxyJobWidget(self.job, gi))
             ###########################Job run ######################### 
 
          
@@ -146,26 +146,25 @@ class GPTaskWidget(UIBuilder):
                 if p['test_param']['value'] == None:
                     spec[safe_name]['default'] = 'Input File'
                 else: 
-                    spec[safe_name]['default'] = GPTaskWidget.form_value(p['test_param']['value'])
+                    spec[safe_name]['default'] = GalaxyTaskWidget.form_value(p['test_param']['value'])
             else:
                 if p['value'] == None:
                     spec[safe_name]['default'] = 'Input File'
                 else: 
-                    spec[safe_name]['default'] = GPTaskWidget.form_value(p['value'])
+                    spec[safe_name]['default'] = GalaxyTaskWidget.form_value(p['value'])
                        
             if p['type'] == 'history_list':
                  spec[safe_name]['default'] == "Select History"
                     
             if 'test_param' in p.keys():
-                spec[safe_name]['description'] = GPTaskWidget.form_value(p['test_param']['label'])
+                spec[safe_name]['description'] = GalaxyTaskWidget.form_value(p['test_param']['label'])
             else:
-                spec[safe_name]['description'] = GPTaskWidget.form_value(p['label'])
+                spec[safe_name]['description'] = GalaxyTaskWidget.form_value(p['label'])
                 
             if 'test_param' in p.keys():                                                                                                                    
                 spec[safe_name]['optional'] = p['test_param']['optional']
             else:
                 spec[safe_name]['optional'] = p['optional']
-                
             spec[safe_name]['kinds'] = []
             self.add_type_spec(p, spec[safe_name])
         return spec
@@ -186,7 +185,7 @@ class GPTaskWidget(UIBuilder):
 
     def generate_upload_callback(self):
 
-        def genepattern_upload_callback(values):
+        def galaxy_upload_callback(values):
             gi = self.tool.gi.gi
             for k in values:
                 with tempfile.NamedTemporaryFile() as f:
@@ -194,7 +193,7 @@ class GPTaskWidget(UIBuilder):
                     f.flush()
                     a = gi.tools.upload_file(os.path.realpath(f.name), self.Hlist[0]['options'][0][1], file_name=k) 
                     return 'Input Data ID :'+a['outputs'][0]['id']
-        return genepattern_upload_callback
+        return galaxy_upload_callback
 
     def handle_error_task(self, error_message, name='Galaxy Module', **kwargs):
         """Display an error message if the task is None"""
@@ -243,4 +242,4 @@ class TaskTool(NBTool):
         self.id = tool.wrapped['id']
         self.name = tool.wrapped['name']
         self.description = tool.wrapped['description']
-        self.load = lambda: GPTaskWidget(tool)
+        self.load = lambda: GalaxyTaskWidget(tool)

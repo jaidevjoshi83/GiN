@@ -1,11 +1,10 @@
 import bioblend
 import nbtools
 from bioblend.galaxy.objects import client, GalaxyInstance
-import gp
-from IPython.display import display
+from .display import display
 from nbtools import UIBuilder, ToolManager, NBTool, EventManager
 from .sessions import session
-from .shim import login, system_message
+#from .shim import login, system_message
 from .taskwidget import TaskTool
 from .util import DEFAULT_COLOR, DEFAULT_LOGO
 from bioblend import galaxy
@@ -24,8 +23,8 @@ REGISTER_EVENT = """
     if (server_input) window.open(server_input.value + '/login#register');
     else console.warn('Cannot obtain Galaxy Server URL');"""
 
-class GPAuthWidget(UIBuilder):
-    """A widget for authenticating with a GenePattern server"""
+class GalaxyAuthWidget(UIBuilder):
+    """A widget for authenticating with a Galaxy server"""
     #default_color = 'rgba(10, 45, 105, 0.80)'
     default_color = DEFAULT_COLOR
     default_logo =  DEFAULT_LOGO
@@ -90,7 +89,7 @@ class GPAuthWidget(UIBuilder):
 
     def login(self, server, email, password):
 
-        """Login to the GenePattern server"""
+        """Login to the Galaxy server"""
         
         self.session.url = server
         self.session.email = email
@@ -109,7 +108,7 @@ class GPAuthWidget(UIBuilder):
     def replace_widget(self):
         """Replace the unauthenticated widget with the authenticated widget"""
         self.form.children[2].value = ''            # Blank password so it doesn't get serialized
-        display(GPAuthWidget(self.session))     # Display the authenticated widget
+        display(GalaxyAuthWidget(self.session))     # Display the authenticated widget
         self.close()   
 
     def register_session(self):
@@ -139,7 +138,7 @@ class AuthenticationTool(NBTool):
     id = 'galaxy_authentication'
     name = 'Galaxy Login'
     description = 'Log into a Galaxy server'
-    load = lambda x: GPAuthWidget()
+    load = lambda x: GalaxyAuthWidget()
 
 
 # Register the authentication widget

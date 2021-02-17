@@ -4,13 +4,13 @@ from urllib.error import HTTPError
 from ipywidgets import Dropdown, Button, VBox, HBox
 
 
-from galaxygp.shim import get_permissions, set_permissions, get_token
+from .shim import get_permissions, set_permissions, get_token
 from nbtools import UIOutput, EventManager, ToolManager
 from .util import DEFAULT_COLOR, DEFAULT_LOGO
 
 
-class GPJobWidget(UIOutput):
-    """A widget for representing the status of a GenePattern job"""
+class GalaxyJobWidget(UIOutput):
+    """A widget for representing the status of a Galaxy job"""
     default_color = DEFAULT_COLOR
     default_logo = DEFAULT_LOGO
     sharing_displayed = False
@@ -22,17 +22,17 @@ class GPJobWidget(UIOutput):
         UIOutput.__init__(self, color=self.default_color, logo=self.default_logo, **kwargs)
         self.job = job
         self.gi = gi
-        self.poll()  # Query the GP server and begin polling, if needed
+        self.poll()  # Query the Galaxy server and begin polling, if needed
         #self.attach_detach()
         #self.attach_sharing()
 
-        # Register the event handler for GP login
-        EventManager.instance().register("gp.login", self.login_callback)
+        # Register the event handler for Galaxy login
+        EventManager.instance().register("gp.login", self.login_callback) #ToDo
 
     def poll(self):
-        """Poll the GenePattern server for the job info and display it in the widget"""
+        """Poll the Galaxy server for the job info and display it in the widget"""
         if self.job is not None:
-            try:  # Attempt to load the job info from the GP server
+            try:  # Attempt to load the job info from the Galaxy server
                 self.gi.jobs.show_job(self.job['jobs'][0]['id'], full_details=True)
             except HTTPError:  # Handle HTTP errors contacting the server
                 self.name = 'Error Loading Job'
@@ -49,26 +49,9 @@ class GPJobWidget(UIOutput):
             # Send notification if completed
             self.handle_notification()
 
-            #self.extra_file_menu_items = {
-            #    'Send to Code': {
-            #        'action': 'cell',
-            #        'code': f'import genepattern\n\nfile_{self.job.job_number} = genepattern.session.get("{self.job.server_data.url}").get_job({self.job.job_number}).get_file("{{{{file_name}}}}")\nfile_{self.job.job_number}'
-            #    },
-            ##    'Send to Dataframe': {
-            #        'action': 'cell',
-            #        'kinds': ['gct', 'odf'],
-            #        'code': f'import genepattern\nfrom gp.data import GCT as gct, ODF as odf\n\nfile_{self.job.job_number} = {{{{type}}}}(genepattern.session.get("{self.job.server_data.url}").get_job({self.job.job_number}).get_file("{{{{file_name}}}}"))\nfile_{self.job.job_number}'
-            #    }
-            #}
-
-            # Handle child jobs
-            #if len(self.appendix.children) == 0:
-            ##   self.appendix.children = [GPJobWidget(child) for child in self.job.get_child_jobs()]
-
-            # Begin polling if pending or running
             self.poll_if_needed()
         else:
-            # Display error message if no initialized GPJob object is provided
+            # Display error message if no initialized Galaxy Job object is provided #ToDo
             self.name = 'Not Authenticated'
             self.error = 'You must be authenticated before the job can be displayed. After you authenticate it may take a few seconds for the information to appear.'
 
@@ -134,11 +117,11 @@ class GPJobWidget(UIOutput):
 
     def handle_notification(self):
         if self.status == 'error':
-            ToolManager.instance().send('notification', {'message': f'Job #{self.name} has an error!', 'sender': 'Galaxy/GenePattern Notebook'})
+            ToolManager.instance().send('notification', {'message': f'Job #{self.name} has an error!', 'sender': 'Galaxy/GalaxyLab Notebook'})
         elif self.status == 'ok':
-            ToolManager.instance().send('notification', {'message': f'Job #{self.name} is complete!', 'sender': 'Galaxy/GenePattern Notebook'})
+            ToolManager.instance().send('notification', {'message': f'Job #{self.name} is complete!', 'sender': 'Galaxy/GalaxyLab Notebook'})
 
-    def status_text(self):
+    def status_text(self): #ToDo
         """Return concise status text"""
         if self.job is None: return ''  # Ensure the job has been set
         if 'hasError' in self.job.info['status'] and self.job.info['status']['hasError']:
@@ -150,11 +133,11 @@ class GPJobWidget(UIOutput):
         else:
             return 'Running'
 
-    def attach_detach(self):
+    def attach_detach(self): #ToDo
         """Attach the menu option to detach the job widget from the analysis cell"""
         self.extra_menu_items = {**self.extra_menu_items, **{'Detach Job': {
                 'action': 'cell',
-                'code': f'import gp\n\ngenepattern.display(gp.GPJob(genepattern.session.get(0), fixme))'  # FIXME: support non-default sessions
+                'code': f"import \n\ngalaxy.display(self.gi.jobs.show_job(self.job['jobs'][0]['id'], full_details=True))"  # FIXME: support non-default sessions
             }}}
 
     def attach_sharing(self):
