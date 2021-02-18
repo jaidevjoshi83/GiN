@@ -1,2 +1,2 @@
-include genepattern/static/*
-include genepattern/static/resources/*
+include galaxy/static/*
+include galaxy/static/resources/*

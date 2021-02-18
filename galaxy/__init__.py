@@ -2,8 +2,7 @@ from .authwidget import GALAXY_SERVERS, GalaxyAuthWidget
 from .taskwidget import GalaxyTaskWidget
 from .jobwidget import GalaxyJobWidget
 from .sessions import session, get_session
-from .display import display
-from nbtools import UIBuilder as GPUIBuilder, UIOutput as GPUIOutput, build_ui, open
+#from .display import display
 
 __author__ = 'Jayadev Joshi'
 __copyright__ = 'Copyright 2021 Galaxy Contributors'

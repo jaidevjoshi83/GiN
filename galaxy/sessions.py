@@ -1,5 +1,6 @@
 
-from bioblend import galaxy
+#from bioblend import galaxy
+from bioblend.galaxy.objects import GalaxyInstance
 
 class SessionList:
     """
@@ -7,38 +8,36 @@ class SessionList:
     """
     sessions = []
 
-    def register(self, server, username, password):
+    def register(self, server, email, password):
         """
         Register a new Galaxy  server session for the provided
-        server, username and password. Return the session.
+        server, email and password. Return the session.
         :param server:
-        :param username:
+        :param email:
         :param password:
         :return:
         """
 
         # Create the session
-        #session = GalaxyInstance(server, email=username, password=password, verify=True)
-        session = galaxy.GalaxyInstance(server, email=username, password=password, verify=True)
+        session = GalaxyInstance(server, email=email, password=password, verify=True)
+        session._notebook_url = server
+        session._notebook_email = email
+        session._notebook_password = password
 
-        #print (session)
-
-        # Validate username if not empty
-        valid_username = username != "" and username is not None
+        # Validate email if not empty
+        valid_email = email != "" and email is not None
 
         # Validate that the server is not already registered
         index = self._get_index(server)
         new_server = index == -1
 
         # Add the new session to the list
-        if valid_username and new_server:
+        if valid_email and new_server:
             self.sessions.append(session)
 
         # Replace old session is one exists
-        if valid_username and not new_server:
+        if valid_email and not new_server:
             self.sessions[index] = session
-
-       # print(session)
 
         return session
 
@@ -80,7 +79,7 @@ class SessionList:
         """
         for i in range(len(self.sessions)):
             session = self.sessions[i]
-            if session.url == server_url:
+            if session._notebook_url == server_url:
                 return i
         return -1
 

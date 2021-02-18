@@ -1,13 +1,10 @@
-import bioblend
-import nbtools
-from bioblend.galaxy.objects import client, GalaxyInstance
+from bioblend.galaxy.objects import GalaxyInstance
 from .display import display
 from nbtools import UIBuilder, ToolManager, NBTool, EventManager
 from .sessions import session
 #from .shim import login, system_message
 from .taskwidget import TaskTool
 from .util import DEFAULT_COLOR, DEFAULT_LOGO
-from bioblend import galaxy
 
 
 GALAXY_SERVERS = {
@@ -25,7 +22,6 @@ REGISTER_EVENT = """
 
 class GalaxyAuthWidget(UIBuilder):
     """A widget for authenticating with a Galaxy server"""
-    #default_color = 'rgba(10, 45, 105, 0.80)'
     default_color = DEFAULT_COLOR
     default_logo =  DEFAULT_LOGO
 
@@ -62,21 +58,17 @@ class GalaxyAuthWidget(UIBuilder):
 
     def __init__(self, session=None, **kwargs):
         """Initialize the authentication widget"""
-
-       # print (session)
-        if session is None: 
-            self.session = galaxy.GalaxyInstance("", email="", password="")
-        else: 
-            self.session = session
+        self.session = session
 
         # Assign the session object, lazily creating one if needed
-        if self.validate_credentials(session):
-            self.register_session()
+        if self.has_credentials() and self.validate_credentials(session):
+            self.register_session()     # Register the session with the SessionList
             self.register_modules()     # Register the modules with the ToolManager
             self.system_message()       # Display the system message
+            self.trigger_login()        # Trigger login callbacks of job and task widgets
 
             # Display the widget with the system message and no form
-            UIBuilder.__init__(self, lambda: None, name=self.session.url, display_header=False, display_footer=False,
+            UIBuilder.__init__(self, lambda: None, name=server_name(self.session._notebook_url), display_header=False, display_footer=False,
                                color=self.default_color, logo=self.default_logo, collapsed=True, **kwargs)
 
         # If not, prompt the user to login
@@ -88,49 +80,67 @@ class GalaxyAuthWidget(UIBuilder):
             UIBuilder.__init__(self, self.login, **kwargs)
 
     def login(self, server, email, password):
-
         """Login to the Galaxy server"""
-        
-        self.session.url = server
-        self.session.email = email
-        self.session.password = password
+        self.session = GalaxyInstance(server, email=email, password=password)
+        self.session._notebook_url = server
+        self.session._notebook_email = email
+        self.session._notebook_password = password
 
         # Validate the provided credentials
         if self.validate_credentials(self.session):
             self.replace_widget()
 
+    def has_credentials(self):
+        """Test whether the session object is instantiated and whether an email and password have been provided"""
+        if type(self.session) is not GalaxyInstance: return False  # Test type
+        if not self.session._notebook_url: return False                   # Test server url
+        if not self.session._notebook_email: return False              # Test email
+        if not self.session._notebook_password: return False              # Test password
+        return True
+
 
     def validate_credentials(self, session):
         """Validate the provided credentials"""
         # TODO: Is there a bioblend call to verify the user's login credentials? If so, add it here
-        return session is not None
+        try:
+            if session is not None and session.gi.key:
+                return True
+        except BaseException as e:
+            self.error = str(e)
+        return False
 
     def replace_widget(self):
         """Replace the unauthenticated widget with the authenticated widget"""
         self.form.children[2].value = ''            # Blank password so it doesn't get serialized
         display(GalaxyAuthWidget(self.session))     # Display the authenticated widget
-        self.close()   
+        self.close()   # Close the unauthenticated widget
 
     def register_session(self):
         """Register the validated credentials with the SessionList"""
-        self.session = session.register(self.session.url, self.session.email, self.session.password)                          # Close the unauthenticated widget
+        self.session = session.register(self.session._notebook_url, self.session._notebook_email, self.session._notebook_password)
 
     def register_modules(self):
-
-        session = GalaxyInstance(self.session.url, email=self.session.email, password=self.session.password)
-
-        a = bioblend.galaxy.objects.client.ObjToolClient(session) 
-
-        for tool in a.list():
-            tools = a.get(id_=tool.wrapped['id'],  io_details=True)
-            t = TaskTool(self.session.url, tools)
-            ToolManager.instance().register(t)
-        """Get the list available modules and register widgets for them with the tool manager"""
-        # TODO: Register galaxy tools with the tool manager - galaxy.tools.get_tools()
+        """Get the list available modules (currently only tools) and register widgets for them with the tool manager"""
+        for tool in self.session.tools.list():
+            tool = self.session.tools.get(tool.id, io_details=True)
+            tool = TaskTool(server_name(self.session._notebook_url), tool)
+            ToolManager.instance().register(tool)
    
     def system_message(self):
         self.info = "Successfully logged into Galaxy"
 
+    def trigger_login(self):
+        """Dispatch a login event after authentication"""
+        # Trigger login callbacks of job and task widgets
+        return
+        print("trigger_login")
+        EventManager.instance().dispatch("galaxy.login", self.session)
+
+def server_name(search_url):
+    """Search the GALAXY_SERVERS dict for the server with the matching URL"""
+    for name, url in GALAXY_SERVERS.items():
+        if url == search_url: return name
+    return search_url
 
 class AuthenticationTool(NBTool):
     """Tool wrapper for the authentication widget"""

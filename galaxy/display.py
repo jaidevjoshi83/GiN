@@ -13,10 +13,10 @@ def display(content):
     :return:
     """
     #if isinstance(content, ToDo):
-    #    IPython.display.display(GPAuthWidget(content))
+    #    IPython.display.display(GalaxyAuthWidget(content))
     #elif isinstance(content, ToDo):
-    #    IPython.display.display(GPTaskWidget(content))
+    #    IPython.display.display(GalaxyTaskWidget(content))
     #elif isinstance(content, ToDo):
-    #    IPython.display.display(GPJobWidget(content))
+    #    IPython.display.display(GalaxywJobWidget(content))
     #else:
     IPython.display.display(content)
