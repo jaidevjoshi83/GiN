@@ -22,7 +22,11 @@ pip install . && jupyter labextension install .
 
 ## Installation of galaxylab
 
-git clone -b co_working https://github.com/jaidevjoshi83/galaxylab.git
+-- Download the Brancch
+
+    ```
+    git clone -b co_working https://github.com/jaidevjoshi83/galaxylab.git
+    ```
 
 -- Installation of nbtools for build 
 
