@@ -9,10 +9,12 @@ Conda env:
 ```
 create -n galaxy-lab JupyterLab=2.2.9 ipywidgets=7.5.1 nodejs -y
 
-##Note optional step, for me it worked without this this step if in case it dint work this step can be followed. 
+########################################################################
+## Note optional step, if in case it dint work this step can be followed. 
 # bleep, bloop
-npm i backbone@1.2.3
-npm i @types/backbone@1.4.4
+# npm i backbone@1.2.3
+# npm i @types/backbone@1.4.4
+########################################################################
 
 pip install . && jupyter labextension install .
 
@@ -21,8 +23,6 @@ jupyter-lab --no-browser
 ```
 
 ## Installation of nbtools for build 
-
-
 
 ```bash
 
