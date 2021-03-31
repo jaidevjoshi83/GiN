@@ -1,41 +1,124 @@
+#!/usr/bin/env python
+# coding: utf-8
+
+# Copyright (c) Jupyter Development Team.
+# Distributed under the terms of the Modified BSD License.
+
+from __future__ import print_function
+from glob import glob
 import os
-from setuptools import setup
+from os.path import join as pjoin
+from setuptools import setup, find_packages
 
 
-__version__ = '0.1.0'
+from jupyter_packaging import (
+    create_cmdclass,
+    install_npm,
+    ensure_targets,
+    combine_commands,
+    get_version,
+)
+
+HERE = os.path.dirname(os.path.abspath(__file__))
 
 
-with open('README.md') as f:
-    long_description = f.read()
 
 
-setup(name='galaxy',
-      packages=['galaxy'],
-      version=__version__,
-      description='Galaxy extension for JupyterLab',
-      long_description=long_description,
-      long_description_content_type="text/markdown",
-      license='BSD',
-      author='Jayadev Joshi',
-      author_email='jayadev.joshi12@gmail.com',
-      url='https://github.com/jaidevjoshi83/galaxy-jupyterlab.git',
-      download_url='https://github.com/jaidevjoshi83/galaxy-jupyterlab.git/archive/' + __version__ + '.tar.gz',
-      keywords=['galaxy','genepattern', 'genomics', 'bioinformatics', 'ipython', 'jupyter'],
-      classifiers=[
-          'Development Status :: 5 - Production/Stable',
-          'Intended Audience :: Science/Research',
-          'Intended Audience :: Developers',
-          'Topic :: Scientific/Engineering :: Bio-Informatics',
-          'License :: OSI Approved :: BSD License',
-          'Programming Language :: Python :: 3.6',
-          'Programming Language :: Python :: 3.7',
-          'Framework :: Jupyter',
-      ],
-      install_requires=[
-          'bioblend==0.14.0',
-          'nbtools>=20',
-          'notebook>=5.0.0',
-          'ipywidgets>=7.0.0',
-      ],
-      normalize_version=False,
-      )
+# The name of the project
+name = 'galaxylab'
+
+# Get the version
+version = get_version(pjoin(name, '_version.py'))
+
+
+# Representative files that should exist after a successful build
+jstargets = [
+    pjoin(HERE, name, 'nbextension', 'index.js'),
+    pjoin(HERE, 'lib', 'plugin.js'),
+]
+
+
+package_data_spec = {
+    name: [
+        'nbextension/**js*',
+        'labextension/**'
+    ]
+}
+
+
+data_files_spec = [
+    ('share/jupyter/nbextensions/galaxylab', 'galaxylab/nbextension', '**'),
+    ('share/jupyter/labextensions/@galaxy/galaxylab', 'galaxylab/labextension', '**'),
+    ('share/jupyter/labextensions/@galaxy/galaxylab', '.', 'install.json'),
+    ('etc/jupyter/nbconfig/notebook.d', '.', '@galaxy/galaxylab.json'),
+]
+
+
+cmdclass = create_cmdclass('jsdeps', package_data_spec=package_data_spec,
+    data_files_spec=data_files_spec)
+cmdclass['jsdeps'] = combine_commands(
+    install_npm(HERE, build_cmd='build:prod'),
+    ensure_targets(jstargets),
+)
+
+
+setup_args = dict(
+    name            = name,
+    description     = 'A Custom Jupyter Widget Library',
+    version         = version,
+    scripts         = glob(pjoin('scripts', '*')),
+    cmdclass        = cmdclass,
+    packages        = find_packages(),
+    author          = 'Jayadev Joshi',
+    author_email    = 'jayadev.joshi12@gmail.com',
+    url             = 'https://github.com/galaxy/galaxylab',
+    license         = 'BSD',
+    platforms       = "Linux, Mac OS X, Windows",
+    keywords        = ['Jupyter', 'Widgets', 'IPython'],
+    classifiers     = [
+        'Intended Audience :: Developers',
+        'Intended Audience :: Science/Research',
+        'License :: OSI Approved :: BSD License',
+        'Programming Language :: Python',
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
+        'Framework :: Jupyter',
+    ],
+    include_package_data = True,
+    python_requires=">=3.6",
+    install_requires = [
+        'ipywidgets>=7.0.0',
+        'bioblend==0.14.0',
+        'nbtools>=20',
+        'notebook>=5.0.0',
+        'ipywidgets>=7.0.0',
+    ],
+    extras_require = {
+        'test': [
+            'pytest>=4.6',
+            'pytest-cov',
+            'nbval',
+        ],
+        'examples': [
+            # Any requirements for the examples to run
+        ],
+        'docs': [
+            'jupyter_sphinx',
+            'nbsphinx',
+            'nbsphinx-link',
+            'pytest_check_links',
+            'pypandoc',
+            'recommonmark',
+            'sphinx>=1.5',
+            'sphinx_rtd_theme',
+        ],
+    },
+    entry_points = {
+    },
+)
+
+if __name__ == '__main__':
+    setup(**setup_args)

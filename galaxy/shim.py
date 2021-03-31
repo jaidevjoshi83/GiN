@@ -5,7 +5,6 @@ import requests
 import urllib.parse
 import urllib.request
 
-from gp import GPTask
 
 
 def get_token(session):
@@ -32,7 +31,7 @@ def get_permissions(job):
     request = urllib.request.Request(url)
     if job.server_data.authorization_header() is not None:
         request.add_header('Authorization', job.server_data.authorization_header())
-    request.add_header('User-Agent', 'GenePatternRest')
+    request.add_header('User-Agent', 'GalaxyJupyterLabRest')
 
     response = urllib.request.urlopen(request)
     return json.loads(response.read())
@@ -44,78 +43,78 @@ def set_permissions(job, permissions):
     request = urllib.request.Request(url, data=data, method='PUT')
     if job.server_data.authorization_header() is not None:
         request.add_header('Authorization', job.server_data.authorization_header())
-    request.add_header('User-Agent', 'GenePatternRest')
+    request.add_header('User-Agent', 'GalaxyJupyterLabRest')
     urllib.request.urlopen(request)
 
 
-def login(session):
-    safe_url = ensure_safe_url(session.url)
-    safe_username = urllib.parse.quote(session.username)
-    safe_password = urllib.parse.quote(session.password)
+#def login(session):
+#    safe_url = ensure_safe_url(session._notebook_url)
+#    safe_email = urllib.parse.quote(session._notebook_email)
+#    safe_password = urllib.parse.quote(session._notebook_password)
 
-    url = f"{safe_url}/rest/v1/oauth2/token?grant_type=password&username={safe_username}&password={safe_password}&client_id=GenePatternNotebook-{safe_username}"
-    response = requests.post(url)
+#    url = f"{safe_url}/rest/v1/oauth2/token?grant_type=password&username={safe_username}&password={safe_password}&client_id=GenePatternNotebook-{safe_username}"
+#    response = requests.post(url)
 
-    try:
-        response.raise_for_status()
-        return response.json()['access_token']
-    except requests.exceptions.Timeout:
-        raise TimeoutError('Connection timed out attempting to contact GenePattern server')
-    except requests.exceptions.TooManyRedirects:
-        raise TimeoutError('Bad GenePattern server URL')
-    except requests.exceptions.RequestException as e:
-        raise TimeoutError('Invalid username or password')
-
-
-def system_message(session):
-    safe_url = ensure_safe_url(session.url)
-    url = f"{safe_url}/rest/v1/config/system-message"
-    response = requests.get(url)
-    return strip_html(response.text)
+#    try:
+#        response.raise_for_status()
+#        return response.json()['access_token']
+#    except requests.exceptions.Timeout:
+#        raise TimeoutError('Connection timed out attempting to contact GenePattern server')
+#    except requests.exceptions.TooManyRedirects:
+#        raise TimeoutError('Bad GenePattern server URL')
+#    except requests.exceptions.RequestException as e:
+#        raise TimeoutError('Invalid email or password')
 
 
-def get_task(session, lsid_or_name):
-    url = f'{session.url}/rest/v1/tasks/{lsid_or_name}/'
-    request = urllib.request.Request(url)
-    if session.authorization_header() is not None:
-        request.add_header('Authorization', session.authorization_header())
-    request.add_header('User-Agent', 'GenePatternRest')
-
-    response = urllib.request.urlopen(request)
-    task_dict = json.loads(response.read())
-    return GPTask(session, task_dict['lsid'], task_dict)
+#def system_message(session):
+#    safe_url = ensure_safe_url(session._notebook_url)
+#    url = f"{safe_url}/rest/v1/config/system-message"
+#    response = requests.get(url)
+#    return strip_html(response.text)
 
 
-class HTMLStripper(HTMLParser):
-    """Parse HTML blob and strip out all tags"""
-    def __init__(self):
-        super().__init__()
-        self.reset()
-        self.strict = False
-        self.convert_charrefs = True
-        self.text = StringIO()
+#def get_task(session, lsid_or_name): #ToDo
+#    url = f'{session._notebook_url}/rest/v1/tasks/{lsid_or_name}/'
+#    request = urllib.request.Request(url)
+#    if session.authorization_header() is not None:
+#        request.add_header('Authorization', session.authorization_header())
+#    request.add_header('User-Agent', 'GalaxyJupyterLabRest')#
 
-    def error(self, message):
-        pass
-
-    def handle_data(self, d):
-        self.text.write(d)
-
-    def get_data(self):
-        return self.text.getvalue()
+#    response = urllib.request.urlopen(request)
+#    task_dict = json.loads(response.read())
+#   return GalaxyTask(session, task_dict['lsid'], task_dict)
 
 
-def strip_html(html):
+#class HTMLStripper(HTMLParser):
+#    """Parse HTML blob and strip out all tags"""
+#    def __init__(self):
+#        super().__init__()
+#        self.reset()
+#        self.strict = False
+#        self.convert_charrefs = True
+#        self.text = StringIO()
+
+#    def error(self, message):
+#        pass
+
+#    def handle_data(self, d):
+#        self.text.write(d)
+
+#    def get_data(self):
+#        return self.text.getvalue()
+
+
+#def strip_html(html):
     """Strip potentially unsafe HTML from the system message string"""
-    s = HTMLStripper()
-    s.feed(html)
-    return s.get_data()
+#    s = HTMLStripper()
+#    s.feed(html)
+#    return s.get_data()
 
 
-def ensure_safe_url(url):
-    """Ensure the GenePattern URL ends with /gp"""
-    if url.endswith('/'):
-        url = url[:-1]
-    if not url.endswith('/gp'):
-        url += '/gp'
-    return url
+#def ensure_safe_url(url):
+    """Ensure the Galaxy URL ends with /api"""
+#    if url.endswith('/'):
+#        url = url[:-1]
+#    if not url.endswith('/api'):
+#        url += '/api'
+#    return url

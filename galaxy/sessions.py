@@ -1,50 +1,49 @@
 
-from bioblend import galaxy
+#from bioblend import galaxy
+from bioblend.galaxy.objects import GalaxyInstance
 
 class SessionList:
     """
-    Keeps a list of all currently registered GenePattern server sessions
+    Keeps a list of all currently registered Galaxy server sessions
     """
     sessions = []
 
-    def register(self, server, username, password):
+    def register(self, server, email, password):
         """
-        Register a new GenePattern server session for the provided
-        server, username and password. Return the session.
+        Register a new Galaxy  server session for the provided
+        server, email and password. Return the session.
         :param server:
-        :param username:
+        :param email:
         :param password:
         :return:
         """
 
         # Create the session
-        #session = gp.GPServer(server, username, password)
-        session = galaxy.GalaxyInstance(server, email=username, password=password, verify=True)
+        session = GalaxyInstance(server, email=email, password=password, verify=True)
+        session._notebook_url = server
+        session._notebook_email = email
+        session._notebook_password = password
 
-        #print (session)
-
-        # Validate username if not empty
-        valid_username = username != "" and username is not None
+        # Validate email if not empty
+        valid_email = email != "" and email is not None
 
         # Validate that the server is not already registered
         index = self._get_index(server)
         new_server = index == -1
 
         # Add the new session to the list
-        if valid_username and new_server:
+        if valid_email and new_server:
             self.sessions.append(session)
 
         # Replace old session is one exists
-        if valid_username and not new_server:
+        if valid_email and not new_server:
             self.sessions[index] = session
-
-       # print(session)
 
         return session
 
     def get(self, server):
         """
-        Returns a registered GPServer object with a matching GenePattern server url or index
+        Returns a registered GalaxyServer object with a matching Galaxy server url or index
         Returns None if no matching result was found
         :param server:
         :return:
@@ -66,31 +65,29 @@ class SessionList:
 
     def clean(self):
         """
-        Clear all GenePattern sessions from the sessions list
+        Clear all Galaxy sessions from the sessions list
         :return:
         """
         self.sessions = []
 
     def _get_index(self, server_url):
         """
-        Returns a registered GPServer object with a matching GenePattern server url
+        Returns a registered GalaxyServer object with a matching Galaaxy server url
         Returns -1 if no matching result was found
         :param server_url:
         :return:
         """
         for i in range(len(self.sessions)):
             session = self.sessions[i]
-            if session.url == server_url:
+            if session._notebook_url == server_url:
                 return i
         return -1
 
 """
-GenePattern Sessions Singleton
+Galaxy Sessions Singleton
 """
 session = SessionList()
 
 
 def get_session(index):
-    """genepattern.get_session shim added for the purposes of backward compatibility"""
-    warnings.warn("genepattern.get_session() has been deprecated. Please use genepattern.session.get() instead.", UserWarning)
     return session.get(index)
