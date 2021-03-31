@@ -22,67 +22,43 @@ jupyter-lab --no-browser
 
 ```
 
-## Installation of nbtools for build 
-
-```bash
-
-docker pull verdaccio/verdaccio
-
-docker run -it --rm --name verdaccio -p 4873:4873 verdaccio/verdaccio
-
-view in browser: http://0.0.0.0:4873/
-
-cd nbtools
-
-npm adduser --registry http://0.0.0.0:4873
-
-npm publish --registry http://0.0.0.0:4873
-
-now go to galaxylab dir
-
-cd galaxylab
-
-npm install @genepattern/nbtools@20.10.0-alpha.0 --registry http://0.0.0.0:4873
-
-```
-
-## ## Installation of galaxylab build
+## Installation of galaxylab
 
 git clone -b co_working https://github.com/jaidevjoshi83/galaxylab.git
 
--- Installation of nbtools for build
-
-
-  docker pull verdaccio/verdaccio
-
-  docker run -it --rm --name verdaccio -p 4873:4873 verdaccio/verdaccio
-
-  view in browser: http://0.0.0.0:4873/
-
-  cd nbtools
-
-  npm adduser --registry http://0.0.0.0:4873
-
-  npm publish --registry http://0.0.0.0:4873
-
-  now go to galaxylab dir
-
-  cd galaxylab
-
-  npm install @genepattern/nbtools@20.10.0-alpha.0 --registry http://0.0.0.0:4873
-
--- Installation of galaxylab
+-- Installation of nbtools for build 
 
 ```bash
 
-  cd galaxylab/
+    docker pull verdaccio/verdaccio
 
-  pip install -e .
+    docker run -it --rm --name verdaccio -p 4873:4873 verdaccio/verdaccio
 
-  jupyter labextension install .
-  
-  jupyter nbextension enable --py widgetsnbextension
+    view in browser: http://0.0.0.0:4873/
 
-  jupyter labextension install @jupyter-widgets/jupyterlab-manager
+    cd nbtools
+
+    npm adduser --registry http://0.0.0.0:4873
+
+    npm publish --registry http://0.0.0.0:4873
+
+    now go to galaxylab dir
+
+    cd galaxylab
+
+    npm install @genepattern/nbtools@20.10.0-alpha.0 --registry http://0.0.0.0:4873
+
+
+-- galaxylab installatoin
+
+    cd galaxylab/
+
+    pip install -e .
+
+    jupyter labextension install .
+
+    jupyter nbextension enable --py widgetsnbextension
+
+    jupyter labextension install @jupyter-widgets/jupyterlab-manager
   
   
