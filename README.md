@@ -1,72 +1,88 @@
 
 # galaxylab
 
-[![Build Status](https://travis-ci.org/galaxy/galaxylab.svg?branch=master)](https://travis-ci.org/galaxy/galaxylab)
-[![codecov](https://codecov.io/gh/galaxy/galaxylab/branch/master/graph/badge.svg)](https://codecov.io/gh/galaxy/galaxylab)
+
+## Installation nbtools
+
+Conda env:
+
+```
+create -n galaxy-lab JupyterLab=2.2.9 ipywidgets=7.5.1 nodejs -y
+
+##Note optional step, for me it worked without this this step if in case it dint work this step can be followed. 
+# bleep, bloop
+npm i backbone@1.2.3
+npm i @types/backbone@1.4.4
+
+pip install . && jupyter labextension install .
+
+jupyter-lab --no-browser
+
+```
+
+## Installation of nbtools for build 
 
 
-A Custom Jupyter Widget Library
-
-## Installation
-
-You can install using `pip`:
 
 ```bash
-pip install galaxylab
+
+docker pull verdaccio/verdaccio
+
+docker run -it --rm --name verdaccio -p 4873:4873 verdaccio/verdaccio
+
+view in browser: http://0.0.0.0:4873/
+
+cd nbtools
+
+npm adduser --registry http://0.0.0.0:4873
+
+npm publish --registry http://0.0.0.0:4873
+
+now go to galaxylab dir
+
+cd galaxylab
+
+npm install @genepattern/nbtools@20.10.0-alpha.0 --registry http://0.0.0.0:4873
+
 ```
 
-If you are using Jupyter Notebook 5.2 or earlier, you may also need to enable
-the nbextension:
+## ## Installation of galaxylab build
+
+git clone -b co_working https://github.com/jaidevjoshi83/galaxylab.git
+
+-- Installation of nbtools for build
+
+
+  docker pull verdaccio/verdaccio
+
+  docker run -it --rm --name verdaccio -p 4873:4873 verdaccio/verdaccio
+
+  view in browser: http://0.0.0.0:4873/
+
+  cd nbtools
+
+  npm adduser --registry http://0.0.0.0:4873
+
+  npm publish --registry http://0.0.0.0:4873
+
+  now go to galaxylab dir
+
+  cd galaxylab
+
+  npm install @genepattern/nbtools@20.10.0-alpha.0 --registry http://0.0.0.0:4873
+
+-- Installation of galaxylab
+
 ```bash
-jupyter nbextension enable --py [--sys-prefix|--user|--system] galaxylab
-```
 
-## Development Installation
+  cd galaxylab/
 
-Create a dev environment:
-```bash
-conda create -n galaxylab-dev -c conda-forge nodejs yarn python jupyterlab
-conda activate galaxylab-dev
-```
+  pip install -e .
 
-Install the python. This will also build the TS package.
-```bash
-pip install -e ".[test, examples]"
-```
+  jupyter labextension install .
+  
+  jupyter nbextension enable --py widgetsnbextension
 
-When developing your extensions, you need to manually enable your extensions with the
-notebook / lab frontend. For lab, this is done by the command:
-
-```
-jupyter labextension develop --overwrite .
-yarn run build
-```
-
-For classic notebook, you need to run:
-
-```
-jupyter nbextension install --sys-prefix --symlink --overwrite --py galaxylab
-jupyter nbextension enable --sys-prefix --py galaxylab
-```
-
-Note that the `--symlink` flag doesn't work on Windows, so you will here have to run
-the `install` command every time that you rebuild your extension. For certain installations
-you might also need another flag instead of `--sys-prefix`, but we won't cover the meaning
-of those flags here.
-
-### How to see your changes
-#### Typescript:
-If you use JupyterLab to develop then you can watch the source directory and run JupyterLab at the same time in different
-terminals to watch for changes in the extension's source and automatically rebuild the widget.
-
-```bash
-# Watch the source directory in one terminal, automatically rebuilding when needed
-yarn run watch
-# Run JupyterLab in another terminal
-jupyter lab
-```
-
-After a change wait for the build to finish and then refresh your browser and the changes should take effect.
-
-#### Python:
-If you make a change to the python code then you will need to restart the notebook kernel to have it take effect.
+  jupyter labextension install @jupyter-widgets/jupyterlab-manager
+  
+  
