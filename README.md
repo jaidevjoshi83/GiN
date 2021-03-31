@@ -47,5 +47,10 @@ pip install . && jupyter labextension install .
     jupyter labextension install @jupyter-widgets/jupyterlab-manager
     
     jupyter-lab --no-browser
+    
+    Note: If galaxy login dint appear in the side panel just wait for a minute and refresh the page.
+    
+    
+  
   
   
