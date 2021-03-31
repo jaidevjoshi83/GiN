@@ -28,8 +28,6 @@ git clone -b co_working https://github.com/jaidevjoshi83/galaxylab.git
 
 -- Installation of nbtools for build 
 
-```bash
-
     docker pull verdaccio/verdaccio
 
     docker run -it --rm --name verdaccio -p 4873:4873 verdaccio/verdaccio
