@@ -45,5 +45,7 @@ pip install . && jupyter labextension install .
     jupyter nbextension enable --py widgetsnbextension
 
     jupyter labextension install @jupyter-widgets/jupyterlab-manager
+    
+    jupyter-lab --no-browser
   
   
