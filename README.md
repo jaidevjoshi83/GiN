@@ -18,8 +18,6 @@ create -n galaxy-lab JupyterLab=2.2.9 ipywidgets=7.5.1 nodejs -y
 
 pip install . && jupyter labextension install .
 
-jupyter-lab --no-browser
-
 ```
 
 ## Installation of galaxylab
