@@ -26,24 +26,9 @@ git clone -b co_working https://github.com/jaidevjoshi83/galaxylab.git
 
 -- Installation of nbtools for build 
 
-    docker pull verdaccio/verdaccio
-
-    docker run -it --rm --name verdaccio -p 4873:4873 verdaccio/verdaccio
-
-    view in browser: http://0.0.0.0:4873/
-
-    cd nbtools
-
-    npm adduser --registry http://0.0.0.0:4873
-
-    npm publish --registry http://0.0.0.0:4873
-
-    now go to galaxylab dir
-
     cd galaxylab
 
     npm install @genepattern/nbtools@20.10.0-alpha.0 --registry http://0.0.0.0:4873
-
 
 -- galaxylab installatoin
 
