@@ -7,9 +7,9 @@ from nbtools import NBTool, UIBuilder, python_safe, EventManager
 from .shim import  get_kinds
 from .util import DEFAULT_COLOR, DEFAULT_LOGO
 
-import galaxylab
+from .galaxyoutput import GalaxyOutputWidget
 
-w = galaxylab.GalaxyOutputWidget()
+w = GalaxyOutputWidget()
 
 class GalaxyTaskWidget(UIBuilder):
     """A widget for representing the status of a Galaxy job"""
