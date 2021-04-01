@@ -47,7 +47,6 @@
     "watch:nbextension": "webpack --watch"
   },
   "dependencies": {
-    "@genepattern/nbtools": "^20.10.0-alpha.0",
     "@jupyter-widgets/base": "^1.1.10 || ^2.0.0 || ^3.0.0 || ^4.0.0",
     "buffer": "^6.0.3",
     "path": "^0.12.7",
