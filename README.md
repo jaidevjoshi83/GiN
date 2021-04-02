@@ -7,7 +7,7 @@
 Conda env:
 
 ```
-create -n galaxy-lab JupyterLab=2.2.9 ipywidgets=7.5.1 nodejs -y
+conda create -n galaxy-lab JupyterLab=2.2.9 ipywidgets=7.5.1 nodejs -y
 
 ########################################################################
 ## Note optional step, if in case it dint work this step can be followed. 
