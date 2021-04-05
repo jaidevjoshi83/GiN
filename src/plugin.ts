@@ -1,13 +1,16 @@
 // Copyright (c) Jayadev Joshi
 // Distributed under the terms of the Modified BSD License.
 
-import { Application, IPlugin } from '@phosphor/application';
-
-import { Widget } from '@phosphor/widgets';
-
+import { Application, IPlugin } from '@lumino/application';
+import { Widget } from '@lumino/widgets';
 import { IJupyterWidgetRegistry } from '@jupyter-widgets/base';
+import * as base_exports from '@genepattern/nbtools';
+import * as uioutput_exports from '@genepattern/nbtools';
+import * as uibuilder_exports from '@genepattern/nbtools';
 
-import * as widgetExports from './widget';
+
+const module_exports = { ...base_exports, ...uioutput_exports, ...uibuilder_exports };
+
 
 import { MODULE_NAME, MODULE_VERSION } from './version';
 
@@ -37,6 +40,6 @@ function activateWidgetExtension(
   registry.registerWidget({
     name: MODULE_NAME,
     version: MODULE_VERSION,
-    exports: widgetExports,
+    exports: module_exports,
   });
 }
