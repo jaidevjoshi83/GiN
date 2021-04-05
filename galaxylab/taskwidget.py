@@ -7,9 +7,7 @@ from nbtools import NBTool, UIBuilder, python_safe, EventManager
 from .shim import  get_kinds
 from .util import DEFAULT_COLOR, DEFAULT_LOGO
 
-from .galaxyoutput import GalaxyOutputWidget
 
-w = GalaxyOutputWidget()
 
 class GalaxyTaskWidget(UIBuilder):
     """A widget for representing the status of a Galaxy job"""
@@ -48,9 +46,9 @@ class GalaxyTaskWidget(UIBuilder):
             ###########################Job run ######################### 
             self.job = gi.tools.run_tool(history_id=History_ID, tool_id=tool_id, tool_inputs=inputs)
             ###########################Job run######################### 
-            #self.job = display(GalaxyJobWidget(self.job, gi))
+            self.job = display(GalaxyJobWidget(self.job, gi))
             ###########################Job run ######################### 
-            display(w)
+    
 
         submit_job.__qualname__ = tool.wrapped['name']
         submit_job.__doc__ = tool.wrapped['description']
