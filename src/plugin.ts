@@ -7,9 +7,10 @@ import { IJupyterWidgetRegistry } from '@jupyter-widgets/base';
 import * as base_exports from '@genepattern/nbtools';
 import * as uioutput_exports from '@genepattern/nbtools';
 import * as uibuilder_exports from '@genepattern/nbtools';
+import * as galaxyuioutput_exports from './widget';
 
 
-const module_exports = { ...base_exports, ...uioutput_exports, ...uibuilder_exports };
+const module_exports = { ...base_exports, ...uioutput_exports, ...uibuilder_exports, ...galaxyuioutput_exports };
 
 
 import { MODULE_NAME, MODULE_VERSION } from './version';

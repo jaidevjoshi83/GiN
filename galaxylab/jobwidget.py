@@ -8,11 +8,11 @@ from .shim import get_permissions, set_permissions, get_token
 from nbtools import EventManager, ToolManager, UIOutput
 from .util import DEFAULT_COLOR, DEFAULT_LOGO
 
-from galaxylab.galaxyoutput import GalaxyOutputWidget
+from .uioutput import GalaxyUIOutput
 
 
 
-class GalaxyJobWidget(UIOutput):
+class GalaxyJobWidget(GalaxyUIOutput):
     """A widget for representing the status of a Galaxy job"""
     default_color = DEFAULT_COLOR
     default_logo = DEFAULT_LOGO
@@ -101,8 +101,9 @@ class GalaxyJobWidget(UIOutput):
         """Return pretty job submission text"""
         if self.job is None: 
             return  # Ensure the job has been set
-        
-        user = self.gi.jobs.show_job(self.job['jobs'][0]['id'], full_details=True)['user_email']
+        user = self.gi.users.get_current_user()
+        user = user.get('username') or user.get('email')
+        #user = self.gi.jobs.show_job(self.job['jobs'][0]['id'], full_details=True)['user_email']
         time = self.gi.jobs.show_job(self.job['jobs'][0]['id'], full_details=True)['create_time']
 
         return 'Submitted by '+user+' on '+time

@@ -9,7 +9,8 @@ from .authwidget import GALAXY_SERVERS, GalaxyAuthWidget
 from .taskwidget import GalaxyTaskWidget
 from .jobwidget import GalaxyJobWidget
 from .sessions import session, get_session
-from .galaxyoutput import GalaxyOutputWidget
+#from .galaxyoutput import GalaxyOutputWidget
+from .uioutput import GalaxyUIOutputModel
 from ._version import __version__, version_info
 
 def _jupyter_labextension_paths():

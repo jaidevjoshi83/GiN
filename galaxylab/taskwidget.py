@@ -46,7 +46,8 @@ class GalaxyTaskWidget(UIBuilder):
             ###########################Job run ######################### 
             self.job = gi.tools.run_tool(history_id=History_ID, tool_id=tool_id, tool_inputs=inputs)
             ###########################Job run######################### 
-            self.job = display(GalaxyJobWidget(self.job, gi))
+            #self.job = 
+            display(GalaxyJobWidget(self.job, gi))
             ###########################Job run ######################### 
     
 
