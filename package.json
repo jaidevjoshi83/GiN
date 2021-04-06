@@ -47,7 +47,10 @@
     "watch:nbextension": "webpack --watch"
   },
   "dependencies": {
+    "@genepattern/nbtools": "*",
     "@jupyter-widgets/base": "^1.1.10 || ^2.0.0 || ^3.0.0 || ^4.0.0",
+    "@types/backbone": "^1.4.4",
+    "backbone": "^1.2.3",
     "buffer": "^6.0.3",
     "path": "^0.12.7",
     "stream": "^0.0.2",
