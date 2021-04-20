@@ -32,6 +32,18 @@
     "url": "https://github.com/genepattern/galaxylab"
   },
   "scripts": {
+
+    "galaxy-watch": " yarn run galaxy-save-build-hash && yarn run galaxy-webpack-watch",
+    "galaxy-webpack-dev-server": "galaxy-webpack-dev-server -d --host 0.0.0.0 --port 8081",
+    "galaxy-build": "NODE_ENV=development  yarn run galaxy-webpack && yarn run galaxy-save-build-hash",
+    "galaxy-build-production": "NODE_ENV=production  yarn run webpack-production && yarn run galaxy-save-build-hash",
+    "galaxy-build-production-maps": "NODE_ENV=production yarn run galaxy-webpack-production-maps && yarn run galaxy-save-build-hash",
+    "galaxy-build-stats": "webpack --profile --json > webpack-stats.json",
+    "galaxy-webpack": "webpack -d",
+    "galaxy-webpack-watch": "webpack -d --watch",
+    "galaxy-webpack-production": "webpack -p",
+    "galaxy-webpack-production-maps": "GXY_BUILD_SOURCEMAPS=1 webpack -p",
+    "galaxy-save-build-hash": "(git rev-parse HEAD 2>/dev/null || echo '') >../static/client_build_hash.txt",
     "build": "jlpm run build:lib && jlpm run build:labextension:dev",
     "build:all": "jlpm run build:lib && jlpm run build:labextension && jlpm run build:nbextension",
     "build:labextension": "jupyter labextension build .",
