@@ -32,7 +32,6 @@
     "url": "https://github.com/genepattern/galaxylab"
   },
   "scripts": {
-
     "galaxy-watch": " yarn run galaxy-save-build-hash && yarn run galaxy-webpack-watch",
     "galaxy-webpack-dev-server": "galaxy-webpack-dev-server -d --host 0.0.0.0 --port 8081",
     "galaxy-build": "NODE_ENV=development  yarn run galaxy-webpack && yarn run galaxy-save-build-hash",
@@ -138,6 +137,7 @@
     "stream": "^0.0.2",
     "threads": "^1.6.3",
     "toastr": "^2.1.4",
+    "tsc": "^1.20150623.0",
     "underscore": "^1.10.2",
     "underscore.string": "^3.3.5",
     "url": "^0.11.0",

@@ -337,10 +337,10 @@ module.exports = [
     target: 'web',
     output: {
       filename: 'index.js',
-      path: path.resolve(__dirname, 'nbtools', 'nbextension', 'static'),
+      path: path.resolve(__dirname, 'galaxylab', 'nbextension', 'static'),
       libraryTarget: 'amd',
       // TODO: Replace after release to unpkg.org
-      publicPath: '' // 'https://unpkg.com/@genepattern/nbtools@' + version + '/dist/'
+      publicPath: '' 
     },
     module: {
       rules: rules
@@ -356,7 +356,7 @@ module.exports = [
   },
 
   /**
-   * Embeddable nbtools bundle
+   * Embeddable galaxylab bundle
    *
    * This bundle is almost identical to the notebook extension bundle. The only
    * difference is in the configuration of the webpack public path for the
@@ -372,9 +372,9 @@ module.exports = [
         filename: 'index.js',
         path: path.resolve(__dirname, 'dist'),
         libraryTarget: 'amd',
-        library: "@genepattern/nbtools",
+        library: "@galaxy/galaxylab",
         // TODO: Replace after release to unpkg.org
-        publicPath: '' // 'https://unpkg.com/@genepattern/nbtools@' + version + '/dist/'
+        publicPath: '' 
     },
     devtool: 'source-map',
     module: {
@@ -401,10 +401,10 @@ module.exports = [
     output: {
       filename: 'embed-bundle.js',
       path: path.resolve(__dirname, 'docs', 'source', '_static'),
-      library: "@genepattern/nbtools",
+      library: "@galaxy/galaxylab",
       libraryTarget: 'amd',
       // TODO: Replace after release to unpkg.org
-      publicPath: '' // 'https://unpkg.com/@genepattern/nbtools@' + version + '/dist/'
+      publicPath: '' 
     },
     module: {
       rules: rules

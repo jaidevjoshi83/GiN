@@ -5,7 +5,10 @@
 # Distributed under the terms of the Modified BSD License.
 import json
 from pathlib import Path
-from .authwidget import GALAXY_SERVERS, GalaxyAuthWidget
+try:
+    from .authwidget import GALAXY_SERVERS, GalaxyAuthWidget
+except:
+    pass
 from .taskwidget import GalaxyTaskWidget
 from .jobwidget import GalaxyJobWidget
 from .sessions import session, get_session

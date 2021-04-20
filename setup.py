@@ -75,6 +75,7 @@ setup_args = dict(
         "ipywidgets>=7.0.0",
         'bioblend==0.14.0',
     ],
+    data_files=[("share/jupyter/galaxylab", ["nbtools/galaxylab.json"])],
     zip_safe=False,
     include_package_data=True,
     python_requires=">=3.6",
