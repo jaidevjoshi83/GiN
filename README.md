@@ -7,48 +7,70 @@
 Conda env:
 
 ```
-conda create -n galaxy-lab JupyterLab=2.2.9 ipywidgets=7.5.1 nodejs=14.15.1 -y
-
-########################################################################
-## Note optional step, if in case it dint work this step can be followed. 
-# bleep, bloop
-# npm i backbone@1.2.3
-# npm i @types/backbone@1.4.4
-########################################################################
-
-pip install . && jupyter labextension install .
+conda create -n galaxy-lab JupyterLab=3.0.7 ipywidgets=7.5.1 nodejs=14.15.1 yarn -y
 
 ```
 
-## Installation of galaxylab
+## Installation of nbtools
 
 -- Download the Brancch
 
     ```
-    git clone -b co_working https://github.com/jaidevjoshi83/galaxylab.git
+    git clone -b lab https://github.com/genepattern/nbtools.git
     ```
 
 -- Installation of nbtools for build 
 
-    cd galaxylab
-
-    npm install @genepattern/nbtools@20.10.0-alpha.0 --registry http://0.0.0.0:4873
+     ```
+     npm install -g yalc 
+     
+     cd nbtools/
+     
+     yalc publish
+     
+     ```
+     
+-- Installation of nbtools 
+    
+    ```
+    cd nbtools/
+    
+    pip install . 
+    
+    jupyter nbextension enable --py widgetsnbextension
+    
+    jupyter labextension install @jupyter-widgets/jupyterlab-manager
+    
+    jupyter labextension develop . --overwrite
+    
+    jupyter nbextension install --py nbtools --symlink
+    
+    jupyter nbextension enable nbtools --py
+    
+    ```
+     
 
 -- galaxylab installatoin
 
+
+    ```
+    git clone -b working_3Xlab_with_client_build  https://github.com/jaidevjoshi83/galaxylab.git
+
     cd galaxylab/
+   
+    yalc add @genepattern/nbtools
+   
+    pip install -e . (Work smoothly most of the time rarely throws an error, if dint work and throws package related errors, run "npm install" first and then "pip install -e .") 
 
-    pip install -e .
-
-    jupyter labextension install .
-
-    jupyter nbextension enable --py widgetsnbextension
-
-    jupyter labextension install @jupyter-widgets/jupyterlab-manager
+    jupyter labextension develop . --overwrite
     
-    jupyter-lab --no-browser
+    jupyter nbextension install --py galaxylab --symlink
     
-    Note: If galaxy login dint appear in the side panel just wait for a minute and refresh the page.
+    jupyter nbextension enable galaxylab --py
+    
+    ```
+    
+    Note: If galaxy login dint appear in the side panel manually "import galaxylab" and refresh/reload the page.
     
     
   
