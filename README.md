@@ -70,8 +70,6 @@ conda create -n galaxy-lab JupyterLab=3.0.7 ipywidgets=7.5.1 nodejs=14.15.1 yarn
     
     ```
     
-    Note: If galaxy login dint appear in the side panel manually "import galaxylab" and refresh/reload the page.
-    
     
   
   
