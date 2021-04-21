@@ -1,0 +1,5 @@
+src/qunit
+src/mocha
+src/libs
+src/nls
+src/legacy
