@@ -1,0 +1,81 @@
+.nbtools-status {
+    width: 33%;
+    float: left;
+    padding-right: 10px;
+    text-align: right;
+    color: var(--jp-cell-inprompt-font-color);
+    font-family: monospace;
+}
+
+.nbtools-files {
+    width: calc(66% - 30px);
+    float: right;
+    padding-left: 20px;
+    position: relative;
+}
+
+.nbtools-file {
+    display: block;
+    color: var(--jp-content-link-color);
+    text-decoration: none;
+    line-break: anywhere;
+}
+
+.nbtools-file-menu {
+    left: 0;
+    right: auto;
+    top: 20px;
+    z-index: 7;
+}
+
+.nbtools-menu-header,
+.nbtools-menu-header:hover {
+    background-color: var(--jp-layout-color0) !important;
+    cursor: text;
+    color: var(--jp-ui-font-color2);
+    font-weight: bold;
+}
+
+.nbtools-menu-subitem {
+    padding-left: 20px;
+}
+
+.nbtools-status::after,
+.nbtools-files::after {
+  content: "";
+  clear: both;
+  display: table;
+}
+
+.nbtools-text {
+    font-family: monospace;
+    padding-top: 5px !important;
+    width: 100%;
+}
+
+.nbtools-visualization {
+    margin-top: 0;
+}
+
+.nbtools-visualization-iframe {
+    width: 100%;
+    height: 500px;
+    overflow: auto;
+    border: 1px solid var(--jp-border-color2);
+    margin-top: 10px;
+}
+
+.nbtools-appendix .nbtools-logo,
+.nbtools-appendix .nbtools-gear,
+.nbtools-appendix .nbtools-description {
+    display: none !important;
+}
+
+.nbtools-appendix .nbtools-header {
+    background-color: var(--jp-layout-color4) !important;
+    min-height: 23px;
+}
+
+.nbtools-appendix .nbtools {
+    margin-bottom: 5px;
+}
