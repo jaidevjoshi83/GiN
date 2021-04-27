@@ -55,7 +55,7 @@ conda create -n galaxy-lab JupyterLab=3.0.7 ipywidgets=7.5.1 nodejs=14.15.1 yarn
 
 
     ```
-    git clone -b working_3Xlab_with_client_build  https://github.com/jaidevjoshi83/galaxylab.git
+    git clone -b galaxylab-js  https://github.com/jaidevjoshi83/galaxylab.git
 
     cd galaxylab/
    
