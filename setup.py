@@ -55,6 +55,7 @@ setup_args = dict(
         "jupyterlab~=3.0",
         'bioblend==0.14.0',
     ],
+    data_files=[("share/jupyter/nbtools", ["nbtools/galaxylab.json"])],
     packages=find_packages(),
     zip_safe=False,
     cmdclass=cmdclass,
