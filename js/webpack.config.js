@@ -4,9 +4,15 @@ var version = require('./package.json').version;
 // Custom webpack rules are generally the same for all webpack bundles, hence
 // stored in a separate local variable.
 var rules = [
-    { test: /\.css$/, use: ['style-loader', 'css-loader']}
+    { test: /\.css$/, use: ['style-loader', 'css-loader']},
+    { test: /\.js$/, loader: 'source-map-loader' },
+    { test: /\.(png|svg|jpg)$/i, use: ['file-loader'] }
 ]
 
+const resolve = {
+    // Add '.ts' and '.tsx' as resolvable extensions.
+    extensions: [".webpack.js", ".web.js",  ".js", ".css"]
+  }; 
 
 module.exports = (env, argv) => {
     var devtool = argv.mode === 'development' ? 'source-map' : false;
@@ -45,7 +51,8 @@ module.exports = (env, argv) => {
             module: {
                 rules: rules
             },
-            externals: ['@jupyter-widgets/base']
+            externals: ['@jupyter-widgets/base'],
+            resolve,
         },
         {// Embeddable galaxylab bundle
         //
@@ -66,7 +73,7 @@ module.exports = (env, argv) => {
                 filename: 'index.js',
                 path: path.resolve(__dirname, 'dist'),
                 libraryTarget: 'amd',
-                publicPath: 'https://unpkg.com/galaxylab@' + version + '/dist/'
+                publicPath: ''
             },
             devtool,
             module: {
