@@ -4,7 +4,7 @@
  *
  * Copyright 2020 Regents of the University of California and the Broad Institute
  */
-import '../style/widget.css';
+import '../style/galaxyoutput.css';
 import { unpack_models } from '@jupyter-widgets/base';
 import { MODULE_NAME, MODULE_VERSION } from './version';
 import { UIOutputView, UIOutputModel } from "@genepattern/nbtools";
