@@ -1,7 +1,8 @@
-from ._version import version_info, __version__
+#!/usr/bin/env python
+# coding: utf-8
 
-from .example import *
-
+# Copyright (c) Jayadev Joshi.
+# Distributed under the terms of the Modified BSD License.
 import json
 from pathlib import Path
 try:
@@ -16,10 +17,21 @@ from .uioutput import GalaxyUIOutput
 from ._version import __version__
 
 
+HERE = Path(__file__).parent.resolve()
+
+with (HERE / "labextension" / "package.json").open() as fid:
+    data = json.load(fid)
+
+def _jupyter_labextension_paths():
+    return [{
+        "src": "labextension",
+        "dest": data["name"]
+    }]
+
+
 def _jupyter_labextension_paths():
     """Called by Jupyter Lab Server to detect if it is a valid labextension and
     to install the widget
-
     Returns
     =======
     src: Source directory name to copy files from. Webpack outputs generated files
@@ -31,14 +43,13 @@ def _jupyter_labextension_paths():
     """
     return [{
         'src': 'labextension',
-        'dest': 'galaxylab',
+        'dest': '@galaxy/galaxylab',
     }]
 
 
 def _jupyter_nbextension_paths():
     """Called by Jupyter Notebook Server to detect if it is a valid nbextension and
     to install the widget
-
     Returns
     =======
     section: The section of the Jupyter Notebook Server to change.
@@ -58,3 +69,11 @@ def _jupyter_nbextension_paths():
         'dest': 'galaxylab',
         'require': 'galaxylab/extension'
     }]
+
+#from .display import display
+
+__author__ = 'Jayadev Joshi'
+__copyright__ = 'Copyright 2021 Galaxy Contributors'
+__version__ = '0.1.0'
+__status__ = 'prealpha'
+__license__ = 'BSD-3-Clause'
