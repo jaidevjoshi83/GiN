@@ -49,35 +49,10 @@ conda create -n galaxy-lab JupyterLab=3.0.7 ipywidgets=7.5.1 nodejs=14.15.1 yarn
     jupyter nbextension enable nbtools --py
     
     ```
-     
-
--- galaxylab installatoin
+      
 
 
-    ```
-    git clone -b galaxylab-js  https://github.com/jaidevjoshi83/galaxylab.git
-
-    cd galaxylab/
-   
-    yalc add @genepattern/nbtools
-   
-    pip install -e . (Work smoothly most of the time rarely throws an error, if dint work and throws package related errors, run "npm install" first and then "pip install -e .") 
-
-    jupyter labextension develop . --overwrite
-    
-    jupyter nbextension install --py galaxylab --symlink
-    
-    jupyter nbextension enable galaxylab --py
-    
-    ```
-    
-    
-  
-  
- 
-
-############################## Ignore this  ########################
-galaxylab
+galaxylab installation
 ===============================
 
 A Custom Jupyter Widget Library
@@ -92,7 +67,9 @@ To install use pip:
 For a development installation (requires [Node.js](https://nodejs.org) and [Yarn version 1](https://classic.yarnpkg.com/)),
 
     $ git clone https://github.com/galaxy/galaxylab.git
-    $ cd galaxylab
+    $ cd galaxylab/js
+    $ yalc add @genepattern/nbtools
+    $ cd ..
     $ pip install -e .
     $ jupyter nbextension install --py --symlink --overwrite --sys-prefix galaxylab
     $ jupyter nbextension enable --py --sys-prefix galaxylab
