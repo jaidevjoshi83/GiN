@@ -5,9 +5,12 @@
  * Copyright 2020 Regents of the University of California and the Broad Institute
  */
 import '../style/galaxyoutput.css';
+import './dist/base.css'
 import { unpack_models } from '@jupyter-widgets/base';
 import { MODULE_NAME, MODULE_VERSION } from './version';
 import { UIOutputView, UIOutputModel } from "@genepattern/nbtools";
+import * as options from './dist/analysis.bundled.js'
+
 //import { extract_file_name, extract_file_type, is_absolute_path, is_url } from '@genepattern/nbtools';
 //import { ContextManager } from "@genepattern/nbtools";
 

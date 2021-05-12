@@ -1,17 +1,32 @@
 var path = require('path');
 var version = require('./package.json').version;
+const CopyWebpackPlugin = require("copy-webpack-plugin");
 
 // Custom webpack rules are generally the same for all webpack bundles, hence
 // stored in a separate local variable.
 var rules = [
     { test: /\.css$/, use: ['style-loader', 'css-loader']},
-    { test: /\.js$/, loader: 'source-map-loader' },
-    { test: /\.(png|svg|jpg)$/i, use: ['file-loader'] }
+    { test: /\.(png|jpg|jpeg|gif|svg|woff|woff2|ttf|eot)$/i, use: ['file-loader','url-loader','svg-url-loader'] }
+    
 ]
 
 const resolve = {
     // Add '.ts' and '.tsx' as resolvable extensions.
-    extensions: [".webpack.js", ".web.js",  ".js", ".css"]
+    extensions: [".webpack.js", ".web.js",  ".js", ".css"],
+    fallback: { 
+        "path": require.resolve("path-browserify"),
+        "os": require.resolve("os-browserify/browser"),
+        "crypto": require.resolve("crypto-browserify"),
+        "https": require.resolve("https-browserify"),
+        "http": require.resolve("stream-http"),
+        "vm": require.resolve("vm-browserify") ,
+        "stream": require.resolve("stream-browserify"),
+        "constants": require.resolve("constants-browserify"), 
+        fs: false,
+        child_process: false,
+        worker_threads: false
+
+  }
   }; 
 
 module.exports = (env, argv) => {
@@ -32,7 +47,16 @@ module.exports = (env, argv) => {
                 libraryTarget: 'amd',
                 publicPath: '' // publicPath is set in extension.js
             },
-            devtool
+            devtool,
+            plugins: [
+            new CopyWebpackPlugin({
+                patterns: [
+
+                    { from: "./lib/", to: path.resolve(__dirname, '..', 'galaxylab', 'nbextension')},
+                ]
+        })
+            ],
+            resolve,
         },
         {// Bundle for the notebook containing the custom widget views and models
         //
@@ -48,10 +72,18 @@ module.exports = (env, argv) => {
                 publicPath: '',
             },
             devtool,
+            plugins: [
+                new CopyWebpackPlugin({
+                    patterns: [
+    
+                        { from: "./lib/", to: path.resolve(__dirname, '..', 'galaxylab', 'nbextension')},
+                    ]
+            })
+                ],
             module: {
                 rules: rules
             },
-            externals: ['@jupyter-widgets/base'],
+            externals: ['@jupyter-widgets/base','fsevents'],
             resolve,
         },
         {// Embeddable galaxylab bundle
@@ -79,7 +111,16 @@ module.exports = (env, argv) => {
             module: {
                 rules: rules
             },
-            externals: ['@jupyter-widgets/base']
+            plugins: [
+                new CopyWebpackPlugin({
+                    patterns: [
+    
+                        { from: "./lib/", to: path.resolve(__dirname, 'dist')},
+                    ]
+            })
+                ],
+            externals: ['@jupyter-widgets/base','fsevents'],
+            resolve,
         }
     ];
 }
