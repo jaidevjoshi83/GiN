@@ -24,9 +24,10 @@ import * as base_exports from '@genepattern/nbtools';
 import * as uioutput_exports from '@genepattern/nbtools';
 import * as uibuilder_exports from '@genepattern/nbtools';
 import * as galaxyuioutput_exports from './galaxyoutput';
-const module_exports = Object.assign(Object.assign(Object.assign(Object.assign({}, base_exports), uioutput_exports), uibuilder_exports), galaxyuioutput_exports);
+import * as example_exports from './example';
+const module_exports = Object.assign(Object.assign(Object.assign(Object.assign(Object.assign({}, base_exports), uioutput_exports), uibuilder_exports), galaxyuioutput_exports), example_exports) ;
 import { MODULE_NAME, MODULE_VERSION } from './version';
-const EXTENSION_ID = '@galaxy/galaxylab:plugin';
+const EXTENSION_ID = 'galaxylab:plugin';
 /**
  * The example plugin.
  */
@@ -44,7 +45,7 @@ export default examplePlugin;
  */
 function activateWidgetExtension(app, registry) {
     registry.registerWidget({
-        name: '@galaxy/galaxylab',
+        name: 'galaxylab',
         version: '0.1.0',
         exports: module_exports,
     });

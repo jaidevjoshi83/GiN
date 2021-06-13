@@ -14,6 +14,7 @@ from .jobwidget import GalaxyJobWidget
 from .sessions import session, get_session
 #from .galaxyoutput import GalaxyOutputWidget
 from .uioutput import GalaxyUIOutput
+from .example import TestUIOutput
 from ._version import __version__
 
 
@@ -43,7 +44,7 @@ def _jupyter_labextension_paths():
     """
     return [{
         'src': 'labextension',
-        'dest': '@galaxy/galaxylab',
+        'dest': 'galaxylab',
     }]
 
 
