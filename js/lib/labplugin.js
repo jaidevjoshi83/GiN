@@ -25,7 +25,8 @@ import * as uioutput_exports from '@genepattern/nbtools';
 import * as uibuilder_exports from '@genepattern/nbtools';
 import * as galaxyuioutput_exports from './galaxyoutput';
 import * as example_exports from './example';
-const module_exports = Object.assign(Object.assign(Object.assign(Object.assign(Object.assign({}, base_exports), uioutput_exports), uibuilder_exports), galaxyuioutput_exports), example_exports) ;
+import * as example1_exports from './example1';
+const module_exports = Object.assign(Object.assign(Object.assign(Object.assign(Object.assign(Object.assign({}, base_exports), uioutput_exports), uibuilder_exports), galaxyuioutput_exports), example_exports), example1_exports) ;
 import { MODULE_NAME, MODULE_VERSION } from './version';
 const EXTENSION_ID = 'galaxylab:plugin';
 /**

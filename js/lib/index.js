@@ -6,3 +6,4 @@
 export * from './version';
 export * from './galaxyoutput';
 export * from './example'
+export * from './example1'

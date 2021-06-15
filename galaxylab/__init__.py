@@ -15,6 +15,7 @@ from .sessions import session, get_session
 #from .galaxyoutput import GalaxyOutputWidget
 from .uioutput import GalaxyUIOutput
 from .example import TestUIOutput
+from .example1 import GalaxyTools
 from ._version import __version__
 
 

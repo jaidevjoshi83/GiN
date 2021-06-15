@@ -37,6 +37,7 @@
   "dependencies": {
     "@genepattern/nbtools": "file:.yalc/@genepattern/nbtools",
     "@jupyter-widgets/base": "^1.1 || ^2 || ^3 || ^4",
+    "blueimp-file-upload": "^10.31.0",
     "lodash": "^4.17.4",
     "source-map-loader": "^2.0.1"
   },
