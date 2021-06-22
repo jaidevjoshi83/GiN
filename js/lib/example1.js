@@ -24,74 +24,119 @@ GalaxyToolModel.serializers = Object.assign(Object.assign({}, BaseWidgetModel.se
 
 export class GalaxyToolView extends BaseWidgetView {
     constructor() {
-        super(...arguments); 
-        const NewTemp = new DOMParser().parseFromString(this.Temp, "text/html")
-        this.element = NewTemp                
+        super(...arguments);   
+        this.elements = {};   
+           
     }
 
     render () {
-
-        this.dom_class = 'Galaxy-uibuilder';
-
-        //const input = this.model.get('inputs')
-        
-        //super.render() 
-
-        //this.addRow()
-        //this.CreateAForm()
-        this.addConditional()
-
-
-        // this.addInputFiled()
-        // this.addDropdown()
-        // this.UpLoadData()
-        //this.addSections()
-        // this.value_changed();
-        // this.model.on('change:value', this.value_changed, this);
+        super.render()
+        const inputs = this.model.get('inputs')
+        //this.addSections(inputs)
+        this.CreateForm(inputs)
 
     }
 
-    value_changed() {
-        const input = this.model.get('inputs')
-        this.el.textContent = input.label;
-      }
-
-    CreateAForm(){
-        const Form = document.createElement("form")
-        Form.className = "GalaxyForm"
-        this.element.querySelector('.nbtools-body').appendChild(Form)
+    uid () {
+        top.__utils__uid__ = top.__utils__uid__ || 0;
+        return `uid-${top.__utils__uid__++}`;
     }
-   
-     addInputFiled (rowID){
-        const InputSection = document.createElement('section')
-        InputSection.className = `input-section`
-        this.element.querySelector('.GalaxyForm').appendChild(InputSection)
-        const node = document.createElement("input");
-        node.className = 'Input'
-        this.element.querySelector('.input-section').appendChild(node)
+    
+    addRow(input_def) {
 
-     }
-
-    UpLoadData (){  
-        const UploadFile = document.createElement('section')
-        UploadFile.className = `uploadfile-section`
-        this.element.querySelector('.GalaxyForm').appendChild(UploadFile)
-        const FileUpload = document.createElement('input')  
-        FileUpload.type = 'file' 
-        FileUpload.id = 'uploadInput'    
-        FileUpload.style.color = 'transparent' 
-        FileUpload.text = 'FileUpload'       
-        this.element.querySelector('.uploadfile-section').appendChild(FileUpload)
+        switch (input_def.type) {
+            
+            case "data" :
+                this.addInputField(input_def.id);
+                break;
+            case "select":
+                console.log(inputs[i].type)
+                this.AddSelectField(input_def.id, options);
+                break;
+            case "boolean":
+                console.log(input_def.id)
+                this.addDropdown();
+                break;
+        }
 
     }
 
-    addDropdown () {
-        const options =  [ ['Mean Residue Ellipticity','mean residue ellipticity', 'False'],
-                           ['Molar Ellipticity', 'molar ellipticity', 'False'],
-                           ['Circular Dichroism', 'circular dichroism', 'False']];
+    CreateForm (inputs){
 
-        const select = document.createElement("select");
-        
+        const GalaxyForm = document.createElement('form')
+        GalaxyForm.className += 'galaxy-form'
+        this.element.querySelector('div.nbtools-body').append(GalaxyForm)
+
+        for (var i = 0; inputs.length > i; i++ ) {
+            inputs.id = this.uid()
+            if (inputs.type === "data") {
+                const input = document.createElement('input')
+                input.id = `input-${input_def.id}`
+                const row = document.createElement('div')
+                const title = document.createElement('div')
+                title.className = 'ui-from-title'
+                const TitleSpan = document.createElement('span')
+                TitleSpan.className = "ui-form-title-text"
+                TitleSpan.textContent = input_def.label
+                TitleSpan.style.display = 'inline'
+                title.append(TitleSpan)
+                row.className = 'ui-form-element sectiono-row'
+                row.id = input_def.id
+                row.append(input)
+                row.append(title)
+                this.element.querySelector('.galaxy-form').append(row)
+
+            }
+
+        }
+
+
+    }
+
+    addInputField (input_def) {
+
+        const input = document.createElement('input')
+        input.id = `input-${input_def.id}`
+        const row = document.createElement('div')
+        const title = document.createElement('div')
+        title.className = 'ui-from-title'
+        const TitleSpan = document.createElement('span')
+        TitleSpan.className = "ui-form-title-text"
+        TitleSpan.textContent = input_def.label
+        TitleSpan.style.display = 'inline'
+        title.append(TitleSpan)
+        row.className = 'ui-form-element sectiono-row'
+        row.id = input_def.id
+        row.append(input)
+        row.append(title)
+        this.element.querySelector('.galaxy-form').append(row)
+    }
+
+    addFloat (input_def) {
+
+        const input = document.createElement('input')
+        input.id = `input-${id}`
+        const row = document.createElement('div')
+        row.className = 'ui-form-element sectiono-row'
+        row.id = id
+        row.append(input)
+        this.element.querySelector('.galaxy-form').append(row)
+    }
+
+    addInteger (input_def) {
+
+        const input = document.createElement('input')
+        input.id = `input-${id}`
+        const row = document.createElement('div')
+        row.className = 'ui-form-element sectiono-row'
+        row.id = id
+        row.append(input)
+        this.element.querySelector('.galaxy-form').append(row)
+    }
+
+
+    AddSelectField (input_def ) {
+
         for(var i = 0; i < options.length; i++) {
             const opt = options[i][0];
             const el = document.createElement("option");
@@ -100,102 +145,100 @@ export class GalaxyToolView extends BaseWidgetView {
             select.appendChild(el);
         }
 
-        const DropDownSection = document.createElement("section")
-        DropDownSection.className = 'dropdown-section'
-        this.element.querySelector('.GalaxyForm').appendChild(DropDownSection)
-        this.element.querySelector('.dropdown-section').appendChild(select)
-
-     }
-
-
-
-     addFloat () {
-        const floatValue = document.createElement('section')
-        floatValue.className = `floatValue-section`
-        this.element.querySelector('.GalaxyForm').appendChild(floatValue)
-        const floatValueInput = document.createElement("input");
-        floatValueInput.className = 'floatValueInput'
-        this.element.querySelector('.floatValue-section').appendChild(floatValueInput)
-
-     }
-
-
-
-     addInteger () {
-        const IntValue = document.createElement('section')
-        IntValue.className = `IntValue-section`
-        this.element.querySelector('.GalaxyForm').appendChild(IntValue)
-        const floatValueInput = document.createElement("input");
-        floatValueInput.className = 'IntValueInput'
-        this.element.querySelector('.IntValue-section').appendChild(floatValueInput)
-        this.element.querySelector('.IntValue-section').appendChild(Label)
-         
+        const select = document.createElement('select')
+        const row = document.createElement('div')
+        row.className = 'ui-form-element sectiono-row'
+        row.id = id
+        row.append(select)
+        this.element.querySelector('.galaxy-form').append(row)
     }
 
-    addLabel() {
-        const Label = document.createElement('label')
-        this.element.querySelector('IntValueInput').appendChild(Label)
+    AddBooleanField (input_def) {
+
+        const row = document.createElement('div')
+        row.className = 'ui-form-element sectiono-row'
+        row.id = id
+
+        const TrueInput = document.createElement('input')
+        TrueInput.type = 'radio'
+        TrueInput.id = `True-${id}`
+        TrueInput.text = 'True'
+
+        const FalseInput = document.createElement('input')
+        TrueInput.type = 'radio'
+        TrueInput.id = `False-${id}`
+        TrueInput.text = 'False'
+
+        this.element.querySelector('.galaxy-form').append(TrueInput)
+        this.element.querySelector('.galaxy-form').append(FalseInput)
 
     }
 
-   
-    // uid() {
-    //     top.__utils__uid__ = top.__utils__uid__ || 0;
-    //     return `uid-${top.__utils__uid__++}`;
-    // }
-
-    addConditional () {
-
-        const select = document.createElement("select");
-        select.id = 'uid-1'
-        console.log(select)
-
+    value_changed() {
         const input = this.model.get('inputs')
-        for (var i = 0; i < input[1].cases.length; i++) {
-            //console.log(input[1].cases[i].value)
-            const opt = input[1].cases[i].value;
+        this.el.textContent = input.label;
+      }
+
+    addConditional (input_def) {
+
+        for (var i in input_def.cases) {
+            var sub_section = new GalaxyToolView({})
+
+            this.elements[input_def.id + "_" + i] = sub_section;
+            this._append(sub_section.$el.addClass("ui-portlet-section pl-2"), `${input_def.id}-section-${i}`);
+        }
+
+        const select = document.createElement('select')
+
+        for (var i = 0; i < input_def.cases.length; i++) {
+            const opt = input_def.cases[i].value;
             const el = document.createElement("option");
             el.textContent = opt;
-            el.value = input[1].cases[i].value;
+            el.value = input_def.cases[i].value;
             select.appendChild(el);
         }
 
-        const DropDownSection = document.createElement("section")
-        DropDownSection.className = 'dropdown-section'
-        this.element.querySelector('.GalaxyForm').appendChild(DropDownSection)
-        this.element.querySelector('.dropdown-section').appendChild(select)
-        const select_element = document.querySelector('#uid-1');
  
-        // select_element.onchange = function(e){
-        //      if (!e)
-        //         var e = window.event;
-        //     var svalue = this.options[this.selectedIndex].value;
-        //     alert( svalue );
-        // } 
+        const row = document.createElement('div')
+        row.className = 'ui-form-element sectiono-row pl-2'
+        row.id = input_def.id
+
+        row.append(select)
+        this.element.querySelector('.galaxy-form').append(row)
     }
 
-    addRow (){
-        this.portlet_content = document.createElement('div')
+    addSections (inputs) {
 
-    }
+        const GalaxyForm = document.createElement('form')
+        GalaxyForm.className += 'galaxy-form'
+        this.element.querySelector('div.nbtools-body').append(GalaxyForm)
 
-    addSections () {
-
-        const inputs = this.model.get('inputs')
+        //const inputs = this.model.get('inputs')
 
         for(var i = 0; i < inputs.length; i++) {
+
+            inputs[i].id = this.uid()
+
+            
             switch (inputs[i].type) {
-                
-                case "data":
-                    this.addInputFiled();
+     
+                case "data" :
+                    this.addInputField(inputs[i]);
                     break;
-                case "select":
-                    
-                    console.log(inputs[i].type)
-                    this.addDropdown();
+                case "integer" :
+                    this.addRow(inputs[i]);
                     break;
+                case "text":
+                    this.addRow(inputs[i]);
+                    break;
+
+                // case "conditional":
+                //     this.addConditional(inputs[i]);
+                //     break;
             }
         }
     }
 
 }
+
+

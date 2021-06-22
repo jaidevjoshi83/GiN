@@ -26,7 +26,7 @@ class GalaxyTools(BaseWidget):
     extra_file_menu_items = Dict().tag(sync=True)
     gi = GalaxyInstance("http://127.0.0.1:8080", email="jaidev53ster@gmail.com", api_key="c4ba1ea68dc49eacaba2fdc0fc8585d5", verify=True)
     a = bioblend.galaxy.objects.client.ObjToolClient(gi)
-    tool = a.get(id_='toolshed.g2.bx.psu.edu/repos/jay/pdaug_peptide_cd_spectral_analysis/pdaug_peptide_cd_spectral_analysis/0.1.0',  io_details=True)
+    tool = a.get(id_='toolshed.g2.bx.psu.edu/repos/jay/pdaug_tsvtofasta/pdaug_tsvtofasta/0.1.0',  io_details=True)
 
     inputs = tool.wrapped['inputs']
     inputs = List(inputs).tag(sync=True)
