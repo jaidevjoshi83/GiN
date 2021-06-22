@@ -43,6 +43,7 @@ export class GalaxyToolView extends BaseWidgetView {
         // this.AddText(inputs[0])
         // this.AddBooleanField(inputs[0])
         this.CreateSections(inputs)
+        this.AddBooleanField(inputs[0])
     }
 
     uid () {
@@ -149,7 +150,10 @@ export class GalaxyToolView extends BaseWidgetView {
     row.id = input_def.id
     row.append(select)
     row.append(title)
+
+    
     this.element.querySelector('.galaxy-form').append(row)
+
     }
 
     AddBooleanField (input_def ) {
@@ -183,6 +187,8 @@ export class GalaxyToolView extends BaseWidgetView {
         row.append(select)
         row.append(title)
         this.element.querySelector('.galaxy-form').append(row)
+
+        return row
         }
 
     value_changed() {
@@ -204,7 +210,8 @@ export class GalaxyToolView extends BaseWidgetView {
 
                 this.AddSelectField(inputs[i])
                 console.log(inputs[i].cases)
-                for (var j in inputs[i].cases[0]) {
+
+                for (var j in inputs[i].cases) {
 
                     this.CreateSections (inputs[i].cases[j].inputs)
 
