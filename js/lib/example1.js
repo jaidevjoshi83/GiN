@@ -37,11 +37,12 @@ export class GalaxyToolView extends BaseWidgetView {
         GalaxyForm.className += 'galaxy-form'
         this.element.querySelector('div.nbtools-body').append(GalaxyForm)
         //this.AddInput(inputs[0])
-        this.AddSelectField(inputs[0])
-        this.AddFlot(inputs[0])
-        this.AddInteger(inputs[0])
-        this.AddText(inputs[0])
-        this.AddBooleanField(inputs[0])
+        // this.AddSelectField(inputs[0])
+        // this.AddFlot(inputs[0])
+        // this.AddInteger(inputs[0])
+        // this.AddText(inputs[0])
+        // this.AddBooleanField(inputs[0])
+        this.CreateSections(inputs)
     }
 
     uid () {
@@ -96,7 +97,6 @@ export class GalaxyToolView extends BaseWidgetView {
    AddFlot (input_def) {
 
     input_def.id = this.uid()
-
     const input = document.createElement('input')
     input.id = `input-${input_def.id}`
     const row = document.createElement('div')
@@ -115,16 +115,16 @@ export class GalaxyToolView extends BaseWidgetView {
 
    }
 
-
     AddSelectField (input_def ) {
 
     input_def.id = this.uid()
 
+    //const options = input_def.options
 
-    const options =  [['Calculate Ellipticity', 'calc_ellipticity', 'False'],
-                    ['Generate CD Plots', 'PlotData', 'False'],
-                    ['Save Data in DichroWeb Readable Format', 'Dichroweb', 'False'],
-                    ['Calculate the Percentage of Helicity', 'helicity', 'False']]
+
+
+
+     const options =  input_def['test_param']['options']
 
     const select = document.createElement('select')
 
@@ -151,7 +151,6 @@ export class GalaxyToolView extends BaseWidgetView {
     row.append(title)
     this.element.querySelector('.galaxy-form').append(row)
     }
-
 
     AddBooleanField (input_def ) {
 
@@ -191,8 +190,30 @@ export class GalaxyToolView extends BaseWidgetView {
         this.el.textContent = input.label;
       }
 
- 
+    CreateSections (inputs) {
 
+        for (var i in inputs) {
+            if ( inputs[i].type !== 'conditional' ) {
+                this.AddInteger(inputs[i])
+                for (var i in inputs.cases) {
+                    cases.inputs
+                } 
+            }
+
+            else if (inputs[i].type === 'conditional')  {
+
+                this.AddSelectField(inputs[i])
+                console.log(inputs[i].cases)
+                for (var j in inputs[i].cases[0]) {
+
+                    this.CreateSections (inputs[i].cases[j].inputs)
+
+                }
+
+
+            }
+        }
+    }
 
 
 }
