@@ -43,7 +43,8 @@ export class GalaxyToolView extends BaseWidgetView {
         // this.AddText(inputs[0])
         // this.AddBooleanField(inputs[0])
         this.CreateSections(inputs)
-        this.AddBooleanField(inputs[0])
+       // const newvar = this.AddBooleanField(inputs[0])
+        //console.log(newvar)
     }
 
     uid () {
@@ -65,18 +66,18 @@ export class GalaxyToolView extends BaseWidgetView {
     TitleSpan.textContent = input_def.label
     TitleSpan.style.display = 'inline'
     title.append(TitleSpan)
-    row.className = 'ui-form-element sectiono-row'
+    row.className = 'ui-form-element section-row'
     row.id = input_def.id
     row.append(input)
     row.append(title)
     this.element.querySelector('.galaxy-form').append(row)
+    return row
 
    }
 
    AddInteger (input_def) {
 
     input_def.id = this.uid()
-
     const input = document.createElement('input')
     input.id = `input-${input_def.id}`
     const row = document.createElement('div')
@@ -87,11 +88,12 @@ export class GalaxyToolView extends BaseWidgetView {
     TitleSpan.textContent = input_def.label
     TitleSpan.style.display = 'inline'
     title.append(TitleSpan)
-    row.className = 'ui-form-element sectiono-row'
+    row.className = 'ui-form-element section-row'
     row.id = input_def.id
     row.append(input)
     row.append(title)
     this.element.querySelector('.galaxy-form').append(row)
+    return row
 
    }
 
@@ -108,11 +110,13 @@ export class GalaxyToolView extends BaseWidgetView {
     TitleSpan.textContent = input_def.label
     TitleSpan.style.display = 'inline'
     title.append(TitleSpan)
-    row.className = 'ui-form-element sectiono-row'
+    row.className = 'ui-form-element section-row'
     row.id = input_def.id
     row.append(input)
     row.append(title)
     this.element.querySelector('.galaxy-form').append(row)
+
+    return row
 
    }
 
@@ -122,11 +126,7 @@ export class GalaxyToolView extends BaseWidgetView {
 
     //const options = input_def.options
 
-
-
-
-     const options =  input_def['test_param']['options']
-
+    const options =  input_def['test_param']['options']
     const select = document.createElement('select')
 
     for(var i = 0; i < options.length; i++) {
@@ -146,25 +146,25 @@ export class GalaxyToolView extends BaseWidgetView {
     TitleSpan.textContent = input_def.label
     TitleSpan.style.display = 'inline'
     title.append(TitleSpan)
-    row.className = 'ui-form-element sectiono-row'
+    row.className = 'ui-form-element section-row'
     row.id = input_def.id
     row.append(select)
     row.append(title)
-
-    
     this.element.querySelector('.galaxy-form').append(row)
+
+    return row
 
     }
 
     AddBooleanField (input_def ) {
 
         input_def.id = this.uid()
-    
+
         const options =  [['True', 'True', 'true'],
                         ['False', 'False', 'false']]
-    
+
         const select = document.createElement('select')
-    
+
         for(var i = 0; i < options.length; i++) {
             const opt = options[i][0];
             const el = document.createElement("option");
@@ -172,7 +172,7 @@ export class GalaxyToolView extends BaseWidgetView {
             el.value = options[i][1];
             select.appendChild(el);
         }
-    
+
         select.id = `input-${input_def.id}`
         const row = document.createElement('div')
         const title = document.createElement('div')
@@ -182,7 +182,7 @@ export class GalaxyToolView extends BaseWidgetView {
         TitleSpan.textContent = input_def.label
         TitleSpan.style.display = 'inline'
         title.append(TitleSpan)
-        row.className = 'ui-form-element sectiono-row'
+        row.className = 'ui-form-element section-row'
         row.id = input_def.id
         row.append(select)
         row.append(title)
@@ -194,9 +194,10 @@ export class GalaxyToolView extends BaseWidgetView {
     value_changed() {
         const input = this.model.get('inputs')
         this.el.textContent = input.label;
-      }
+        }
 
     CreateSections (inputs) {
+        var self = this
 
         for (var i in inputs) {
             if ( inputs[i].type !== 'conditional' ) {
@@ -205,7 +206,6 @@ export class GalaxyToolView extends BaseWidgetView {
                     cases.inputs
                 } 
             }
-
             else if (inputs[i].type === 'conditional')  {
 
                 this.AddSelectField(inputs[i])
@@ -221,7 +221,6 @@ export class GalaxyToolView extends BaseWidgetView {
             }
         }
     }
-
 
 }
 
