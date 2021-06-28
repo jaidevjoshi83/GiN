@@ -25,26 +25,21 @@ GalaxyToolModel.serializers = Object.assign(Object.assign({}, BaseWidgetModel.se
 export class GalaxyToolView extends BaseWidgetView {
     constructor() {
         super(...arguments);   
-        this.elements = {};   
-           
+        this.elements = {};      
     }
 
     render () {
-        super.render()
         const inputs = this.model.get('inputs')
+        super.render()
+        this.CreateForm()
+        this.AddConditoinalSection(inputs[2])
+    }
+
+    CreateForm() {
 
         const GalaxyForm = document.createElement('form')
-        GalaxyForm.className += 'galaxy-form'
+        GalaxyForm.className = 'Galaxy-form'
         this.element.querySelector('div.nbtools-body').append(GalaxyForm)
-        //this.AddInput(inputs[0])
-        // this.AddSelectField(inputs[0])
-        // this.AddFlot(inputs[0])
-        // this.AddInteger(inputs[0])
-        // this.AddText(inputs[0])
-        // this.AddBooleanField(inputs[0])
-        this.CreateSections(inputs)
-       // const newvar = this.AddBooleanField(inputs[0])
-        //console.log(newvar)
     }
 
     uid () {
@@ -52,7 +47,7 @@ export class GalaxyToolView extends BaseWidgetView {
         return `uid-${top.__utils__uid__++}`;
     }
     
-   AddText (input_def) {
+    AddText (input_def) {
 
     input_def.id = this.uid()
 
@@ -73,9 +68,31 @@ export class GalaxyToolView extends BaseWidgetView {
     this.element.querySelector('.galaxy-form').append(row)
     return row
 
-   }
+    }
 
-   AddInteger (input_def) {
+    AddInteger (input_def) {
+
+    input_def.id = this.uid()
+    const input = document.createElement('input')
+    input.id = input_def.id
+    const row = document.createElement('div')
+    const title = document.createElement('div')
+    title.className = 'ui-from-title'
+    const TitleSpan = document.createElement('span')
+    TitleSpan.className = "ui-form-title-text"
+    TitleSpan.textContent = input_def.label
+    TitleSpan.style.display = 'inline'
+    title.append(TitleSpan)
+    row.className = 'ui-form-element section-row'
+    row.id = input_def.id
+    row.append(input)
+    row.append(title)
+    this.element.querySelector('.Galaxy-form').append(row)
+    return row
+
+    }
+
+    AddFlot (input_def) {
 
     input_def.id = this.uid()
     const input = document.createElement('input')
@@ -92,33 +109,11 @@ export class GalaxyToolView extends BaseWidgetView {
     row.id = input_def.id
     row.append(input)
     row.append(title)
-    this.element.querySelector('.galaxy-form').append(row)
-    return row
-
-   }
-
-   AddFlot (input_def) {
-
-    input_def.id = this.uid()
-    const input = document.createElement('input')
-    input.id = `input-${input_def.id}`
-    const row = document.createElement('div')
-    const title = document.createElement('div')
-    title.className = 'ui-from-title'
-    const TitleSpan = document.createElement('span')
-    TitleSpan.className = "ui-form-title-text"
-    TitleSpan.textContent = input_def.label
-    TitleSpan.style.display = 'inline'
-    title.append(TitleSpan)
-    row.className = 'ui-form-element section-row'
-    row.id = input_def.id
-    row.append(input)
-    row.append(title)
-    this.element.querySelector('.galaxy-form').append(row)
+    this.element.querySelector('.Galaxy-form').append(row)
 
     return row
 
-   }
+    }
 
     AddSelectField (input_def ) {
 
@@ -150,7 +145,14 @@ export class GalaxyToolView extends BaseWidgetView {
     row.id = input_def.id
     row.append(select)
     row.append(title)
-    this.element.querySelector('.galaxy-form').append(row)
+    this.element.querySelector('.Galaxy-form').append(row)
+
+
+    const SelectEl = this.element.querySelector(`#input-${input_def.id}`);
+
+    SelectEl.addEventListener("click", () => {
+       console.log(this.element.querySelector(`#input-${input_def.id}`).value)
+    });
 
     return row
 
@@ -186,14 +188,85 @@ export class GalaxyToolView extends BaseWidgetView {
         row.id = input_def.id
         row.append(select)
         row.append(title)
-        this.element.querySelector('.galaxy-form').append(row)
+        this.element.querySelector('.Galaxy-form').append(row)
 
         return row
-        }
+    }
 
     value_changed() {
         const input = this.model.get('inputs')
         this.el.textContent = input.label;
+    }
+
+    AddConditoinalSection (input_def ) {
+
+        input_def.id = this.uid()
+     
+        this.return_value = ''
+        var self = this
+     
+        const ConditionalDiv = document.createElement('div')
+        ConditionalDiv.className = 'ui-form-element section-row pl-2'
+        ConditionalDiv.id = `${input_def.id}-section`
+     
+        
+        //const options = input_def.options
+        const options =  input_def['test_param']['options']
+        const select = document.createElement('select')
+        select.id = `input-${input_def.id}`
+     
+        //select.style.margin = "50px 10px 20px 30px"
+     
+        for(var i = 0; i < options.length; i++) {
+              const opt = options[i][0];
+              const el = document.createElement("option");
+              el.textContent = opt;
+              el.value = options[i][1];
+              select.appendChild(el);
+        }
+     
+        select[0].selected = 'selected'
+     
+        console.log(select[1])
+     
+        const row = document.createElement('div')
+        const title = document.createElement('div')
+        title.className = 'ui-from-title'
+        const TitleSpan = document.createElement('span')
+        TitleSpan.className = "ui-form-title-text"
+        TitleSpan.textContent = input_def.label
+        TitleSpan.style.display = 'inline'
+        title.append(TitleSpan)
+        row.className = 'ui-form-element section-row'
+        row.id = input_def.id
+        row.append(select)
+        row.append(title)
+     
+        ConditionalDiv.append(row)
+        
+        this.element.querySelector('.Galaxy-form').append(ConditionalDiv)
+        const SelectEl = this.element.querySelector(`#input-${input_def.id}`);
+     
+        SelectEl.addEventListener("click", () => {
+              const SelectedValue = self.element.querySelector(`#input-${input_def.id}`).value
+              for (var i in input_def.cases ) {
+                 if (input_def.cases[i].value === SelectedValue) {
+                    for (var j in input_def.cases[i].inputs) {
+                       if (input_def.cases[i].inputs[j].type === 'conditional'){
+                       this.AddConditoinalSection(input_def.cases[i].inputs[j])
+                       }
+                       else {
+                       const Section  = this.AddInteger(input_def.cases[i].inputs[j])
+                       ConditionalDiv.append(Section)
+     
+                       }
+     
+                    }
+     
+                 }
+              }
+        });
+     
         }
 
     CreateSections (inputs) {
