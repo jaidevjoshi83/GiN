@@ -75,7 +75,7 @@ export class GalaxyToolView extends BaseWidgetView {
             case "conditional":
                 this.AddConditoinalSection2(input_def,this.element.querySelector('.Galaxy-form'));
                 break;
-            case "data":
+            case "data" || 'text' || 'integer' || 'float':
                 this.AddInteger(input_def);
                 break;
   
@@ -150,7 +150,9 @@ export class GalaxyToolView extends BaseWidgetView {
 
     }
 
-    AddSelectField (input_def ) {
+    AddSelectField (input_def, ElID ) {
+
+        var self = this
 
         const options =  input_def['test_param']['options']
         const select = document.createElement('select')
@@ -178,6 +180,25 @@ export class GalaxyToolView extends BaseWidgetView {
         row.id = input_def.id
         row.append(select)
         row.append(title)
+
+
+        //const SelectEl = this.element.querySelector(`#select-${input_def.id}`)
+
+        select.addEventListener("change", () => {
+
+            var queryID = select.value
+
+            console.log(queryID)
+            console.log(ElID)
+
+            for (var i in ElID) {
+                if (i == queryID ) {
+                    this.element.querySelector(`#${ElID[i]}`).style.display = 'block'
+                } else {
+                    this.element.querySelector(`#${ElID[i]}`).style.display = 'none'
+                }
+            }
+        });
 
         return row
 
@@ -385,7 +406,20 @@ export class GalaxyToolView extends BaseWidgetView {
     // }    
 
     AddConditoinalSection2 (input_def,parent) {
+
+
         input_def.id = this.uid()
+
+        const ElementIDs = []
+
+        for (var e in input_def.cases) {
+
+            ElementIDs.push(`${input_def.id}-section-${e}`)
+        }
+
+        const Selectfiled = this.AddSelectField(input_def, ElementIDs)
+
+        parent.append(Selectfiled)
 
         var ConditionalDiv
 
@@ -393,6 +427,12 @@ export class GalaxyToolView extends BaseWidgetView {
           ConditionalDiv = document.createElement('div')
           ConditionalDiv.className = 'ui-form-element section-row pl-2 '+input_def.cases[i].value
           ConditionalDiv.id = `${input_def.id}-section-${i}`
+
+          if (i == 0){
+            ConditionalDiv.style.display = 'block'
+         } else {
+            ConditionalDiv.style.display = 'none'
+         }
 
           for (var j in input_def.cases[i].inputs) {
             if (input_def.cases[i].inputs[j].type !== 'conditional') {
@@ -402,6 +442,7 @@ export class GalaxyToolView extends BaseWidgetView {
               SimpleRow.id = input_def.cases[i].inputs[j].id
               ConditionalDiv.append(SimpleRow)
             } else {
+              
               input_def.cases[i].inputs[j].id = this.uid()
               this.AddConditoinalSection2(input_def.cases[i].inputs[j],ConditionalDiv)
             }
