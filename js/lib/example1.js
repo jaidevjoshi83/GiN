@@ -75,78 +75,102 @@ export class GalaxyToolView extends BaseWidgetView {
             case "conditional":
                 this.AddConditoinalSection2(input_def,this.element.querySelector('.Galaxy-form'));
                 break;
-            case "data" || 'text' || 'integer' || 'float':
-                this.AddInteger(input_def);
+            case "data" || 'text' || 'integer' || 'float' || 'boolean' || "select":
+                this.AddInputRow(input_def);
                 break;
   
         }
     }
-    
+
+    AddInputRow(input_def) {
+
+        switch(input_def.type) {
+
+            case "data":
+                this.AddInteger(input_def)
+                break
+            case "text":
+                this.AddText(input_def)
+                break
+            case "integer":
+                this.AddInteger(input_def)
+                break
+            case "float":
+                this.AddFloat(input_def)
+                break
+            case "boolean":
+                this.AddBooleanField(input_def)
+                break
+            case "select":
+                this.AddSelectFiled(input_def)
+
+        }
+
+    }
+
+
     AddText (input_def) {
 
-    input_def.id = this.uid()
+        input_def.id = this.uid()
 
-    const input = document.createElement('input')
-    input.id = `input-${input_def.id}`
-    const row = document.createElement('div')
-    const title = document.createElement('div')
-    title.className = 'ui-from-title'
-    const TitleSpan = document.createElement('span')
-    TitleSpan.className = "ui-form-title-text"
-    TitleSpan.textContent = input_def.label
-    TitleSpan.style.display = 'inline'
-    title.append(TitleSpan)
-    row.className = 'ui-form-element section-row'
-    row.id = input_def.id
-    row.append(input)
-    row.append(title)
-    this.element.querySelector('.galaxy-form').append(row)
-    return row
+        const input = document.createElement('input')
+        input.id = `input-${input_def.id}`
+        const row = document.createElement('div')
+        const title = document.createElement('div')
+        title.className = 'ui-from-title'
+        const TitleSpan = document.createElement('span')
+        TitleSpan.className = "ui-form-title-text"
+        TitleSpan.textContent = input_def.label
+        TitleSpan.style.display = 'inline'
+        title.append(TitleSpan)
+        row.className = 'ui-form-element section-row'
+        row.id = input_def.id
+        row.append(input)
+        row.append(title)
+        return row
 
     }
 
     AddInteger (input_def) {
 
-    input_def.id = this.uid()
-    const input = document.createElement('input')
-    input.id = input_def.id
-    const row = document.createElement('div')
-    const title = document.createElement('div')
-    title.className = 'ui-from-title'
-    const TitleSpan = document.createElement('span')
-    TitleSpan.className = "ui-form-title-text"
-    TitleSpan.textContent = input_def.label
-    TitleSpan.style.display = 'inline'
-    title.append(TitleSpan)
-    row.className = 'ui-form-element section-row'
-    row.id = input_def.id
-    row.append(input)
-    row.append(title)
-    //this.element.querySelector('.Galaxy-form').append(row)
-    return row
+        input_def.id = this.uid()
+        const input = document.createElement('input')
+        input.id = input_def.id
+        const row = document.createElement('div')
+        const title = document.createElement('div')
+        title.className = 'ui-from-title'
+        const TitleSpan = document.createElement('span')
+        TitleSpan.className = "ui-form-title-text"
+        TitleSpan.textContent = input_def.label
+        TitleSpan.style.display = 'inline'
+        title.append(TitleSpan)
+        row.className = 'ui-form-element section-row'
+        row.id = input_def.id
+        row.append(input)
+        row.append(title)
+        return row
 
     }
 
     AddFlot (input_def) {
 
-    input_def.id = this.uid()
-    const input = document.createElement('input')
-    input.id = `input-${input_def.id}`
-    const row = document.createElement('div')
-    const title = document.createElement('div')
-    title.className = 'ui-from-title'
-    const TitleSpan = document.createElement('span')
-    TitleSpan.className = "ui-form-title-text"
-    TitleSpan.textContent = input_def.label
-    TitleSpan.style.display = 'inline'
-    title.append(TitleSpan)
-    row.className = 'ui-form-element section-row'
-    row.id = input_def.id
-    row.append(input)
-    row.append(title)
-    this.element.querySelector('.Galaxy-form').append(row)
+        input_def.id = this.uid()
+        const input = document.createElement('input')
+        input.id = `input-${input_def.id}`
+        const row = document.createElement('div')
+        const title = document.createElement('div')
+        title.className = 'ui-from-title'
+        const TitleSpan = document.createElement('span')
+        TitleSpan.className = "ui-form-title-text"
+        TitleSpan.textContent = input_def.label
+        TitleSpan.style.display = 'inline'
+        title.append(TitleSpan)
+        row.className = 'ui-form-element section-row'
+        row.id = input_def.id
+        row.append(input)
+        row.append(title)
 
-    return row
+        return row
 
     }
 
@@ -173,16 +197,14 @@ export class GalaxyToolView extends BaseWidgetView {
         title.className = 'ui-from-title'
         const TitleSpan = document.createElement('span')
         TitleSpan.className = "ui-form-title-text"
-        TitleSpan.textContent = input_def.label
+        TitleSpan.textContent = input_def['test_param']['label']
+
         TitleSpan.style.display = 'inline'
         title.append(TitleSpan)
         row.className = 'ui-form-element section-row'
         row.id = input_def.id
         row.append(select)
         row.append(title)
-
-
-        //const SelectEl = this.element.querySelector(`#select-${input_def.id}`)
 
         select.addEventListener("change", () => {
 
@@ -239,172 +261,6 @@ export class GalaxyToolView extends BaseWidgetView {
         return row
     }
 
-    value_changed() {
-        const input = this.model.get('inputs')
-        this.el.textContent = input.label;
-    }
-
-    AddConditoinalSection (input_def ) {
-
-        const Elements = []
-
-        var self = this
-        input_def.id = this.uid()
-        this.return_value = ''
-    
-        const options =  input_def['test_param']['options']
-        const select = document.createElement('select')
-        select.id = `select-${input_def.id}`     
-     
-        for(var i = 0; i < options.length; i++) {
-              const opt = options[i][0];
-              const el = document.createElement("option");
-              el.textContent = opt;
-              el.value = i;
-              select.appendChild(el);
-        }
-     
-        select[0].selected = 'selected'
-     
-        const row = document.createElement('div')
-        const title = document.createElement('div')
-        title.className = 'ui-from-title'
-        const TitleSpan = document.createElement('span')
-        TitleSpan.className = "ui-form-title-text"
-        TitleSpan.textContent = input_def.label
-        TitleSpan.style.display = 'inline'
-        title.append(TitleSpan)
-        row.className = 'ui-form-element section-row'
-        row.id = input_def.id
-        row.append(select)
-        row.append(title)
-        
-        this.element.querySelector('.Galaxy-form').append(row)
-        const SelectEl = this.element.querySelector(`#select-${input_def.id}`);
-
-        for (var i in input_def.cases ) {
-
-            const ConditionalDiv = document.createElement('div')
-            ConditionalDiv.className = 'ui-form-element section-row pl-2'
-            ConditionalDiv.id = `${input_def.id}-section-${i}`
-
-            Elements.push(ConditionalDiv)
-            
-            if (i == 0){
-                ConditionalDiv.style.display = 'block'
-            } else {
-                ConditionalDiv.style.display = 'none'
-            }
-
-            this.element.querySelector('.Galaxy-form').append(ConditionalDiv)
-
-            for (var j in input_def.cases[i].inputs) {
-
-               if (input_def.cases[i].inputs[j].type === 'conditional'){
-                    this.AddConditoinalSection(input_def.cases[i].inputs[j])
-
-               } else {
-                    console.log(Object.keys(input_def.cases[i].inputs[j]))
-                    this.AddInteger(input_def.cases[i].inputs[j])
-                    ConditionalDiv.append(this.AddInteger(input_def.cases[i].inputs[j]))
-               }
-            }
-        }
-
-        SelectEl.addEventListener("change", () => {
-
-            var queryID = SelectEl.value
-
-            for (var i in Elements) {
-                if (i == queryID ) {
-                    Elements[i].style.display = 'block'
-                } else {
-                    Elements[i].style.display = 'none'
-                }
-            }
-        });
-
-        }
-
-
-
-    CreateASubsection(input_def, i) {
-
-        const ConditionalDiv = document.createElement('div')
-        ConditionalDiv.className = 'ui-form-element section-row pl-2'
-        ConditionalDiv.id = `${input_def.id}-section-${i}`
-
-        return ConditionalDiv
-    }
-
-    AddConditoinalSection1 (input_def ) {
-
-        // input_def.id = this.uid()
-
-        const row = this.AddSelectField(input_def )
-        this.element.querySelector('.Galaxy-form').append(row)
-        console.log(input_def.id, '########')
-        console.log(input_def.test_param.options)
-
-        for (var i in input_def.cases) {
-
-            console.log(this.CreateASubsection(input_def, i))
-
-            for (var j in input_def.cases[i].inputs ) {
-
-                if (input_def.cases[i].inputs[j].type !== 'conditional' ) {
-                    input_def.id = this.uid()
-                    console.log(input_def.cases[i].inputs[j].label)
-                }
-                else {
-                    //const SubSection1 = document.createElement('div')
-                    //SubSection1.id = `subsection-${input_def.cases[i].inputs[j].id}`
-                    //SubSection.append(SubSection1)       
-                    console.log('###########################################')
-                    this.AddConditoinalSection1(input_def.cases[i].inputs[j])
-
-                } 
-            }
-
-        }
-        //this.element.querySelector('.Galaxy-form').append(SubSection)
-    }
-
-
-    // AddConditoinalSection2 (input_def ) {
-
-    //     input_def.id = this.uid()
-
-    //     var ConditionalDiv
-
-    //     for (var i in input_def.cases) {
-
-    //         ConditionalDiv  = document.createElement('div')
-    //         ConditionalDiv.className = 'ui-form-element section-row pl-2'
-    //         ConditionalDiv.id = `${input_def.id}-section-${i}`
-        
-    //         for (var j in input_def.cases[i].inputs ) {
-
-    //             if (input_def.cases[i].inputs[j].type !== 'conditional') {
-
-    //                 input_def.cases[i].inputs[j].id = this.uid()
-    //                 const SimpleRow  = document.createElement('div')
-    //                 SimpleRow.className = 'ui-form-element section-row' 
-    //                 SimpleRow.id = input_def.cases[i].inputs[j].id
-    //                 ConditionalDiv.append(SimpleRow)
-    //             } 
-
-    //             else{
-
-    //                 input_def.cases[i].inputs[j].id = this.uid()
-    //                 this.AddConditoinalSection2(input_def.cases[i].inputs[j])
-    //             }
-    //         }
-
-    //         this.element.querySelector('.Galaxy-form').append(ConditionalDiv)
-    //     }
-    // }    
-
     AddConditoinalSection2 (input_def,parent) {
 
 
@@ -425,7 +281,7 @@ export class GalaxyToolView extends BaseWidgetView {
 
         for (var i in input_def.cases) {
           ConditionalDiv = document.createElement('div')
-          ConditionalDiv.className = 'ui-form-element section-row pl-2 '+input_def.cases[i].value
+          ConditionalDiv.className = 'ui-form-element section-row pl-2 '
           ConditionalDiv.id = `${input_def.id}-section-${i}`
 
           if (i == 0){
@@ -437,9 +293,9 @@ export class GalaxyToolView extends BaseWidgetView {
           for (var j in input_def.cases[i].inputs) {
             if (input_def.cases[i].inputs[j].type !== 'conditional') {
               input_def.cases[i].inputs[j].id = this.uid()
-              const SimpleRow = document.createElement('div')
-              SimpleRow.className = 'ui-form-element section-row '+input_def.cases[i].inputs[j].name
-              SimpleRow.id = input_def.cases[i].inputs[j].id
+
+              const SimpleRow = this.AddInteger(input_def.cases[i].inputs[j])
+
               ConditionalDiv.append(SimpleRow)
             } else {
               
@@ -450,59 +306,6 @@ export class GalaxyToolView extends BaseWidgetView {
 
           parent.append(ConditionalDiv)
         }
-      }
-
-     
-    AddConditoinalSection4 (input_def ) {
-
-        var Elements
-        input_def.id = this.uid()
-        var ConditionalDiv
-
-        for (var i in input_def.cases) {
-
-            ConditionalDiv  = document.createElement('div')
-            ConditionalDiv.className = 'ui-form-element section-row pl-2'
-            ConditionalDiv.id = `${input_def.id}-section-${i}`
-        
-            for (var j in input_def.cases[i].inputs ) {
-
-                input_def.cases[i].inputs[j].id = this.uid()
-                const SimpleRow  = document.createElement('div')
-                SimpleRow.className = 'ui-form-element section-row' 
-                SimpleRow.id = input_def.cases[i].inputs[j].id
-                ConditionalDiv.append(SimpleRow)
-
-                } 
-                Elements.push(ConditionalDiv)
-            }
-    
-        }  
-
-    CreateSections (inputs) {
-        var self = this
-
-        for (var i in inputs) {
-            if ( inputs[i].type !== 'conditional' ) {
-                this.AddInteger(inputs[i])
-                for (var i in inputs.cases) {
-                    cases.inputs
-                } 
-            }
-            else if (inputs[i].type === 'conditional')  {
-
-                this.AddSelectField(inputs[i])
-                for (var j in inputs[i].cases) {
-
-                    this.CreateSections (inputs[i].cases[j].inputs)
-
-                }
-
-
-            }
-        }
-    }
+      } 
 
 }
-
-
