@@ -36,13 +36,6 @@ export class GalaxyToolView extends BaseWidgetView {
 
     }
 
-    // render () {
-    //     const inputs = this.model.get('inputs')
-    //     super.render()
-    //     this.CreateForm()
-    //     this.AddConditoinalSection(inputs[2])
-    // }
-
     render  () {
         super.render()
         const inputs = this.model.get('inputs')
@@ -76,6 +69,7 @@ export class GalaxyToolView extends BaseWidgetView {
                 this.AddConditoinalSection2(input_def,this.element.querySelector('.Galaxy-form'));
                 break;
             case "data" || 'text' || 'integer' || 'float' || 'boolean' || "select":
+
                 this.AddInputRow(input_def);
                 break;
   
@@ -87,27 +81,29 @@ export class GalaxyToolView extends BaseWidgetView {
         switch(input_def.type) {
 
             case "data":
-                this.AddInteger(input_def)
+                
+                this.element.querySelector('.Galaxy-form').append(this.AddInteger(input_def))
                 break
             case "text":
-                this.AddText(input_def)
+                this.element.querySelector('.Galaxy-form').append(this.AddText(input_def))
                 break
             case "integer":
-                this.AddInteger(input_def)
+                this.element.querySelector('.Galaxy-form').append(this.AddInteger(input_def))
                 break
             case "float":
-                this.AddFloat(input_def)
+                this.element.querySelector('.Galaxy-form').append(this.AddFloat(input_def))
                 break
             case "boolean":
-                this.AddBooleanField(input_def)
+                this.element.querySelector('.Galaxy-form').append(this.AddBooleanField(input_def))
                 break
             case "select":
-                this.AddSelectFiled(input_def)
+
+                console.log('Add select filed')
+                this.element.querySelector('.Galaxy-form').append(this.AddSelectField(input_def))
 
         }
 
     }
-
 
     AddText (input_def) {
 
@@ -148,6 +144,7 @@ export class GalaxyToolView extends BaseWidgetView {
         row.id = input_def.id
         row.append(input)
         row.append(title)
+        
         return row
 
     }
@@ -174,7 +171,7 @@ export class GalaxyToolView extends BaseWidgetView {
 
     }
 
-    AddSelectField (input_def, ElID ) {
+    AddConditionalSelectField (input_def, ElID ) {
 
         var self = this
 
@@ -226,6 +223,49 @@ export class GalaxyToolView extends BaseWidgetView {
 
     }
 
+    AddSelectField (input_def) {
+
+        var self = this
+
+        const options =  input_def['test_param']['options']
+        const select = document.createElement('select')
+        select.id = `select-${input_def.id}`     
+     
+        for(var i = 0; i < options.length; i++) {
+              const opt = options[i][0];
+              const el = document.createElement("option");
+              el.textContent = opt;
+              el.value = i;
+              select.appendChild(el);
+        }
+     
+        select[0].selected = 'selected'
+     
+        const row = document.createElement('div')
+        const title = document.createElement('div')
+        title.className = 'ui-from-title'
+        const TitleSpan = document.createElement('span')
+        TitleSpan.className = "ui-form-title-text"
+        TitleSpan.textContent = input_def['test_param']['label']
+
+        TitleSpan.style.display = 'inline'
+        title.append(TitleSpan)
+        row.className = 'ui-form-element section-row'
+        row.id = input_def.id
+        row.append(select)
+        row.append(title)
+
+        select.addEventListener("change", () => {
+
+            var queryID = select.value
+
+            console.log(queryID)
+        });
+
+        return row
+
+    }
+
     AddBooleanField (input_def ) {
 
         input_def.id = this.uid()
@@ -263,7 +303,6 @@ export class GalaxyToolView extends BaseWidgetView {
 
     AddConditoinalSection2 (input_def,parent) {
 
-
         input_def.id = this.uid()
 
         const ElementIDs = []
@@ -273,7 +312,7 @@ export class GalaxyToolView extends BaseWidgetView {
             ElementIDs.push(`${input_def.id}-section-${e}`)
         }
 
-        const Selectfiled = this.AddSelectField(input_def, ElementIDs)
+        const Selectfiled = this.AddConditionalSelectField(input_def, ElementIDs)
 
         parent.append(Selectfiled)
 
