@@ -1,4 +1,53 @@
-.custom-widget {
-  background-color: lightseagreen;
+.ui-form-element.section-row.pl-2 {
   padding: 0px 2px;
+  margin-left: 10px;
+  border-left: 2px solid rgb(221, 218, 196);
+  border-radius: 5px;
 }
+
+.ui-form-element.section-row {
+  padding: 0px 2px;
+  margin-bottom: 10px;
+
+}
+
+
+.Galaxy-form {
+
+  width: 40%;
+
+}
+
+.Galaxy-form input{
+
+  width: 100%;
+  padding: 12px 20px;
+  margin: 8px 0;
+  display: inline-block;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+.Galaxy-form {
+
+  border-left: 2px solid rgb(221, 218, 196);
+  border-radius: 5px;
+  background-color: #f2f2f2;
+  padding: 20px;
+
+}
+
+
+.Galaxy-form select{
+
+  width: 100%;
+  padding: 12px 20px;
+  margin: 8px 0;
+  display: inline-block;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+
+}
+
