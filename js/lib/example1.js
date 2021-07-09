@@ -1,4 +1,4 @@
-//import '../style/galaxyoutput.css';
+import '../style/galaxyoutput.css';
 
 import { unpack_models } from '@jupyter-widgets/base';
 import { MODULE_NAME, MODULE_VERSION } from './version';
@@ -68,20 +68,8 @@ export class GalaxyToolView extends BaseWidgetView {
             case "conditional":
                 this.AddConditoinalSection2(input_def,this.element.querySelector('.Galaxy-form'));
                 break;
-            case "data" || 'text' || 'integer' || 'float' || 'boolean' || "select":
-
-                this.AddInputRow(input_def);
-                break;
-  
-        }
-    }
-
-    AddInputRow(input_def) {
-
-        switch(input_def.type) {
-
             case "data":
-                
+            
                 this.element.querySelector('.Galaxy-form').append(this.AddInteger(input_def))
                 break
             case "text":
@@ -97,13 +85,40 @@ export class GalaxyToolView extends BaseWidgetView {
                 this.element.querySelector('.Galaxy-form').append(this.AddBooleanField(input_def))
                 break
             case "select":
-
-                console.log('Add select filed')
                 this.element.querySelector('.Galaxy-form').append(this.AddSelectField(input_def))
-
+                break
+  
         }
-
     }
+
+    // AddInputRow(input_def) {
+
+    //     switch(input_def.type) {
+
+    //         case "data":
+                
+    //             this.element.querySelector('.Galaxy-form').append(this.AddInteger(input_def))
+    //             break
+    //         case "text":
+    //             this.element.querySelector('.Galaxy-form').append(this.AddText(input_def))
+    //             break
+    //         case "integer":
+    //             this.element.querySelector('.Galaxy-form').append(this.AddInteger(input_def))
+    //             break
+    //         case "float":
+    //             this.element.querySelector('.Galaxy-form').append(this.AddFloat(input_def))
+    //             break
+    //         case "boolean":
+    //             this.element.querySelector('.Galaxy-form').append(this.AddBooleanField(input_def))
+    //             break
+    //         case "select":
+    //             console.log(input_def['name'])
+    //             this.element.querySelector('.Galaxy-form').append(this.AddSelectField(input_def))
+    //             break
+
+    //     }
+
+    // }
 
     AddText (input_def) {
 
@@ -149,7 +164,7 @@ export class GalaxyToolView extends BaseWidgetView {
 
     }
 
-    AddFlot (input_def) {
+    AddFloat (input_def) {
 
         input_def.id = this.uid()
         const input = document.createElement('input')
@@ -227,7 +242,7 @@ export class GalaxyToolView extends BaseWidgetView {
 
         var self = this
 
-        const options =  input_def['test_param']['options']
+        const options =  input_def['options']
         const select = document.createElement('select')
         select.id = `select-${input_def.id}`     
      
@@ -235,7 +250,7 @@ export class GalaxyToolView extends BaseWidgetView {
               const opt = options[i][0];
               const el = document.createElement("option");
               el.textContent = opt;
-              el.value = i;
+              el.value =  options[i][1];
               select.appendChild(el);
         }
      
@@ -246,7 +261,7 @@ export class GalaxyToolView extends BaseWidgetView {
         title.className = 'ui-from-title'
         const TitleSpan = document.createElement('span')
         TitleSpan.className = "ui-form-title-text"
-        TitleSpan.textContent = input_def['test_param']['label']
+        TitleSpan.textContent = input_def['label']
 
         TitleSpan.style.display = 'inline'
         title.append(TitleSpan)
@@ -303,6 +318,8 @@ export class GalaxyToolView extends BaseWidgetView {
 
     AddConditoinalSection2 (input_def,parent) {
 
+
+
         input_def.id = this.uid()
 
         const ElementIDs = []
@@ -330,10 +347,32 @@ export class GalaxyToolView extends BaseWidgetView {
          }
 
           for (var j in input_def.cases[i].inputs) {
+
+            
             if (input_def.cases[i].inputs[j].type !== 'conditional') {
               input_def.cases[i].inputs[j].id = this.uid()
 
-              const SimpleRow = this.AddInteger(input_def.cases[i].inputs[j])
+              var SimpleRow 
+
+
+              if (input_def.cases[i].inputs[j].type == 'data') {
+                 SimpleRow = this.AddInteger(input_def.cases[i].inputs[j])
+
+              } else if (input_def.cases[i].inputs[j].type == 'integer') {
+                 SimpleRow = this.AddInteger(input_def.cases[i].inputs[j])
+
+              } else if (input_def.cases[i].inputs[j].type == 'float') {
+                   SimpleRow = this.AddFloat(input_def.cases[i].inputs[j])
+
+              } else if (input_def.cases[i].inputs[j].type == 'boolean') {
+                   SimpleRow = this.AddBooleanField(input_def.cases[i].inputs[j])
+
+              } else if (input_def.cases[i].inputs[j].type == 'text') {
+                  SimpleRow = this.AddText(input_def.cases[i].inputs[j])
+              }
+              else if (input_def.cases[i].inputs[j].type == 'select') {
+                   SimpleRow = this.AddSelectField(input_def.cases[i].inputs[j])
+              }
 
               ConditionalDiv.append(SimpleRow)
             } else {
