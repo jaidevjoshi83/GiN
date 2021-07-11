@@ -69,7 +69,6 @@ export class GalaxyToolView extends BaseWidgetView {
                 this.AddConditoinalSection2(input_def,this.element.querySelector('.Galaxy-form'));
                 break;
             case "data":
-            
                 this.element.querySelector('.Galaxy-form').append(this.AddInteger(input_def))
                 break
             case "text":
@@ -87,7 +86,6 @@ export class GalaxyToolView extends BaseWidgetView {
             case "select":
                 this.element.querySelector('.Galaxy-form').append(this.AddSelectField(input_def))
                 break
-  
         }
     }
 
@@ -136,11 +134,91 @@ export class GalaxyToolView extends BaseWidgetView {
         title.append(TitleSpan)
         row.className = 'ui-form-element section-row'
         row.id = input_def.id
-        row.append(input)
         row.append(title)
+        row.append(input)
         return row
 
     }
+
+    FileUpLoad (input_def) {
+
+
+        // <input id='fileid' type='file' hidden />
+        // <input id='buttonid' type='button' value='Upload MB' />
+        // <input list="ice-cream-flavors" id="ice-cream-choice" name="ice-cream-choice" />
+
+        // <datalist id="ice-cream-flavors">
+        //     <option value="Chocolate">
+        //     <option value="Coconut">
+        //     <option value="Mint">
+        //     <option value="Strawberry">
+        //     <option value="Vanilla">
+        // </datalist>
+
+        input_def.id = this.uid()
+
+        const options = ['Chocolate', 'Coconut', 'File']
+
+
+        const input = document.createElement('input')
+        input.className = 'fileid'
+        input.type = 'file'
+        input = 'hidden'
+        
+
+        const input1 = document.createElement('input')
+        input1.className= 'buttonid'
+        input1.type = 'button'
+        input1.value = 'Upload MB'
+
+
+        // const input2 = document.createElement('input')
+        // input2.list = 'file_list'
+        // input2.id = 'file_list_choice'
+        // input2.name = 'file_list_choice'
+
+        // const DataList = document.createElement('datalist')
+        // DataList.id = 'file_list'
+
+
+        // for(var i = 0; i < options.length; i++) {
+        //     const opt = options[i];
+        //     const el = document.createElement("option");
+        //     el.value = opt;
+        //     DataList.appendChild(el);
+        // }
+        
+        
+
+        // const input1 = document.createElement('input')
+        // input.className = 'upload_data'
+        // input1.className = 'text_data'
+        // input.type = 'file'
+        // input.label = 'Upload Data'
+        const row = document.createElement('div')
+        // const title = document.createElement('div')
+        // title.className = 'ui-from-title'
+        // const TitleSpan = document.createElement('span')
+        // TitleSpan.className = "ui-form-title-text"
+        // TitleSpan.textContent = input_def.label
+        // TitleSpan.style.display = 'inline'
+        // title.append(TitleSpan)
+        row.className = 'ui-form-element section-row'
+        row.id = input_def.id
+        row.append(input)
+        row.append(input1)
+        // row.append(input2)
+        // row.append(DataList)
+        return row
+
+    }
+
+
+
+    // <label class="custom-file-upload">
+    // <input type="file"/>
+    // <i class="fa fa-cloud-upload"></i> Custom Upload
+    // </label>
 
     AddInteger (input_def) {
 
@@ -157,8 +235,8 @@ export class GalaxyToolView extends BaseWidgetView {
         title.append(TitleSpan)
         row.className = 'ui-form-element section-row'
         row.id = input_def.id
-        row.append(input)
         row.append(title)
+        row.append(input)
         
         return row
 
@@ -179,8 +257,9 @@ export class GalaxyToolView extends BaseWidgetView {
         title.append(TitleSpan)
         row.className = 'ui-form-element section-row'
         row.id = input_def.id
-        row.append(input)
         row.append(title)
+        row.append(input)
+        
 
         return row
 
@@ -215,8 +294,9 @@ export class GalaxyToolView extends BaseWidgetView {
         title.append(TitleSpan)
         row.className = 'ui-form-element section-row'
         row.id = input_def.id
-        row.append(select)
         row.append(title)
+        row.append(select)
+        
 
         select.addEventListener("change", () => {
 
@@ -267,8 +347,9 @@ export class GalaxyToolView extends BaseWidgetView {
         title.append(TitleSpan)
         row.className = 'ui-form-element section-row'
         row.id = input_def.id
-        row.append(select)
         row.append(title)
+        row.append(select)
+        
 
         select.addEventListener("change", () => {
 
@@ -309,8 +390,9 @@ export class GalaxyToolView extends BaseWidgetView {
         title.append(TitleSpan)
         row.className = 'ui-form-element section-row'
         row.id = input_def.id
-        row.append(select)
         row.append(title)
+        row.append(select)
+        
         this.element.querySelector('.Galaxy-form').append(row)
 
         return row
