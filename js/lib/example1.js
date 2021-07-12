@@ -142,45 +142,35 @@ export class GalaxyToolView extends BaseWidgetView {
 
     FileUpLoad (input_def) {
 
-
-        // <input id='fileid' type='file' hidden />
-        // <input id='buttonid' type='button' value='Upload MB' />
-        // <input list="ice-cream-flavors" id="ice-cream-choice" name="ice-cream-choice" />
-
-        // <datalist id="ice-cream-flavors">
-        //     <option value="Chocolate">
-        //     <option value="Coconut">
-        //     <option value="Mint">
-        //     <option value="Strawberry">
-        //     <option value="Vanilla">
-        // </datalist>
-
         input_def.id = this.uid()
 
         const Label = document.createElement('label')
         Label.className = 'custom_file_upload'
         const Input = document.createElement('input')
         Input.type = 'file'
+
+        const Input1 = document.createElement('input')
+        Input1.type = 'text'
+        Input1.setAttribute("list","car")
+
+        const DataList = document.createElement('datalist')
+        DataList.id = 'car'
+
+        const Option1 = document.createElement('option')
+        Option1.textContent = 'Volvo'
+        DataList.append(Option1)
+
+        const Option2 = document.createElement('option')
+        Option2.textContent = 'Suzuki'
+        DataList.append(Option2)
+
         Label.append(Input)
+        Label.append(Input1)
+        Label.append(DataList)
         const Li = document.createElement('i')
-        Li.innerText = 'Custom Upload'
+        Li.innerText = ' Upload Data'
         Li.className = "fa fa-cloud-upload"
         Label.append(Li)
-
-        // const FileBrowser  = document.createElement('div')
-        // FileBrowser.className = `File_Browser_${input_def.id}`
-        // FileBrowser.float = 'right'
-        // const input = document.createElement('input')
-        // input.className = 'fileid'
-        // input.type = 'file'
-        // FileBrowser.append(input)
-        // const FileSelect  = document.createElement('div')
-        // FileSelect.className = `File_Select_${input_def.id}`
-        // FileSelect.float = 'right'
-        // const input1 = document.createElement('input')
-        // input1.className= 'buttonid'
-        // input1.value = 'Upload MB'
-        // FileSelect.append(input1)
 
         const row = document.createElement('div')
         row.className = 'ui-form-element section-row'
