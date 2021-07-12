@@ -69,7 +69,7 @@ export class GalaxyToolView extends BaseWidgetView {
                 this.AddConditoinalSection2(input_def,this.element.querySelector('.Galaxy-form'));
                 break;
             case "data":
-                this.element.querySelector('.Galaxy-form').append(this.AddInteger(input_def))
+                this.element.querySelector('.Galaxy-form').append(this.FileUpLoad(input_def))
                 break
             case "text":
                 this.element.querySelector('.Galaxy-form').append(this.AddText(input_def))
@@ -157,58 +157,36 @@ export class GalaxyToolView extends BaseWidgetView {
 
         input_def.id = this.uid()
 
-        const options = ['Chocolate', 'Coconut', 'File']
+        const Label = document.createElement('label')
+        Label.className = 'custom_file_upload'
+        const Input = document.createElement('input')
+        Input.type = 'file'
+        Label.append(Input)
+        const Li = document.createElement('i')
+        Li.innerText = 'Custom Upload'
+        Li.className = "fa fa-cloud-upload"
+        Label.append(Li)
 
-
-        const input = document.createElement('input')
-        input.className = 'fileid'
-        input.type = 'file'
-        input = 'hidden'
-        
-
-        const input1 = document.createElement('input')
-        input1.className= 'buttonid'
-        input1.type = 'button'
-        input1.value = 'Upload MB'
-
-
-        // const input2 = document.createElement('input')
-        // input2.list = 'file_list'
-        // input2.id = 'file_list_choice'
-        // input2.name = 'file_list_choice'
-
-        // const DataList = document.createElement('datalist')
-        // DataList.id = 'file_list'
-
-
-        // for(var i = 0; i < options.length; i++) {
-        //     const opt = options[i];
-        //     const el = document.createElement("option");
-        //     el.value = opt;
-        //     DataList.appendChild(el);
-        // }
-        
-        
-
-        // const input1 = document.createElement('input')
-        // input.className = 'upload_data'
-        // input1.className = 'text_data'
+        // const FileBrowser  = document.createElement('div')
+        // FileBrowser.className = `File_Browser_${input_def.id}`
+        // FileBrowser.float = 'right'
+        // const input = document.createElement('input')
+        // input.className = 'fileid'
         // input.type = 'file'
-        // input.label = 'Upload Data'
+        // FileBrowser.append(input)
+        // const FileSelect  = document.createElement('div')
+        // FileSelect.className = `File_Select_${input_def.id}`
+        // FileSelect.float = 'right'
+        // const input1 = document.createElement('input')
+        // input1.className= 'buttonid'
+        // input1.value = 'Upload MB'
+        // FileSelect.append(input1)
+
         const row = document.createElement('div')
-        // const title = document.createElement('div')
-        // title.className = 'ui-from-title'
-        // const TitleSpan = document.createElement('span')
-        // TitleSpan.className = "ui-form-title-text"
-        // TitleSpan.textContent = input_def.label
-        // TitleSpan.style.display = 'inline'
-        // title.append(TitleSpan)
         row.className = 'ui-form-element section-row'
         row.id = input_def.id
-        row.append(input)
-        row.append(input1)
-        // row.append(input2)
-        // row.append(DataList)
+
+        row.append(Label)
         return row
 
     }
@@ -438,7 +416,7 @@ export class GalaxyToolView extends BaseWidgetView {
 
 
               if (input_def.cases[i].inputs[j].type == 'data') {
-                 SimpleRow = this.AddInteger(input_def.cases[i].inputs[j])
+                 SimpleRow = this.FileUpLoad(input_def.cases[i].inputs[j])
 
               } else if (input_def.cases[i].inputs[j].type == 'integer') {
                  SimpleRow = this.AddInteger(input_def.cases[i].inputs[j])

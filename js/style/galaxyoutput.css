@@ -11,15 +11,11 @@
 
 }
 
-
 .Galaxy-form {
-
   width: 40%;
-
 }
 
-.Galaxy-form input{
-
+.Galaxy-form input:not(.fileid, .buttonid){
   width: 100%;
   padding: 12px 20px;
   margin: 8px 0;
@@ -30,17 +26,13 @@
 }
 
 .Galaxy-form {
-
   border-left: 2px solid rgb(221, 218, 196);
   border-radius: 5px;
   background-color: #f2f2f2;
   padding: 20px;
-
 }
 
-
 .Galaxy-form select{
-
   width: 100%;
   padding: 12px 20px;
   margin: 8px 0;
@@ -48,6 +40,32 @@
   border: 1px solid #ccc;
   border-radius: 4px;
   box-sizing: border-box;
-
+}
+.ui-form-element.section-row span {
+  font-weight: bold;
 }
 
+.upload_data {
+  
+  display: inline-block;
+  border: 1px solid rgb(212, 41, 41);
+  box-sizing: border-box;
+}
+
+.Galaxy-form input[type="file"] {
+  display: none;
+}
+.custom-file-upload {
+  border: 1px solid rgb(212, 41, 41);
+  display: inline-block;
+  padding: 6px 12px;
+  cursor: pointer;
+}
+
+.ui-form-element.section-row label {
+  border: 1px solid rgb(80, 77, 77);;
+  display: inline-block;
+  padding: 6px 12px;
+  cursor: pointer;
+
+}
