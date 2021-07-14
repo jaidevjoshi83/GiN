@@ -3,6 +3,7 @@ import '../style/galaxyoutput.css';
 import { unpack_models } from '@jupyter-widgets/base';
 import { MODULE_NAME, MODULE_VERSION } from './version';
 import  { BaseWidgetModel, BaseWidgetView } from "@genepattern/nbtools";
+// import { ContextManager } from "@genepattern/context";
 import $ from "jquery";
 import _ from "underscore";
 //import { extract_file_name, extract_file_type, is_absolute_path, is_url } from '@genepattern/nbtools';
@@ -10,7 +11,7 @@ import _ from "underscore";
 
 export class GalaxyToolModel extends BaseWidgetModel {
     defaults() {
-        return Object.assign(Object.assign({}, super.defaults()), { _model_name: GalaxyToolModel.model_name, _model_module: GalaxyToolModel.model_module, _model_module_version: GalaxyToolModel.model_module_version, _view_name: GalaxyToolModel.view_name, _view_module: GalaxyToolModel.view_module, _view_module_version: GalaxyToolModel.view_module_version, name: 'Python Results', description: '', status: '', files: [], text: '', visualization: '', appendix: undefined, extra_file_menu_items: {}, inputs:{} });
+        return Object.assign(Object.assign({}, super.defaults()), { _model_name: GalaxyToolModel.model_name, _model_module: GalaxyToolModel.model_module, _model_module_version: GalaxyToolModel.model_module_version, _view_name: GalaxyToolModel.view_name, _view_module: GalaxyToolModel.view_module, _view_module_version: GalaxyToolModel.view_module_version, name: 'Python Results', description: '', status: '', files: [], text: '', visualization: '', appendix: undefined, extra_file_menu_items: {}, inputs:{}, File:'' });
     }
 }
 GalaxyToolModel.model_name = 'TestUIOutputModel';
@@ -142,6 +143,8 @@ export class GalaxyToolView extends BaseWidgetView {
 
     FileUpLoad (input_def) {
 
+        var self = this
+
         input_def.id = this.uid()
 
         const Label = document.createElement('label')
@@ -175,13 +178,23 @@ export class GalaxyToolView extends BaseWidgetView {
         const row = document.createElement('div')
         row.className = 'ui-form-element section-row'
         row.id = input_def.id
-
         row.append(Label)
+
+        Input.addEventListener("change", function() {
+
+            ContextManager.context().execute_code(this.current, 'from nbtools import import_defaults\nimport_defaults()');
+            
+            console.log(Input.files[0].name);
+
+            self.model.set('File', Input.files[0].name);
+            self.model.save_changes();
+            Input1.value = Input.files[0].name
+
+
+        }, false);
         return row
 
     }
-
-
 
     // <label class="custom-file-upload">
     // <input type="file"/>
