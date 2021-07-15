@@ -11,9 +11,10 @@ import { unpack_models } from "@jupyter-widgets/base";
 //import { UIBuilderModel, UIBuilderView } from "@genepattern/nbtools";
 import { BaseWidgetModel, BaseWidgetView } from "@genepattern/nbtools";
 import { element_rendered, toggle } from "./utils";
+import _ from "underscore";
 export class GalaxyUIBuilderModel extends BaseWidgetModel{
     defaults() {
-        return Object.assign(Object.assign(Object.assign({}, super.defaults()), { _model_name: GalaxyUIBuilderModel.model_name, _model_module: GalaxyUIBuilderModel.model_module, _model_module_version: GalaxyUIBuilderModel.model_module_version, _view_name: GalaxyUIBuilderModel.view_name, _view_module: GalaxyUIBuilderModel.view_module, _view_module_version: GalaxyUIBuilderModel.view_module_version, name: 'Python Function', description: '', origin: '', _parameters: [], parameter_groups: [], function_import: '', register_tool: true, collapse: true, events: {}, buttons: {}, display_header: true, display_footer: true, busy: false, run_label: 'Run', form: undefined, output: undefined }));
+        return Object.assign(Object.assign(Object.assign({}, super.defaults()), { _model_name: GalaxyUIBuilderModel.model_name, _model_module: GalaxyUIBuilderModel.model_module, _model_module_version: GalaxyUIBuilderModel.model_module_version, _view_name: GalaxyUIBuilderModel.view_name, _view_module: GalaxyUIBuilderModel.view_module, _view_module_version: GalaxyUIBuilderModel.view_module_version, name: 'Python Function', description: '', origin: '', _parameters: [], parameter_groups: [], function_import: '', register_tool: true, collapse: true, events: {}, buttons: {}, display_header: true, display_footer: true, busy: false, run_label: 'Run', form: undefined, output: undefined, inputs:[] }));
     }
 }
 GalaxyUIBuilderModel.model_name = 'GalaxyUIBuilderModel';
@@ -54,12 +55,433 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         </div>`;
     }
 
-
     render() {
-        super.render()
+        // super.render()
+        // this.activate_run_buttons();
+        // this.toggle_code(false);
+
+        super.render();
+
+        const inputs = this.model.get('inputs')
+
+        console.log(inputs)
+
+        this.CreateForm()
+        var self = this;
+        _.each(inputs, (input) => {
+            self.add(input);
+        });
+
+        console.log( this.model.get('inputs'), 'thats the tratlet')
+        // Hide the header or footer, if necessary
+        this.display_header_changed();
+        this.display_footer_changed();
+        this.model.on(`change:display_header`, this.display_header_changed, this);
+        this.model.on(`change:display_footer`, this.display_footer_changed, this);
+        // Show or hide the "busy" UI
+        this.busy_changed();
+        this.model.on(`change:busy`, this.busy_changed, this);
+        // Attach the Reset Parameters gear option
+        this.add_menu_item('Reset Parameters', () => this.reset_parameters());
+        // Attach the Run button callbacks
         this.activate_run_buttons();
-        this.toggle_code(false);
+        // Attach custom buttons
+        this.activate_custom_buttons();
+        // Add the interactive form widget
+        // this.attach_child_widget('.nbtools-form', 'form');
+        // // After the view is rendered
+        // element_rendered(this.el).then(() => {
+        //     // Attach ID and event callbacks
+        //     this._attach_callbacks();
+        //     // Create parameter groups
+        //     this._init_parameter_groups();
+        // });
     }
+
+    //#############################################################################
+
+    // initialize (inputs){
+
+    //     this.inputs = inputs
+
+    // }
+
+    // render  () {
+    //     super.render()
+    //     const inputs = this.model.get('inputs')
+    //     this.CreateForm()
+    //     var self = this;
+    //     _.each(inputs, (input) => {
+    //         self.add(input);
+    //     });
+  
+    // }
+
+    CreateForm() {
+
+        const GalaxyForm = document.createElement('form')
+        GalaxyForm.className = 'nbtools-form'
+        this.el.querySelector('div.nbtools-body').append(GalaxyForm)
+    }
+
+    uid () {
+        top.__utils__uid__ = top.__utils__uid__ || 0;
+        return `uid-${top.__utils__uid__++}`;
+    }
+
+    add  ( input ) {
+        
+        var input_def = input;
+       // input_def.id = this.uid();
+  
+        switch (input_def.type) {
+            case "conditional":
+                this.AddConditoinalSection2(input_def,this.el.querySelector('.nbtools-form'));
+                break;
+            case "data":
+                this.el.querySelector('.nbtools-form').append(this.FileUpLoad(input_def))
+                break
+            case "text":
+                this.el.querySelector('.nbtools-form').append(this.AddText(input_def))
+                break
+            case "integer":
+                this.el.querySelector('.nbtools-form').append(this.AddInteger(input_def))
+                break
+            case "float":
+                this.el.querySelector('.nbtools-form').append(this.AddFloat(input_def))
+                break
+            case "boolean":
+                this.el.querySelector('.nbtools-form').append(this.AddBooleanField(input_def))
+                break
+            case "select":
+                this.el.querySelector('.nbtools-form').append(this.AddSelectField(input_def))
+                break
+        }
+    }
+
+    AddText (input_def) {
+
+        input_def.id = this.uid()
+
+        const input = document.createElement('input')
+        input.id = `input-${input_def.id}`
+        const row = document.createElement('div')
+        const title = document.createElement('div')
+        title.className = 'ui-from-title'
+        const TitleSpan = document.createElement('span')
+        TitleSpan.className = "ui-form-title-text"
+        TitleSpan.textContent = input_def.label
+        TitleSpan.style.display = 'inline'
+        title.append(TitleSpan)
+        row.className = 'ui-form-element section-row'
+        row.id = input_def.id
+        row.append(title)
+        row.append(input)
+        return row
+
+    }
+
+    FileUpLoad (input_def) {
+
+        var self = this
+
+        input_def.id = this.uid()
+
+        const Label = document.createElement('label')
+        Label.className = 'custom_file_upload'
+        const Input = document.createElement('input')
+        Input.type = 'file'
+
+        const Input1 = document.createElement('input')
+        Input1.type = 'text'
+        Input1.setAttribute("list","car")
+
+        const DataList = document.createElement('datalist')
+        DataList.id = 'car'
+
+        const Option1 = document.createElement('option')
+        Option1.textContent = 'Volvo'
+        DataList.append(Option1)
+
+        const Option2 = document.createElement('option')
+        Option2.textContent = 'Suzuki'
+        DataList.append(Option2)
+
+        Label.append(Input)
+        Label.append(Input1)
+        Label.append(DataList)
+        const Li = document.createElement('i')
+        Li.innerText = ' Upload Data'
+        Li.className = "fa fa-cloud-upload"
+        Label.append(Li)
+
+        const row = document.createElement('div')
+        row.className = 'ui-form-element section-row'
+        row.id = input_def.id
+        row.append(Label)
+
+        Input.addEventListener("change", function() {
+
+            ContextManager.context().execute_code(this.current, 'from nbtools import import_defaults\nimport_defaults()');
+            
+            console.log(Input.files[0].name);
+
+            self.model.set('File', Input.files[0].name);
+            self.model.save_changes();
+            Input1.value = Input.files[0].name
+
+
+        }, false);
+        return row
+
+    }
+
+    AddInteger (input_def) {
+
+        input_def.id = this.uid()
+        const input = document.createElement('input')
+        input.id = input_def.id
+        const row = document.createElement('div')
+        const title = document.createElement('div')
+        title.className = 'ui-from-title'
+        const TitleSpan = document.createElement('span')
+        TitleSpan.className = "ui-form-title-text"
+        TitleSpan.textContent = input_def.label
+        TitleSpan.style.display = 'inline'
+        title.append(TitleSpan)
+        row.className = 'ui-form-element section-row'
+        row.id = input_def.id
+        row.append(title)
+        row.append(input)
+        
+        return row
+
+    }
+
+    AddFloat (input_def) {
+
+        input_def.id = this.uid()
+        const input = document.createElement('input')
+        input.id = `input-${input_def.id}`
+        const row = document.createElement('div')
+        const title = document.createElement('div')
+        title.className = 'ui-from-title'
+        const TitleSpan = document.createElement('span')
+        TitleSpan.className = "ui-form-title-text"
+        TitleSpan.textContent = input_def.label
+        TitleSpan.style.display = 'inline'
+        title.append(TitleSpan)
+        row.className = 'ui-form-element section-row'
+        row.id = input_def.id
+        row.append(title)
+        row.append(input)
+        return row
+
+    }
+
+    AddConditionalSelectField (input_def, ElID ) {
+
+        var self = this
+
+        const options =  input_def['test_param']['options']
+        const select = document.createElement('select')
+        select.id = `select-${input_def.id}`     
+     
+        for(var i = 0; i < options.length; i++) {
+              const opt = options[i][0];
+              const el = document.createElement("option");
+              el.textContent = opt;
+              el.value = i;
+              select.appendChild(el);
+        }
+     
+        select[0].selected = 'selected'
+     
+        const row = document.createElement('div')
+        const title = document.createElement('div')
+        title.className = 'ui-from-title'
+        const TitleSpan = document.createElement('span')
+        TitleSpan.className = "ui-form-title-text"
+        TitleSpan.textContent = input_def['test_param']['label']
+
+        TitleSpan.style.display = 'inline'
+        title.append(TitleSpan)
+        row.className = 'ui-form-element section-row'
+        row.id = input_def.id
+        row.append(title)
+        row.append(select)
+        
+
+        select.addEventListener("change", () => {
+
+            var queryID = select.value
+
+            console.log(queryID)
+            console.log(ElID)
+
+            for (var i in ElID) {
+                if (i == queryID ) {
+                    this.el.querySelector(`#${ElID[i]}`).style.display = 'block'
+                } else {
+                    this.el.querySelector(`#${ElID[i]}`).style.display = 'none'
+                }
+            }
+        });
+
+        return row
+
+    }
+
+    AddSelectField (input_def) {
+
+        var self = this
+
+        const options =  input_def['options']
+        const select = document.createElement('select')
+        select.id = `select-${input_def.id}`     
+     
+        for(var i = 0; i < options.length; i++) {
+              const opt = options[i][0];
+              const el = document.createElement("option");
+              el.textContent = opt;
+              el.value =  options[i][1];
+              select.appendChild(el);
+        }
+     
+        select[0].selected = 'selected'
+     
+        const row = document.createElement('div')
+        const title = document.createElement('div')
+        title.className = 'ui-from-title'
+        const TitleSpan = document.createElement('span')
+        TitleSpan.className = "ui-form-title-text"
+        TitleSpan.textContent = input_def['label']
+
+        TitleSpan.style.display = 'inline'
+        title.append(TitleSpan)
+        row.className = 'ui-form-element section-row'
+        row.id = input_def.id
+        row.append(title)
+        row.append(select)
+        
+
+        select.addEventListener("change", () => {
+
+            var queryID = select.value
+
+            console.log(queryID)
+        });
+
+        return row
+
+    }
+
+    AddBooleanField (input_def ) {
+
+        input_def.id = this.uid()
+
+        const options =  [['True', 'True', 'true'],
+                        ['False', 'False', 'false']]
+
+        const select = document.createElement('select')
+
+        for(var i = 0; i < options.length; i++) {
+            const opt = options[i][0];
+            const el = document.createElement("option");
+            el.textContent = opt;
+            el.value = options[i][1];
+            select.appendChild(el);
+        }
+
+        select.id = `input-${input_def.id}`
+        const row = document.createElement('div')
+        const title = document.createElement('div')
+        title.className = 'ui-from-title'
+        const TitleSpan = document.createElement('span')
+        TitleSpan.className = "ui-form-title-text"
+        TitleSpan.textContent = input_def.label
+        TitleSpan.style.display = 'inline'
+        title.append(TitleSpan)
+        row.className = 'ui-form-element section-row'
+        row.id = input_def.id
+        row.append(title)
+        row.append(select)
+        
+        this.el.querySelector('.nbtools-form').append(row)
+
+        return row
+    }
+
+    AddConditoinalSection2 (input_def,parent) {
+
+        input_def.id = this.uid()
+
+        const ElementIDs = []
+
+        for (var e in input_def.cases) {
+
+            ElementIDs.push(`${input_def.id}-section-${e}`)
+        }
+
+        const Selectfiled = this.AddConditionalSelectField(input_def, ElementIDs)
+
+        parent.append(Selectfiled)
+
+        var ConditionalDiv
+
+        for (var i in input_def.cases) {
+          ConditionalDiv = document.createElement('div')
+          ConditionalDiv.className = 'ui-form-element section-row pl-2 '
+          ConditionalDiv.id = `${input_def.id}-section-${i}`
+
+          if (i == 0){
+            ConditionalDiv.style.display = 'block'
+         } else {
+            ConditionalDiv.style.display = 'none'
+         }
+
+          for (var j in input_def.cases[i].inputs) {
+
+            
+            if (input_def.cases[i].inputs[j].type !== 'conditional') {
+              input_def.cases[i].inputs[j].id = this.uid()
+
+              var SimpleRow 
+
+
+              if (input_def.cases[i].inputs[j].type == 'data') {
+                 SimpleRow = this.FileUpLoad(input_def.cases[i].inputs[j])
+
+              } else if (input_def.cases[i].inputs[j].type == 'integer') {
+                 SimpleRow = this.AddInteger(input_def.cases[i].inputs[j])
+
+              } else if (input_def.cases[i].inputs[j].type == 'float') {
+                   SimpleRow = this.AddFloat(input_def.cases[i].inputs[j])
+
+              } else if (input_def.cases[i].inputs[j].type == 'boolean') {
+                   SimpleRow = this.AddBooleanField(input_def.cases[i].inputs[j])
+
+              } else if (input_def.cases[i].inputs[j].type == 'text') {
+                  SimpleRow = this.AddText(input_def.cases[i].inputs[j])
+              }
+              else if (input_def.cases[i].inputs[j].type == 'select') {
+                   SimpleRow = this.AddSelectField(input_def.cases[i].inputs[j])
+              }
+
+              ConditionalDiv.append(SimpleRow)
+            } else {
+              
+              input_def.cases[i].inputs[j].id = this.uid()
+              this.AddConditoinalSection2(input_def.cases[i].inputs[j],ConditionalDiv)
+            }
+          }
+
+          parent.append(ConditionalDiv)
+        }
+      } 
+
+
+    //#############################################################################
     
     busy_changed() {
         const display = this.model.get('busy') ? 'block' : 'none';
@@ -104,7 +526,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             if (!this.validate())
                 return;
             // Execute the interact instance
-            //this.el.querySelector('.widget-interact > .jupyter-button').click();
+           // this.el.querySelector('.widget-interact > .jupyter-button').click();
             // Collapse the widget, if collapse=True
             console.log(this.model.get('collapse'))
             if (this.model.get('collapse'))

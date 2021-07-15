@@ -215,19 +215,16 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
         """Initialize the task widget"""
 
         self.tool = tool
-
         self.function_wrapper = self.create_function_wrapper(self.tool) 
 
         #if self.tool is None or self.function_wrapper is None:  # Set the right look and error message if task is None
         #   self.handle_error_task('Job Error.', **kwargs)
         #else:
-
-
         #self.function_wrapper = self.create_function_wrapper(self.tool) 
         #print (self.function_wrapper)        
         self.parameter_spec = self.create_param_spec(self.tool) # Create run task function
 
-        GalaxyUIBuilder.__init__(self, self.function_wrapper, parameters=self.parameter_spec,
+        GalaxyUIBuilder.__init__(self, self.function_wrapper, self.tool.wrapped['inputs'], parameters=self.parameter_spec,
                            color=self.default_color,
                            logo=self.default_logo,
                            upload_callback=self.generate_upload_callback(),

@@ -11,11 +11,11 @@
 
 }
 
-.Galaxy-form {
+.nbtools-form {
   width: 40%;
 }
 
-.Galaxy-form input:not(.fileid, .buttonid){
+.nbtools-form input:not(.fileid, .buttonid){
   width: 100%;
   padding: 12px 20px;
   margin: 8px 0;
@@ -25,14 +25,14 @@
   box-sizing: border-box;
 }
 
-.Galaxy-form {
+.nbtools-form {
   border-left: 2px solid rgb(221, 218, 196);
   border-radius: 5px;
   background-color: #f2f2f2;
   padding: 20px;
 }
 
-.Galaxy-form select{
+.nbtools-form select{
   width: 100%;
   padding: 12px 20px;
   margin: 8px 0;
@@ -52,7 +52,7 @@
   box-sizing: border-box;
 }
 
-.Galaxy-form input[type="file"] {
+.nbtools-form input[type="file"] {
   display: none;
 }
 .custom-file-upload {

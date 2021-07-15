@@ -108,10 +108,13 @@ class GalaxyUIBuilder(BaseWidget, NBTool):
     form = Instance(InteractiveForm, (None, [])).tag(sync=True, **widget_serialization)
     output = Instance(Output, ()).tag(sync=True, **widget_serialization)
     function_or_method = None
-
-    def __init__(self, function_or_method, upload_callback=None, **kwargs):
+    inputs = List(['Hello']).tag(sync=True)
+    
+    def __init__(self, function_or_method, inputs, upload_callback=None,  **kwargs):
         # Apply defaults based on function docstring/annotations
         self._apply_defaults(function_or_method)
+
+        self.inputs = inputs
 
         # Set the function and call superclass constructor
         self.function_or_method = function_or_method
@@ -130,6 +133,7 @@ class GalaxyUIBuilder(BaseWidget, NBTool):
 
         # Display the output underneath the UI Builder widget
         self.on_displayed(lambda widget: display(widget.output))
+
 
     def _apply_defaults(self, function_or_method):
         # Set the name based on the function name
@@ -243,3 +247,5 @@ class GalaxyUIBuilder(BaseWidget, NBTool):
     def id(self):
         """Return the function name regardless of custom display name"""
         return self.function_or_method.__qualname__
+
+    
