@@ -33,7 +33,7 @@ class Galaxybuild_ui:
         # Display if decorator with no arguments
         if len(args) > 0:
             self.func = args[0]                                 # Set the function
-            self.__widget__ = UIBuilder(self.func)              # Set the widget
+            self.__widget__ = GalaxyUIBuilder(self.func)              # Set the widget
             self.func.__dict__["__widget__"] = self.__widget__  # Ensure function has access to widget
             if self.__widget__.register_tool:
                 ToolManager.instance().register(self.__widget__)
@@ -122,8 +122,7 @@ class GalaxyUIBuilder(BaseWidget, NBTool):
 
         # Force the parameters setter to be called before instantiating the form
         # This is a hack necessary to prevent interact from throwing an error if parameters override is given
-        if not self.parameters: 
-            self.parameters = self.parameters
+        if not self.parameters: self.parameters = self.parameters
 
         # Create the form and output child widgets
         self.form = InteractiveForm(function_or_method, self.parameters, parent=self, upload_callback=upload_callback)

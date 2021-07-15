@@ -56,12 +56,11 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
 
     render() {
-
         super.render()
         this.activate_run_buttons();
         this.toggle_code(false);
-
     }
+    
     busy_changed() {
         const display = this.model.get('busy') ? 'block' : 'none';
         this.element.querySelector('.nbtools-busy').style.display = display;

@@ -14,7 +14,7 @@ from .jobwidget import GalaxyJobWidget
 from .sessions import session, get_session
 #from .galaxyoutput import GalaxyOutputWidget
 from .uioutput import GalaxyUIOutput
-from .uibuilder import GalaxyUIBuilder
+from .Galaxyuibuilder import GalaxyUIBuilder
 
 from .example1 import GalaxyTools
 from ._version import __version__

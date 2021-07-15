@@ -3,8 +3,8 @@ import os
 import tempfile
 from .display import display
 from .jobwidget import GalaxyJobWidget
-from nbtools import NBTool, python_safe,  EventManager
-from .uibuilder import GalaxyUIBuilder
+from nbtools import NBTool,  python_safe, EventManager
+from .Galaxyuibuilder import GalaxyUIBuilder
 from .shim import  get_kinds
 from .util import DEFAULT_COLOR, DEFAULT_LOGO
 
@@ -217,7 +217,6 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
         self.tool = tool
 
         self.function_wrapper = self.create_function_wrapper(self.tool) 
-    
 
         #if self.tool is None or self.function_wrapper is None:  # Set the right look and error message if task is None
         #   self.handle_error_task('Job Error.', **kwargs)
