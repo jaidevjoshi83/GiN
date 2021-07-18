@@ -14,7 +14,7 @@ import { element_rendered, toggle } from "./utils";
 import _ from "underscore";
 export class GalaxyUIBuilderModel extends BaseWidgetModel{
     defaults() {
-        return Object.assign(Object.assign(Object.assign({}, super.defaults()), { _model_name: GalaxyUIBuilderModel.model_name, _model_module: GalaxyUIBuilderModel.model_module, _model_module_version: GalaxyUIBuilderModel.model_module_version, _view_name: GalaxyUIBuilderModel.view_name, _view_module: GalaxyUIBuilderModel.view_module, _view_module_version: GalaxyUIBuilderModel.view_module_version, name: 'Python Function', description: '', origin: '', _parameters: [], parameter_groups: [], function_import: '', register_tool: true, collapse: true, events: {}, buttons: {}, display_header: true, display_footer: true, busy: false, run_label: 'Run', form: undefined, output: undefined, inputs:[] }));
+        return Object.assign(Object.assign(Object.assign({}, super.defaults()), { _model_name: GalaxyUIBuilderModel.model_name, _model_module: GalaxyUIBuilderModel.model_module, _model_module_version: GalaxyUIBuilderModel.model_module_version, _view_name: GalaxyUIBuilderModel.view_name, _view_module: GalaxyUIBuilderModel.view_module, _view_module_version: GalaxyUIBuilderModel.view_module_version, name: 'Python Function', description: '', origin: '', _parameters: [], parameter_groups: [], function_import: '', register_tool: true, collapse: true, events: {}, buttons: {}, display_header: true, display_footer: true, busy: false, run_label: 'Execute', form: undefined, output: undefined, inputs:[], form_output:{} }));
     }
 }
 GalaxyUIBuilderModel.model_name = 'GalaxyUIBuilderModel';
@@ -64,7 +64,9 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         const inputs = this.model.get('inputs')
 
-        console.log(inputs)
+        // console.log(inputs)
+        
+        //########################
 
         this.CreateForm()
         var self = this;
@@ -72,13 +74,14 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             self.add(input);
         });
 
-        console.log( this.model.get('inputs'), 'thats the tratlet')
-        // Hide the header or footer, if necessary
+        //########################
+
+        // // Hide the header or footer, if necessary
         this.display_header_changed();
         this.display_footer_changed();
         this.model.on(`change:display_header`, this.display_header_changed, this);
         this.model.on(`change:display_footer`, this.display_footer_changed, this);
-        // Show or hide the "busy" UI
+        // // Show or hide the "busy" UI
         this.busy_changed();
         this.model.on(`change:busy`, this.busy_changed, this);
         // Attach the Reset Parameters gear option
@@ -87,7 +90,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         this.activate_run_buttons();
         // Attach custom buttons
         this.activate_custom_buttons();
-        // Add the interactive form widget
+        //Add the interactive form widget
         // this.attach_child_widget('.nbtools-form', 'form');
         // // After the view is rendered
         // element_rendered(this.el).then(() => {
@@ -117,12 +120,58 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
   
     // }
 
+
+
     CreateForm() {
 
+        var self = this
+
         const GalaxyForm = document.createElement('form')
-        GalaxyForm.className = 'nbtools-form'
-        this.el.querySelector('div.nbtools-body').append(GalaxyForm)
+        GalaxyForm.className = 'Galaxy-form'
+        this.el.querySelector('div.nbtools-form').append(GalaxyForm)
+        const Button = document.createElement('button')
+        Button.style.display = 'none'
+        Button.type = 'submit'
+        Button.id = 'submit'
+
+        GalaxyForm.append(Button)
+
+        //#########################
+
+        const getFormData = () => {
+            const form = self.el.querySelector(".Galaxy-form");
+            return new FormData(form);
+          }
+          
+          const toJson = function(event) {
+            const formData = getFormData();
+            event.preventDefault();
+            let object = {};
+            formData.forEach((value, key) => {
+              if (!Reflect.has(object, key)) {
+                object[key] = value;
+                return;
+              }
+              if (!Array.isArray(object[key])) {
+                object[key] = [object[key]];
+              }
+              object[key].push(value);
+            });
+            let json = JSON.stringify(object);
+            console.log(json);
+
+            self.model.set('form_output', object)
+            self.model.save_changes()
+            self.touch()
+
+            console.log(self.model.get('form_output'))
+          };
+          
+          Button.addEventListener("click", toJson);
+        //#######################
+
     }
+
 
     uid () {
         top.__utils__uid__ = top.__utils__uid__ || 0;
@@ -136,25 +185,25 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
   
         switch (input_def.type) {
             case "conditional":
-                this.AddConditoinalSection2(input_def,this.el.querySelector('.nbtools-form'));
+                this.AddConditoinalSection2(input_def,this.el.querySelector('.Galaxy-form'));
                 break;
             case "data":
-                this.el.querySelector('.nbtools-form').append(this.FileUpLoad(input_def))
+                this.el.querySelector('.Galaxy-form').append(this.FileUpLoad(input_def))
                 break
             case "text":
-                this.el.querySelector('.nbtools-form').append(this.AddText(input_def))
+                this.el.querySelector('.Galaxy-form').append(this.AddText(input_def))
                 break
             case "integer":
-                this.el.querySelector('.nbtools-form').append(this.AddInteger(input_def))
+                this.el.querySelector('.Galaxy-form').append(this.AddInteger(input_def))
                 break
             case "float":
-                this.el.querySelector('.nbtools-form').append(this.AddFloat(input_def))
+                this.el.querySelector('.Galaxy-form').append(this.AddFloat(input_def))
                 break
             case "boolean":
-                this.el.querySelector('.nbtools-form').append(this.AddBooleanField(input_def))
+                this.el.querySelector('.Galaxy-form').append(this.AddBooleanField(input_def))
                 break
             case "select":
-                this.el.querySelector('.nbtools-form').append(this.AddSelectField(input_def))
+                this.el.querySelector('.Galaxy-form').append(this.AddSelectField(input_def))
                 break
         }
     }
@@ -165,6 +214,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         const input = document.createElement('input')
         input.id = `input-${input_def.id}`
+        input.name = input_def['name']
+        input.value = input_def['value']
         const row = document.createElement('div')
         const title = document.createElement('div')
         title.className = 'ui-from-title'
@@ -178,13 +229,11 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         row.append(title)
         row.append(input)
         return row
-
     }
 
     FileUpLoad (input_def) {
 
         var self = this
-
         input_def.id = this.uid()
 
         const Label = document.createElement('label')
@@ -194,6 +243,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         const Input1 = document.createElement('input')
         Input1.type = 'text'
+        Input1.name = input_def['name']
         Input1.setAttribute("list","car")
 
         const DataList = document.createElement('datalist')
@@ -240,6 +290,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         input_def.id = this.uid()
         const input = document.createElement('input')
+        input.value = input_def['value']
+        input.id = input_def.name
         input.id = input_def.id
         const row = document.createElement('div')
         const title = document.createElement('div')
@@ -255,13 +307,15 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         row.append(input)
         
         return row
-
     }
+
 
     AddFloat (input_def) {
 
         input_def.id = this.uid()
         const input = document.createElement('input')
+        input.value = input_def['value']
+        input.id = input_def.name
         input.id = `input-${input_def.id}`
         const row = document.createElement('div')
         const title = document.createElement('div')
@@ -276,7 +330,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         row.append(title)
         row.append(input)
         return row
-
     }
 
     AddConditionalSelectField (input_def, ElID ) {
@@ -285,6 +338,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         const options =  input_def['test_param']['options']
         const select = document.createElement('select')
+        select.name = input_def['test_param']['name']
+
         select.id = `select-${input_def.id}`     
      
         for(var i = 0; i < options.length; i++) {
@@ -338,7 +393,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         const options =  input_def['options']
         const select = document.createElement('select')
-        select.id = `select-${input_def.id}`     
+        select.id = `select-${input_def.id}`    
+        select.name = input_def['name']
      
         for(var i = 0; i < options.length; i++) {
               const opt = options[i][0];
@@ -383,7 +439,10 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         const options =  [['True', 'True', 'true'],
                         ['False', 'False', 'false']]
 
+
         const select = document.createElement('select')
+
+        select.name = input_def['name']
 
         for(var i = 0; i < options.length; i++) {
             const opt = options[i][0];
@@ -527,6 +586,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 return;
             // Execute the interact instance
            // this.el.querySelector('.widget-interact > .jupyter-button').click();
+           this.el.querySelector('#submit').click()
             // Collapse the widget, if collapse=True
             console.log(this.model.get('collapse'))
             if (this.model.get('collapse'))
@@ -664,6 +724,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
     _attach_callbacks() {
         // Handle widget events
         const widget_events = this.model.get('events');
+
+        console.log('events', this.model.get('events'))
         GalaxyUIBuilderView._attach_all_events(this.el, widget_events);
         // Handle parameter IDs and parameter events
         const json_parameters = this.model.get('_parameters');

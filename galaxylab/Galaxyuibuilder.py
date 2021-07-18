@@ -106,9 +106,17 @@ class GalaxyUIBuilder(BaseWidget, NBTool):
     run_label = Unicode('Run', sync=True)
     busy = Bool(False, sync=True)
     form = Instance(InteractiveForm, (None, [])).tag(sync=True, **widget_serialization)
+    print(form)
     output = Instance(Output, ()).tag(sync=True, **widget_serialization)
     function_or_method = None
     inputs = List(['Hello']).tag(sync=True)
+    form_output = Dict(sync=True)
+
+    print('##############')
+    print(form_output)
+    print('##############')
+
+
     
     def __init__(self, function_or_method, inputs, upload_callback=None,  **kwargs):
         # Apply defaults based on function docstring/annotations

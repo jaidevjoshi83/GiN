@@ -9,7 +9,6 @@ from .shim import  get_kinds
 from .util import DEFAULT_COLOR, DEFAULT_LOGO
 
 
-
 class GalaxyTaskWidget(GalaxyUIBuilder):
     """A widget for representing the status of a Galaxy job"""
     #default_color = 'rgba(10, 45, 105, 0.80)'
@@ -24,6 +23,7 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
     Hlist = None
     #job = None
 
+
     def create_function_wrapper(self, tool):
         gi = tool.gi.gi #tool.gi is oo gi, gi.gi is original gi
         """Create a function that accepts the expected input and submits a Galaxy job"""
@@ -31,7 +31,11 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
         name_map = {}  # Map of Python-safe parameter names to Galaxy parameter names
         # Function for submitting a new Galaxy job based on the task form
 
+        print('jai')
+
         def submit_job(**kwargs):
+
+            self.job = gi.tools.run_tool(history_id='3434343434', tool_id='sdfsdffsf', tool_inputs={''})
             tool_id  = tool.wrapped['id']
             inputs = kwargs
             History_ID = inputs['History_list']
@@ -50,7 +54,6 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
             #self.job = 
             display(GalaxyJobWidget(self.job, gi))
             ###########################Job run ######################### 
-    
 
         submit_job.__qualname__ = tool.wrapped['name']
         submit_job.__doc__ = tool.wrapped['description']
@@ -135,7 +138,6 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
         else: 
             param_spec['type'] = 'text'
 
-
     def create_param_spec(self, task):
         """Create the display spec for each parameter"""
         if task is None: return {}  # Dummy function for null task
@@ -193,6 +195,7 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
         def galaxy_upload_callback(values):
             gi = self.tool.gi.gi
             for k in values:
+                print(values)
                 with tempfile.NamedTemporaryFile() as f:
                     f.write(values[k]['content'])
                     f.flush()
@@ -232,8 +235,10 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
     @staticmethod
     def form_value(raw_value):
         """Give the default parameter value in format the UI Builder expects"""
-        if raw_value is not None: return raw_value
-        else: return ''
+        if raw_value is not None: 
+            return raw_value
+        else: 
+            return ''
 
 class TaskTool(NBTool):
     """Tool wrapper for the authentication widget"""
