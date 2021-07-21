@@ -11,6 +11,7 @@ import { unpack_models } from "@jupyter-widgets/base";
 //import { UIBuilderModel, UIBuilderView } from "@genepattern/nbtools";
 import { BaseWidgetModel, BaseWidgetView } from "@genepattern/nbtools";
 import { element_rendered, toggle } from "./utils";
+import { Toolbox } from "@genepattern/nbtools";
 import _ from "underscore";
 export class GalaxyUIBuilderModel extends BaseWidgetModel{
     defaults() {
@@ -31,7 +32,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         super(...arguments);
         this.dom_class = 'nbtools-uibuilder';
         this.traitlets = [...super.basics(), 'origin', '_parameters', 'function_import', 'register_tool', 'collapse',
-            'events', 'run_label', 'form', 'output'];
+            'events', 'run_label', 'form'];
         this.renderers = {
             "error": this.render_error,
             "info": this.render_info
@@ -56,6 +57,9 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
     }
 
     render() {
+
+
+        
         // super.render()
         // this.activate_run_buttons();
         // this.toggle_code(false);
@@ -101,27 +105,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         // });
     }
 
-    //#############################################################################
-
-    // initialize (inputs){
-
-    //     this.inputs = inputs
-
-    // }
-
-    // render  () {
-    //     super.render()
-    //     const inputs = this.model.get('inputs')
-    //     this.CreateForm()
-    //     var self = this;
-    //     _.each(inputs, (input) => {
-    //         self.add(input);
-    //     });
-  
-    // }
-
-
-
     CreateForm() {
 
         var self = this
@@ -133,6 +116,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         Button.style.display = 'none'
         Button.type = 'submit'
         Button.id = 'submit'
+        Button.className  = 'Galaxy-form-button'
 
         GalaxyForm.append(Button)
 
@@ -157,8 +141,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
               }
               object[key].push(value);
             });
-            let json = JSON.stringify(object);
-            console.log(json);
+            // let json = JSON.stringify(object);
+            // console.log(json);
 
             self.model.set('form_output', object)
             self.model.save_changes()
@@ -177,6 +161,13 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         top.__utils__uid__ = top.__utils__uid__ || 0;
         return `uid-${top.__utils__uid__++}`;
     }
+
+    // JobSub(){
+    //     if (!ContextManager.notebook_tracker)
+    //         return; // If no NotebookTracker, do nothing
+    //     const current = ContextManager.tool_registry.current;
+    // }
+
 
     add  ( input ) {
         
@@ -580,15 +571,32 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
      * Attach the click event to each Run button
      */
     activate_run_buttons() {
+
+        var self  = this;
         this.el.querySelectorAll('.nbtools-run').forEach((button) => button.addEventListener('click', () => {
             // Validate required parameters and return if not valid
             if (!this.validate())
                 return;
             // Execute the interact instance
-           // this.el.querySelector('.widget-interact > .jupyter-button').click();
-           this.el.querySelector('#submit').click()
+           //this.el.querySelector('.widget-interact > .jupyter-button').click();
+           const form = self.el.querySelector(".Galaxy-form");
+
+           const Input = document.createElement('input');
+           Input.style.display = 'none';
+           Input.name = '__GALAXY_JUPYTERLAB_JOBRUN__';
+           Input.value = '1';
+
+           form.append(Input);
+
+           console.log(form);
+           this.el.querySelector('#submit').click();
+
+           console.log('@@@@@@@@@@@@@@@@@@@@');
+
+           Toolbox.add_code_cell("gi.tools.run_tool(history_id=History_ID, tool_id=tool_id, tool_inputs=inputs)")
+           console.log(BaseWidgetModel);
             // Collapse the widget, if collapse=True
-            console.log(this.model.get('collapse'))
+
             if (this.model.get('collapse'))
                 this.el.querySelector('.nbtools-collapse').click();
         }));
@@ -748,6 +756,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 this.el.querySelector('.nbtools-footer').style.height = '50px';
             }
         }
+
         // Attach send to / come from menus
         this._attach_menus();
         // Attach enter key submit event
