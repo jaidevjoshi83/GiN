@@ -3,11 +3,10 @@ import '../style/galaxyoutput.css';
 import { unpack_models } from '@jupyter-widgets/base';
 import { MODULE_NAME, MODULE_VERSION } from './version';
 import  { BaseWidgetModel, BaseWidgetView } from "@genepattern/nbtools";
-// import { ContextManager } from "@genepattern/context";
+import { ContextManager } from "@genepattern/nbtools";
 import $ from "jquery";
 import _ from "underscore";
-//import { extract_file_name, extract_file_type, is_absolute_path, is_url } from '@genepattern/nbtools';
-//import { ContextManager } from "@genepattern/nbtools";
+
 
 export class GalaxyToolModel extends BaseWidgetModel {
     defaults() {
@@ -45,15 +44,58 @@ export class GalaxyToolView extends BaseWidgetView {
         _.each(inputs, (input) => {
             self.add(input);
         });
+
+        console.dir(ContextManager.tool_registry.current)
+
+        const current = ContextManager.notebook_tracker.currentWidget;
+        // const notebook = ContextManager.tool_registry.current;
+        // ContextManager.context().execute_code(notebook, "print('Hello World')")
+        console.log(current)
   
     }
 
     CreateForm() {
+        var self = this
 
         const GalaxyForm = document.createElement('form')
+
+        let btn = document.createElement("button");
+        btn.innerHTML = "Click Me";
+
+
         GalaxyForm.className = 'Galaxy-form'
         this.element.querySelector('div.nbtools-body').append(GalaxyForm)
+        this.element.querySelector('div.nbtools-body').appendChild(btn)
+
+        btn.addEventListener("click", function() {
+
+           // console.log(self.element.querySelector('.Galaxy-form'));
+            var children = self.element.querySelector('.Galaxy-form').children;
+            self.ReturnData(children)
+
+
+        }, false);
     }
+
+    ReturnData(FormEelements){
+
+        for (var i = 0; i < FormEelements.length; i++) {
+
+            if (FormEelements[i].className == 'ui-form-element section-row'){
+                var tableChild = FormEelements[i];
+                console.log(tableChild)
+            } else if (FormEelements[i].className == 'ui-form-element section-row pl-2' && FormEelements[i].style.display == 'block'){
+                var tableChild1 = FormEelements[i].children;
+                this.ReturnData(tableChild1)
+
+
+            }
+
+           }
+
+    }
+
+
 
     uid () {
         top.__utils__uid__ = top.__utils__uid__ || 0;
@@ -90,34 +132,6 @@ export class GalaxyToolView extends BaseWidgetView {
         }
     }
 
-    // AddInputRow(input_def) {
-
-    //     switch(input_def.type) {
-
-    //         case "data":
-                
-    //             this.element.querySelector('.Galaxy-form').append(this.AddInteger(input_def))
-    //             break
-    //         case "text":
-    //             this.element.querySelector('.Galaxy-form').append(this.AddText(input_def))
-    //             break
-    //         case "integer":
-    //             this.element.querySelector('.Galaxy-form').append(this.AddInteger(input_def))
-    //             break
-    //         case "float":
-    //             this.element.querySelector('.Galaxy-form').append(this.AddFloat(input_def))
-    //             break
-    //         case "boolean":
-    //             this.element.querySelector('.Galaxy-form').append(this.AddBooleanField(input_def))
-    //             break
-    //         case "select":
-    //             console.log(input_def['name'])
-    //             this.element.querySelector('.Galaxy-form').append(this.AddSelectField(input_def))
-    //             break
-
-    //     }
-
-    // }
 
     AddText (input_def) {
 
@@ -190,16 +204,10 @@ export class GalaxyToolView extends BaseWidgetView {
             self.model.save_changes();
             Input1.value = Input.files[0].name
 
-
         }, false);
         return row
 
     }
-
-    // <label class="custom-file-upload">
-    // <input type="file"/>
-    // <i class="fa fa-cloud-upload"></i> Custom Upload
-    // </label>
 
     AddInteger (input_def) {
 
@@ -381,8 +389,6 @@ export class GalaxyToolView extends BaseWidgetView {
 
     AddConditoinalSection2 (input_def,parent) {
 
-
-
         input_def.id = this.uid()
 
         const ElementIDs = []
@@ -400,7 +406,7 @@ export class GalaxyToolView extends BaseWidgetView {
 
         for (var i in input_def.cases) {
           ConditionalDiv = document.createElement('div')
-          ConditionalDiv.className = 'ui-form-element section-row pl-2 '
+          ConditionalDiv.className = 'ui-form-element section-row pl-2'
           ConditionalDiv.id = `${input_def.id}-section-${i}`
 
           if (i == 0){
