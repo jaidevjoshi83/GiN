@@ -32,7 +32,7 @@ class GalaxyTools(BaseWidget):
 
     gi = GalaxyInstance("http://localhost:8080", email="jaidev53ster@gmail.com", api_key="b6b0868d4c27b745be2bd68d04c1c213", verify=True)
     a = bioblend.galaxy.objects.client.ObjToolClient(gi)
-    tool = a.get(id_='toolshed.g2.bx.psu.edu/repos/jay/pdaug_ml_models/pdaug_ml_models/0.1.0',  io_details=True)
+    tool = a.get(id_='toolshed.g2.bx.psu.edu/repos/jay/pdaug_basic_plots/pdaug_basic_plots/0.1.0',  io_details=True)
 
     inputs = tool.wrapped['inputs']
     inputs = List(inputs).tag(sync=True)
