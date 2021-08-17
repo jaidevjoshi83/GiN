@@ -6,7 +6,6 @@ from ._frontend import module_name, module_version
 #from .basewidget import BaseWidget
 
 
-
 class ExampleUIOutput(UIOutput):
     """
     Widget used to render Python output in a UI

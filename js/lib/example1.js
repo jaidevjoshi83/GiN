@@ -1,16 +1,17 @@
 import '../style/galaxyoutput.css';
-
 import { unpack_models } from '@jupyter-widgets/base';
 import { MODULE_NAME, MODULE_VERSION } from './version';
 import  { BaseWidgetModel, BaseWidgetView } from "@genepattern/nbtools";
-import { ContextManager } from "@genepattern/nbtools";
 import $ from "jquery";
 import _ from "underscore";
+import { ContextManager } from '@genepattern/nbtools';
+import { NotebookPanel } from "@jupyterlab/notebook";
+
 
 
 export class GalaxyToolModel extends BaseWidgetModel {
     defaults() {
-        return Object.assign(Object.assign({}, super.defaults()), { _model_name: GalaxyToolModel.model_name, _model_module: GalaxyToolModel.model_module, _model_module_version: GalaxyToolModel.model_module_version, _view_name: GalaxyToolModel.view_name, _view_module: GalaxyToolModel.view_module, _view_module_version: GalaxyToolModel.view_module_version, name: 'Python Results', description: '', status: '', files: [], text: '', visualization: '', appendix: undefined, extra_file_menu_items: {}, inputs:{}, File:'' });
+        return Object.assign(Object.assign({}, super.defaults()), { _model_name: GalaxyToolModel.model_name, _model_module: GalaxyToolModel.model_module, _model_module_version: GalaxyToolModel.model_module_version, _view_name: GalaxyToolModel.view_name, _view_module: GalaxyToolModel.view_module, _view_module_version: GalaxyToolModel.view_module_version, name: 'Python Results', description: '', status: '', files: [], text: '', visualization: '', appendix: undefined, extra_file_menu_items: {}, inputs:{}, File:'', GInstace: undefined });
     }
 }
 GalaxyToolModel.model_name = 'TestUIOutputModel';
@@ -26,14 +27,24 @@ GalaxyToolModel.serializers = Object.assign(Object.assign({}, BaseWidgetModel.se
 export class GalaxyToolView extends BaseWidgetView {
     constructor() {
         super(...arguments);   
-        this.elements = {};      
+        this.elements = {}; 
+        
+        ContextManager.context().notebook_focus((current_widget) => {
+            // Current notebook hasn't changed, no need to do anything, return
+            if (this.current === current_widget)
+                return;
+            // Otherwise, update the current notebook reference
+            this.current = current_widget;
+            // If the current selected widget isn't a notebook, no comm is needed
+            if (!(this.current instanceof NotebookPanel) && ContextManager.is_lab())
+                return;
+            // Initialize the comm
+        });
+          
     }
 
-
     initialize (inputs){
-
         this.inputs = inputs
-
     }
 
     render  () {
@@ -45,13 +56,13 @@ export class GalaxyToolView extends BaseWidgetView {
             self.add(input);
         });
 
-        console.dir(ContextManager.tool_registry.current)
-
-        const current = ContextManager.notebook_tracker.currentWidget;
-        // const notebook = ContextManager.tool_registry.current;
-        // ContextManager.context().execute_code(notebook, "print('Hello World')")
-        console.log(current)
-  
+        //  let notebook 
+        // //  ContextManager.context().execute_code(notebook, 'import requests')
+        //  while (notebook !== null ) {
+        // console.log(ContextManager)
+ 
+        console.trace("Trace")
+        //   }
     }
 
     CreateForm() {
@@ -62,7 +73,6 @@ export class GalaxyToolView extends BaseWidgetView {
         let btn = document.createElement("button");
         btn.innerHTML = "Click Me";
 
-
         GalaxyForm.className = 'Galaxy-form'
         this.element.querySelector('div.nbtools-body').append(GalaxyForm)
         this.element.querySelector('div.nbtools-body').appendChild(btn)
@@ -71,8 +81,18 @@ export class GalaxyToolView extends BaseWidgetView {
 
            // console.log(self.element.querySelector('.Galaxy-form'));
             var children = self.element.querySelector('.Galaxy-form').children;
-            self.ReturnData(children)
+            const notebook = ContextManager.tool_registry.current
 
+            console.log('OK1')
+
+            console.log(this.model.get('GalInstance'))
+
+            //console.log(JSON.parse(this.model.get('GalInstance')))
+            
+            //console.log(notebook)
+            var children = self.element.querySelector('.Galaxy-form').children;
+            self.ReturnData(children) 
+            console.log('OK3')
 
         }, false);
     }
@@ -83,19 +103,21 @@ export class GalaxyToolView extends BaseWidgetView {
 
             if (FormEelements[i].className == 'ui-form-element section-row'){
                 var tableChild = FormEelements[i];
+
+                if (tableChild.querySelector('.Galaxy-form')) {
+
+                }
+
+
                 console.log(tableChild)
+
             } else if (FormEelements[i].className == 'ui-form-element section-row pl-2' && FormEelements[i].style.display == 'block'){
                 var tableChild1 = FormEelements[i].children;
                 this.ReturnData(tableChild1)
-
-
             }
 
            }
-
     }
-
-
 
     uid () {
         top.__utils__uid__ = top.__utils__uid__ || 0;
@@ -139,6 +161,7 @@ export class GalaxyToolView extends BaseWidgetView {
 
         const input = document.createElement('input')
         input.id = `input-${input_def.id}`
+        input.className = 'InputData'
         const row = document.createElement('div')
         const title = document.createElement('div')
         title.className = 'ui-from-title'
@@ -165,13 +188,15 @@ export class GalaxyToolView extends BaseWidgetView {
         Label.className = 'custom_file_upload'
         const Input = document.createElement('input')
         Input.type = 'file'
+        Input.className = 'InputData' 
 
         const Input1 = document.createElement('input')
         Input1.type = 'text'
-        Input1.setAttribute("list","car")
+        Input1.setAttribute("list","history-data-list")
 
         const DataList = document.createElement('datalist')
-        DataList.id = 'car'
+        DataList.id = `History-data-${input_def.id}`
+        DataList.className = 'InputData' 
 
         const Option1 = document.createElement('option')
         Option1.textContent = 'Volvo'
@@ -195,8 +220,6 @@ export class GalaxyToolView extends BaseWidgetView {
         row.append(Label)
 
         Input.addEventListener("change", function() {
-
-            ContextManager.context().execute_code(this.current, 'from nbtools import import_defaults\nimport_defaults()');
             
             console.log(Input.files[0].name);
 
@@ -214,6 +237,7 @@ export class GalaxyToolView extends BaseWidgetView {
         input_def.id = this.uid()
         const input = document.createElement('input')
         input.id = input_def.id
+        input.className = 'InputData'
         const row = document.createElement('div')
         const title = document.createElement('div')
         title.className = 'ui-from-title'
@@ -236,6 +260,7 @@ export class GalaxyToolView extends BaseWidgetView {
         input_def.id = this.uid()
         const input = document.createElement('input')
         input.id = `input-${input_def.id}`
+        input.className = 'InputData'
         const row = document.createElement('div')
         const title = document.createElement('div')
         title.className = 'ui-from-title'
@@ -248,7 +273,6 @@ export class GalaxyToolView extends BaseWidgetView {
         row.id = input_def.id
         row.append(title)
         row.append(input)
-        
 
         return row
 
@@ -260,7 +284,8 @@ export class GalaxyToolView extends BaseWidgetView {
 
         const options =  input_def['test_param']['options']
         const select = document.createElement('select')
-        select.id = `select-${input_def.id}`     
+        select.id = `select-${input_def.id}`   
+        select.className = 'InputData'  
      
         for(var i = 0; i < options.length; i++) {
               const opt = options[i][0];
@@ -313,7 +338,8 @@ export class GalaxyToolView extends BaseWidgetView {
 
         const options =  input_def['options']
         const select = document.createElement('select')
-        select.id = `select-${input_def.id}`     
+        select.id = `select-${input_def.id}`   
+        select.className = 'InputData'
      
         for(var i = 0; i < options.length; i++) {
               const opt = options[i][0];
@@ -369,6 +395,7 @@ export class GalaxyToolView extends BaseWidgetView {
         }
 
         select.id = `input-${input_def.id}`
+        select.className = 'InputData'
         const row = document.createElement('div')
         const title = document.createElement('div')
         title.className = 'ui-from-title'

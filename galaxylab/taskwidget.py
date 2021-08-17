@@ -8,6 +8,13 @@ from .Galaxyuibuilder import GalaxyUIBuilder
 from .shim import  get_kinds
 from .util import DEFAULT_COLOR, DEFAULT_LOGO
 
+import bioblend
+from bioblend.galaxy.objects import *
+import json5
+
+import logging
+import pickle
+
 
 class GalaxyTaskWidget(GalaxyUIBuilder):
     """A widget for representing the status of a Galaxy job"""
@@ -64,7 +71,7 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
             else:
                 pass
         
-        ############# Generating tool wrapper for history data####################
+        ############# Generating tool wrapper for history data ####################
         ds = gi.datasets.get_datasets()
         options = []
 
@@ -85,6 +92,7 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
         
         for H in Hs:
             Hoptions.append(["%s (%s)" % (H['name'],H['id']),H['id']])
+            
         self.Hlist = [{'name':'History_list', 'value':'', 'type':'history_list', 'optional':False, 'label':'History list', 'options':Hoptions}]
 
         ##############################################################################
@@ -97,11 +105,29 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
 
         submit_job.__signature__ = inspect.Signature(params)
 
-        print('############')
-        print (submit_job)
-        print('############')
-
         return submit_job
+
+        #####################
+
+    def submit_job(GInstace, Tool_inputs):
+
+        gi = GalaxyInstance(GInstace['URL'], email=GInstace['email_ID'], api_key=GInstace['API_key'], verify=True)
+        tool_inputs  = json5.loads(Tool_inputs)
+
+        for a in tool_inputs.keys():
+            if 'Input Data ID:' in str(tool_inputs[a]):
+                data_id = tool_inputs[a].split(' ')[3]
+                data_src = gi.gi.datasets.gi.datasets.show_dataset(dataset_id=data_id)['hda_ldda']
+                # data_src = gi.datasets.show_dataset(dataset_id=data_id)['hda_ldda']
+                tool_inputs[a] = {'src':data_src,'id':data_id}
+
+        job = gi.tools.gi.tools.run_tool(history_id='f597429621d6eb2b', tool_id=GInstace['tool_ID'], tool_inputs=tool_inputs)
+
+        print("JOB STATUS")
+        print(tool_inputs)
+
+        display(GalaxyJobWidget(job, gi.gi))
+    
     
     def add_type_spec(self, task_param, param_spec): 
         
@@ -213,12 +239,35 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
         self.error = error_message
 
 
+    def ReturnHistoryData(self , tool):
+
+        gi = tool.gi.gi
+        HData = []
+
+        for i in gi.datasets.get_datasets():
+            data = []
+            if i['deleted'] != True: 
+                data.append(i['name']+"(History ID: "+str(i['history_id'])+")")
+                data.append('Input Data ID: '+i['id'])
+                HData.append(data)
+
+        return HData
+
+
     def __init__(self, tool=None, **kwargs):
 
         """Initialize the task widget"""
 
         self.tool = tool
         self.function_wrapper = self.create_function_wrapper(self.tool) 
+
+
+        self.GalInstace = { 
+                            "API_key":  self.tool.gi.gi.key,
+                            "email_ID": self.tool.gi.gi.users.get_current_user()['email'],
+                            "URL":      self.tool.gi.gi.base_url,
+                            "tool_ID": self.tool.wrapped['id'],
+                         }
 
         #if self.tool is None or self.function_wrapper is None:  # Set the right look and error message if task is None
         #   self.handle_error_task('Job Error.', **kwargs)
@@ -227,7 +276,10 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
         #print (self.function_wrapper)        
         self.parameter_spec = self.create_param_spec(self.tool) # Create run task function
 
-        GalaxyUIBuilder.__init__(self, self.function_wrapper, self.tool.wrapped['inputs'], parameters=self.parameter_spec,
+        self.HistoryData = self.ReturnHistoryData(tool)
+
+
+        GalaxyUIBuilder.__init__(self, self.function_wrapper, self.tool.wrapped['inputs'], self.HistoryData, self.GalInstace, parameters=self.parameter_spec,
                            color=self.default_color,
                            logo=self.default_logo,
                            upload_callback=self.generate_upload_callback(),

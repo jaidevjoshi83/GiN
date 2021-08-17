@@ -1,9 +1,10 @@
 import inspect
+import pickle
 import functools
 import warnings
 
 from IPython.core.display import display
-from traitlets import Unicode, List, Bool, Dict, Instance
+from traitlets import Unicode, List, Bool, Dict, Instance, Bytes
 from ipywidgets import widget_serialization, Output
 from ._frontend import module_name, module_version
 from nbtools.form import InteractiveForm
@@ -105,31 +106,24 @@ class GalaxyUIBuilder(BaseWidget, NBTool):
     display_footer = Bool(True, sync=True)
     run_label = Unicode('Run', sync=True)
     busy = Bool(False, sync=True)
-    form = Instance(InteractiveForm, (None, [])).tag(sync=True, **widget_serialization)
-    print(form)
+    GalInstace = Dict(sync=True)
+    # GalInstace = Instance('bioblend.galaxy.objects.galaxy_instance.GalaxyInstance').tag(sync=True)
 
     function_or_method = None
     inputs = List(['Hello']).tag(sync=True)
     form_output = Dict().tag(sync=True)
+    History_Data = List(['Hello']).tag(sync=True)
 
 
-    print('##############')
-    print(form_output)
-    print('##############')
-
-
-
-    def __init__(self, function_or_method, inputs, upload_callback=None,  **kwargs):
+    def __init__(self, function_or_method, inputs, History_Data, GalInstace, upload_callback=None,  **kwargs):
         # Apply defaults based on function docstring/annotations
         self._apply_defaults(function_or_method)
 
         self.inputs = inputs
 
-        # self.form_output = form_output
+        self.GalInstace =  GalInstace
 
-        # f = open('/Users/joshij/Desktop/genepattern/log1.txt', 'w')
-
-        # f.write(self.form_output[list(self.form_output.keys())[1]])
+        self.History_Data = History_Data
 
         # Set the function and call superclass constructor
         self.function_or_method = function_or_method
@@ -144,11 +138,11 @@ class GalaxyUIBuilder(BaseWidget, NBTool):
             self.parameters = self.parameters
 
         # Create the form and output child widgets
-        self.form = InteractiveForm(function_or_method, self.parameters, parent=self, upload_callback=upload_callback)
-        self.output = self.form.out
+        # self.form = InteractiveForm(function_or_method, self.parameters, parent=self, upload_callback=upload_callback)
+        # self.output = self.form.out
 
         # # # Display the output underneath the UI Builder widget
-        self.on_displayed(lambda widget: display(widget.output))
+        # self.on_displayed(lambda widget: display(widget.output))
 
 
     def _apply_defaults(self, function_or_method):
