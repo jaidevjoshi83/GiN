@@ -158,7 +158,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
     }
 
-    ReturnData(FormEelements){
+    ReturnData(FormEelements, MyVar){
 
         var InputPerameters = {}
 
@@ -169,11 +169,33 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 //console.log(tableChild)
                 InputPerameters[tableChild.querySelector('.InputData').name] = tableChild.querySelector('.InputData').value
 
-            } else if (FormEelements[i].className == 'ui-form-element section-row pl-2' && FormEelements[i].style.display == 'block'){
-                var tableChild1 = FormEelements[i].children;
+                if (tableChild.querySelector('.InputData').name.includes("|")) {
 
-                Object.assign(InputPerameters, this.ReturnData(tableChild1))
+                } else{
+                    console.log(tableChild.querySelector('.InputData').name, tableChild.querySelector('.InputData').value)
+                    
+                }
                 
+
+            } else if (FormEelements[i].className == 'ui-form-element section-row pl-2' && FormEelements[i].style.display == 'block'){
+
+                if (typeof(MyVar) == "undefined"){
+                    var FullVar = tableChild.querySelector('.InputData').name
+                } else{
+
+                    var FullVar = MyVar+"|"+tableChild.querySelector('.InputData').name
+                }
+                
+                var tableChild1 = FormEelements[i].children;
+                console.log(FullVar)
+                var DataOut = [tableChild.querySelector('.InputData').name , this.ReturnData(tableChild1, FullVar)]
+
+
+                // console.log("this.ReturnData(tableChild1)")
+                // console.log(this.ReturnData(tableChild1))
+                // console.log("this.ReturnData(tableChild1)")
+
+                Object.assign(InputPerameters, DataOut[1])
             }
 
            }
@@ -251,7 +273,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         const Input = document.createElement('input')
         Input.type = 'file'
         
-
         const Input1 = document.createElement('input')
         Input1.type = 'text'
         Input1.className = 'InputData'
@@ -266,10 +287,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         for(var i = 0; i < this.model.get('History_Data').length; i++) {
             const opt = options[i][0];
-            console.log(opt)
             const el = document.createElement("option");
             el.textContent = opt;
-            console.log(options[i][1])
             el.value = options[i][1];
             DataList.appendChild(el);
       }
@@ -354,7 +373,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         const options =  input_def['test_param']['options']
         const select = document.createElement('select')
-        select.name = input_def['test_param']['name']
+        select.name = input_def['name']+"|"+input_def['test_param']['name']
 
         select.id = `select-${input_def.id}`    
         select.className = 'InputData' 
@@ -387,9 +406,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         select.addEventListener("change", () => {
 
             var queryID = select.value
-
-            console.log(queryID)
-            console.log(ElID)
 
             for (var i in ElID) {
                 if (options[i][1] == queryID ) {
@@ -618,11 +634,10 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
            var children = self.element.querySelector('.Galaxy-form').children;
            //console.log(self.ReturnData(children))
 
-
            var Inputs = self.ReturnData(children)
 
-           console.log(Inputs)
-           console.log(this.model.get('GalInstace'))
+        //    console.log(Inputs)
+        //    console.log(this.model.get('GalInstace'))
 
            notebook.context.sessionContext.session.kernel.requestExecute({code: `from galaxylab import GalaxyTaskWidget\nGalaxyTaskWidget.submit_job(${JSON.stringify(this.model.get('GalInstace'))}, ${JSON.stringify(Inputs)})`})
 
