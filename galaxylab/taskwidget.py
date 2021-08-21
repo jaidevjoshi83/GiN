@@ -39,6 +39,8 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
         # Function for submitting a new Galaxy job based on the task form
 
         def submit_job(**kwargs):
+
+            print('ok')
             tool_id  = tool.wrapped['id']
             inputs = kwargs
             History_ID = inputs['History_list']
@@ -56,7 +58,7 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
             ###########################Job run######################### 
             #self.job = 
             display(GalaxyJobWidget(self.job, gi))
-            ###########################Job run ######################### 
+            ##########################Job run ######################### 
 
         submit_job.__qualname__ = tool.wrapped['name']
         submit_job.__doc__ = tool.wrapped['description']
@@ -168,38 +170,38 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
         """Create the display spec for each parameter"""
         if task is None: return {}  # Dummy function for null task
         spec = {}
-        for p in task.wrapped['inputs']+self.hdata+self.Hlist:
-            safe_name = python_safe(p['name'])
-            spec[safe_name] = {}
-            spec[safe_name]['default'] = p['name']
-            if p['type'] == 'data':
-                spec[safe_name]['default'] = 'Input File'
+        # for p in task.wrapped['inputs']+self.hdata+self.Hlist:
+        #     safe_name = python_safe(p['name'])
+        #     spec[safe_name] = {}
+        #     spec[safe_name]['default'] = p['name']
+        #     if p['type'] == 'data':
+        #         spec[safe_name]['default'] = 'Input File'
                 
-            if 'test_param' in p.keys():
-                if p['test_param']['value'] == None:
-                    spec[safe_name]['default'] = 'Input File'
-                else: 
-                    spec[safe_name]['default'] = GalaxyTaskWidget.form_value(p['test_param']['value'])
-            else:
-                if p['value'] == None:
-                    spec[safe_name]['default'] = 'Input File'
-                else: 
-                    spec[safe_name]['default'] = GalaxyTaskWidget.form_value(p['value'])
+        #     if 'test_param' in p.keys():
+        #         if p['test_param']['value'] == None:
+        #             spec[safe_name]['default'] = 'Input File'
+        #         else: 
+        #             spec[safe_name]['default'] = GalaxyTaskWidget.form_value(p['test_param']['value'])
+        #     else:
+        #         if p['value'] == None:
+        #             spec[safe_name]['default'] = 'Input File'
+        #         else: 
+        #             spec[safe_name]['default'] = GalaxyTaskWidget.form_value(p['value'])
                        
-            if p['type'] == 'history_list':
-                 spec[safe_name]['default'] == "Select History"
+        #     if p['type'] == 'history_list':
+        #          spec[safe_name]['default'] == "Select History"
                     
-            if 'test_param' in p.keys():
-                spec[safe_name]['description'] = GalaxyTaskWidget.form_value(p['test_param']['label'])
-            else:
-                spec[safe_name]['description'] = GalaxyTaskWidget.form_value(p['label'])
+        #     if 'test_param' in p.keys():
+        #         spec[safe_name]['description'] = GalaxyTaskWidget.form_value(p['test_param']['label'])
+        #     else:
+        #         spec[safe_name]['description'] = GalaxyTaskWidget.form_value(p['label'])
                 
-            if 'test_param' in p.keys():                                                                                                                    
-                spec[safe_name]['optional'] = p['test_param']['optional']
-            else:
-                spec[safe_name]['optional'] = p['optional']
-            spec[safe_name]['kinds'] = []
-            self.add_type_spec(p, spec[safe_name])
+        #     if 'test_param' in p.keys():                                                                                                                    
+        #         spec[safe_name]['optional'] = p['test_param']['optional']
+        #     else:
+        #         spec[safe_name]['optional'] = p['optional']
+        #     spec[safe_name]['kinds'] = []
+        #     self.add_type_spec(p, spec[safe_name])
         return spec
 
     @staticmethod
@@ -260,6 +262,7 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
 
         self.tool = tool
         self.function_wrapper = self.create_function_wrapper(self.tool) 
+        # self.function_wrapper = None
 
 
         self.GalInstace = { 
@@ -272,9 +275,12 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
         #if self.tool is None or self.function_wrapper is None:  # Set the right look and error message if task is None
         #   self.handle_error_task('Job Error.', **kwargs)
         #else:
-        #self.function_wrapper = self.create_function_wrapper(self.tool) 
-        #print (self.function_wrapper)        
+        # self.function_wrapper = self.create_function_wrapper(self.tool) 
+        #print (self.function_wrapper)   
+
+   
         self.parameter_spec = self.create_param_spec(self.tool) # Create run task function
+        # self.parameter_spec = None
 
         self.HistoryData = self.ReturnHistoryData(tool)
 

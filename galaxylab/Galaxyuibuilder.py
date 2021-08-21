@@ -142,7 +142,7 @@ class GalaxyUIBuilder(BaseWidget, NBTool):
         # self.output = self.form.out
 
         # # # Display the output underneath the UI Builder widget
-        # self.on_displayed(lambda widget: display(widget.output))
+        # self.on_displayed(lambda widget: display(widget))
 
 
     def _apply_defaults(self, function_or_method):

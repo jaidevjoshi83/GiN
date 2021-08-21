@@ -32,6 +32,22 @@
     cursor: pointer;
 }
 
+.RepeatButton {
+
+    z-index: 1;
+    background-color: var(--jp-layout-color2);
+    border: 1px solid var(--jp-border-color1);
+    padding: 6px 12px;
+    font-size: 0.9em;
+    cursor: pointer;
+}
+
+.ui-repeat .section-row {
+
+    border-radius: 20px;
+
+}
+
 .nbtools-buttons {
     position: absolute;
     z-index: 1;

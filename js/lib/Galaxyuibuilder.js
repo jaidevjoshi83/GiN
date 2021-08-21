@@ -14,8 +14,9 @@ import { element_rendered, toggle } from "./utils";
 import { ContextManager } from '@genepattern/nbtools';
 
 
-
 import _ from "underscore";
+
+
 export class GalaxyUIBuilderModel extends BaseWidgetModel{
     defaults() {
         return Object.assign(Object.assign(Object.assign({}, super.defaults()), { _model_name: GalaxyUIBuilderModel.model_name, _model_module: GalaxyUIBuilderModel.model_module, _model_module_version: GalaxyUIBuilderModel.model_module_version, _view_name: GalaxyUIBuilderModel.view_name, _view_module: GalaxyUIBuilderModel.view_module, _view_module_version: GalaxyUIBuilderModel.view_module_version, name: 'Python Function', description: '', origin: '', _parameters: [], parameter_groups: [], function_import: '', register_tool: true, collapse: true, events: {}, buttons: {}, display_header: true, display_footer: true, busy: false, run_label: 'Execute', GalInstace: {}, output: undefined, inputs:[], form_output:{}, History_Data:[] }));
@@ -172,11 +173,17 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 var tableChild = FormEelements[i];
                 //console.log(tableChild)
                 InputPerameters[tableChild.querySelector('.InputData').name] = tableChild.querySelector('.InputData').value
-                
-
+            
             }  else if (FormEelements[i].className == 'ui-form-element section-row conditional'){
                 var tableChild = FormEelements[i];
                 //console.log(tableChild)
+                InputPerameters[tableChild.querySelector('.InputData').name] = tableChild.querySelector('.InputData').value
+            }
+
+            else if  (FormEelements[i].className == "ui-repeat section-row") {
+
+                var tableChild = FormEelements[i];
+
                 InputPerameters[tableChild.querySelector('.InputData').name] = tableChild.querySelector('.InputData').value
 
             }
@@ -227,6 +234,14 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             case "select":
                 this.AddSelectField(input_def, FormParent, NamePrefix)
                 break
+            case "repeat":
+                console.log(input_def.type)
+                this.AddRepeat(input_def, FormParent, NamePrefix) 
+                break
+            case "section":
+                this.AddSection(input_def, FormParent, NamePrefix) 
+                break
+
         }
     }
 
@@ -254,6 +269,87 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         FormParent.append(row)
         return row
     }
+
+    AddSection(input_def, FormParent, NamePrefix) {
+        input_def.id = this.uid()
+
+        console.log(input_def)
+
+        const input = document.createElement('input')
+        input.id = `input-${input_def.id}`
+        input.name = NamePrefix+input_def['name']
+        input.value = input_def['value']
+        input.className = 'InputData'
+        const row = document.createElement('div')
+        const title = document.createElement('div')
+        title.className = 'ui-from-title'
+        const TitleSpan = document.createElement('span')
+        TitleSpan.className = "ui-form-title-text"
+        TitleSpan.textContent = input_def.label
+        TitleSpan.style.display = 'inline'
+        title.append(TitleSpan)
+        row.className = 'ui-form-element section-row'
+        row.id = input_def.id
+        row.append(title)
+        row.append(input)
+        FormParent.append(row)
+
+        for (var j in input_def['inputs']){
+            console.log(input_def['inputs'][j]['type'])
+            // this.add(input_def['inputs'][j], row,  input_def['name'])
+            }
+        return row
+    }
+
+    AddRepeat(input_def, FormParent, NamePrefix) {
+
+        console.log(input_def)
+
+        var self = this
+
+        input_def.id = this.uid()
+
+        var Button = document.createElement('button')
+        Button.innerText = 'Add Repeat Block'
+        Button.className = 'RepeatButton'
+
+        const row = document.createElement('div')
+        const title = document.createElement('div')
+        title.className = 'ui-from-title'
+        const TitleSpan = document.createElement('span')
+        TitleSpan.className = "ui-form-title-text"
+        TitleSpan.textContent = input_def['title']
+        TitleSpan.style.display = 'inline'
+        title.append(TitleSpan)
+        row.className = 'ui-repeat section-row'
+        row.id = input_def.id
+        row.append(title)
+        // row.append(input)
+
+        var SuffixName = input_def['name']
+
+       for (var j in input_def['inputs']){
+
+
+        console.log(NamePrefix+SuffixName+`_${j}`)
+
+
+           this.add(input_def['inputs'][j], row, NamePrefix+SuffixName+`_${j}|`)
+        }
+
+        FormParent.append(row)
+
+        FormParent.append(Button)
+
+        Button.addEventListener("click", function(e){ 
+
+            e.preventDefault(); self.AddRepeat(input_def, FormParent, NamePrefix) 
+
+        });
+
+        return row
+    }
+
 
     FileUpLoad (input_def, FormParent, NamePrefix) {
 
@@ -410,9 +506,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 }
             }
         });
-
         return row
-
     }
 
     AddSelectField (input_def, FormParent, NamePrefix) {
@@ -453,8 +547,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         select.addEventListener("change", () => {
 
             var queryID = select.value
-
-            console.log(queryID)
         });
 
         FormParent.append(row)
@@ -540,6 +632,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         for (var j in input_def.cases[i].inputs) {
 
             this.add(input_def.cases[i].inputs[j], ConditionalDiv, NewNamePrefix)
+
+            console.log(NewNamePrefix)
             
             // if (input_def.cases[i].inputs[j].type !== 'conditional') {
             //   input_def.cases[i].inputs[j].id = this.uid()
@@ -572,12 +666,9 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             //   this.AddConditoinalSection2(input_def.cases[i].inputs[j],ConditionalDiv)
         //     }
         }
-
           parent.append(ConditionalDiv)
         }
-      
     }
-
     //#############################################################################
     
     busy_changed() {
