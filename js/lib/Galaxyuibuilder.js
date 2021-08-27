@@ -183,7 +183,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             else if  (FormEelements[i].className == "ui-repeat section-row") {
 
                 var tableChild = FormEelements[i];
-
                 InputPerameters[tableChild.querySelector('.InputData').name] = tableChild.querySelector('.InputData').value
 
             }
@@ -235,7 +234,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 this.AddSelectField(input_def, FormParent, NamePrefix)
                 break
             case "repeat":
-                console.log(input_def.type)
                 this.AddRepeat(input_def, FormParent, NamePrefix) 
                 break
             case "section":
@@ -270,40 +268,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         return row
     }
 
-    AddSection(input_def, FormParent, NamePrefix) {
-        input_def.id = this.uid()
-
-        console.log(input_def)
-
-        const input = document.createElement('input')
-        input.id = `input-${input_def.id}`
-        input.name = NamePrefix+input_def['name']
-        input.value = input_def['value']
-        input.className = 'InputData'
-        const row = document.createElement('div')
-        const title = document.createElement('div')
-        title.className = 'ui-from-title'
-        const TitleSpan = document.createElement('span')
-        TitleSpan.className = "ui-form-title-text"
-        TitleSpan.textContent = input_def.label
-        TitleSpan.style.display = 'inline'
-        title.append(TitleSpan)
-        row.className = 'ui-form-element section-row'
-        row.id = input_def.id
-        row.append(title)
-        row.append(input)
-        FormParent.append(row)
-
-        for (var j in input_def['inputs']){
-            console.log(input_def['inputs'][j]['type'])
-            // this.add(input_def['inputs'][j], row,  input_def['name'])
-            }
-        return row
-    }
-
     AddRepeat(input_def, FormParent, NamePrefix) {
-
-        console.log(input_def)
 
         var self = this
 
@@ -329,10 +294,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         var SuffixName = input_def['name']
 
        for (var j in input_def['inputs']){
-
-
-        console.log(NamePrefix+SuffixName+`_${j}`)
-
 
            this.add(input_def['inputs'][j], row, NamePrefix+SuffixName+`_${j}|`)
         }
@@ -511,6 +472,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
     AddSelectField (input_def, FormParent, NamePrefix) {
 
+        input_def.id = this.uid()
+
         var self = this
 
         const options =  input_def['options']
@@ -632,8 +595,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         for (var j in input_def.cases[i].inputs) {
 
             this.add(input_def.cases[i].inputs[j], ConditionalDiv, NewNamePrefix)
-
-            console.log(NewNamePrefix)
             
             // if (input_def.cases[i].inputs[j].type !== 'conditional') {
             //   input_def.cases[i].inputs[j].id = this.uid()
@@ -664,11 +625,64 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
               
             input_def.cases[i].inputs[j].id = this.uid()
             //   this.AddConditoinalSection2(input_def.cases[i].inputs[j],ConditionalDiv)
-        //     }
-        }
+            //     }
+          }
           parent.append(ConditionalDiv)
         }
     }
+    //#############################################################################
+    AddSection (input_def, parent, NamePrefix) {
+
+        var self = this
+        var NewNamePrefix = NamePrefix+input_def['name']+"|"
+        input_def.id = this.uid()
+
+        const UpperDiv = document.createElement('div')
+        UpperDiv.className = `UPD`
+
+        const Button = document.createElement('button')
+        Button.className = 'collapsible'
+        Button.innerText = input_def['title']
+
+        var ConditionalDiv  = document.createElement('div')
+        // ConditionalDiv.style.display = 'none'
+
+        UpperDiv.appendChild(Button)
+
+        ConditionalDiv.className = `ui-form-element section-row sections`
+        ConditionalDiv.style.display = 'none';
+
+        ConditionalDiv.id = `${input_def.id}-sections`
+
+        UpperDiv.append(ConditionalDiv)
+
+        for (var j in input_def['inputs']){
+            // console.log(NamePrefix+SuffixName+`_${j}`)
+            // this.add(input_def['inputs'][j], row, NamePrefix)
+            this.add(input_def['inputs'][j] ,ConditionalDiv , NewNamePrefix)
+        }
+
+        parent.append(UpperDiv)
+
+        Button.addEventListener("click", function(e) {
+            e.preventDefault();
+
+
+            let nextSibling = Button.nextElementSibling;   
+            // var Div = self.el.querySelector(`${input_def.id}-sections`)
+
+            // var Div = document.getElementById(`${input_def.id}-sections`)
+            console.log(nextSibling.id)
+
+            if (nextSibling.style.display == 'none'){
+                nextSibling.style.display = 'block'
+            } else {
+                nextSibling.style.display = 'none'
+            }
+        });
+
+    }
+    
     //#############################################################################
     
     busy_changed() {
