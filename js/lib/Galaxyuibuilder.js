@@ -127,40 +127,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         GalaxyForm.append(Button)
 
-        //#########################
-
-        const getFormData = () => {
-            const form = self.el.querySelector(".Galaxy-form");
-            return new FormData(form);
-          }
-          
-          const toJson = function(event) {
-            const formData = getFormData();
-            event.preventDefault();
-            let object = {};
-            formData.forEach((value, key) => {
-              if (!Reflect.has(object, key)) {
-                object[key] = value;
-                return;
-              }
-              if (!Array.isArray(object[key])) {
-                object[key] = [object[key]];
-              }
-              object[key].push(value);
-            });
-            // let json = JSON.stringify(object);
-            // console.log(json);
-
-            self.model.set('form_output', object)
-            self.model.save_changes()
-            self.touch()
-
-            //console.log(self.model.get('form_output'))
-          };
-          
-          Button.addEventListener("click", toJson);
-        //#######################
-
     }
     
     ReturnData(FormEelements){
@@ -171,25 +137,28 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
             if (FormEelements[i].className == 'ui-form-element section-row'){
                 var tableChild = FormEelements[i];
-                //console.log(tableChild)
                 InputPerameters[tableChild.querySelector('.InputData').name] = tableChild.querySelector('.InputData').value
             
             }  else if (FormEelements[i].className == 'ui-form-element section-row conditional'){
                 var tableChild = FormEelements[i];
-                //console.log(tableChild)
                 InputPerameters[tableChild.querySelector('.InputData').name] = tableChild.querySelector('.InputData').value
+
+            } else if (FormEelements[i].className == 'UPD') {
+                var tableChild = FormEelements[i].querySelector('.ui-form-element.section-row.sections') 
+
+                console.log(Object.assign(InputPerameters, this.ReturnData(tableChild)))
+
             }
 
             else if  (FormEelements[i].className == "ui-repeat section-row") {
-
                 var tableChild = FormEelements[i];
                 InputPerameters[tableChild.querySelector('.InputData').name] = tableChild.querySelector('.InputData').value
+                console.log(InputPerameters[tableChild.querySelector('.InputData').name])
 
             }
             
             else if (FormEelements[i].className == 'ui-form-element section-row pl-2' && FormEelements[i].style.display == 'block'){
                 var tableChild1 = FormEelements[i].children;
-
                 Object.assign(InputPerameters, this.ReturnData(tableChild1))
 
             }
@@ -299,9 +268,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         }
 
         FormParent.append(row)
-
         FormParent.append(Button)
-
         Button.addEventListener("click", function(e){ 
 
             e.preventDefault(); self.AddRepeat(input_def, FormParent, NamePrefix) 
@@ -490,7 +457,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
               select.appendChild(el);
         }
      
-        select[0].selected = 'selected'
+        // select[0].selected = 'selected'
      
         const row = document.createElement('div')
         const title = document.createElement('div')
@@ -576,6 +543,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         }
 
         const Selectfiled = this.AddConditionalSelectField(input_def, ElementIDs, NamePrefix)
+        
+        // const Selectfiled = this.add(input_def,parent, NewNamePrefix) 
 
         parent.append(Selectfiled)
 
@@ -645,7 +614,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         Button.innerText = input_def['title']
 
         var ConditionalDiv  = document.createElement('div')
-        // ConditionalDiv.style.display = 'none'
 
         UpperDiv.appendChild(Button)
 
@@ -657,8 +625,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         UpperDiv.append(ConditionalDiv)
 
         for (var j in input_def['inputs']){
-            // console.log(NamePrefix+SuffixName+`_${j}`)
-            // this.add(input_def['inputs'][j], row, NamePrefix)
+
             this.add(input_def['inputs'][j] ,ConditionalDiv , NewNamePrefix)
         }
 
@@ -667,11 +634,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         Button.addEventListener("click", function(e) {
             e.preventDefault();
 
-
             let nextSibling = Button.nextElementSibling;   
-            // var Div = self.el.querySelector(`${input_def.id}-sections`)
 
-            // var Div = document.getElementById(`${input_def.id}-sections`)
             console.log(nextSibling.id)
 
             if (nextSibling.style.display == 'none'){
@@ -680,7 +644,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 nextSibling.style.display = 'none'
             }
         });
-
     }
     
     //#############################################################################
