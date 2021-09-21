@@ -25,6 +25,7 @@
   box-sizing: border-box;
 }
 
+
 .Galaxy-form {
   border-left: 2px solid rgb(221, 218, 196);
   border-radius: 5px;
@@ -46,7 +47,6 @@
 }
 
 .upload_data {
-  
   display: inline-block;
   border: 1px solid rgb(212, 41, 41);
   box-sizing: border-box;
@@ -55,6 +55,8 @@
 .Galaxy-form input[type="file"] {
   display: none;
 }
+
+
 .custom-file-upload {
   border: 1px solid rgb(212, 41, 41);
   display: inline-block;
@@ -67,4 +69,15 @@
   display: inline-block;
   padding: 6px 12px;
   cursor: pointer;
+}
+
+.ui-input {
+  border: 1px solid rgb(212, 41, 41);
+} 
+
+.Galaxy-form input[type="checkbox"] {
+  position: left;
+  cursor: pointer;
+  margin-left: 0px;
+  display: inline-block;
 }

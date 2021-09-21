@@ -11,7 +11,7 @@ import { NotebookPanel } from "@jupyterlab/notebook";
 
 export class GalaxyToolModel extends BaseWidgetModel {
     defaults() {
-        return Object.assign(Object.assign({}, super.defaults()), { _model_name: GalaxyToolModel.model_name, _model_module: GalaxyToolModel.model_module, _model_module_version: GalaxyToolModel.model_module_version, _view_name: GalaxyToolModel.view_name, _view_module: GalaxyToolModel.view_module, _view_module_version: GalaxyToolModel.view_module_version, name: 'Python Results', description: '', status: '', files: [], text: '', visualization: '', appendix: undefined, extra_file_menu_items: {}, inputs:{}, File:'', GInstace: undefined });
+        return Object.assign(Object.assign({}, super.defaults()), { _model_name: GalaxyToolModel.model_name, _model_module: GalaxyToolModel.model_module, _model_module_version: GalaxyToolModel.model_module_version, _view_name: GalaxyToolModel.view_name, _view_module: GalaxyToolModel.view_module, _view_module_version: GalaxyToolModel.view_module_version, name: 'Python Results', description: '', status: '', files: [], text: '', visualization: '', appendix: undefined, extra_file_menu_items: {}, inputs:{}, File:'' });
     }
 }
 GalaxyToolModel.model_name = 'TestUIOutputModel';
@@ -79,17 +79,10 @@ export class GalaxyToolView extends BaseWidgetView {
 
         btn.addEventListener("click", function() {
 
-           // console.log(self.element.querySelector('.Galaxy-form'));
             var children = self.element.querySelector('.Galaxy-form').children;
             const notebook = ContextManager.tool_registry.current
 
             console.log('OK1')
-
-            console.log(this.model.get('GalInstance'))
-
-            //console.log(JSON.parse(this.model.get('GalInstance')))
-            
-            //console.log(notebook)
             var children = self.element.querySelector('.Galaxy-form').children;
             self.ReturnData(children) 
             console.log('OK3')
@@ -99,24 +92,33 @@ export class GalaxyToolView extends BaseWidgetView {
 
     ReturnData(FormEelements){
 
+        var SimpleInputs = []
+
         for (var i = 0; i < FormEelements.length; i++) {
 
             if (FormEelements[i].className == 'ui-form-element section-row'){
                 var tableChild = FormEelements[i];
 
-                if (tableChild.querySelector('.Galaxy-form')) {
+                console.log(tableChild.querySelector('.InputData').name)
 
-                }
+            }  
 
+           else if (FormEelements[i].className == 'ui-form-element section-row conditional'){
+                var tableChild = FormEelements[i];
 
-                console.log(tableChild)
+                console.log(tableChild.querySelector('.InputData').name)
 
-            } else if (FormEelements[i].className == 'ui-form-element section-row pl-2' && FormEelements[i].style.display == 'block'){
-                var tableChild1 = FormEelements[i].children;
-                this.ReturnData(tableChild1)
-            }
+            }  
 
-           }
+            else  if (FormEelements[i].className == 'ui-form-element section-row pl-2' && FormEelements[i].style.display == 'block'){
+
+                 var tableChild1 = FormEelements[i].children;
+
+                 this.ReturnData(tableChild1)
+
+             }
+        }
+
     }
 
     uid () {
@@ -161,6 +163,8 @@ export class GalaxyToolView extends BaseWidgetView {
 
         const input = document.createElement('input')
         input.id = `input-${input_def.id}`
+        input.name = input_def['name']
+        input.value = input_def['value']
         input.className = 'InputData'
         const row = document.createElement('div')
         const title = document.createElement('div')
@@ -175,36 +179,37 @@ export class GalaxyToolView extends BaseWidgetView {
         row.append(title)
         row.append(input)
         return row
-
     }
 
     FileUpLoad (input_def) {
 
         var self = this
-
         input_def.id = this.uid()
 
         const Label = document.createElement('label')
         Label.className = 'custom_file_upload'
         const Input = document.createElement('input')
         Input.type = 'file'
-        Input.className = 'InputData' 
-
+        
         const Input1 = document.createElement('input')
         Input1.type = 'text'
+        Input1.className = 'InputData'
+        Input1.name = input_def['name']
         Input1.setAttribute("list","history-data-list")
 
         const DataList = document.createElement('datalist')
-        DataList.id = `History-data-${input_def.id}`
-        DataList.className = 'InputData' 
+        DataList.id = `history-data-list`
 
-        const Option1 = document.createElement('option')
-        Option1.textContent = 'Volvo'
-        DataList.append(Option1)
+        var options = this.model.get('History_Data')
 
-        const Option2 = document.createElement('option')
-        Option2.textContent = 'Suzuki'
-        DataList.append(Option2)
+
+        for(var i = 0; i < this.model.get('History_Data').length; i++) {
+            const opt = options[i][0];
+            const el = document.createElement("option");
+            el.textContent = opt;
+            el.value = options[i][1];
+            DataList.appendChild(el);
+      }
 
         Label.append(Input)
         Label.append(Input1)
@@ -220,7 +225,7 @@ export class GalaxyToolView extends BaseWidgetView {
         row.append(Label)
 
         Input.addEventListener("change", function() {
-            
+
             console.log(Input.files[0].name);
 
             self.model.set('File', Input.files[0].name);
@@ -236,8 +241,10 @@ export class GalaxyToolView extends BaseWidgetView {
 
         input_def.id = this.uid()
         const input = document.createElement('input')
-        input.id = input_def.id
+        input.value = input_def['value']
         input.className = 'InputData'
+        input.name = input_def['name']
+        input.id = input_def.id
         const row = document.createElement('div')
         const title = document.createElement('div')
         title.className = 'ui-from-title'
@@ -252,13 +259,15 @@ export class GalaxyToolView extends BaseWidgetView {
         row.append(input)
         
         return row
-
     }
+
 
     AddFloat (input_def) {
 
         input_def.id = this.uid()
         const input = document.createElement('input')
+        input.value = input_def['value']
+        input.name = input_def.name
         input.id = `input-${input_def.id}`
         input.className = 'InputData'
         const row = document.createElement('div')
@@ -273,9 +282,7 @@ export class GalaxyToolView extends BaseWidgetView {
         row.id = input_def.id
         row.append(title)
         row.append(input)
-
         return row
-
     }
 
     AddConditionalSelectField (input_def, ElID ) {
@@ -284,14 +291,16 @@ export class GalaxyToolView extends BaseWidgetView {
 
         const options =  input_def['test_param']['options']
         const select = document.createElement('select')
-        select.id = `select-${input_def.id}`   
-        select.className = 'InputData'  
+        select.name = input_def['name']+"|"+input_def['test_param']['name']
+
+        select.id = `select-${input_def.id}`    
+        select.className = 'InputData' 
      
         for(var i = 0; i < options.length; i++) {
               const opt = options[i][0];
               const el = document.createElement("option");
               el.textContent = opt;
-              el.value = i;
+              el.value = options[i][1];
               select.appendChild(el);
         }
      
@@ -306,7 +315,7 @@ export class GalaxyToolView extends BaseWidgetView {
 
         TitleSpan.style.display = 'inline'
         title.append(TitleSpan)
-        row.className = 'ui-form-element section-row'
+        row.className = 'ui-form-element section-row conditional'
         row.id = input_def.id
         row.append(title)
         row.append(select)
@@ -316,14 +325,11 @@ export class GalaxyToolView extends BaseWidgetView {
 
             var queryID = select.value
 
-            console.log(queryID)
-            console.log(ElID)
-
             for (var i in ElID) {
-                if (i == queryID ) {
-                    this.element.querySelector(`#${ElID[i]}`).style.display = 'block'
+                if (options[i][1] == queryID ) {
+                    this.el.querySelector(`#${ElID[i]}`).style.display = 'block'
                 } else {
-                    this.element.querySelector(`#${ElID[i]}`).style.display = 'none'
+                    this.el.querySelector(`#${ElID[i]}`).style.display = 'none'
                 }
             }
         });
@@ -338,8 +344,9 @@ export class GalaxyToolView extends BaseWidgetView {
 
         const options =  input_def['options']
         const select = document.createElement('select')
-        select.id = `select-${input_def.id}`   
-        select.className = 'InputData'
+        select.id = `select-${input_def.id}`  
+        select.className = 'InputData'   
+        select.name = input_def['name']
      
         for(var i = 0; i < options.length; i++) {
               const opt = options[i][0];
@@ -381,10 +388,13 @@ export class GalaxyToolView extends BaseWidgetView {
 
         input_def.id = this.uid()
 
-        const options =  [['True', 'True', 'true'],
-                        ['False', 'False', 'false']]
+        const options =  [['True', 'True', 'True'],
+                        ['False', 'False', 'False']]
+
 
         const select = document.createElement('select')
+
+        select.name = input_def['name']
 
         for(var i = 0; i < options.length; i++) {
             const opt = options[i][0];
@@ -395,7 +405,7 @@ export class GalaxyToolView extends BaseWidgetView {
         }
 
         select.id = `input-${input_def.id}`
-        select.className = 'InputData'
+        select.className = 'InputData' 
         const row = document.createElement('div')
         const title = document.createElement('div')
         title.className = 'ui-from-title'
@@ -409,7 +419,7 @@ export class GalaxyToolView extends BaseWidgetView {
         row.append(title)
         row.append(select)
         
-        this.element.querySelector('.Galaxy-form').append(row)
+        this.el.querySelector('.nbtools-form').append(row)
 
         return row
     }

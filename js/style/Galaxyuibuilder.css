@@ -256,9 +256,12 @@
   }
 
   .ui-form-element .section-row .sections {
-
     border: solid;
     border-color: rgb(123, 116, 116);
     border-width: 3px;
+  }
+
+  input[type="checkbox"] {
+      float: left;
 
   }
