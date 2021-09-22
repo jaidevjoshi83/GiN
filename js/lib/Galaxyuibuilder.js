@@ -161,7 +161,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             else if  (FormEelements[i].className == "ui-repeat section-row") {
                 var tableChild = FormEelements[i];
                 InputPerameters[tableChild.querySelector('.InputData').name] = tableChild.querySelector('.InputData').value
-                console.log(InputPerameters[tableChild.querySelector('.InputData').name])
+                // console.log(InputPerameters[tableChild.querySelector('.InputData').name])
             }
             
             else if (FormEelements[i].className == 'ui-form-element section-row pl-2' && FormEelements[i].style.display == 'block'){
@@ -316,18 +316,42 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             DataSelect.appendChild(el);
         }
 
-        if (selected_index!=='default'){
-            DataSelect.selectedIndex = selected_index
+        for(var i, j = 0; i = DataSelect.options[j]; j++) {
+            // console.log('ok'+i)
+
+            console.log(i.value.split(":")[3].replace('"',"").split(',')[0].replace('"',''), input_def.value.values[0]['id'])
+
+            if(i.value.split(":")[3].replace('"',"").split(',')[0].replace('"','') == input_def.value.values[0]['id']) {
+                console.log(j)
+                DataSelect.selectedIndex = j;
+                break;
+            }
         }
+        // if (selected_index!=='default'){
+        //     DataSelect.selectedIndex = selected_index
+        // }
 
         // if (selected_index == "default") {
         //     if (input_def.value !== 'undefined') { 
-        //         for(var i, j = 0; i = DataSelect.options[j]; j++) {
-        //             if(i.value == input_def.value) {
-        //                 DataSelect.selectedIndex = j;
-        //                 break;
-        //             }
-        //         }
+
+
+        // for (var i, j = 0; i = DataSelect.options[j]; j++) {
+
+        // }
+        
+
+        // if (input_def.value !== null ) {
+        //     console.log(input_def.value)
+
+        // }
+
+        // for(var i, j = 0; i = DataSelect.options[j]; j++) {
+        //     if(i.value == input_def.value) {
+        //         DataSelect.selectedIndex = j;
+        //         break;
+        //     }
+        // }
+
         //     }
 
         // }
@@ -351,7 +375,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         DataSelect.addEventListener("change", function() {
 
-            console.log(DataSelect.value)
+            // console.log(DataSelect.value)
             // var queryID = DataSelect.value
             
 
@@ -361,7 +385,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             var future = notebook.context.sessionContext.session.kernel.requestExecute({code: `from galaxylab import GalaxyTaskWidget\nGalaxyTaskWidget.UpdateForm(${JSON.stringify(self.model.get('GalInstace'))}, ${JSON.stringify(Inputs)}, ${JSON.stringify(self.model.get('ToolID'))})`})    
         
             future.onIOPub  = (msg) => {
-                var queryID  = DataSelect.selectedIndex
+                 var queryID  = DataSelect.selectedIndex
 
                 const msgType = msg.header.msg_type;
                 switch (msgType) {
@@ -378,7 +402,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                         var FormParent = self.el.querySelector('.Galaxy-form')
                         self.removeAllChildNodes(FormParent)
                         self.Main_Form(JSON.parse(refine_inputs), queryID)
-                        console.log(refine_inputs)
                       } catch(err){
                         console.log(err);
                       }
@@ -681,9 +704,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         row.append(select)
         
         this.el.querySelector('.nbtools-form').append(row)
-
         FormParent.append(row)
-
         return row
     }
 
@@ -698,7 +719,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         const ElementIDs = []
 
         for (var e in input_def.cases) {
-
             ElementIDs.push(`${input_def.id}-section-${e}`)
         }
 
@@ -796,7 +816,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
             let nextSibling = Button.nextElementSibling;   
 
-            console.log(nextSibling.id)
+            // console.log(nextSibling.id)
 
             if (nextSibling.style.display == 'none'){
                 nextSibling.style.display = 'block'
@@ -866,7 +886,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
            var Inputs = self.ReturnData(children)
 
-            console.log(Inputs)
+            // console.log(Inputs)
            //  console.log(this.model.get('GalInstace'))
 
 
