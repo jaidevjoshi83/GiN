@@ -32,7 +32,6 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
     Hlist = None
     #job = None
 
-
     def create_function_wrapper(self, tool):
         gi = tool.gi.gi #tool.gi is oo gi, gi.gi is original gi
         """Create a function that accepts the expected input and submits a Galaxy job"""
@@ -137,9 +136,6 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
             NewInputs[a] = Tool_inputs[a]
             if 'Input_data:' in Tool_inputs[a]:
                 NewInputs[a] = json.loads(Tool_inputs[a].split('Input_data:')[1])
-
-        # NewInputs = {'input1': {'values': [{'id': '1d6404f66ed3d72e', 'hid': 1, 'name': 'UCSC Main on Human: knownGene (genome)', 'tags': [], 'src': 'hda', 'keep': False}], 'batch': False}, 'maf_source_type|maf_source': 'user', 'maf_source_type|mafFile': {'values': [{'id': '0b378429c2c91c4f', 'hid': 11, 'name': '(unavailable) UCSC Main on Human: multiz100way (chrX:15,578,261-15,621,068)', 'tags': [], 'src': 'hda', 'keep': True}], 'batch': False}, 'maf_source_type|species': None, 'split_blocks_by_species_selector|split_blocks_by_species': 'dont_split_blocks_by_species'}
-
 
         print("#################")
         print( NewInputs)
