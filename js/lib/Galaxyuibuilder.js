@@ -80,7 +80,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         var FormParent = this.el.querySelector('.Galaxy-form');
 
-        console.log(inputs)
+        // console.log(inputs)
 
         this.Main_Form(inputs)
 
@@ -126,7 +126,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         });
     }
 
-    CreateForm() {
+    CreateForm() {  //Fix me in future
 
         var self = this
 
@@ -313,51 +313,20 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             const el = document.createElement("option");
             el.textContent = opt;
             el.value = 'Input_data:'+JSON.stringify({'values': [options['hda'][i]]})
+            // el.value = JSON.stringify({'values': [options['hda'][i]]})
             DataSelect.appendChild(el);
         }
 
         for(var i, j = 0; i = DataSelect.options[j]; j++) {
-            // console.log('ok'+i)
 
-            console.log(i.value.split(":")[3].replace('"',"").split(',')[0].replace('"',''), input_def.value.values[0]['id'])
+            // console.log(i.value.split(":")[3].replace('"',"").split(',')[0].replace('"',''), input_def.value.values[0]['id'])
 
-            if(i.value.split(":")[3].replace('"',"").split(',')[0].replace('"','') == input_def.value.values[0]['id']) {
-                console.log(j)
+            if(i.value.split(":")[3].replace('"',"").split(',')[0].replace('"','') == input_def.value.values[0]['id']) { //fix me 
+                
                 DataSelect.selectedIndex = j;
                 break;
             }
         }
-        // if (selected_index!=='default'){
-        //     DataSelect.selectedIndex = selected_index
-        // }
-
-        // if (selected_index == "default") {
-        //     if (input_def.value !== 'undefined') { 
-
-
-        // for (var i, j = 0; i = DataSelect.options[j]; j++) {
-
-        // }
-        
-
-        // if (input_def.value !== null ) {
-        //     console.log(input_def.value)
-
-        // }
-
-        // for(var i, j = 0; i = DataSelect.options[j]; j++) {
-        //     if(i.value == input_def.value) {
-        //         DataSelect.selectedIndex = j;
-        //         break;
-        //     }
-        // }
-
-        //     }
-
-        // }
-
-
-        // console.log(input_def.value)
 
         const Li = document.createElement('i')
         Li.innerText = ' Upload Data'
@@ -374,10 +343,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         var Inputs = self.ReturnData(children)
 
         DataSelect.addEventListener("change", function() {
-
-            // console.log(DataSelect.value)
-            // var queryID = DataSelect.value
-            
 
             var children = self.element.querySelector('.Galaxy-form').children;
             var Inputs = self.ReturnData(children)
@@ -399,8 +364,22 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                         refine_inputs = refine_inputs.slice(1,-1);
                     }
                     try { 
+                       
                         var FormParent = self.el.querySelector('.Galaxy-form')
                         self.removeAllChildNodes(FormParent)
+
+                        //######################################## //Fix me in future
+
+                        const Button = document.createElement('button')
+                        Button.style.display = 'none'
+                        Button.type = 'submit'
+                        Button.id = 'submit'
+                        Button.className  = 'Galaxy-form-button'
+                
+                        FormParent.append(Button)
+
+                        //########################################
+
                         self.Main_Form(JSON.parse(refine_inputs), queryID)
                       } catch(err){
                         console.log(err);
@@ -418,8 +397,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         FormParent.append(row)
         return row
     }
-
-
 
     AddInteger (input_def, FormParent, NamePrefix) {
 
@@ -496,10 +473,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 break;
             }
         }
-
-        // console.log(select.selectedIndex)
-     
-        // select[0].selected = 'selected'
      
         const row = document.createElement('div')
         const title = document.createElement('div')
@@ -517,76 +490,82 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         
         select.addEventListener("change", () => {
 
-            // console.log(select.value)
+            // //##################################### Recently Added 
+
+            var children = self.element.querySelector('.Galaxy-form').children;
+            var Inputs = self.ReturnData(children)
+            const notebook = ContextManager.tool_registry.current
+            var future = notebook.context.sessionContext.session.kernel.requestExecute({code: `from galaxylab import GalaxyTaskWidget\nGalaxyTaskWidget.UpdateForm(${JSON.stringify(self.model.get('GalInstace'))}, ${JSON.stringify(Inputs)}, ${JSON.stringify(self.model.get('ToolID'))})`})  
+
+            future.onIOPub  = (msg) => {
+
+               const msgType = msg.header.msg_type;
+               switch (msgType) {
+                 case 'execute_result':
+                 case 'display_data':
+                 case 'update_display_data':
+                   future.onIOPub = msg.content;
+
+                   let refine_inputs = future.onIOPub.data['text/plain'];
+
+                //    console.log(refine_inputs )
+                   if (refine_inputs.startsWith("'")){
+                       refine_inputs = refine_inputs.slice(1,-1);
+
+                       console.log(refine_inputs)
+                   }
+                   try { 
+                      
+                       var FormParent = self.el.querySelector('.Galaxy-form')
+                       self.removeAllChildNodes(FormParent)
+
+                       //######################################## //Fix me in future
+
+                       const Button = document.createElement('button')
+                       Button.style.display = 'none'
+                       Button.type = 'submit'
+                       Button.id = 'submit'
+                       Button.className  = 'Galaxy-form-button'
+               
+                       FormParent.append(Button)
+
+                       //########################################
+
+                       self.Main_Form(JSON.parse(refine_inputs))
+                     } catch(err){
+                       console.log(err);
+                     }
+
+                   break;
+                 default:
+                   break;
+               }
+                return
+             };
+
+            //##################################### Recently Added 
+
 
             var queryID = select.value
 
             for (var i in ElID) {
-                // input_def.cases[i]
+      
                 if (options[i][1] == queryID ) {
-                    // console.log(input_def.test_param.cases[i]['inputs'])
+                    // console.log(options[i][1], queryID )
                     this.el.querySelector(`#${ElID[i]}`).style.display = 'block'
-                } else {
+                } 
+                else {
                     this.el.querySelector(`#${ElID[i]}`).style.display = 'none'
                 }
             }
         });
+
+        //#################### Recently Added 
+        // FormParent.append(row)
+        //#################### Recently Added 
         return row
     }
 
-    // AddSelectField (input_def, FormParent, NamePrefix) {
-
-    //     console.log(input_def.display)
-
-    //     if (input_def.display == 'checkboxes'){
-    //         console.log(input_def.options)
-    //     }
-
-    //     input_def.id = this.uid()
-
-    //     var self = this
-
-    //     const options =  input_def['options']
-    //     const select = document.createElement('select')
-    //     select.id = `select-${input_def.id}`  
-    //     select.className = 'InputData'   
-    //     select.name = NamePrefix+input_def['name']
-     
-    //     for(var i = 0; i < options.length; i++) {
-    //           const opt = options[i][0];
-    //           const el = document.createElement("option");
-    //           el.textContent = opt;
-    //           el.value =  options[i][1];
-    //           select.appendChild(el);
-    //     }
-     
-    //     // select[0].selected = 'selected'
-     
-    //     const row = document.createElement('div')
-    //     const title = document.createElement('div')
-    //     title.className = 'ui-from-title'
-    //     const TitleSpan = document.createElement('span')
-    //     TitleSpan.className = "ui-form-title-text"
-    //     TitleSpan.textContent = input_def['label']
-
-    //     TitleSpan.style.display = 'inline'
-    //     title.append(TitleSpan)
-    //     row.className = 'ui-form-element section-row'
-    //     row.id = input_def.id
-    //     row.append(title)
-    //     row.append(select)
-        
-
-    //     select.addEventListener("change", () => {
-
-    //         var queryID = select.value
-    //     });
-
-    //     FormParent.append(row)
-
-    //     return row
-
-    // }
 
     AddSelectField (input_def, FormParent, NamePrefix) {
 
@@ -656,10 +635,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
                 var queryID = select.value
             });
-
         }
-
-        // select[0].selected = 'selected'
 
         FormParent.append(row)
 
@@ -712,7 +688,17 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         const Childrens  = this.el.querySelector('.nbtools-form').children;
     }
 
+
+
+    AddConditoinalSection2(input_def, parent, NamePrefix) {
+
+    }
+
     AddConditoinalSection2 (input_def, parent, NamePrefix) {
+
+
+        // console.log(input_def['test_param']['options'])
+
         var NewNamePrefix = NamePrefix+input_def['name']+"|"
         input_def.id = this.uid()
 
@@ -723,59 +709,40 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         }
 
         const Selectfiled = this.AddConditionalSelectField(input_def, ElementIDs, NamePrefix)
-        
-        // const Selectfiled = this.add(input_def,parent, NewNamePrefix) 
 
         parent.append(Selectfiled)
 
         var ConditionalDiv
 
-        for (var i in input_def.cases) {
-          ConditionalDiv = document.createElement('div')
-          ConditionalDiv.className = 'ui-form-element section-row pl-2'
-          ConditionalDiv.id = `${input_def.id}-section-${i}`
+
+
+        for (var i in input_def['test_param']['options']) {
+
+            ConditionalDiv = document.createElement('div')
+            ConditionalDiv.className = 'ui-form-element section-row pl-2'
+            ConditionalDiv.id = `${input_def.id}-section-${i}`
 
         if (input_def.test_param.value == input_def.test_param.options[i][1]){ //Fix Me
+            // console.log(input_def.test_param.options[i][1])
             ConditionalDiv.style.display = 'block'
          } else {
             ConditionalDiv.style.display = 'none'
          }
 
-        for (var j in input_def.cases[i].inputs) {
-
-            this.add(input_def.cases[i].inputs[j], ConditionalDiv, NewNamePrefix )
+         for (var l in input_def.cases){
             
-            // if (input_def.cases[i].inputs[j].type !== 'conditional') {
-            //   input_def.cases[i].inputs[j].id = this.uid()
+            if  (input_def.cases[l].value == input_def['test_param']['options'][i][1]) {
+                // console.log(input_def.cases[l].value, input_def['test_param']['options'][i][1])
+                for (var j in input_def.cases[l].inputs) {
 
-            //   var SimpleRow 
+                    this.add(input_def.cases[l].inputs[j], ConditionalDiv, NewNamePrefix )
+                      
+                    input_def.cases[l].inputs[j].id = this.uid()
+        
+                  }
+            }
+         }
 
-            //   if (input_def.cases[i].inputs[j].type == 'data') {
-            //      SimpleRow = this.FileUpLoad(input_def.cases[i].inputs[j])
-
-            //   } else if (input_def.cases[i].inputs[j].type == 'integer') {
-            //      SimpleRow = this.AddInteger(input_def.cases[i].inputs[j])
-
-            //   } else if (input_def.cases[i].inputs[j].type == 'float') {
-            //        SimpleRow = this.AddFloat(input_def.cases[i].inputs[j])
-
-            //   } else if (input_def.cases[i].inputs[j].type == 'boolean') {
-            //        SimpleRow = this.AddBooleanField(input_def.cases[i].inputs[j])
-
-            //   } else if (input_def.cases[i].inputs[j].type == 'text') {
-            //       SimpleRow = this.AddText(input_def.cases[i].inputs[j])
-            //   }
-            //   else if (input_def.cases[i].inputs[j].type == 'select') {
-            //        SimpleRow = this.AddSelectField(input_def.cases[i].inputs[j])
-            //   }
-
-            //   ConditionalDiv.append(SimpleRow)
-            // } else {
-              
-            input_def.cases[i].inputs[j].id = this.uid()
-            //   this.AddConditoinalSection2(input_def.cases[i].inputs[j],ConditionalDiv)
-            //     }
-          }
           parent.append(ConditionalDiv)
         }
     }
@@ -865,7 +832,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
     /**
      * Attach the click event to each Run button
      */
-    activate_run_buttons() {
+     activate_run_buttons() {
 
         var self  = this;
         this.el.querySelectorAll('.nbtools-run').forEach((button) => button.addEventListener('click', () => {
@@ -882,13 +849,10 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
            const notebook = ContextManager.tool_registry.current
 
            var children = self.element.querySelector('.Galaxy-form').children;
-           //console.log(self.ReturnData(children))
 
            var Inputs = self.ReturnData(children)
 
-            // console.log(Inputs)
-           //  console.log(this.model.get('GalInstace'))
-
+           console.log(Inputs)
 
            notebook.context.sessionContext.session.kernel.requestExecute({code: `from galaxylab import GalaxyTaskWidget\nGalaxyTaskWidget.submit_job(${JSON.stringify(this.model.get('GalInstace'))}, ${JSON.stringify(Inputs)})`})
 
