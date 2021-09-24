@@ -489,19 +489,19 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         
         select.addEventListener("change", () => {
 
+            console.log('ok')
 
-            //##################################### Recently Added 
+            // //##################################### Recently Added 
 
             var children = self.element.querySelector('.Galaxy-form').children;
             var Inputs = self.ReturnData(children)
             const notebook = ContextManager.tool_registry.current
             var future = notebook.context.sessionContext.session.kernel.requestExecute({code: `from galaxylab import GalaxyTaskWidget\nGalaxyTaskWidget.UpdateForm(${JSON.stringify(self.model.get('GalInstace'))}, ${JSON.stringify(Inputs)}, ${JSON.stringify(self.model.get('ToolID'))})`})  
 
-
             console.log(future)
 
+
             future.onIOPub  = (msg) => {
-                var queryID  = DataSelect.selectedIndex
 
                const msgType = msg.header.msg_type;
                switch (msgType) {
@@ -511,8 +511,12 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                    future.onIOPub = msg.content;
 
                    let refine_inputs = future.onIOPub.data['text/plain'];
+
+                //    console.log(refine_inputs )
                    if (refine_inputs.startsWith("'")){
                        refine_inputs = refine_inputs.slice(1,-1);
+
+                       console.log(refine_inputs)
                    }
                    try { 
                       
@@ -531,7 +535,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
                        //########################################
 
-                       self.Main_Form(JSON.parse(refine_inputs), queryID)
+                       self.Main_Form(JSON.parse(refine_inputs))
                      } catch(err){
                        console.log(err);
                      }
