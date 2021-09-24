@@ -118,11 +118,13 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
         tool_inputs  = json5.loads(Tool_inputs)
 
         for a in tool_inputs.keys():
-            if 'Input Data ID:' in str(tool_inputs[a]):
-                data_id = tool_inputs[a].split(' ')[3]
-                data_src = gi.gi.datasets.gi.datasets.show_dataset(dataset_id=data_id)['hda_ldda']
-                # data_src = gi.datasets.show_dataset(dataset_id=data_id)['hda_ldda']
-                tool_inputs[a] = {'src':data_src,'id':data_id}
+            if 'Input_data:' in tool_inputs[a]:
+                                  
+                tool_inputs[a] = json.loads(tool_inputs[a].split('Input_data:')[1])
+
+        print("####### ok ")
+        print(tool_inputs)
+        print("####### ok ")
 
         job = gi.tools.gi.tools.run_tool(history_id='f597429621d6eb2b', tool_id=GInstace['tool_ID'], tool_inputs=tool_inputs)
 

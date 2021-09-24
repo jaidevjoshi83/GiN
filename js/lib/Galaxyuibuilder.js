@@ -313,6 +313,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             const el = document.createElement("option");
             el.textContent = opt;
             el.value = 'Input_data:'+JSON.stringify({'values': [options['hda'][i]]})
+            // el.value = JSON.stringify({'values': [options['hda'][i]]})
             DataSelect.appendChild(el);
         }
 
@@ -489,17 +490,12 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         
         select.addEventListener("change", () => {
 
-            console.log('ok')
-
             // //##################################### Recently Added 
 
             var children = self.element.querySelector('.Galaxy-form').children;
             var Inputs = self.ReturnData(children)
             const notebook = ContextManager.tool_registry.current
             var future = notebook.context.sessionContext.session.kernel.requestExecute({code: `from galaxylab import GalaxyTaskWidget\nGalaxyTaskWidget.UpdateForm(${JSON.stringify(self.model.get('GalInstace'))}, ${JSON.stringify(Inputs)}, ${JSON.stringify(self.model.get('ToolID'))})`})  
-
-            console.log(future)
-
 
             future.onIOPub  = (msg) => {
 
