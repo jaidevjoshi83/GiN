@@ -15,6 +15,8 @@ import json5
 import logging
 import pickle
 
+import json
+
 
 class GalaxyTaskWidget(GalaxyUIBuilder):
     """A widget for representing the status of a Galaxy job"""
@@ -30,7 +32,6 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
     Hlist = None
     #job = None
 
-
     def create_function_wrapper(self, tool):
         gi = tool.gi.gi #tool.gi is oo gi, gi.gi is original gi
         """Create a function that accepts the expected input and submits a Galaxy job"""
@@ -40,7 +41,7 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
 
         def submit_job(**kwargs):
 
-            print('ok')
+            # print('ok')
             tool_id  = tool.wrapped['id']
             inputs = kwargs
             History_ID = inputs['History_list']
@@ -117,20 +118,43 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
         tool_inputs  = json5.loads(Tool_inputs)
 
         for a in tool_inputs.keys():
-            if 'Input Data ID:' in str(tool_inputs[a]):
-                data_id = tool_inputs[a].split(' ')[3]
-                data_src = gi.gi.datasets.gi.datasets.show_dataset(dataset_id=data_id)['hda_ldda']
-                # data_src = gi.datasets.show_dataset(dataset_id=data_id)['hda_ldda']
-                tool_inputs[a] = {'src':data_src,'id':data_id}
+            if 'Input_data:' in tool_inputs[a]:
+                                  
+                tool_inputs[a] = json.loads(tool_inputs[a].split('Input_data:')[1])
+
+        print("####### ok ")
+        print(tool_inputs)
+        print("####### ok ")
 
         job = gi.tools.gi.tools.run_tool(history_id='f597429621d6eb2b', tool_id=GInstace['tool_ID'], tool_inputs=tool_inputs)
 
-        print("JOB STATUS")
-        print(tool_inputs)
-
         display(GalaxyJobWidget(job, gi.gi))
-    
-    
+
+    def UpdateForm(GInstace, Tool_inputs, toolID):
+
+        NewInputs = {}
+
+        for a in Tool_inputs.keys():
+            NewInputs[a] = Tool_inputs[a]
+            if 'Input_data:' in Tool_inputs[a]:
+                NewInputs[a] = json.loads(Tool_inputs[a].split('Input_data:')[1])
+
+        print("#################")
+        print( NewInputs)
+        print(toolID)
+        gi = GalaxyInstance(GInstace['URL'], email=GInstace['email_ID'], api_key=GInstace['API_key'], verify=True)
+        inputs = gi.gi.tools.gi.tools.build_tool(tool_id=toolID, inputs=NewInputs, history_id='33b43b4e7093c91f')
+        print("#################")
+        # print(type(inputs['inputs']))
+        # print(inputs['inputs'])
+        # print(json.dumps(inputs['inputs']))
+        # print('UpdateForm')
+
+        # print(json.dumps(inputs['inputs']))
+
+        return json.dumps(inputs['inputs'])
+        # return {'inputs':inputs['inputs']}
+        
     def add_type_spec(self, task_param, param_spec): 
         
         if 'test_param' in task_param.keys():
@@ -223,7 +247,6 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
         def galaxy_upload_callback(values):
             gi = self.tool.gi.gi
             for k in values:
-                print(values)
                 with tempfile.NamedTemporaryFile() as f:
                     f.write(values[k]['content'])
                     f.flush()
@@ -264,7 +287,6 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
         self.function_wrapper = self.create_function_wrapper(self.tool) 
         # self.function_wrapper = None
 
-
         self.GalInstace = { 
                             "API_key":  self.tool.gi.gi.key,
                             "email_ID": self.tool.gi.gi.users.get_current_user()['email'],
@@ -283,9 +305,9 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
         # self.parameter_spec = None
 
         self.HistoryData = self.ReturnHistoryData(tool)
+        inputs = self.tool.gi.tools.gi.tools.build_tool(tool_id=tool.wrapped['id'], history_id='33b43b4e7093c91f')
 
-
-        GalaxyUIBuilder.__init__(self, self.function_wrapper, self.tool.wrapped['inputs'], self.HistoryData, self.GalInstace, parameters=self.parameter_spec,
+        GalaxyUIBuilder.__init__(self, self.function_wrapper, inputs['inputs'], self.HistoryData, self.GalInstace,tool.wrapped['id'], parameters=self.parameter_spec,
                            color=self.default_color,
                            logo=self.default_logo,
                            upload_callback=self.generate_upload_callback(),

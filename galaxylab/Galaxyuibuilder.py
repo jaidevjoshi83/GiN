@@ -113,17 +113,19 @@ class GalaxyUIBuilder(BaseWidget, NBTool):
     inputs = List(['Hello']).tag(sync=True)
     form_output = Dict().tag(sync=True)
     History_Data = List(['Hello']).tag(sync=True)
+    UI =  Dict(sync=True)
+    ToolID = Unicode(sync=True)
 
 
-    def __init__(self, function_or_method, inputs, History_Data, GalInstace, upload_callback=None,  **kwargs):
+
+    def __init__(self, function_or_method, inputs, History_Data, GalInstace, ToolID, upload_callback=None,  **kwargs):
         # Apply defaults based on function docstring/annotations
+
         self._apply_defaults(function_or_method)
-
         self.inputs = inputs
-
         self.GalInstace =  GalInstace
-
         self.History_Data = History_Data
+        self.ToolID = ToolID
 
         # Set the function and call superclass constructor
         self.function_or_method = function_or_method
