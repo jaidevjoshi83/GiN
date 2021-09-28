@@ -308,24 +308,31 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         DataSelect.className = 'InputData'   
         DataSelect.name = NamePrefix+input_def['name']
      
-        for(var i = 0; i < options['hda'].length; i++) {
+        for (var i = 0; i < options['hda'].length; i++) {
             const opt = options['hda'][i].name;
             const el = document.createElement("option");
             el.textContent = opt;
-            el.value = 'Input_data:'+JSON.stringify({'values': [options['hda'][i]]})
+            el.value = 'Input_data:'+JSON.stringify({'values': [options['hda'][i]]}) //Fix me 
             // el.value = JSON.stringify({'values': [options['hda'][i]]})
             DataSelect.appendChild(el);
         }
 
-        for(var i, j = 0; i = DataSelect.options[j]; j++) {
+        for (var i, j = 0; i = DataSelect.options[j]; j++) {
 
             // console.log(i.value.split(":")[3].replace('"',"").split(',')[0].replace('"',''), input_def.value.values[0]['id'])
+            // console.log(JSON.parse(i.value.split('Input_data:')[1])['values'][0]['id'])
 
-            if(i.value.split(":")[3].replace('"',"").split(',')[0].replace('"','') == input_def.value.values[0]['id']) { //fix me 
-                
-                DataSelect.selectedIndex = j;
-                break;
+            if (input_def.value == null) {
+                DataSelect.selectedIndex = 0;
+            } else {
+
+                if (JSON.parse(i.value.split('Input_data:')[1])['values'][0]['id'] == input_def.value.values[0]['id']) { //fix me 
+                    DataSelect.selectedIndex = j;
+                    break;
+                }
+
             }
+
         }
 
         const Li = document.createElement('i')
@@ -359,10 +366,10 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                   case 'update_display_data':
                     future.onIOPub = msg.content;
 
-                    let refine_inputs = future.onIOPub.data['text/plain'];
-                    if (refine_inputs.startsWith("'")){
-                        refine_inputs = refine_inputs.slice(1,-1);
-                    }
+                    let refine_inputs = future.onIOPub.data['application/json'];
+                    // if (refine_inputs.startsWith("'")){
+                    //     refine_inputs = refine_inputs.slice(1,-1);
+                    // }
                     try { 
                        
                         var FormParent = self.el.querySelector('.Galaxy-form')
@@ -380,7 +387,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
                         //########################################
 
-                        self.Main_Form(JSON.parse(refine_inputs), queryID)
+                        self.Main_Form(refine_inputs)
                       } catch(err){
                         console.log(err);
                       }
@@ -506,15 +513,16 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                  case 'update_display_data':
                    future.onIOPub = msg.content;
 
-                   let refine_inputs = future.onIOPub.data['text/plain'];
+                   let refine_inputs = future.onIOPub.data['application/json'];
+
+                   console.log(future.onIOPub.data['text/plain'])
+                   console.log(future.onIOPub.data['application/json'])
 
                 //    console.log(refine_inputs )
-                   if (refine_inputs.startsWith("'")){
-                       refine_inputs = refine_inputs.slice(1,-1);
-
-                       console.log(refine_inputs)
-                   }
-                   try { 
+                //    if (refine_inputs.startsWith("'")){
+                //        refine_inputs = refine_inputsc;
+                //    }
+                //    try { 
                       
                        var FormParent = self.el.querySelector('.Galaxy-form')
                        self.removeAllChildNodes(FormParent)
@@ -531,7 +539,11 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
                        //########################################
 
-                       self.Main_Form(JSON.parse(refine_inputs))
+                    try { 
+                        // refine_inputs =  JSON.stringify(refine_inputs)
+                        console.log(refine_inputs)
+                        // self.Main_Form(refine_inputs)
+                        self.Main_Form(refine_inputs);
                      } catch(err){
                        console.log(err);
                      }
@@ -690,9 +702,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
 
 
-    AddConditoinalSection2(input_def, parent, NamePrefix) {
-
-    }
 
     AddConditoinalSection2 (input_def, parent, NamePrefix) {
 
@@ -765,7 +774,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         UpperDiv.appendChild(Button)
 
         ConditionalDiv.className = `ui-form-element section-row sections`
-        ConditionalDiv.style.display = 'none';
+        
 
         ConditionalDiv.id = `${input_def.id}-sections`
 
@@ -775,6 +784,17 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
             this.add(input_def['inputs'][j] ,ConditionalDiv , NewNamePrefix)
         }
+
+        if (input_def.expanded == true) {
+            ConditionalDiv.style.display = 'block';  
+
+        } else  {
+            ConditionalDiv.style.display = 'none'; 
+
+        }
+
+
+
 
         parent.append(UpperDiv)
 
