@@ -141,19 +141,18 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
 
         print("#################")
         print( NewInputs)
-        print(toolID)
         gi = GalaxyInstance(GInstace['URL'], email=GInstace['email_ID'], api_key=GInstace['API_key'], verify=True)
         inputs = gi.gi.tools.gi.tools.build_tool(tool_id=toolID, inputs=NewInputs, history_id='33b43b4e7093c91f')
         print("#################")
-        # print(type(inputs['inputs']))
-        # print(inputs['inputs'])
-        # print(json.dumps(inputs['inputs']))
-        # print('UpdateForm')
 
-        # print(json.dumps(inputs['inputs']))
 
-        return json.dumps(inputs['inputs'])
-        # return {'inputs':inputs['inputs']}
+        # return json.dumps(inputs)
+
+        import IPython.display
+
+        return IPython.display.JSON(data=inputs['inputs'])
+
+        # return inputs['inputs']
         
     def add_type_spec(self, task_param, param_spec): 
         
