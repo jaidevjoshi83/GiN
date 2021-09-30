@@ -142,6 +142,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         GalaxyForm.append(Button)
 
     }
+
     
     ReturnData(FormEelements){
 
@@ -165,6 +166,16 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             }
             
             else if (FormEelements[i].className == 'ui-form-element section-row pl-2' && FormEelements[i].style.display == 'block'){
+                var tableChild1 = FormEelements[i].children;
+                Object.assign(InputPerameters, this.ReturnData(tableChild1))
+            }
+
+            else if (FormEelements[i].className == 'ui-portlet-section section-row') {
+                var tableChild1 = FormEelements[i].children;
+                Object.assign(InputPerameters, this.ReturnData(tableChild1))
+            }
+
+            else if (FormEelements[i].className == 'ui-form-element section-row sections')  {
                 var tableChild1 = FormEelements[i].children;
                 Object.assign(InputPerameters, this.ReturnData(tableChild1))
             }
@@ -353,6 +364,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
             var children = self.element.querySelector('.Galaxy-form').children;
             var Inputs = self.ReturnData(children)
+
+
             const notebook = ContextManager.tool_registry.current
             var future = notebook.context.sessionContext.session.kernel.requestExecute({code: `from galaxylab import GalaxyTaskWidget\nGalaxyTaskWidget.UpdateForm(${JSON.stringify(self.model.get('GalInstace'))}, ${JSON.stringify(Inputs)}, ${JSON.stringify(self.model.get('ToolID'))})`})    
         
@@ -501,6 +514,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
             var children = self.element.querySelector('.Galaxy-form').children;
             var Inputs = self.ReturnData(children)
+
             const notebook = ContextManager.tool_registry.current
             var future = notebook.context.sessionContext.session.kernel.requestExecute({code: `from galaxylab import GalaxyTaskWidget\nGalaxyTaskWidget.UpdateForm(${JSON.stringify(self.model.get('GalInstace'))}, ${JSON.stringify(Inputs)}, ${JSON.stringify(self.model.get('ToolID'))})`})  
 
@@ -515,13 +529,10 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
                    let refine_inputs = future.onIOPub.data['application/json'];
 
-                   console.log(future.onIOPub.data['text/plain'])
-                   console.log(future.onIOPub.data['application/json'])
+                //    console.log(refine_inputs)
 
-                //    console.log(refine_inputs )
-                //    if (refine_inputs.startsWith("'")){
-                //        refine_inputs = refine_inputsc;
-                //    }
+                //    console.log(future.onIOPub.data['text/plain'])
+                //    console.log(future.onIOPub.data['application/json'])
                 //    try { 
                       
                        var FormParent = self.el.querySelector('.Galaxy-form')
@@ -540,9 +551,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                        //########################################
 
                     try { 
-                        // refine_inputs =  JSON.stringify(refine_inputs)
-                        console.log(refine_inputs)
-                        // self.Main_Form(refine_inputs)
+
                         self.Main_Form(refine_inputs);
                      } catch(err){
                        console.log(err);
@@ -701,10 +710,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
     }
 
 
-
-
     AddConditoinalSection2 (input_def, parent, NamePrefix) {
-
 
         // console.log(input_def['test_param']['options'])
 
@@ -723,16 +729,14 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         var ConditionalDiv
 
-
-
         for (var i in input_def['test_param']['options']) {
 
             ConditionalDiv = document.createElement('div')
             ConditionalDiv.className = 'ui-form-element section-row pl-2'
             ConditionalDiv.id = `${input_def.id}-section-${i}`
 
-        if (input_def.test_param.value == input_def.test_param.options[i][1]){ //Fix Me
-            // console.log(input_def.test_param.options[i][1])
+        if (input_def.test_param.value == input_def.test_param.options[i][1]){
+    
             ConditionalDiv.style.display = 'block'
          } else {
             ConditionalDiv.style.display = 'none'
@@ -741,7 +745,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
          for (var l in input_def.cases){
             
             if  (input_def.cases[l].value == input_def['test_param']['options'][i][1]) {
-                // console.log(input_def.cases[l].value, input_def['test_param']['options'][i][1])
+       
                 for (var j in input_def.cases[l].inputs) {
 
                     this.add(input_def.cases[l].inputs[j], ConditionalDiv, NewNamePrefix )
@@ -756,6 +760,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         }
     }
     //#############################################################################
+
     AddSection (input_def, parent, NamePrefix) {
 
         var self = this
@@ -763,7 +768,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         input_def.id = this.uid()
 
         const UpperDiv = document.createElement('div')
-        UpperDiv.className = `UPD`
+        UpperDiv.className = `ui-portlet-section section-row`
+        UpperDiv.id = `${input_def.id}`
 
         const Button = document.createElement('button')
         Button.className = 'collapsible'
@@ -793,9 +799,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         }
 
-
-
-
         parent.append(UpperDiv)
 
         Button.addEventListener("click", function(e) {
@@ -812,6 +815,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             }
         });
     }
+    
+ 
     
     //#############################################################################
     

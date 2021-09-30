@@ -122,9 +122,9 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
                                   
                 tool_inputs[a] = json.loads(tool_inputs[a].split('Input_data:')[1])
 
-        print("####### ok ")
-        print(tool_inputs)
-        print("####### ok ")
+        print("*****************")
+        print(Tool_inputs)
+        print("*****************")
 
         job = gi.tools.gi.tools.run_tool(history_id='f597429621d6eb2b', tool_id=GInstace['tool_ID'], tool_inputs=tool_inputs)
 
@@ -139,12 +139,11 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
             if 'Input_data:' in Tool_inputs[a]:
                 NewInputs[a] = json.loads(Tool_inputs[a].split('Input_data:')[1])
 
-        print("#################")
+        print("###########&######")
         print( NewInputs)
         gi = GalaxyInstance(GInstace['URL'], email=GInstace['email_ID'], api_key=GInstace['API_key'], verify=True)
         inputs = gi.gi.tools.gi.tools.build_tool(tool_id=toolID, inputs=NewInputs, history_id='33b43b4e7093c91f')
-        print("#################")
-
+        print("###########&######")
 
         # return json.dumps(inputs)
 
