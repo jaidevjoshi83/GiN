@@ -265,3 +265,40 @@
       float: left;
 
   }
+
+
+
+  .repeat-ui-from-title {
+      background-color: rgb(143, 145, 145);
+      padding: 5px;
+      border-color: rgb(143, 145, 145);
+      border-width: 5px;
+      /* border-left-width: 2px;
+      border-right-width: 0px;
+      border-bottom-width: 0px;
+      border-top-width: 0px; */
+      /* border-top-left-radius: 5px;
+      border-bottom-left-radius: 5px; */
+      border-radius: 5px;
+
+  }
+
+  .internal-ui-repeat .section-row {
+
+    border-color: rgb(32, 156, 156);
+    border-width: 5px;
+
+  }
+
+  .delete-button {
+    /* background-color: DodgerBlue;
+    border: none;
+    color: white;
+    padding: 12px 16px;
+    font-size: 16px; */
+    
+    background: none;
+    border: none;
+    cursor: pointer;
+    float: right;
+  }

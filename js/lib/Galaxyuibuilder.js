@@ -19,7 +19,7 @@ import _ from "underscore";
 export class GalaxyUIBuilderModel extends BaseWidgetModel{
     
     defaults() {
-        return Object.assign(Object.assign(Object.assign({}, super.defaults()), { _model_name: GalaxyUIBuilderModel.model_name, _model_module: GalaxyUIBuilderModel.model_module, _model_module_version: GalaxyUIBuilderModel.model_module_version, _view_name: GalaxyUIBuilderModel.view_name, _view_module: GalaxyUIBuilderModel.view_module, _view_module_version: GalaxyUIBuilderModel.view_module_version, name: 'Python Function', description: '', origin: '', _parameters: [], parameter_groups: [], function_import: '', register_tool: true, collapse: true, events: {}, buttons: {}, display_header: true, display_footer: true, busy: false, run_label: 'Execute', GalInstace: {}, output: undefined, inputs:[], form_output:{}, History_Data:[], UI:{}, ToolID:'' }));
+        return Object.assign(Object.assign(Object.assign({}, super.defaults()), { _model_name: GalaxyUIBuilderModel.model_name, _model_module: GalaxyUIBuilderModel.model_module, _model_module_version: GalaxyUIBuilderModel.model_module_version, _view_name: GalaxyUIBuilderModel.view_name, _view_module: GalaxyUIBuilderModel.view_module, _view_module_version: GalaxyUIBuilderModel.view_module_version, name: 'Python Function', description: '', origin: '', _parameters: [], parameter_groups: [], function_import: '', register_tool: true, collapse: true, events: {}, buttons: {}, display_header: true, display_footer: true, busy: false, run_label: 'Execute', GalInstace: {}, output: undefined, inputs:[], form_output:{}, History_IDs: [], UI: {}, ToolID: '' }));
     }
 }
 GalaxyUIBuilderModel.model_name = 'GalaxyUIBuilderModel';
@@ -124,6 +124,10 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         _.each(inputs, (input) => {
             self.add(input, FormParent, '', selected_index);
         });
+    }
+
+    HiStoryList(){
+        
     }
 
     CreateForm() {  //Fix me in future
@@ -255,41 +259,90 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         return row
     }
 
+    AddRepeat1(input_def, FormParent, NamePrefix) {
+
+
+        for (var j in input_def['inputs']){
+            this.add(input_def['inputs'][j], FormParent, NamePrefix+SuffixName+`_${j}|`)
+         }
+
+    }
+
     AddRepeat(input_def, FormParent, NamePrefix) {
 
         var self = this
         input_def.id = this.uid()
 
         var Button = document.createElement('button')
-        Button.innerText = 'Add Repeat Block'
+        Button.innerText = `Insert ${input_def['title']}`
         Button.className = 'RepeatButton'
+        
+        const row2 = document.createElement('div')
+        row2.className = 'internal-ui-repeat section-row'
+
+        var DeleteButton = document.createElement('button')
+        DeleteButton.innerHTML = ('<i class="fa fa-trash-o" aria-hidden="true"></i>')
+        DeleteButton.className = 'delete-button'
 
         const row = document.createElement('div')
         const title = document.createElement('div')
-        title.className = 'ui-from-title'
+        title.append(DeleteButton)
+
+        title.className = 'repeat-ui-from-title'
         const TitleSpan = document.createElement('span')
         TitleSpan.className = "ui-form-title-text"
-        TitleSpan.textContent = input_def['title']
+        TitleSpan.textContent = '1: '+input_def['title']
         TitleSpan.style.display = 'inline'
         title.append(TitleSpan)
         row.className = 'ui-repeat section-row'
         row.id = input_def.id
-        row.append(title)
+        row2.append(title)
+        
         // row.append(input)
         var SuffixName = input_def['name']
 
        for (var j in input_def['inputs']){
-           this.add(input_def['inputs'][j], row, NamePrefix+SuffixName+`_${j}|`)
+           this.add(input_def['inputs'][j], row2, NamePrefix+SuffixName+`_${j}|`)
         }
+        row.append(row2)
 
         FormParent.append(row)
         FormParent.append(Button)
+        var click = 1;
         Button.addEventListener("click", function(e){ 
-            e.preventDefault(); self.AddRepeat(input_def, FormParent, NamePrefix) 
+
+            const row1 = document.createElement('div')
+            row1.className = 'internal-ui-repeat section-row'
+
+            var DeleteButton = document.createElement('button')
+            DeleteButton.innerHTML = ('<i class="fa fa-trash-o" aria-hidden="true"></i>')
+            DeleteButton.className = 'delete-button'
+
+            const InnerTitle = document.createElement('div')
+            InnerTitle.className = 'repeat-ui-from-title'
+            InnerTitle.append(DeleteButton)
+
+            const InnerTitleSpan = document.createElement('span')
+            InnerTitleSpan.className = "ui-form-title-text"
+            InnerTitleSpan.textContent = `${++click}: `+input_def['title']
+            InnerTitleSpan.style.display = 'inline'
+            InnerTitle.append(InnerTitleSpan)
+
+            row1.append(InnerTitle)
+
+             e.preventDefault(); //self.AddRepeat(input_def, FormParent, NamePrefix)
+             console.log()
+             for (var j in input_def['inputs']){
+                self.add(input_def['inputs'][j], row1, NamePrefix+SuffixName+`_${j}|`)
+             } 
+
+             row.append(row1)
+            // FormParent.append(row)
         });
         return row
     }
 
+ 
     removeAllChildNodes(parent) {
         while (parent.firstChild) {
             parent.removeChild(parent.firstChild);
@@ -399,6 +452,9 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                         FormParent.append(Button)
 
                         //########################################
+
+
+                        console.log(refine_inputs)
 
                         self.Main_Form(refine_inputs)
                       } catch(err){

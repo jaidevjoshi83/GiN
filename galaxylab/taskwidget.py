@@ -148,7 +148,6 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
         # return json.dumps(inputs)
 
         import IPython.display
-
         return IPython.display.JSON(data=inputs['inputs'])
 
         # return inputs['inputs']
@@ -298,14 +297,17 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
         # self.function_wrapper = self.create_function_wrapper(self.tool) 
         #print (self.function_wrapper)   
 
-   
         self.parameter_spec = self.create_param_spec(self.tool) # Create run task function
         # self.parameter_spec = None
 
-        self.HistoryData = self.ReturnHistoryData(tool)
-        inputs = self.tool.gi.tools.gi.tools.build_tool(tool_id=tool.wrapped['id'], history_id='33b43b4e7093c91f')
+        self.History_IDs = self.ReturnHistoryData(tool)
 
-        GalaxyUIBuilder.__init__(self, self.function_wrapper, inputs['inputs'], self.HistoryData, self.GalInstace,tool.wrapped['id'], parameters=self.parameter_spec,
+        inputs = self.tool.gi.tools.gi.tools.build_tool(tool_id=tool.wrapped['id'], history_id='33b43b4e7093c91f')
+        self.History_IDs = self.tool.gi.histories.gi.histories.get_histories()
+
+        print(self.History_IDs)
+
+        GalaxyUIBuilder.__init__(self, self.function_wrapper, inputs['inputs'], self.History_IDs, self.GalInstace,tool.wrapped['id'], parameters=self.parameter_spec,
                            color=self.default_color,
                            logo=self.default_logo,
                            upload_callback=self.generate_upload_callback(),
