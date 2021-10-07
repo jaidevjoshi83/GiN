@@ -302,3 +302,7 @@
     cursor: pointer;
     float: right;
   }
+  .input-title {
+      padding: 10px;
+
+  }
