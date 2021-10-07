@@ -203,10 +203,14 @@
          
          var input_def = input;
         // input_def.id = this.uid();
+
+
+        if (input_def.id == 'undefined') {
+            input_def.id = this.uid()
+        }
    
          switch (input_def.type) {
- 
-             
+
              case "conditional":
                  this.AddConditoinalSection2(input_def, FormParent, NamePrefix);
                  break;
@@ -506,7 +510,6 @@
                          Button.id = 'submit'
                          Button.className  = 'Galaxy-form-button'
                     
-                 
                          FormParent.append(Button)
  
                          //########################################
@@ -580,6 +583,9 @@
      }
  
      AddConditionalSelectField (input_def, ElID, NamePrefix) {
+
+
+        input_def.id = this.uid()
  
          var self = this
  
@@ -622,12 +628,24 @@
          select.addEventListener("change", () => {
  
              // //##################################### Recently Added 
+             var queryID = select.value
+
+             for (var i in ElID) {
+       
+                 if (options[i][1] == queryID ) {
+                     this.el.querySelector(`#${ElID[i]}`).style.display = 'block'
+                 } 
+                 else {
+                     this.el.querySelector(`#${ElID[i]}`).style.display = 'none'
+                 }
+             }
  
-             var children = self.element.querySelector('.Galaxy-form').children;
-             var Inputs = self.ReturnData(children)
- 
-             const notebook = ContextManager.tool_registry.current
-             var future = notebook.context.sessionContext.session.kernel.requestExecute({code: `from galaxylab import GalaxyTaskWidget\nGalaxyTaskWidget.UpdateForm(${JSON.stringify(self.model.get('GalInstace'))}, ${JSON.stringify(Inputs)}, ${JSON.stringify(self.model.get('ToolID'))})`})  
+            var children = self.element.querySelector('.Galaxy-form').children;
+            var Inputs = self.ReturnData(children)
+
+            const notebook = ContextManager.tool_registry.current
+            var future = notebook.context.sessionContext.session.kernel.requestExecute({code: `from galaxylab import GalaxyTaskWidget\nGalaxyTaskWidget.UpdateForm(${JSON.stringify(self.model.get('GalInstace'))}, ${JSON.stringify(Inputs)}, ${JSON.stringify(self.model.get('ToolID'))})`})  
+
  
              future.onIOPub  = (msg) => {
  
@@ -640,12 +658,6 @@
  
                     let refine_inputs = future.onIOPub.data['application/json'];
  
-                 //    console.log(refine_inputs)
- 
-                 //    console.log(future.onIOPub.data['text/plain'])
-                 //    console.log(future.onIOPub.data['application/json'])
-                 //    try { 
-                       
                         var FormParent = self.el.querySelector('.Galaxy-form')
                         self.removeAllChildNodes(FormParent)
  
@@ -662,8 +674,8 @@
                         //########################################
  
                      try { 
- 
-                         self.Main_Form(refine_inputs);
+
+                        self.Main_Form(refine_inputs);
                       } catch(err){
                         console.log(err);
                       }
@@ -677,19 +689,6 @@
  
              //##################################### Recently Added 
  
- 
-             var queryID = select.value
- 
-             for (var i in ElID) {
-       
-                 if (options[i][1] == queryID ) {
-                     // console.log(options[i][1], queryID )
-                     this.el.querySelector(`#${ElID[i]}`).style.display = 'block'
-                 } 
-                 else {
-                     this.el.querySelector(`#${ElID[i]}`).style.display = 'none'
-                 }
-             }
          });
  
          //#################### Recently Added 
@@ -844,14 +843,14 @@
  
              ConditionalDiv = document.createElement('div')
              ConditionalDiv.className = 'ui-form-element section-row pl-2'
-             ConditionalDiv.id = `${input_def.id}-section-${i}`
- 
-         if (input_def.test_param.value == input_def.test_param.options[i][1]){
-     
-             ConditionalDiv.style.display = 'block'
-          } else {
-             ConditionalDiv.style.display = 'none'
-          }
+             ConditionalDiv.id = `${ElementIDs[i]}`
+             if (input_def.test_param.value == input_def.test_param.options[i][1]){
+                ConditionalDiv.style.display = 'block'
+
+             } else {
+                ConditionalDiv.style.display = 'none'
+             }
+
  
           for (var l in input_def.cases){
              
@@ -980,18 +979,15 @@
  
             this.el.querySelector('#submit').click();
  
-            console.log('@@@@@@@@@@@@@@@@@@@@');
+            // console.log('@@@@@@@@@@@@@@@@@@@@');
             const notebook = ContextManager.tool_registry.current
  
             var children = self.element.querySelector('.Galaxy-form').children;
- 
             var Inputs = self.ReturnData(children)
- 
-            console.log(Inputs)
- 
+            // console.log(Inputs)
             notebook.context.sessionContext.session.kernel.requestExecute({code: `from galaxylab import GalaxyTaskWidget\nGalaxyTaskWidget.submit_job(${JSON.stringify(this.model.get('GalInstace'))}, ${JSON.stringify(Inputs)})`})
  
-            console.log('@@@@@@@@@@@@@@@@@@@@');
+            // console.log('@@@@@@@@@@@@@@@@@@@@');
  
              // Collapse the widget, if collapse=True
  
