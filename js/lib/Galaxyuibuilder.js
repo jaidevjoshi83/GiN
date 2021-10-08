@@ -53,7 +53,7 @@
          </div>
          <div class="nbtools-error" data-traitlet="error"></div>
          <div class="nbtools-info" data-traitlet="info"></div>
-         <div class="history-list"></div> 
+         <div class="dataset-list"></div> 
          <div class="nbtools-form"></div>
          <div class="nbtools-footer"></div>
          <div class="nbtools-buttons">
@@ -560,10 +560,13 @@
  
              var children = self.element.querySelector('.Galaxy-form').children;
              var Inputs = self.ReturnData(children)
+
+
+             var HistoryID = self.element.querySelector('#History_IDs').value
  
- 
+
              const notebook = ContextManager.tool_registry.current
-             var future = notebook.context.sessionContext.session.kernel.requestExecute({code: `from galaxylab import GalaxyTaskWidget\nGalaxyTaskWidget.UpdateForm(${JSON.stringify(self.model.get('GalInstace'))}, ${JSON.stringify(Inputs)}, ${JSON.stringify(self.model.get('ToolID'))})`})    
+             var future = notebook.context.sessionContext.session.kernel.requestExecute({code: `from galaxylab import GalaxyTaskWidget\nGalaxyTaskWidget.UpdateForm(${JSON.stringify(self.model.get('GalInstace'))}, ${JSON.stringify(Inputs)}, ${JSON.stringify(self.model.get('ToolID'))}, ${JSON.stringify(HistoryID)})`})    
          
              future.onIOPub  = (msg) => {
                   var queryID  = DataSelect.selectedIndex
@@ -725,8 +728,10 @@
             var children = self.element.querySelector('.Galaxy-form').children;
             var Inputs = self.ReturnData(children)
 
+            var HistoryID = self.element.querySelector('#History_IDs').value
+
             const notebook = ContextManager.tool_registry.current
-            var future = notebook.context.sessionContext.session.kernel.requestExecute({code: `from galaxylab import GalaxyTaskWidget\nGalaxyTaskWidget.UpdateForm(${JSON.stringify(self.model.get('GalInstace'))}, ${JSON.stringify(Inputs)}, ${JSON.stringify(self.model.get('ToolID'))})`})  
+            var future = notebook.context.sessionContext.session.kernel.requestExecute({code: `from galaxylab import GalaxyTaskWidget\nGalaxyTaskWidget.UpdateForm(${JSON.stringify(self.model.get('GalInstace'))}, ${JSON.stringify(Inputs)}, ${JSON.stringify(self.model.get('ToolID'))}, ${JSON.stringify(HistoryID)})`})  
 
  
              future.onIOPub  = (msg) => {
