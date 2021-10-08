@@ -306,3 +306,25 @@
       padding: 10px;
 
   }
+
+  .galaxy-history-list {
+
+    background-color: rgb(143, 145, 145);
+    padding: 5px;
+    border-color: rgb(143, 145, 145);
+    border-width: 5px;
+    margin: 5px;
+    /* width: 40%; */
+
+  }
+
+  .galaxy-history-list select{
+
+    width: 100%;
+    padding: 12px 20px;
+    margin: 8px 0;
+    display: inline-block;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+  }

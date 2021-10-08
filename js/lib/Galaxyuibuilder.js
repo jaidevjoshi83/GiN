@@ -53,6 +53,7 @@
          </div>
          <div class="nbtools-error" data-traitlet="error"></div>
          <div class="nbtools-info" data-traitlet="info"></div>
+         <div class="history-list"></div> 
          <div class="nbtools-form"></div>
          <div class="nbtools-footer"></div>
          <div class="nbtools-buttons">
@@ -79,6 +80,9 @@
          var self = this;
  
          var FormParent = this.el.querySelector('.Galaxy-form');
+
+        //  var HistoryList =  this.AddHistoryList()
+        //  FormParent.append(HistoryList)
  
          // console.log(inputs)
  
@@ -116,13 +120,16 @@
          
      }
  
-     Main_Form (inputs, selected_index='default') {
+     Main_Form (inputs, selected_value='default') {
  
          var FormParent = this.el.querySelector('.Galaxy-form');
- 
+
+         var HistList = this.AddHistoryList(selected_value)
+         FormParent.append(HistList)
+
          var self = this
          _.each(inputs, (input) => {
-             self.add(input, FormParent, '', selected_index);
+             self.add(input, FormParent, '', selected_value);
          });
      }
  
@@ -267,41 +274,116 @@
          FormParent.append(row)
          return row
      }
+
+
+     AddHistoryList(Selected_value, selected_value='default') {
+
+        var self = this
+
+        const options =  this.model.get('History_IDs')
+        const select = document.createElement('select')
+        select.id = `History_IDs`  
+        select.className = 'InputData'   
+        // select.name = NamePrefix+input_def['name']
+     
+        for(var i = 0; i < options.length; i++) {
+              const opt = `${i}: ${options[i]['name']}`;
+              const el = document.createElement("option");
+              el.textContent = opt;
+              el.value =  `${options[i]['id']}`;
+              select.appendChild(el);
+        }
+
+
+        if (selected_value == 'default') {
+
+
+            for(var i, j = 0; i = select.options[j]; j++) {
+                if(i.value == Selected_value) {
+                    select.selectedIndex = j;
+                    break;
+                }
+            }
+        }
+
+
+        const HistoryList = document.createElement('div')
+
+        const title = document.createElement('div')
+        title.className = 'history-title'
+        const TitleSpan = document.createElement('span')
+        TitleSpan.className = "galaxy-history-title"
+        TitleSpan.textContent = 'History List'
+        TitleSpan.style.display = 'inline'
+        title.append(TitleSpan)
+        HistoryList.append(title)
+
+        HistoryList.className = "galaxy-history-list"
+        HistoryList.append(select)
+
+
+        select.addEventListener("change", () => {
  
-    //  AddRepeat(input_def, FormParent, NamePrefix) {
+            var HistoryID = select.value
+
+            // console.log(queryID )
+
+
+            var children = self.element.querySelector('.Galaxy-form').children;
+            var Inputs = self.ReturnData(children)
+
+            const notebook = ContextManager.tool_registry.current
+            var future = notebook.context.sessionContext.session.kernel.requestExecute({code: `from galaxylab import GalaxyTaskWidget\nGalaxyTaskWidget.UpdateForm(${JSON.stringify(self.model.get('GalInstace'))}, ${JSON.stringify(Inputs)}, ${JSON.stringify(self.model.get('ToolID'))}, ${JSON.stringify(HistoryID)})`})  
+
  
-    //      var self = this
-    //      input_def.id = this.uid()
+             future.onIOPub  = (msg) => {
  
-    //      var Button = document.createElement('button')
-    //      Button.innerText = 'Add Repeat Block'
-    //      Button.className = 'RepeatButton'
+                const msgType = msg.header.msg_type;
+                switch (msgType) {
+                  case 'execute_result':
+                  case 'display_data':
+                  case 'update_display_data':
+                    future.onIOPub = msg.content;
  
-    //      const row = document.createElement('div')
-    //      const title = document.createElement('div')
-    //      title.className = 'ui-from-title'
-    //      const TitleSpan = document.createElement('span')
-    //      TitleSpan.className = "ui-form-title-text"
-    //      TitleSpan.textContent = input_def['title']
-    //      TitleSpan.style.display = 'inline'
-    //      title.append(TitleSpan)
-    //      row.className = 'ui-repeat section-row'
-    //      row.id = input_def.id
-    //      row.append(title)
-    //      // row.append(input)
-    //      var SuffixName = input_def['name']
+                    let refine_inputs = future.onIOPub.data['application/json'];
  
-    //     for (var j in input_def['inputs']){
-    //         this.add(input_def['inputs'][j], row, NamePrefix+SuffixName+`_${j}|`)
-    //      }
+                        var FormParent = self.el.querySelector('.Galaxy-form')
+                        self.removeAllChildNodes(FormParent)
  
-    //      FormParent.append(row)
-    //      FormParent.append(Button)
-    //      Button.addEventListener("click", function(e){ 
-    //          e.preventDefault(); self.AddRepeat(input_def, FormParent, NamePrefix) 
-    //      });
-    //      return row
-    //  }
+                        //######################################## //Fix me in future
+ 
+                        const Button = document.createElement('button')
+                        Button.style.display = 'none'
+                        Button.type = 'button'
+                        Button.id = 'submit'
+                        Button.className  = 'Galaxy-form-button'
+                
+                        FormParent.append(Button)
+ 
+                        //########################################
+ 
+                     try { 
+
+                        self.Main_Form(refine_inputs, HistoryID);
+                      } catch(err){
+                        console.log(err);
+                      }
+ 
+                    break;
+                  default:
+                    break;
+                }
+                 return
+              };
+
+
+        });
+
+        return HistoryList
+
+    }
+ 
+
 
      AddRepeat(input_def, FormParent, NamePrefix) {
 
@@ -981,11 +1063,14 @@
  
             // console.log('@@@@@@@@@@@@@@@@@@@@');
             const notebook = ContextManager.tool_registry.current
+
+
+            var HistoryID = self.element.querySelector('#History_IDs').value
  
             var children = self.element.querySelector('.Galaxy-form').children;
             var Inputs = self.ReturnData(children)
             // console.log(Inputs)
-            notebook.context.sessionContext.session.kernel.requestExecute({code: `from galaxylab import GalaxyTaskWidget\nGalaxyTaskWidget.submit_job(${JSON.stringify(this.model.get('GalInstace'))}, ${JSON.stringify(Inputs)})`})
+            notebook.context.sessionContext.session.kernel.requestExecute({code: `from galaxylab import GalaxyTaskWidget\nGalaxyTaskWidget.submit_job(${JSON.stringify(this.model.get('GalInstace'))}, ${JSON.stringify(Inputs)}, ${JSON.stringify(HistoryID)})`})
  
             // console.log('@@@@@@@@@@@@@@@@@@@@');
  

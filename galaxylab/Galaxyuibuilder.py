@@ -113,6 +113,8 @@ class GalaxyUIBuilder(BaseWidget, NBTool):
     inputs = List(['Hello']).tag(sync=True)
     form_output = Dict().tag(sync=True)
     History_IDs = List(['Hello']).tag(sync=True)
+
+   
     UI =  Dict(sync=True)
     ToolID = Unicode(sync=True)
 

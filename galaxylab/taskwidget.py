@@ -112,7 +112,7 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
 
         #####################
 
-    def submit_job(GInstace, Tool_inputs):
+    def submit_job(GInstace, Tool_inputs, HistoryID):
 
         gi = GalaxyInstance(GInstace['URL'], email=GInstace['email_ID'], api_key=GInstace['API_key'], verify=True)
         tool_inputs  = json5.loads(Tool_inputs)
@@ -126,11 +126,11 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
         print(Tool_inputs)
         print("*****************")
 
-        job = gi.tools.gi.tools.run_tool(history_id='f597429621d6eb2b', tool_id=GInstace['tool_ID'], tool_inputs=tool_inputs)
+        job = gi.tools.gi.tools.run_tool(history_id=HistoryID, tool_id=GInstace['tool_ID'], tool_inputs=tool_inputs)
 
         display(GalaxyJobWidget(job, gi.gi))
 
-    def UpdateForm(GInstace, Tool_inputs, toolID):
+    def UpdateForm(GInstace, Tool_inputs, toolID, HistoryID):
 
         NewInputs = {}
 
@@ -142,7 +142,7 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
         print("###########&######")
         print( NewInputs)
         gi = GalaxyInstance(GInstace['URL'], email=GInstace['email_ID'], api_key=GInstace['API_key'], verify=True)
-        inputs = gi.gi.tools.gi.tools.build_tool(tool_id=toolID, inputs=NewInputs, history_id='33b43b4e7093c91f')
+        inputs = gi.gi.tools.gi.tools.build_tool(tool_id=toolID, inputs=NewInputs, history_id=HistoryID)
         print("###########&######")
 
         # return json.dumps(inputs)
@@ -276,6 +276,11 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
         return HData
 
 
+    def ReturnHistory(self, historyID):
+        return historyID
+
+
+
     def __init__(self, tool=None, **kwargs):
 
         """Initialize the task widget"""
@@ -300,12 +305,12 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
         self.parameter_spec = self.create_param_spec(self.tool) # Create run task function
         # self.parameter_spec = None
 
-        self.History_IDs = self.ReturnHistoryData(tool)
-
-        inputs = self.tool.gi.tools.gi.tools.build_tool(tool_id=tool.wrapped['id'], history_id='33b43b4e7093c91f')
         self.History_IDs = self.tool.gi.histories.gi.histories.get_histories()
 
-        print(self.History_IDs)
+        inputs = self.tool.gi.tools.gi.tools.build_tool(tool_id=tool.wrapped['id'], history_id=self.History_IDs[0]['id'])
+       
+
+        # print(self.History_IDs)
 
         GalaxyUIBuilder.__init__(self, self.function_wrapper, inputs['inputs'], self.History_IDs, self.GalInstace,tool.wrapped['id'], parameters=self.parameter_spec,
                            color=self.default_color,
