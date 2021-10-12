@@ -328,3 +328,28 @@
     border-radius: 4px;
     box-sizing: border-box;
   }
+
+
+  .dataset-list {
+      background: rgb(182, 179, 179);
+      float: right;
+      width: 50%;
+
+  }
+
+  .galaxy-data-panel {
+
+    height: 400px; 
+    overflow-y: scroll;
+
+
+  }
+
+  .data-set-row {
+    list-style-type: none;
+    height: 50px;
+    margin: 5px;
+    background: azure;
+    padding: 20px;
+  }
+

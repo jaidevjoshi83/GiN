@@ -7,15 +7,13 @@ from nbtools import NBTool,  python_safe, EventManager
 from .Galaxyuibuilder import GalaxyUIBuilder
 from .shim import  get_kinds
 from .util import DEFAULT_COLOR, DEFAULT_LOGO
-
 import bioblend
 from bioblend.galaxy.objects import *
 import json5
-
 import logging
 import pickle
-
 import json
+import IPython.display
 
 
 class GalaxyTaskWidget(GalaxyUIBuilder):
@@ -130,25 +128,30 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
 
         display(GalaxyJobWidget(job, gi.gi))
 
-    def UpdateForm(GInstace, Tool_inputs, toolID, HistoryID):
+    def UpdateForm(GInstace={}, Tool_inputs=None, toolID=None, HistoryID=None, Python_side=False):
 
-        NewInputs = {}
-
-        for a in Tool_inputs.keys():
-            NewInputs[a] = Tool_inputs[a]
-            if 'Input_data:' in Tool_inputs[a]:
-                NewInputs[a] = json.loads(Tool_inputs[a].split('Input_data:')[1])
-
-        print("###########&######")
-        print( NewInputs)
         gi = GalaxyInstance(GInstace['URL'], email=GInstace['email_ID'], api_key=GInstace['API_key'], verify=True)
-        inputs = gi.gi.tools.gi.tools.build_tool(tool_id=toolID, inputs=NewInputs, history_id=HistoryID)
-        print("###########&######")
+       
+        if (Tool_inputs != None) and (toolID != None):
 
-        # return json.dumps(inputs)
+            NewInputs = {}
 
-        import IPython.display
-        return IPython.display.JSON(data=inputs['inputs'])
+            for a in Tool_inputs.keys():
+                NewInputs[a] = Tool_inputs[a]
+                if 'Input_data:' in Tool_inputs[a]:
+                    NewInputs[a] = json.loads(Tool_inputs[a].split('Input_data:')[1])
+
+            inputs = gi.gi.tools.gi.tools.build_tool(tool_id=toolID, inputs=NewInputs, history_id=HistoryID)
+            return IPython.display.JSON(data=inputs['inputs'])
+
+        else:
+            HistoryData = gi.gi.datasets.gi.datasets.get_datasets(history_id=HistoryID, state=ok, deleted=False, purged=False, visible=True)
+
+            if Python_side==True:
+                return HistoryData
+            else:
+                return IPython.display.JSON(data=HistoryData)
+
 
         # return inputs['inputs']
         
@@ -262,22 +265,7 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
 
 
     def ReturnHistoryData(self , tool):
-
-        gi = tool.gi.gi
-        HData = []
-
-        for i in gi.datasets.get_datasets():
-            data = []
-            if i['deleted'] != True: 
-                data.append(i['name']+"(History ID: "+str(i['history_id'])+")")
-                data.append('Input Data ID: '+i['id'])
-                HData.append(data)
-
         return HData
-
-
-    def ReturnHistory(self, historyID):
-        return historyID
 
 
 
@@ -289,7 +277,7 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
         self.function_wrapper = self.create_function_wrapper(self.tool) 
         # self.function_wrapper = None
 
-        self.GalInstace = { 
+        self.galInstace = { 
                             "API_key":  self.tool.gi.gi.key,
                             "email_ID": self.tool.gi.gi.users.get_current_user()['email'],
                             "URL":      self.tool.gi.gi.base_url,
@@ -307,12 +295,12 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
 
         self.History_IDs = self.tool.gi.histories.gi.histories.get_histories()
 
-        inputs = self.tool.gi.tools.gi.tools.build_tool(tool_id=tool.wrapped['id'], history_id=self.History_IDs[0]['id'])
-       
+        inputs = self.tool.gi.tools.gi.tools.build_tool(tool_id=tool.wrapped['id'], history_id=self.History_IDs[1]['id'])
 
-        # print(self.History_IDs)
+        self.HistoryData = GalaxyTaskWidget.UpdateForm(GInstace=self.galInstace, HistoryID=self.History_IDs[0]['id'], Python_side=True)
 
-        GalaxyUIBuilder.__init__(self, self.function_wrapper, inputs['inputs'], self.History_IDs, self.GalInstace,tool.wrapped['id'], parameters=self.parameter_spec,
+
+        GalaxyUIBuilder.__init__(self, self.function_wrapper, inputs['inputs'], self.History_IDs, self.HistoryData, self.galInstace, tool.wrapped['id'], parameters=self.parameter_spec,
                            color=self.default_color,
                            logo=self.default_logo,
                            upload_callback=self.generate_upload_callback(),
