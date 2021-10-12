@@ -19,7 +19,7 @@
  export class GalaxyUIBuilderModel extends BaseWidgetModel{
      
      defaults() {
-         return Object.assign(Object.assign(Object.assign({}, super.defaults()), { _model_name: GalaxyUIBuilderModel.model_name, _model_module: GalaxyUIBuilderModel.model_module, _model_module_version: GalaxyUIBuilderModel.model_module_version, _view_name: GalaxyUIBuilderModel.view_name, _view_module: GalaxyUIBuilderModel.view_module, _view_module_version: GalaxyUIBuilderModel.view_module_version, name: 'Python Function', description: '', origin: '', _parameters: [], parameter_groups: [], function_import: '', register_tool: true, collapse: true, events: {}, buttons: {}, display_header: true, display_footer: true, busy: false, run_label: 'Execute', GalInstace: {}, output: undefined, inputs:[], form_output:{}, History_Data:[], UI:{}, ToolID:'' }));
+         return Object.assign(Object.assign(Object.assign({}, super.defaults()), { _model_name: GalaxyUIBuilderModel.model_name, _model_module: GalaxyUIBuilderModel.model_module, _model_module_version: GalaxyUIBuilderModel.model_module_version, _view_name: GalaxyUIBuilderModel.view_name, _view_module: GalaxyUIBuilderModel.view_module, _view_module_version: GalaxyUIBuilderModel.view_module_version, name: 'Python Function', description: '', origin: '', _parameters: [], parameter_groups: [], function_import: '', register_tool: true, collapse: true, events: {}, buttons: {}, display_header: true, display_footer: true, busy: false, run_label: 'Execute', GalInstace: {}, output: undefined, inputs:[], form_output:{}, History_Data:[], UI:{}, ToolID:'', HistoryData:[] }));
      }
  }
  GalaxyUIBuilderModel.model_name = 'GalaxyUIBuilderModel';
@@ -59,6 +59,7 @@
          <div class="nbtools-buttons">
              <button class="nbtools-run" type="button" data-traitlet="run_label"></button>
          </div>`;
+         this.dragged = ''
  
      }
  
@@ -71,26 +72,17 @@
          super.render();
  
          const inputs = this.model.get('inputs')
- 
-         // console.log(inputs)
          
          //########################
  
          this.CreateForm()
-         var self = this;
- 
-         var FormParent = this.el.querySelector('.Galaxy-form');
-
-        //  var HistoryList =  this.AddHistoryList()
-        //  FormParent.append(HistoryList)
- 
-         // console.log(inputs)
- 
          this.Main_Form(inputs)
- 
-         // _.each(inputs, (input) => {
-         //     self.add(input, FormParent, '');
-         // });
+
+
+
+         var DataList = this.el.querySelector('.dataset-list');
+         DataList.append(this.AddDataSetTable())
+     
  
          //########################
  
@@ -121,6 +113,8 @@
      }
  
      Main_Form (inputs, selected_value='default') {
+
+
  
          var FormParent = this.el.querySelector('.Galaxy-form');
 
@@ -249,6 +243,11 @@
  
          }
      }
+
+
+    ReturnKernelOutput(code ){
+
+     }
  
      AddText (input_def, FormParent, NamePrefix) {
  
@@ -275,6 +274,195 @@
          return row
      }
 
+     AddDataSetTable(selected_value='default') {
+
+            var self = this
+    
+            const options =  this.model.get('History_IDs')
+            const select = document.createElement('select')
+            select.id = `History_IDs`  
+            select.className = 'InputData'   
+            // select.name = NamePrefix+input_def['name']
+
+            var Selected_value = select.value 
+
+         
+            for(var i = 0; i < options.length; i++) {
+                  const opt = `${i}: ${options[i]['name']}`;
+                  const el = document.createElement("option");
+                  el.textContent = opt;
+                  el.value =  `${options[i]['id']}`;
+                  select.appendChild(el);
+            }
+    
+    
+            if (selected_value == 'default') {
+    
+                for(var i, j = 0; i = select.options[j]; j++) {
+                    if(i.value == Selected_value) {
+                        select.selectedIndex = j;
+                        break;
+                    }
+                }
+            }
+
+            const DataHistoryList = document.createElement('div')
+
+            const title = document.createElement('div')
+            title.className = 'history-title'
+            const TitleSpan = document.createElement('span')
+            TitleSpan.className = "galaxy-history-title"
+            TitleSpan.textContent = 'History List'
+            TitleSpan.style.display = 'inline'
+            title.append(TitleSpan)
+            DataHistoryList.append(title)
+    
+            DataHistoryList.className = "galaxy-history-list"
+            DataHistoryList.append(select)
+
+            var DataTable = document.createElement('ul')
+            DataTable.className = 'galaxy-data-panel'
+
+            console.log(this.element.querySelector('.Galaxy-form').innerHeight)
+            DataTable.style.height = this.element.querySelector('.Galaxy-form').style.offsetHeight
+
+            var InitialData = this.model.get('HistoryData')
+
+            console.log(InitialData)
+
+            for(var i = 0; i < InitialData.length; i++) {
+
+                var Data = JSON.stringify(InitialData[i]['id'])
+
+                var DataTableElement = document.createElement('li')
+                DataTableElement.className = 'data-set-row'
+
+                var DataHeader = document.createElement('div')
+                DataHeader.className = 'data-header'
+
+
+                var DataDescription =  document.createElement('div')
+
+                DataDescription.className = 'data-description'
+                DataDescription.innerText = InitialData[i]['create_time']
+
+                var BoldText = document.createElement('b')
+    
+                BoldText.innerText = InitialData[i]['name']
+
+                DataHeader.append(BoldText)
+
+
+                DataHeader.value = JSON.stringify(InitialData[i])
+
+
+                DataTableElement.append(DataHeader )
+                DataTableElement.append(DataDescription)
+
+                DataTableElement.draggable = 'true'
+                // DataTableElement.ondragstart = "event.dataTransfer.setData('text/plain',null)"
+
+                DataTableElement.addEventListener("drag", function(event) {
+                    console.log("its Dragable")
+                }, false)
+
+
+                DataTableElement.addEventListener("dragstart", function(event) {
+                    // store a ref. on the dragged elem
+                    self.dragged = event.target;
+
+                    console.log(self.dragged.innerText)
+
+
+                    // make it half transparent
+                    // event.target.style.opacity = .5;
+                    console.log('its a drag start')
+                  }, false);
+
+                DataTable.append(DataTableElement)
+            }
+
+            console.log(DataTable)
+
+            DataHistoryList.append(select)
+            DataHistoryList.append(DataTable)
+
+            select.addEventListener("change", () => {
+     
+                var HistoryID = select.value
+    
+                var children = self.element.querySelector('.Galaxy-form').children;
+                var Inputs = self.ReturnData(children)
+    
+                const notebook = ContextManager.tool_registry.current
+    
+                var future = notebook.context.sessionContext.session.kernel.requestExecute({code: `from galaxylab import GalaxyTaskWidget\nGalaxyTaskWidget.UpdateForm( GInstace=${JSON.stringify(self.model.get('GalInstace'))}, HistoryID=${JSON.stringify(HistoryID)})`}) 
+                var Origin = self.element.querySelector('.galaxy-data-panel')
+
+                console.log(Origin)
+
+                Origin.parentNode.removeChild(Origin)
+
+                // self.removeAllChildNodes(Origin)
+                
+                 future.onIOPub  = (msg) => {
+     
+                    const msgType = msg.header.msg_type;
+                    switch (msgType) {
+                      case 'execute_result':
+                      case 'display_data':
+                      case 'update_display_data':
+                        future.onIOPub = msg.content;
+     
+                        let refine_inputs = future.onIOPub.data['application/json'];
+     
+                            //########################################
+     
+                         try { 
+
+                            var InnerDataTable = document.createElement('ul')
+                            InnerDataTable.className = 'galaxy-data-panel'
+                            
+                            for(var i = 0; i < refine_inputs.length; i++) {
+
+                                var InnerElemet = `<div class="data-header"><b> ${refine_inputs[i]['name']}</b></div>
+                                                   <div class="data-description"> ${refine_inputs[i]['create_time']} </div>`
+                                var DataTableElement = document.createElement('li')
+                                DataTableElement.className = 'data-set-row'
+                                DataTableElement.innerHTML =  InnerElemet
+                                DataTableElement.draggable = 'true'
+                                DataTableElement.ondragstart = "drag(event)"
+                                InnerDataTable.append(DataTableElement)
+
+                            }
+
+                            // console.log(DataTable)
+                            console.log(refine_inputs)
+
+                            //######################################## //Fix me in future
+
+                            DataHistoryList.append(InnerDataTable)
+                            
+                          } catch(err){
+                            console.log(err);
+                          }
+     
+                        break;
+                      default:
+                        break;
+                    }
+                     return
+                  };
+    
+            });
+
+           
+           
+
+
+        return DataHistoryList
+     }
+
 
      AddHistoryList(Selected_value, selected_value='default') {
 
@@ -294,9 +482,7 @@
               select.appendChild(el);
         }
 
-
         if (selected_value == 'default') {
-
 
             for(var i, j = 0; i = select.options[j]; j++) {
                 if(i.value == Selected_value) {
@@ -305,7 +491,6 @@
                 }
             }
         }
-
 
         const HistoryList = document.createElement('div')
 
@@ -326,8 +511,7 @@
  
             var HistoryID = select.value
 
-            // console.log(queryID )
-
+            // console.log(HistoryID )
 
             var children = self.element.querySelector('.Galaxy-form').children;
             var Inputs = self.ReturnData(children)
@@ -347,11 +531,19 @@
  
                     let refine_inputs = future.onIOPub.data['application/json'];
  
+                        //########################################
+ 
+                     try { 
+
                         var FormParent = self.el.querySelector('.Galaxy-form')
+
+                        console.log(FormParent)
+
+                        
                         self.removeAllChildNodes(FormParent)
- 
+
                         //######################################## //Fix me in future
- 
+
                         const Button = document.createElement('button')
                         Button.style.display = 'none'
                         Button.type = 'button'
@@ -359,12 +551,9 @@
                         Button.className  = 'Galaxy-form-button'
                 
                         FormParent.append(Button)
- 
-                        //########################################
- 
-                     try { 
 
                         self.Main_Form(refine_inputs, HistoryID);
+                        
                       } catch(err){
                         console.log(err);
                       }
@@ -375,7 +564,6 @@
                 }
                  return
               };
-
 
         });
 
@@ -514,7 +702,10 @@
          DataSelect.id = `select-${input_def.id}`  
          DataSelect.className = 'InputData'   
          DataSelect.name = NamePrefix+input_def['name']
-      
+
+         DataSelect.ondrop="drop(event)"
+         DataSelect.ondragover="allowDrop(event)"
+
          for (var i = 0; i < options['hda'].length; i++) {
              const opt = options['hda'][i].name;
              const el = document.createElement("option");
@@ -523,11 +714,35 @@
              // el.value = JSON.stringify({'values': [options['hda'][i]]})
              DataSelect.appendChild(el);
          }
- 
+
+         DataSelect.addEventListener("dragover", function(event) {
+            // prevent default to allow drop
+            event.preventDefault();
+            console.log('its Drag over')
+          }, false);
+
+          DataSelect.addEventListener("drop", function(event) {
+            // prevent default action (open as link for some elements)
+            event.preventDefault();
+            // move dragged elem to the selected drop target
+            if (event.target.className == "InputData") {
+              event.target.style.background = "";
+            //   dragged.parentNode.removeChild( dragged );
+            //   event.target.appendChild( dragged );
+               var draged_item = self.dragged.firstElementChild
+               self.removeAllChildNodes(DataSelect)
+               console.log(draged_item)
+               const opt = JSON.parse(draged_item.value)['name']
+               const el = document.createElement("option");
+               el.textContent = opt;
+               el.value = 'Input_data:'+`{values:[${draged_item.value}]}` //Fix me 
+               // el.value = JSON.stringify({'values': [options['hda'][i]]})
+               DataSelect.appendChild(el);
+
+            }
+          }, false);
+
          for (var i, j = 0; i = DataSelect.options[j]; j++) {
- 
-             // console.log(i.value.split(":")[3].replace('"',"").split(',')[0].replace('"',''), input_def.value.values[0]['id'])
-             // console.log(JSON.parse(i.value.split('Input_data:')[1])['values'][0]['id'])
  
              if (input_def.value == null) {
                  DataSelect.selectedIndex = 0;
@@ -560,11 +775,8 @@
  
              var children = self.element.querySelector('.Galaxy-form').children;
              var Inputs = self.ReturnData(children)
-
-
              var HistoryID = self.element.querySelector('#History_IDs').value
  
-
              const notebook = ContextManager.tool_registry.current
              var future = notebook.context.sessionContext.session.kernel.requestExecute({code: `from galaxylab import GalaxyTaskWidget\nGalaxyTaskWidget.UpdateForm(${JSON.stringify(self.model.get('GalInstace'))}, ${JSON.stringify(Inputs)}, ${JSON.stringify(self.model.get('ToolID'))}, ${JSON.stringify(HistoryID)})`})    
          
@@ -1069,8 +1281,10 @@
             // console.log('@@@@@@@@@@@@@@@@@@@@');
             const notebook = ContextManager.tool_registry.current
 
-
             var HistoryID = self.element.querySelector('#History_IDs').value
+
+            console.log(self.element.querySelector('.Galaxy-form'))
+            console.log(self.element.querySelector('.Galaxy-form').offsetHeight)
  
             var children = self.element.querySelector('.Galaxy-form').children;
             var Inputs = self.ReturnData(children)
@@ -1079,7 +1293,7 @@
  
             // console.log('@@@@@@@@@@@@@@@@@@@@');
  
-             // Collapse the widget, if collapse=True
+            //Collapse the widget, if collapse=True
  
              if (this.model.get('collapse'))
                  this.el.querySelector('.nbtools-collapse').click();
