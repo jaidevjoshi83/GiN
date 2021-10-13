@@ -323,12 +323,9 @@
             var DataTable = document.createElement('ul')
             DataTable.className = 'galaxy-data-panel'
 
-            console.log(this.element.querySelector('.Galaxy-form').innerHeight)
             DataTable.style.height = this.element.querySelector('.Galaxy-form').style.offsetHeight
 
             var InitialData = this.model.get('HistoryData')
-
-            console.log(InitialData)
 
             for(var i = 0; i < InitialData.length; i++) {
 
@@ -340,22 +337,15 @@
                 var DataHeader = document.createElement('div')
                 DataHeader.className = 'data-header'
 
-
                 var DataDescription =  document.createElement('div')
-
                 DataDescription.className = 'data-description'
                 DataDescription.innerText = InitialData[i]['create_time']
 
                 var BoldText = document.createElement('b')
-    
                 BoldText.innerText = InitialData[i]['name']
-
                 DataHeader.append(BoldText)
 
-
                 DataHeader.value = JSON.stringify(InitialData[i])
-
-
                 DataTableElement.append(DataHeader )
                 DataTableElement.append(DataDescription)
 
@@ -366,23 +356,15 @@
                     console.log("its Dragable")
                 }, false)
 
-
                 DataTableElement.addEventListener("dragstart", function(event) {
                     // store a ref. on the dragged elem
                     self.dragged = event.target;
-
-                    console.log(self.dragged.innerText)
-
-
                     // make it half transparent
                     // event.target.style.opacity = .5;
-                    console.log('its a drag start')
                   }, false);
 
                 DataTable.append(DataTableElement)
             }
-
-            console.log(DataTable)
 
             DataHistoryList.append(select)
             DataHistoryList.append(DataTable)
@@ -398,8 +380,6 @@
     
                 var future = notebook.context.sessionContext.session.kernel.requestExecute({code: `from galaxylab import GalaxyTaskWidget\nGalaxyTaskWidget.UpdateForm( GInstace=${JSON.stringify(self.model.get('GalInstace'))}, HistoryID=${JSON.stringify(HistoryID)})`}) 
                 var Origin = self.element.querySelector('.galaxy-data-panel')
-
-                console.log(Origin)
 
                 Origin.parentNode.removeChild(Origin)
 
@@ -425,19 +405,48 @@
                             
                             for(var i = 0; i < refine_inputs.length; i++) {
 
-                                var InnerElemet = `<div class="data-header"><b> ${refine_inputs[i]['name']}</b></div>
-                                                   <div class="data-description"> ${refine_inputs[i]['create_time']} </div>`
+                                // var InnerElemet = `<div class="data-header"><b> ${refine_inputs[i]['name']}</b></div>
+                                //                    <div class="data-description"> ${refine_inputs[i]['create_time']} </div>`
                                 var DataTableElement = document.createElement('li')
                                 DataTableElement.className = 'data-set-row'
-                                DataTableElement.innerHTML =  InnerElemet
+
+                                var DataHeader = document.createElement('div')
+                                DataHeader.className = 'data-header'
+
+                                var BoldText = document.createElement('b')
+
+                            
+                                BoldText.innerText = refine_inputs[i]['name']
+                                DataHeader.append(BoldText)
+
+                                DataHeader.value = JSON.stringify(refine_inputs[i])
+                
+                                var DataDescription =  document.createElement('div')
+                                DataDescription.className = 'data-description'
+                                DataDescription.innerText =  refine_inputs[i]['create_time']
+
+                                DataTableElement.append(DataHeader)
+                                DataTableElement.append(DataDescription)
                                 DataTableElement.draggable = 'true'
                                 DataTableElement.ondragstart = "drag(event)"
+
+                                DataTableElement.addEventListener("drag", function(event) {
+                                    console.log("its Dragable")
+                                }, false)
+
+                                DataTableElement.addEventListener("dragstart", function(event) {
+                                    // store a ref. on the dragged elem
+                                    self.dragged = event.target;
+                                    // make it half transparent
+                                    // event.target.style.opacity = .5;
+                                  }, false);
+
                                 InnerDataTable.append(DataTableElement)
 
                             }
 
                             // console.log(DataTable)
-                            console.log(refine_inputs)
+                            // console.log(refine_inputs)
 
                             //######################################## //Fix me in future
 
@@ -726,18 +735,22 @@
             event.preventDefault();
             // move dragged elem to the selected drop target
             if (event.target.className == "InputData") {
-              event.target.style.background = "";
-            //   dragged.parentNode.removeChild( dragged );
-            //   event.target.appendChild( dragged );
-               var draged_item = self.dragged.firstElementChild
-               self.removeAllChildNodes(DataSelect)
-               console.log(draged_item)
-               const opt = JSON.parse(draged_item.value)['name']
-               const el = document.createElement("option");
-               el.textContent = opt;
-               el.value = 'Input_data:'+`{values:[${draged_item.value}]}` //Fix me 
-               // el.value = JSON.stringify({'values': [options['hda'][i]]})
-               DataSelect.appendChild(el);
+
+                console.log('ok')
+                event.target.style.background = "";
+                //   dragged.parentNode.removeChild( dragged );
+                //   event.target.appendChild( dragged );
+
+                var draged_item = self.dragged.firstElementChild
+                self.removeAllChildNodes(DataSelect)
+
+                const opt = JSON.parse(draged_item.value)['name']
+                const el = document.createElement("option");
+                el.textContent = opt;
+                el.value = 'Input_data:'+`{values:[${draged_item.value}]}` //Fix me 
+                
+                // el.value = JSON.stringify({'values': [options['hda'][i]]})
+                DataSelect.appendChild(el);
 
             }
           }, false);
