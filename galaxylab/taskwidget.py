@@ -145,7 +145,7 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
             return IPython.display.JSON(data=inputs['inputs'])
 
         else:
-            HistoryData = gi.gi.datasets.gi.datasets.get_datasets(history_id=HistoryID, state=ok, deleted=False, purged=False, visible=True)
+            HistoryData = gi.gi.datasets.gi.datasets.get_datasets(history_id=HistoryID, state='ok', deleted=False, purged=False, visible=True)
 
             if Python_side==True:
                 return HistoryData
