@@ -347,3 +347,36 @@
     padding: 20px;
   }
 
+
+  .help-button {
+    background-color: rgb(143, 145, 145);
+    color: rgb(255, 255, 255);
+    cursor: pointer;
+    padding: 18px;
+    width: 97.5%;
+    border: none;
+    text-align: left;
+    outline: none;
+    font-size: 15px;
+    font-weight: bold;
+  }
+
+  .active, .help-button:hover {
+    background-color: rgb(97, 99, 99);
+  }
+
+  .help-content {
+    padding: 0 18px;
+    display: none;
+    overflow: hidden;
+    background-color: #f1f1f1;
+    /* border:2px solid black; */
+    border-bottom:1px solid rgb(65, 60, 60);
+    border-left: 1px solid rgb(65, 60, 60);
+    border-right: 1px solid rgb(65, 60, 60);
+
+    padding-top: 10px;
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-bottom: 10px;
+  }

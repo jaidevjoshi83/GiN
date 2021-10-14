@@ -19,7 +19,7 @@
  export class GalaxyUIBuilderModel extends BaseWidgetModel{
      
      defaults() {
-         return Object.assign(Object.assign(Object.assign({}, super.defaults()), { _model_name: GalaxyUIBuilderModel.model_name, _model_module: GalaxyUIBuilderModel.model_module, _model_module_version: GalaxyUIBuilderModel.model_module_version, _view_name: GalaxyUIBuilderModel.view_name, _view_module: GalaxyUIBuilderModel.view_module, _view_module_version: GalaxyUIBuilderModel.view_module_version, name: 'Python Function', description: '', origin: '', _parameters: [], parameter_groups: [], function_import: '', register_tool: true, collapse: true, events: {}, buttons: {}, display_header: true, display_footer: true, busy: false, run_label: 'Execute', GalInstace: {}, output: undefined, inputs:[], form_output:{}, History_Data:[], UI:{}, ToolID:'', HistoryData:[] }));
+         return Object.assign(Object.assign(Object.assign({}, super.defaults()), { _model_name: GalaxyUIBuilderModel.model_name, _model_module: GalaxyUIBuilderModel.model_module, _model_module_version: GalaxyUIBuilderModel.model_module_version, _view_name: GalaxyUIBuilderModel.view_name, _view_module: GalaxyUIBuilderModel.view_module, _view_module_version: GalaxyUIBuilderModel.view_module_version, name: 'Python Function', description: '', origin: '', _parameters: [], parameter_groups: [], function_import: '', register_tool: true, collapse: true, events: {}, buttons: {}, display_header: true, display_footer: true, busy: false, run_label: 'Execute', GalInstace: {}, output: undefined, inputs:{}, form_output:{}, History_Data:[], UI:{}, ToolID:'', HistoryData:[] }));
      }
  }
  GalaxyUIBuilderModel.model_name = 'GalaxyUIBuilderModel';
@@ -76,7 +76,10 @@
          //########################
  
          this.CreateForm()
-         this.Main_Form(inputs)
+         this.Main_Form(inputs['inputs'])
+         this.AddHelpSection(inputs['help'])
+
+         console.log(inputs['help'])
          this.Data_Tool()
 
          //########################
@@ -155,7 +158,6 @@
             if (FormEelements[i].className == 'ui-form-element section-row'){
                  var tableChild = FormEelements[i];
                  InputPerameters[tableChild.querySelector('.InputData').name] = tableChild.querySelector('.InputData').value
-             
             } 
              
             else if (FormEelements[i].className == 'ui-form-element section-row conditional'){
@@ -246,9 +248,7 @@
      }
 
 
-    ReturnKernelOutput(code ){
 
-     }
  
      AddText (input_def, FormParent, NamePrefix) {
  
@@ -289,7 +289,6 @@
 
             var Selected_value = select.value 
 
-         
             for(var i = 0; i < options.length; i++) {
                   const opt = `${i}: ${options[i]['name']}`;
                   const el = document.createElement("option");
@@ -390,7 +389,7 @@
      
                          try { 
                             
-                            for(var i = 0; i < refine_inputs.length; i++) {
+                            for(var i = 0; i < refine_inputs['inputs'].length; i++) {
 
                                 console.log(refine_inputs)
 
@@ -539,7 +538,7 @@
                 
                         FormParent.append(Button)
 
-                        self.Main_Form(refine_inputs, select.selectedIndex)
+                        self.Main_Form(refine_inputs['inputs'], select.selectedIndex)
                         
                       } catch(err){
                         console.log(err);
@@ -557,8 +556,50 @@
         return HistoryList
 
     }
- 
 
+    AddHelpSection(help){
+
+        var self = this
+
+        var NbtoolsForm = this.element.querySelector('.nbtools-form')
+        var Help = document.createElement('div')
+        Help.className = 'help-section'
+        var HelpContent = document.createElement('div')
+        HelpContent.className = 'help-content'
+        HelpContent.innerHTML = help
+
+    
+
+        this.basics.className = 'help-button-title'
+        var HelpButton = document.createElement('button')
+        // HelpButton.innerText = ButtonTitle
+        HelpButton.className = 'help-button'
+        HelpButton.textContent = 'Help Section'
+
+        Help.append(HelpButton)
+        Help.append(HelpContent)
+        NbtoolsForm.append(Help)
+
+        HelpButton.addEventListener("click", function() {
+
+            let nextSibling = HelpButton.nextElementSibling;   
+ 
+            // console.log(nextSibling.id)
+
+            console.log(help)
+
+            if (nextSibling.style.display == 'none'){
+                nextSibling.style.display = 'block'
+            } else {
+                nextSibling.style.display = 'none'
+            }
+          });
+
+        console.log(help)
+
+        return Help
+    }
+ 
 
      AddRepeat(input_def, FormParent, NamePrefix) {
 
@@ -699,14 +740,14 @@
              el.textContent = opt;
              el.value = 'Input_data:'+JSON.stringify({'values': [options['hda'][i]]}) //Fix me 
              // el.value = JSON.stringify({'values': [options['hda'][i]]})
-             console.log(options['hda'][i])
+            //  console.log(options['hda'][i])
              DataSelect.appendChild(el);
          }
 
          DataSelect.addEventListener("dragover", function(event) {
             // prevent default to allow drop
             event.preventDefault();
-            console.log('its Drag over')
+            // console.log('its Drag over')
           }, false);
 
           DataSelect.addEventListener("drop", function(event) {
@@ -786,10 +827,11 @@
                      // if (refine_inputs.startsWith("'")){
                      //     refine_inputs = refine_inputs.slice(1,-1);
                      // }
+
+                     console.log(refine_inputs)
                      try { 
                         
 
- 
                          //######################################## //Fix me in future
  
                          const Button = document.createElement('button')
@@ -805,13 +847,10 @@
                          //########################################
 
                          var HID = self.element.querySelector('#History_IDs')
-
-                         
                          self.removeAllChildNodes(FormParent)
+                        //  console.log(HID)
 
-                         console.log(HID)
-
-                         self.Main_Form(refine_inputs, HID.selectedIndex)
+                         self.Main_Form(refine_inputs['inputs'], HID.selectedIndex)
                        } catch(err){
                          console.log(err);
                        }
@@ -974,7 +1013,7 @@
  
                      try { 
 
-                        self.Main_Form(refine_inputs);
+                        self.Main_Form(refine_inputs['inputs']);
                       } catch(err){
                         console.log(err);
                       }

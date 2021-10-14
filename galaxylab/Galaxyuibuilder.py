@@ -110,7 +110,7 @@ class GalaxyUIBuilder(BaseWidget, NBTool):
     # GalInstace = Instance('bioblend.galaxy.objects.galaxy_instance.GalaxyInstance').tag(sync=True)
 
     function_or_method = None
-    inputs = List(['Hello']).tag(sync=True)
+    inputs =  Dict().tag(sync=True)
     form_output = Dict().tag(sync=True)
     History_IDs = List(['Hello']).tag(sync=True)
     HistoryData = List(['Hello']).tag(sync=True)
