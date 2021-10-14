@@ -117,11 +117,16 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
 
         for a in tool_inputs.keys():
             if 'Input_data:' in tool_inputs[a]:
+
+                print(tool_inputs)
+
+
                                   
                 tool_inputs[a] = json.loads(tool_inputs[a].split('Input_data:')[1])
+                # tool_inputs[a] = tool_inputs[a].split('Input_data:')[1]
 
         print("*****************")
-        print(Tool_inputs)
+        print(tool_inputs)
         print("*****************")
 
         job = gi.tools.gi.tools.run_tool(history_id=HistoryID, tool_id=GInstace['tool_ID'], tool_inputs=tool_inputs)
@@ -292,11 +297,8 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
 
         self.parameter_spec = self.create_param_spec(self.tool) # Create run task function
         # self.parameter_spec = None
-
         self.History_IDs = self.tool.gi.histories.gi.histories.get_histories()
-
         inputs = self.tool.gi.tools.gi.tools.build_tool(tool_id=tool.wrapped['id'], history_id=self.History_IDs[1]['id'])
-
         self.HistoryData = GalaxyTaskWidget.UpdateForm(GInstace=self.galInstace, HistoryID=self.History_IDs[0]['id'], Python_side=True)
 
 

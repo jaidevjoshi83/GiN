@@ -308,7 +308,6 @@
   }
 
   .galaxy-history-list {
-
     background-color: rgb(143, 145, 145);
     padding: 5px;
     border-color: rgb(143, 145, 145);
@@ -319,7 +318,6 @@
   }
 
   .galaxy-history-list select{
-
     width: 100%;
     padding: 12px 20px;
     margin: 8px 0;
@@ -334,21 +332,17 @@
       background: rgb(182, 179, 179);
       float: right;
       width: 50%;
-
   }
 
   .galaxy-data-panel {
-
     height: 400px; 
     overflow-y: scroll;
-
-
   }
 
   .data-set-row {
     list-style-type: none;
     height: 50px;
-    margin: 5px;
+    margin: 2px;
     background: azure;
     padding: 20px;
   }

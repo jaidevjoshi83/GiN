@@ -77,13 +77,8 @@
  
          this.CreateForm()
          this.Main_Form(inputs)
+         this.Data_Tool()
 
-
-
-         var DataList = this.el.querySelector('.dataset-list');
-         DataList.append(this.AddDataSetTable())
-     
- 
          //########################
  
          // // Hide the header or footer, if necessary
@@ -115,7 +110,6 @@
      Main_Form (inputs, selected_value='default') {
 
 
- 
          var FormParent = this.el.querySelector('.Galaxy-form');
 
          var HistList = this.AddHistoryList(selected_value)
@@ -125,6 +119,13 @@
          _.each(inputs, (input) => {
              self.add(input, FormParent, '', selected_value);
          });
+     }
+
+     Data_Tool(selected_history='default'){
+
+        var DataList = this.el.querySelector('.dataset-list');
+        DataList.append(this.AddDataSetTable())
+
      }
  
      CreateForm() {  //Fix me in future
@@ -276,11 +277,13 @@
 
      AddDataSetTable(selected_value='default') {
 
+        console.log(selected_value)
+
             var self = this
     
             const options =  this.model.get('History_IDs')
             const select = document.createElement('select')
-            select.id = `History_IDs`  
+            select.id = `Data-History_IDs`  
             select.className = 'InputData'   
             // select.name = NamePrefix+input_def['name']
 
@@ -293,17 +296,6 @@
                   el.textContent = opt;
                   el.value =  `${options[i]['id']}`;
                   select.appendChild(el);
-            }
-    
-    
-            if (selected_value == 'default') {
-    
-                for(var i, j = 0; i = select.options[j]; j++) {
-                    if(i.value == Selected_value) {
-                        select.selectedIndex = j;
-                        break;
-                    }
-                }
             }
 
             const DataHistoryList = document.createElement('div')
@@ -373,17 +365,15 @@
      
                 var HistoryID = select.value
     
-                var children = self.element.querySelector('.Galaxy-form').children;
-                var Inputs = self.ReturnData(children)
+                // var children = self.element.querySelector('.Galaxy-form').children;
+                // var Inputs = self.ReturnData(children)
     
                 const notebook = ContextManager.tool_registry.current
     
                 var future = notebook.context.sessionContext.session.kernel.requestExecute({code: `from galaxylab import GalaxyTaskWidget\nGalaxyTaskWidget.UpdateForm( GInstace=${JSON.stringify(self.model.get('GalInstace'))}, HistoryID=${JSON.stringify(HistoryID)})`}) 
                 var Origin = self.element.querySelector('.galaxy-data-panel')
 
-                Origin.parentNode.removeChild(Origin)
-
-                // self.removeAllChildNodes(Origin)
+                self.removeAllChildNodes(Origin)
                 
                  future.onIOPub  = (msg) => {
      
@@ -399,14 +389,11 @@
                             //########################################
      
                          try { 
-
-                            var InnerDataTable = document.createElement('ul')
-                            InnerDataTable.className = 'galaxy-data-panel'
                             
                             for(var i = 0; i < refine_inputs.length; i++) {
 
-                                // var InnerElemet = `<div class="data-header"><b> ${refine_inputs[i]['name']}</b></div>
-                                //                    <div class="data-description"> ${refine_inputs[i]['create_time']} </div>`
+                                console.log(refine_inputs)
+
                                 var DataTableElement = document.createElement('li')
                                 DataTableElement.className = 'data-set-row'
 
@@ -420,6 +407,8 @@
                                 DataHeader.append(BoldText)
 
                                 DataHeader.value = JSON.stringify(refine_inputs[i])
+
+                                console.log(refine_inputs[i])
                 
                                 var DataDescription =  document.createElement('div')
                                 DataDescription.className = 'data-description'
@@ -441,16 +430,15 @@
                                     // event.target.style.opacity = .5;
                                   }, false);
 
-                                InnerDataTable.append(DataTableElement)
+                                Origin.append(DataTableElement)
 
                             }
 
-                            // console.log(DataTable)
-                            // console.log(refine_inputs)
-
                             //######################################## //Fix me in future
 
-                            DataHistoryList.append(InnerDataTable)
+                            // DataHistoryList.append(InnerDataTable)
+
+
                             
                           } catch(err){
                             console.log(err);
@@ -467,13 +455,11 @@
 
            
            
-
-
         return DataHistoryList
      }
 
 
-     AddHistoryList(Selected_value, selected_value='default') {
+     AddHistoryList(selected_value='default') {
 
         var self = this
 
@@ -491,15 +477,9 @@
               select.appendChild(el);
         }
 
-        if (selected_value == 'default') {
-
-            for(var i, j = 0; i = select.options[j]; j++) {
-                if(i.value == Selected_value) {
-                    select.selectedIndex = j;
-                    break;
-                }
-            }
-        }
+        if (selected_value !== 'default') {
+            select.selectedIndex = selected_value
+         }
 
         const HistoryList = document.createElement('div')
 
@@ -519,8 +499,6 @@
         select.addEventListener("change", () => {
  
             var HistoryID = select.value
-
-            // console.log(HistoryID )
 
             var children = self.element.querySelector('.Galaxy-form').children;
             var Inputs = self.ReturnData(children)
@@ -546,7 +524,7 @@
 
                         var FormParent = self.el.querySelector('.Galaxy-form')
 
-                        console.log(FormParent)
+                        // console.log(FormParent)
 
                         
                         self.removeAllChildNodes(FormParent)
@@ -561,7 +539,7 @@
                 
                         FormParent.append(Button)
 
-                        self.Main_Form(refine_inputs, HistoryID);
+                        self.Main_Form(refine_inputs, select.selectedIndex)
                         
                       } catch(err){
                         console.log(err);
@@ -721,6 +699,7 @@
              el.textContent = opt;
              el.value = 'Input_data:'+JSON.stringify({'values': [options['hda'][i]]}) //Fix me 
              // el.value = JSON.stringify({'values': [options['hda'][i]]})
+             console.log(options['hda'][i])
              DataSelect.appendChild(el);
          }
 
@@ -809,8 +788,7 @@
                      // }
                      try { 
                         
-                         var FormParent = self.el.querySelector('.Galaxy-form')
-                         self.removeAllChildNodes(FormParent)
+
  
                          //######################################## //Fix me in future
  
@@ -819,12 +797,21 @@
                          Button.type = 'button'
                          Button.id = 'submit'
                          Button.className  = 'Galaxy-form-button'
+
+                         var FormParent = self.el.querySelector('.Galaxy-form')
                     
                          FormParent.append(Button)
  
                          //########################################
- 
-                         self.Main_Form(refine_inputs)
+
+                         var HID = self.element.querySelector('#History_IDs')
+
+                         
+                         self.removeAllChildNodes(FormParent)
+
+                         console.log(HID)
+
+                         self.Main_Form(refine_inputs, HID.selectedIndex)
                        } catch(err){
                          console.log(err);
                        }
@@ -1289,7 +1276,7 @@
              // Execute the interact instance
             //this.el.querySelector('.widget-interact > .jupyter-button').click();
  
-            this.el.querySelector('#submit').click();
+            // this.el.querySelector('#submit').click();
  
             // console.log('@@@@@@@@@@@@@@@@@@@@');
             const notebook = ContextManager.tool_registry.current
