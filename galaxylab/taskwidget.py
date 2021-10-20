@@ -1,7 +1,7 @@
 import inspect
 import os
 import tempfile
-from .display import display
+import IPython
 from .jobwidget import GalaxyJobWidget
 from nbtools import NBTool,  python_safe, EventManager
 from .Galaxyuibuilder import GalaxyUIBuilder
@@ -56,6 +56,9 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
             self.job = gi.tools.run_tool(history_id=History_ID, tool_id=tool_id, tool_inputs=inputs)
             ###########################Job run######################### 
             #self.job = 
+
+            print(self.job)
+
             display(GalaxyJobWidget(self.job, gi))
             ##########################Job run ######################### 
 
@@ -131,7 +134,12 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
 
         job = gi.tools.gi.tools.run_tool(history_id=HistoryID, tool_id=GInstace['tool_ID'], tool_inputs=tool_inputs)
 
-        display(GalaxyJobWidget(job, gi.gi))
+
+        print('##### its job sbumit ########')
+
+        IPython.display.display(GalaxyJobWidget(job, gi.gi))
+        # display(GalaxyJobWidget(job, gi.gi))
+        print('##### its job sbumit ########')
 
     def UpdateForm(GInstace={}, Tool_inputs=None, toolID=None, HistoryID=None, Python_side=False):
 
@@ -147,7 +155,9 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
                     NewInputs[a] = json.loads(Tool_inputs[a].split('Input_data:')[1])
 
             inputs = gi.gi.tools.gi.tools.build_tool(tool_id=toolID, inputs=NewInputs, history_id=HistoryID)
-            return IPython.display.JSON(data=inputs['inputs'])
+
+            print(inputs['help'])
+            return IPython.display.JSON(data=inputs)
 
         else:
             HistoryData = gi.gi.datasets.gi.datasets.get_datasets(history_id=HistoryID, state='ok', deleted=False, purged=False, visible=True)
@@ -302,7 +312,7 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
         self.HistoryData = GalaxyTaskWidget.UpdateForm(GInstace=self.galInstace, HistoryID=self.History_IDs[0]['id'], Python_side=True)
 
 
-        GalaxyUIBuilder.__init__(self, self.function_wrapper, inputs['inputs'], self.History_IDs, self.HistoryData, self.galInstace, tool.wrapped['id'], parameters=self.parameter_spec,
+        GalaxyUIBuilder.__init__(self, self.function_wrapper, inputs, self.History_IDs, self.HistoryData, self.galInstace, tool.wrapped['id'], parameters=self.parameter_spec,
                            color=self.default_color,
                            logo=self.default_logo,
                            upload_callback=self.generate_upload_callback(),

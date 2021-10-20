@@ -261,13 +261,10 @@
     border-width: 3px;
   }
 
-  input[type="checkbox"] {
+  /* input[type="checkbox"] {
       float: left;
 
-  }
-
-
-
+  } */
   .repeat-ui-from-title {
       background-color: rgb(143, 145, 145);
       padding: 5px;
@@ -308,11 +305,12 @@
   }
 
   .galaxy-history-list {
-    background-color: rgb(143, 145, 145);
-    padding: 5px;
+    font-weight: bold;
+    background-color: #f1f1f1;
+    padding: 5px; 
     border-color: rgb(143, 145, 145);
-    border-width: 5px;
-    margin: 5px;
+    border-width: 1px;
+    /* margin: 5px; */
     /* width: 40%; */
 
   }
@@ -325,6 +323,7 @@
     border: 1px solid #ccc;
     border-radius: 4px;
     box-sizing: border-box;
+    font-weight: bold;
   }
 
 
@@ -343,7 +342,7 @@
     list-style-type: none;
     height: 50px;
     margin: 2px;
-    background: azure;
+    background: rgb(163, 167, 167);
     padding: 20px;
   }
 
@@ -366,7 +365,7 @@
   }
 
   .help-content {
-    padding: 0 18px;
+    padding: 18px;
     display: none;
     overflow: hidden;
     background-color: #f1f1f1;
@@ -380,3 +379,14 @@
     padding-right: 10px;
     padding-bottom: 10px;
   }
+
+  .mb-2 .ui-button-check {
+    display: inline-block;
+  }
+
+  .drill-down-main {
+
+    border: 1px solid rgb(134, 128, 128);
+
+  }
+
