@@ -146,8 +146,10 @@ class GalaxyUIBuilder(BaseWidget, NBTool):
         # self.form = InteractiveForm(function_or_method, self.parameters, parent=self, upload_callback=upload_callback)
         # self.output = self.form.out
 
-        # # # Display the output underneath the UI Builder widget
+        # # Display the output underneath the UI Builder widget
         # self.on_displayed(lambda widget: display(widget))
+
+        # print(self.on_displayed)
 
 
     def _apply_defaults(self, function_or_method):
