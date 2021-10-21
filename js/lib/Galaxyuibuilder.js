@@ -60,6 +60,7 @@
              <button class="nbtools-run" type="button" data-traitlet="run_label"></button>
          </div>`;
          this.dragged = ''
+         this.KernelOutPut = ''
  
      }
  
@@ -143,9 +144,7 @@
          Button.className  = 'Galaxy-form-button'
  
          GalaxyForm.append(Button)
- 
      }
-
 
  
     ReturnData(FormEelements){
@@ -156,14 +155,26 @@
 
             if (FormEelements[i].className == 'ui-form-element section-row'){
                 var tableChild = FormEelements[i];
-                InputPerameters[tableChild.querySelector('.InputData').name] = tableChild.querySelector('.InputData').value
+
+                if (tableChild.querySelector('.InputData') == null) {
+                    var Select = tableChild.querySelector('.selectbox-scrollable')
+                    var selected1 = [];
+                    for (var i = 0; i < Select.length; i++) {
+                        if (Select.options[i].selected) selected1.push(Select.options[i].value);
+                    }
+                    InputPerameters[Select.name] = selected1
+                    // console.log(InputPerameters)
+                } else {
+                   
+                    InputPerameters[tableChild.querySelector('.InputData').name] = tableChild.querySelector('.InputData').value
+                   console.log(InputPerameters[tableChild.querySelector('.InputData').name] )
+                }
             } 
 
             else if (FormEelements[i].className == 'drill-down ui-form-element section-row'){
 
                 var tableChild = FormEelements[i];
                 Object.assign(InputPerameters, this.Dirll_Down_Output(tableChild.querySelector('.outer-drill').children))
-
             } 
 
             else if (FormEelements[i].className == 'ui-form-element section-row conditional'){
@@ -187,7 +198,6 @@
             }
 
             else if (FormEelements[i].className == 'ui-repeat section-row'){
-
                 // console.log(FormEelements[i].children)
                 var tableChild1 = FormEelements[i].children;
                 Object.assign(InputPerameters, this.ReturnData(tableChild1))
@@ -417,9 +427,11 @@
         TitleSpan.className = "ui-form-title-text"
         TitleSpan.textContent = input_def.label
         TitleSpan.style.display = 'inline'
+
         title.append(TitleSpan)
         row.className = 'ui-form-element section-row'
         row.id = input_def.id
+        title.style.float = 'left'
         row.append(title)
         row.append(input)
         FormParent.append(row)
@@ -688,7 +700,7 @@
                   default:
                     break;
                 }
-                 return
+                 return 
               };
 
         });
@@ -846,45 +858,83 @@
  
          input_def.id = this.uid()
          var self = this
- 
-         const title = document.createElement('div')
-         title.className = 'ui-from-title'
-         const TitleSpan = document.createElement('span')
-         TitleSpan.className = "ui-form-title-text"
-         TitleSpan.textContent = input_def.label
-         TitleSpan.style.display = 'inline'
-         title.append(TitleSpan)
-         const Label = document.createElement('label')
-         Label.className = 'custom_file_upload'
-         const Div = document.createElement('div')
-         const row = document.createElement('div')
-      
-         var options = input_def.options
-         const DataSelect = document.createElement('select')
-         DataSelect.id = `select-${input_def.id}`  
-         DataSelect.className = 'InputData'   
-         DataSelect.name = NamePrefix+input_def['name']
 
-         DataSelect.ondrop="drop(event)"
-         DataSelect.ondragover="allowDrop(event)"
 
-         for (var i = 0; i < options['hda'].length; i++) {
-             const opt = options['hda'][i].name;
-             const el = document.createElement("option");
-             el.textContent = opt;
-             el.value = 'Input_data:'+JSON.stringify({'values': [options['hda'][i]]}) //Fix me 
-             // el.value = JSON.stringify({'values': [options['hda'][i]]})
-            //  console.log(options['hda'][i])
-             DataSelect.appendChild(el);
-         }
+        const row = document.createElement('div')
+        row.className = 'ui-form-element section-row'
+        row.id = input_def.id
 
-         DataSelect.addEventListener("dragover", function(event) {
+         //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+        var SingleFile = document.createElement('li')
+        SingleFile.className = "fa fa-file-o no-paddin"
+
+        var MultFiles = document.createElement('li')
+        MultFiles.className = 'fa fa-files-o no-paddin'
+
+        var Collection = document.createElement('li')
+        Collection.className = 'fa fa-folder-o no-padding'
+
+        var Label_file = document.createElement('label')
+        Label_file.style.width = '5px'
+        Label_file.id = 'label-1'
+        Label_file.className = 'ui-option'
+        Label_file.append(SingleFile)
+
+        var Label_files = document.createElement('label')
+        Label_files.style.width = '5px'
+        Label_files.id = 'label-2'
+        Label_files.className = 'ui-option'
+        Label_files.append(MultFiles)
+
+        var Label_collection = document.createElement('label')
+        Label_collection.style.width = '5px'
+        Label_collection.id = 'label-3'
+        Label_collection.className = 'ui-option'
+        Label_collection.append(Collection)
+
+        var FileManu = document.createElement('div')
+
+        FileManu.className = 'multi-selectbox'
+
+        FileManu.append(Label_file)
+        FileManu.append(Label_files)
+        FileManu.append(Label_collection)
+
+        FileManu.style.width = '100%'
+        FileManu.style.float = 'left'
+
+        var List =  ['a','b','u','i','f','j','h']
+
+        var Select = document.createElement('select')
+        Select.className = 'selectbox-scrollable'
+
+
+        Select.style.width = '100%'
+        Select.multiple = false
+        Select.style.height = '40px'
+
+        Select.name = NamePrefix+input_def['name']
+
+        var options = input_def.options
+
+        Select.ondrop="drop(event)"
+        Select.ondragover="allowDrop(event)"
+
+        for (var i = 0; i < options['hda'].length; i++) {
+            const opt = options['hda'][i].name;
+            const el = document.createElement("option");
+            el.textContent = opt;
+            el.value = 'Input_data:'+JSON.stringify(options['hda'][i]) //Fix me 
+            Select.appendChild(el);
+        }
+
+        Select.addEventListener("dragover", function(event) {
             // prevent default to allow drop
             event.preventDefault();
             // console.log('its Drag over')
           }, false);
 
-          DataSelect.addEventListener("drop", function(event) {
+         Select.addEventListener("drop", function(event) {
             // prevent default action (open as link for some elements)
             event.preventDefault();
             // move dragged elem to the selected drop target
@@ -896,108 +946,203 @@
                 //   event.target.appendChild( dragged );
 
                 var draged_item = self.dragged.firstElementChild
-                self.removeAllChildNodes(DataSelect)
+                self.removeAllChildNodes(Select)
 
                 const opt = JSON.parse(draged_item.value)['name']
                 const el = document.createElement("option");
                 el.textContent = opt;
                 el.value = 'Input_data:'+`{values:[${draged_item.value}]}` //Fix me 
-                
-                // el.value = JSON.stringify({'values': [options['hda'][i]]})
-                DataSelect.appendChild(el);
+
+                Select.appendChild(el);
 
             }
           }, false);
 
-         for (var i, j = 0; i = DataSelect.options[j]; j++) {
+
+        //   for (var i, j = 0; i = Select.options[j]; j++) {
  
-             if (input_def.value == null) {
-                 DataSelect.selectedIndex = 0;
-             } else {
- 
-                 if (JSON.parse(i.value.split('Input_data:')[1])['values'][0]['id'] == input_def.value.values[0]['id']) { //fix me 
-                     DataSelect.selectedIndex = j;
-                     break;
-                 }
- 
-             }
- 
-         }
- 
-         const Li = document.createElement('i')
-         Li.innerText = ' Upload Data'
-         Li.className = "fa fa-cloud-upload"
-         Label.append(Li)
- 
-         row.className = 'ui-form-element section-row'
-         row.id = input_def.id
-         row.append(title)
-         row.append(Label)
-         row.append(DataSelect)
- 
-         var children = self.element.querySelector('.Galaxy-form').children;
-         var Inputs = self.ReturnData(children)
- 
-         DataSelect.addEventListener("change", function() {
- 
-             var children = self.element.querySelector('.Galaxy-form').children;
-             var Inputs = self.ReturnData(children)
-             var HistoryID = self.element.querySelector('#History_IDs').value
- 
-             const notebook = ContextManager.tool_registry.current
-             var future = notebook.context.sessionContext.session.kernel.requestExecute({code: `from galaxylab import GalaxyTaskWidget\nGalaxyTaskWidget.UpdateForm(${JSON.stringify(self.model.get('GalInstace'))}, ${JSON.stringify(Inputs)}, ${JSON.stringify(self.model.get('ToolID'))}, ${JSON.stringify(HistoryID)})`})    
+        //     if (input_def.value == null) {
+        //         Select.selectedIndex = 0;
+        //     } else {
+
+        //         if (JSON.parse(i.value.split('Input_data:')[1])['values'][0]['id'] == input_def.value.values[0]['id']) { //fix me 
+        //             Select.selectedIndex = j;
+        //             break;
+        //         }
+
+        //     }
+
+        // }
+
+        var children = self.element.querySelector('.Galaxy-form').children;
+        var Inputs = self.ReturnData(children)
+
+        FileManu.append(Select)
+        row.append(FileManu)
+
+        // console.log(row.querySelectorAll('.ui-option'))
+        // console.log(this.el)
+
+        var TempLabels = row.querySelectorAll('.ui-option')
+        TempLabels[0].style.backgroundColor = 'rgb(143, 145, 145)'
+        Select.style.height = '40px'
+
+
+        const UploadFileLabel = document.createElement("div")
+        UploadFileLabel.className = 'upload-file-label'
+        UploadFileLabel.style.display = 'none'
+
+        var BatchIcon = document.createElement("li") 
+        BatchIcon.className = 'fa fa-sitemap'
+
+        var Span = document.createElement("span") 
+        Span.innerText = '  This is a batch mode input field. Separate jobs will be triggered for each dataset selection.'
+
+        UploadFileLabel.append(BatchIcon)
+        UploadFileLabel.append(Span)
+
+    
+
+        row.querySelectorAll('.ui-option').forEach((Label) => Label.addEventListener('click', () => {
+
+
+            for (var i =0; i < TempLabels.length; i++ ){
+                if (TempLabels[i].id == Label.id) {
+                    TempLabels[i].style.backgroundColor = 'rgb(143, 145, 145)'
+                } else{
+                    TempLabels[i].style.backgroundColor = 'white'
+                }
+            }
+
+            if (Label.id == 'label-1'){
+
+                Select.multiple = false
+                UploadFileLabel.style.display = 'none'
+
+                
+
+            } else if (Label.id == 'label-2') {
+                Select.multiple = true
+                Select.style.height = '100%'
+
+                UploadFileLabel.style.display = 'block'
+    
+
+            } else {
+                Select.multiple = false
+                UploadFileLabel.style.display = 'block'
+
+
+            }
+        }));
+
+
+         //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+
+
+
+         const title = document.createElement('div')
+         title.className = 'ui-from-title'
+         const TitleSpan = document.createElement('span')
+         TitleSpan.className = "ui-form-title-text"
+         TitleSpan.textContent = input_def.label
+         TitleSpan.style.display = 'inline'
+         title.append(TitleSpan)
+         const Label = document.createElement('label')
+         Label.className = 'custom_file_upload'
+         const Div = document.createElement('div')
+
+
+        FileManu.style.width = '100%'
+
+
+        //  FileManu.style.height = '200px'
+
+        row.append(title)
+        row.append(FileManu)
+        row.append(UploadFileLabel)
          
-             future.onIOPub  = (msg) => {
-                  var queryID  = DataSelect.selectedIndex
- 
-                 const msgType = msg.header.msg_type;
-                 switch (msgType) {
-                   case 'execute_result':
-                   case 'display_data':
-                   case 'update_display_data':
-                     future.onIOPub = msg.content;
- 
-                     let refine_inputs = future.onIOPub.data['application/json'];
-                     // if (refine_inputs.startsWith("'")){
-                     //     refine_inputs = refine_inputs.slice(1,-1);
-                     // }
+        //  row.style.height = '100px';
 
-                     console.log(refine_inputs)
-                     try { 
-                         //######################################## //Fix me in future
- 
-                         const Button = document.createElement('button')
-                         Button.style.display = 'none'
-                         Button.type = 'button'
-                         Button.id = 'submit'
-                         Button.className  = 'Galaxy-form-button'
+        var OutValue = []
 
-                         var FormParent = self.el.querySelector('.Galaxy-form')
-                    
-                         FormParent.append(Button)
- 
-                         //########################################
 
-                         var HID = self.element.querySelector('#History_IDs')
-                         self.removeAllChildNodes(FormParent)
-                        //  console.log(HID)
+        Select.addEventListener("change", function() {
 
-                         self.Main_Form(refine_inputs['inputs'], HID.selectedIndex)
-                       } catch(err){
-                         console.log(err);
-                       }
+
+            if (Select.multiple !== true) {
+
+                 OutValue = []
+                 OutValue.push(Select.value)
+  
+            } else {
+
+                OutValue.push(Select.value)
+
+            }
  
-                     break;
-                   default:
-                     break;
-                 }
-                  return
-               };
+            var children = self.element.querySelector('.Galaxy-form').children;
+            var Inputs = self.ReturnData(children)
+
+            console.log(Inputs)
+            var HistoryID = self.element.querySelector('#History_IDs').value
+
+            const notebook = ContextManager.tool_registry.current
+
+            // var future = notebook.context.sessionContext.session.kernel.requestExecute({code: `from galaxylab import GalaxyTaskWidget\nGalaxyTaskWidget.UpdateForm(${JSON.stringify(self.model.get('GalInstace'))}, ${JSON.stringify(Inputs)}, ${JSON.stringify(self.model.get('ToolID'))}, ${JSON.stringify(HistoryID)})`})    
+        
+            // future.onIOPub  = (msg) => {
+            //      var queryID  = Select.selectedIndex
+
+            //     const msgType = msg.header.msg_type;
+            //     switch (msgType) {
+            //       case 'execute_result':
+            //       case 'display_data':
+            //       case 'update_display_data':
+            //         future.onIOPub = msg.content;
+
+            //         let refine_inputs = future.onIOPub.data['application/json'];
+            //         // if (refine_inputs.startsWith("'")){
+            //         //     refine_inputs = refine_inputs.slice(1,-1);
+            //         // }
+
+            //         console.log(refine_inputs)
+            //         try { 
+            //             //######################################## //Fix me in future
+
+            //             const Button = document.createElement('button')
+            //             Button.style.display = 'none'
+            //             Button.type = 'button'
+            //             Button.id = 'submit'
+            //             Button.className  = 'Galaxy-form-button'
+
+            //             var FormParent = self.el.querySelector('.Galaxy-form')
+                   
+            //             FormParent.append(Button)
+
+            //             //########################################
+
+            //             var HID = self.element.querySelector('#History_IDs')
+            //             self.removeAllChildNodes(FormParent)
+            //            //  console.log(HID)
+
+            //             self.Main_Form(refine_inputs['inputs'], HID.selectedIndex)
+            //           } catch(err){
+            //             console.log(err);
+            //           }
+
+            //         break;
+            //       default:
+            //         break;
+            //     }
+            //      return
+            //   };
+
+        }, false);
+
  
-         }, false);
- 
-         FormParent.append(row)
-         return row
+        FormParent.append(row)
+        return row
      }
  
      AddInteger (input_def, FormParent, NamePrefix) {

@@ -85,7 +85,7 @@
     display: none;
 }
 
-.nbtools-input > div.widget-label:first-child {
+/* .nbtools-input > div.widget-label:first-child {
     font-weight: bold;
     text-align: right;
     padding-right: 20px;
@@ -99,7 +99,7 @@
 .nbtools-input > div.widget-label:last-child {
     height: auto;
     min-height: 5px;
-}
+} */
 
 .nbtools-input.missing {
     border: red solid 2px;
@@ -389,4 +389,76 @@
     border: 1px solid rgb(134, 128, 128);
 
   }
+
+  .ui-option {
+    /* padding: 2px; */
+    border: 2px solid rgb(128, 111, 95);
+    border-radius: 2px;
+    position:  relative;
+    float: left;
+    /* width: 5px; */
+    /* margin-top: 2px;
+    padding-top: 2px; */
+    
+}
+
+
+
+
+  /* * {
+    box-sizing: border-box;
+  } */
+  .multi-selectbox{
+
+    width: 100%;
+    /* position:relative;
+    overflow:hidden;
+    margin: 15px auto;
+    margin-top: 5px;
+    /* height:100px;
+    width:100%; */
+    /* width: 600px;
+    max-width: 300px;
+    margin-left: 2px;
+    margin: left;
+    background:#ddd; 
+    border: 1px solid #ddd; */
+   
+  }
+
+  /* .selectbox-scrollable{
+    overflow-y:scroll; 
+    position:absolute;
+    padding:0 7px 0 0;
+    width: calc(100% + 17px);
+    height:100%;
+    border:0;
+    background: rgb(255, 255, 255);
+    border: rgb(126, 120, 126);
+    float: right;
+    border: 1px solid rgb(194, 184, 184);
+  } */
+
+  /* .selectbox-scrollbar-rail { 
+    position:absolute;
+    overflow:auto;
+    top:0px;
+    right:0px;
+    bottom:0;
+    z-index:2;
+    background:#ddd;
+    width:5px;
+    border-radius:0px;
+  } */
+  /* .selectbox-scrollbar{
+    cursor:n-resize;
+    position:absolute;
+    overflow:auto;
+    top:0px;
+    right:0px;
+    z-index:3;
+    background:#444;
+    width:5px;
+    border-radius:px;
+  } */
 

@@ -57,8 +57,6 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
             ###########################Job run######################### 
             #self.job = 
 
-            print(self.job)
-
             display(GalaxyJobWidget(self.job, gi))
             ##########################Job run ######################### 
 
@@ -120,10 +118,6 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
 
         for a in tool_inputs.keys():
             if 'Input_data:' in tool_inputs[a]:
-
-                print(tool_inputs)
-
-
                                   
                 tool_inputs[a] = json.loads(tool_inputs[a].split('Input_data:')[1])
                 # tool_inputs[a] = tool_inputs[a].split('Input_data:')[1]
@@ -156,7 +150,6 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
 
             inputs = gi.gi.tools.gi.tools.build_tool(tool_id=toolID, inputs=NewInputs, history_id=HistoryID)
 
-            print(inputs['help'])
             return IPython.display.JSON(data=inputs)
 
         else:
@@ -198,7 +191,6 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
         elif 'tesk_param' in task_param.keys():
             if task_param['test_param']['type'] == 'select':
                 param_spec['choices'] = {i[0]:i[1] for i in task_param['test_param']['options']}     
-            print("ok")
             param_spec['type'] = 'choice'
             param_spec['choices'] = {i[0]:i[1] for i in task_param['tesk_param']['options']} 
             
