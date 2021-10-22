@@ -146,29 +146,48 @@
          GalaxyForm.append(Button)
      }
 
+
+    
+ReturnDataFiles(Select){
+
+   var InputPerameters ={}
+   var Values = {}
+
+    // var Select = tableChild.querySelector('.selectbox-scrollable')
+        var selected1 = [];
+        for (var i = 0; i < Select.length; i++) {
+            if (Select.options[i].selected) selected1.push(Select.options[i].value);
+        }
+
+        Values['values'] = selected1
+        InputPerameters[Select.name] = Values
+
+        return InputPerameters
+
+}
  
     ReturnData(FormEelements){
  
          var InputPerameters = {}
+         var Values = {}
  
         for (var i = 0; i < FormEelements.length; i++) {
 
             if (FormEelements[i].className == 'ui-form-element section-row'){
                 var tableChild = FormEelements[i];
 
-                if (tableChild.querySelector('.InputData') == null) {
-                    var Select = tableChild.querySelector('.selectbox-scrollable')
-                    var selected1 = [];
-                    for (var i = 0; i < Select.length; i++) {
-                        if (Select.options[i].selected) selected1.push(Select.options[i].value);
-                    }
-                    InputPerameters[Select.name] = selected1
-                    // console.log(InputPerameters)
-                } else {
-                   
+                // console.log(tableChild)
+
+                if (tableChild.querySelector('.InputData') !== null){
                     InputPerameters[tableChild.querySelector('.InputData').name] = tableChild.querySelector('.InputData').value
-                   console.log(InputPerameters[tableChild.querySelector('.InputData').name] )
+                } 
+                else {
+
+                    var Select = tableChild.querySelector('.selectbox-scrollable')
+                    Object.assign(InputPerameters, this.ReturnDataFiles(Select))
+
                 }
+
             } 
 
             else if (FormEelements[i].className == 'drill-down ui-form-element section-row'){
@@ -289,8 +308,6 @@
             values[Name[0]] = Key
             
         } 
-
-
         return values
 
         
@@ -924,7 +941,7 @@
             const opt = options['hda'][i].name;
             const el = document.createElement("option");
             el.textContent = opt;
-            el.value = 'Input_data:'+JSON.stringify(options['hda'][i]) //Fix me 
+            el.value = JSON.stringify(options['hda'][i]) //Fix me 
             Select.appendChild(el);
         }
 
@@ -1084,59 +1101,57 @@
             var children = self.element.querySelector('.Galaxy-form').children;
             var Inputs = self.ReturnData(children)
 
-            console.log(Inputs)
             var HistoryID = self.element.querySelector('#History_IDs').value
 
             const notebook = ContextManager.tool_registry.current
 
-            // var future = notebook.context.sessionContext.session.kernel.requestExecute({code: `from galaxylab import GalaxyTaskWidget\nGalaxyTaskWidget.UpdateForm(${JSON.stringify(self.model.get('GalInstace'))}, ${JSON.stringify(Inputs)}, ${JSON.stringify(self.model.get('ToolID'))}, ${JSON.stringify(HistoryID)})`})    
+            var future = notebook.context.sessionContext.session.kernel.requestExecute({code: `from galaxylab import GalaxyTaskWidget\nGalaxyTaskWidget.UpdateForm(${JSON.stringify(self.model.get('GalInstace'))}, ${JSON.stringify(Inputs)}, ${JSON.stringify(self.model.get('ToolID'))}, ${JSON.stringify(HistoryID)})`})    
         
-            // future.onIOPub  = (msg) => {
-            //      var queryID  = Select.selectedIndex
+            future.onIOPub  = (msg) => {
+                 var queryID  = Select.selectedIndex
 
-            //     const msgType = msg.header.msg_type;
-            //     switch (msgType) {
-            //       case 'execute_result':
-            //       case 'display_data':
-            //       case 'update_display_data':
-            //         future.onIOPub = msg.content;
+                const msgType = msg.header.msg_type;
+                switch (msgType) {
+                  case 'execute_result':
+                  case 'display_data':
+                  case 'update_display_data':
+                    future.onIOPub = msg.content;
 
-            //         let refine_inputs = future.onIOPub.data['application/json'];
-            //         // if (refine_inputs.startsWith("'")){
-            //         //     refine_inputs = refine_inputs.slice(1,-1);
-            //         // }
+                    let refine_inputs = future.onIOPub.data['application/json'];
+                    // if (refine_inputs.startsWith("'")){
+                    //     refine_inputs = refine_inputs.slice(1,-1);
+                    // }
 
-            //         console.log(refine_inputs)
-            //         try { 
-            //             //######################################## //Fix me in future
+                    try { 
+                        //######################################## //Fix me in future
 
-            //             const Button = document.createElement('button')
-            //             Button.style.display = 'none'
-            //             Button.type = 'button'
-            //             Button.id = 'submit'
-            //             Button.className  = 'Galaxy-form-button'
+                        const Button = document.createElement('button')
+                        Button.style.display = 'none'
+                        Button.type = 'button'
+                        Button.id = 'submit'
+                        Button.className  = 'Galaxy-form-button'
 
-            //             var FormParent = self.el.querySelector('.Galaxy-form')
+                        var FormParent = self.el.querySelector('.Galaxy-form')
                    
-            //             FormParent.append(Button)
+                        FormParent.append(Button)
 
-            //             //########################################
+                        //########################################
 
-            //             var HID = self.element.querySelector('#History_IDs')
-            //             self.removeAllChildNodes(FormParent)
-            //            //  console.log(HID)
+                        var HID = self.element.querySelector('#History_IDs')
+                        self.removeAllChildNodes(FormParent)
+                       //  console.log(HID)
 
-            //             self.Main_Form(refine_inputs['inputs'], HID.selectedIndex)
-            //           } catch(err){
-            //             console.log(err);
-            //           }
+                        self.Main_Form(refine_inputs['inputs'], HID.selectedIndex)
+                      } catch(err){
+                        console.log(err);
+                      }
 
-            //         break;
-            //       default:
-            //         break;
-            //     }
-            //      return
-            //   };
+                    break;
+                  default:
+                    break;
+                }
+                 return
+              };
 
         }, false);
 
