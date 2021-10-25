@@ -148,7 +148,16 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
                 if 'Input_data:' in Tool_inputs[a]:
                     NewInputs[a] = json.loads(Tool_inputs[a].split('Input_data:')[1])
 
+
+            print('############','UpdateForm')
+            print(NewInputs)
+            print('############','UpdateForm')
+
             inputs = gi.gi.tools.gi.tools.build_tool(tool_id=toolID, inputs=NewInputs, history_id=HistoryID)
+
+            print('############','UpdateForm 1')
+            print(inputs)
+            print('############','UpdateForm 1')
 
             return IPython.display.JSON(data=inputs)
 

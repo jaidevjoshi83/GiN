@@ -109,17 +109,17 @@
          
      }
  
-     Main_Form (inputs, selected_value='default') {
-
+     Main_Form (inputs, call_back_data={}) {
 
          var FormParent = this.el.querySelector('.Galaxy-form');
 
-         var HistList = this.AddHistoryList(selected_value)
+         var HistList = this.AddHistoryList(call_back_data['HID'])
          FormParent.append(HistList)
 
          var self = this
          _.each(inputs, (input) => {
-             self.add(input, FormParent, '', selected_value);
+            //  console.log(selected_value)
+             self.add(input, FormParent, '', call_back_data);
          });
      }
 
@@ -146,23 +146,33 @@
          GalaxyForm.append(Button)
      }
 
-
     
 ReturnDataFiles(Select){
 
+   var Data = {}
    var InputPerameters ={}
    var Values = {}
+   var Indexes = []
 
     // var Select = tableChild.querySelector('.selectbox-scrollable')
         var selected1 = [];
         for (var i = 0; i < Select.length; i++) {
-            if (Select.options[i].selected) selected1.push(Select.options[i].value);
+            // console.log(Select.options[i].selected)
+            if (Select.options[i].selected) {
+                selected1.push(Select.options[i].value);
+                Indexes.push(i)
+            }
+           
         }
 
         Values['values'] = selected1
         InputPerameters[Select.name] = Values
 
-        return InputPerameters
+        Data['Inputs_data_files'] = InputPerameters
+        Data['Selected_data_Indexes'] = Indexes
+        Data['select_type'] = Select.multiple
+
+        return  Data 
 
 }
  
@@ -184,7 +194,7 @@ ReturnDataFiles(Select){
                 else {
 
                     var Select = tableChild.querySelector('.selectbox-scrollable')
-                    Object.assign(InputPerameters, this.ReturnDataFiles(Select))
+                    Object.assign(InputPerameters, this.ReturnDataFiles(Select)['Inputs_data_files'])
 
                 }
 
@@ -238,8 +248,8 @@ ReturnDataFiles(Select){
         return `uid-${top.__utils__uid__++}`;
     }
  
-    add  ( input, FormParent, NamePrefix, selected_index='default' ) {
-        
+    add  ( input, FormParent, NamePrefix, data={}) {
+
         var input_def = input;
         // input_def.id = this.uid();
         if (input_def.id == 'undefined') {
@@ -249,10 +259,10 @@ ReturnDataFiles(Select){
         switch (input_def.type) {
 
             case "conditional":
-                this.AddConditoinalSection2(input_def, FormParent, NamePrefix);
+                this.AddConditoinalSection2(input_def, FormParent, NamePrefix, data);
                 break;
             case "data":
-                this.FileUpLoad(input_def, FormParent, NamePrefix, selected_index)
+                    this.FileUpLoad(input_def, FormParent, NamePrefix, data)
                 break
             case "text":
                 this.AddText(input_def, FormParent, NamePrefix);
@@ -361,7 +371,6 @@ ReturnDataFiles(Select){
     }
 
 
-
     AddDrill_Down(input_def, FormParent, NamePrefix) {
         input_def.id = this.uid()
 
@@ -424,7 +433,6 @@ ReturnDataFiles(Select){
 
         FormParent.append(row)
         return row
-
     }
 
  
@@ -577,7 +585,6 @@ ReturnDataFiles(Select){
 
                                 var BoldText = document.createElement('b')
 
-                            
                                 BoldText.innerText = refine_inputs[i]['name']
                                 DataHeader.append(BoldText)
 
@@ -647,7 +654,7 @@ ReturnDataFiles(Select){
 
         if (selected_value !== 'default') {
             select.selectedIndex = selected_value
-         }
+        }
 
         const HistoryList = document.createElement('div')
 
@@ -690,11 +697,7 @@ ReturnDataFiles(Select){
  
                      try { 
 
-                        var FormParent = self.el.querySelector('.Galaxy-form')
-
-                        // console.log(FormParent)
-
-                        
+                        var FormParent = self.el.querySelector('.Galaxy-form')                        
                         self.removeAllChildNodes(FormParent)
 
                         //######################################## //Fix me in future
@@ -707,7 +710,10 @@ ReturnDataFiles(Select){
                 
                         FormParent.append(Button)
 
-                        self.Main_Form(refine_inputs['inputs'], select.selectedIndex)
+                        var SelectedIndex = {}
+                        SelectedIndex['HID'] = select.selectedIndex
+
+                        self.Main_Form(refine_inputs['inputs'],  SelectedIndex)
                         
                       } catch(err){
                         console.log(err);
@@ -870,12 +876,14 @@ ReturnDataFiles(Select){
              parent.removeChild(parent.firstChild);
          }
      }
- 
-     FileUpLoad (input_def, FormParent, NamePrefix, selected_index='default') {
- 
-         input_def.id = this.uid()
-         var self = this
 
+ 
+    FileUpLoad (input_def, FormParent, NamePrefix, call_back_data={}) {
+
+        console.log(call_back_data)
+
+        input_def.id = this.uid()
+        var self = this
 
         const row = document.createElement('div')
         row.className = 'ui-form-element section-row'
@@ -920,11 +928,8 @@ ReturnDataFiles(Select){
         FileManu.style.width = '100%'
         FileManu.style.float = 'left'
 
-        var List =  ['a','b','u','i','f','j','h']
-
         var Select = document.createElement('select')
         Select.className = 'selectbox-scrollable'
-
 
         Select.style.width = '100%'
         Select.multiple = false
@@ -937,27 +942,28 @@ ReturnDataFiles(Select){
         Select.ondrop="drop(event)"
         Select.ondragover="allowDrop(event)"
 
+
         for (var i = 0; i < options['hda'].length; i++) {
-            const opt = options['hda'][i].name;
-            const el = document.createElement("option");
-            el.textContent = opt;
-            el.value = JSON.stringify(options['hda'][i]) //Fix me 
-            Select.appendChild(el);
+            Select.insertAdjacentHTML('beforeend', `
+            <option selected="false" value="${options['hda'][i]['id']}">${options['hda'][i].name}</option>
+          `)
+
         }
+
+    //    Select.selectedIndex = '-1';
 
         Select.addEventListener("dragover", function(event) {
             // prevent default to allow drop
             event.preventDefault();
             // console.log('its Drag over')
-          }, false);
+        }, false);
 
-         Select.addEventListener("drop", function(event) {
+        Select.addEventListener("drop", function(event) {
             // prevent default action (open as link for some elements)
             event.preventDefault();
             // move dragged elem to the selected drop target
             if (event.target.className == "InputData") {
 
-                console.log('ok')
                 event.target.style.background = "";
                 //   dragged.parentNode.removeChild( dragged );
                 //   event.target.appendChild( dragged );
@@ -971,39 +977,16 @@ ReturnDataFiles(Select){
                 el.value = 'Input_data:'+`{values:[${draged_item.value}]}` //Fix me 
 
                 Select.appendChild(el);
-
             }
-          }, false);
+        }, false);
 
 
-        //   for (var i, j = 0; i = Select.options[j]; j++) {
- 
-        //     if (input_def.value == null) {
-        //         Select.selectedIndex = 0;
-        //     } else {
-
-        //         if (JSON.parse(i.value.split('Input_data:')[1])['values'][0]['id'] == input_def.value.values[0]['id']) { //fix me 
-        //             Select.selectedIndex = j;
-        //             break;
-        //         }
-
-        //     }
-
-        // }
 
         var children = self.element.querySelector('.Galaxy-form').children;
         var Inputs = self.ReturnData(children)
 
         FileManu.append(Select)
         row.append(FileManu)
-
-        // console.log(row.querySelectorAll('.ui-option'))
-        // console.log(this.el)
-
-        var TempLabels = row.querySelectorAll('.ui-option')
-        TempLabels[0].style.backgroundColor = 'rgb(143, 145, 145)'
-        Select.style.height = '40px'
-
 
         const UploadFileLabel = document.createElement("div")
         UploadFileLabel.className = 'upload-file-label'
@@ -1018,30 +1001,42 @@ ReturnDataFiles(Select){
         UploadFileLabel.append(BatchIcon)
         UploadFileLabel.append(Span)
 
-    
+        var TempLabels = row.querySelectorAll('.ui-option')
+
+        if (call_back_data['select_type'] === true) {
+
+            Label_files.style.backgroundColor = 'rgb(143, 145, 145)'
+            Select.multiple = true    
+            Select.style.height = '100%'
+            UploadFileLabel.style.display = 'block'
+            Select.selectedIndex = '-1';
+        } else {
+
+            TempLabels[0].style.backgroundColor = 'rgb(143, 145, 145)'
+            Select.style.height = '40px'
+
+        }
 
         row.querySelectorAll('.ui-option').forEach((Label) => Label.addEventListener('click', () => {
 
 
-            for (var i =0; i < TempLabels.length; i++ ){
-                if (TempLabels[i].id == Label.id) {
-                    TempLabels[i].style.backgroundColor = 'rgb(143, 145, 145)'
-                } else{
-                    TempLabels[i].style.backgroundColor = 'white'
+                for (var i = 0; i < TempLabels.length; i++ ){
+                    if (TempLabels[i].id == Label.id) {
+                        TempLabels[i].style.backgroundColor = 'rgb(143, 145, 145)'
+                    } else{
+                        TempLabels[i].style.backgroundColor = 'white'
+                    }
                 }
-            }
 
             if (Label.id == 'label-1'){
 
                 Select.multiple = false
                 UploadFileLabel.style.display = 'none'
 
-                
-
             } else if (Label.id == 'label-2') {
                 Select.multiple = true
                 Select.style.height = '100%'
-
+                Select.selectedIndex = '-1';
                 UploadFileLabel.style.display = 'block'
     
 
@@ -1049,15 +1044,12 @@ ReturnDataFiles(Select){
                 Select.multiple = false
                 UploadFileLabel.style.display = 'block'
 
-
             }
+        // }
+
         }));
-
-
+        
          //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
-
-
-
          const title = document.createElement('div')
          title.className = 'ui-from-title'
          const TitleSpan = document.createElement('span')
@@ -1070,41 +1062,26 @@ ReturnDataFiles(Select){
          const Div = document.createElement('div')
 
 
-        FileManu.style.width = '100%'
+         FileManu.style.width = '100%'
 
-
-        //  FileManu.style.height = '200px'
 
         row.append(title)
         row.append(FileManu)
         row.append(UploadFileLabel)
-         
-        //  row.style.height = '100px';
+        
 
         var OutValue = []
 
 
-        Select.addEventListener("change", function() {
+    Select.addEventListener("change", function() {
 
 
-            if (Select.multiple !== true) {
-
-                 OutValue = []
-                 OutValue.push(Select.value)
-  
-            } else {
-
-                OutValue.push(Select.value)
-
-            }
- 
             var children = self.element.querySelector('.Galaxy-form').children;
             var Inputs = self.ReturnData(children)
 
             var HistoryID = self.element.querySelector('#History_IDs').value
 
             const notebook = ContextManager.tool_registry.current
-
             var future = notebook.context.sessionContext.session.kernel.requestExecute({code: `from galaxylab import GalaxyTaskWidget\nGalaxyTaskWidget.UpdateForm(${JSON.stringify(self.model.get('GalInstace'))}, ${JSON.stringify(Inputs)}, ${JSON.stringify(self.model.get('ToolID'))}, ${JSON.stringify(HistoryID)})`})    
         
             future.onIOPub  = (msg) => {
@@ -1118,9 +1095,6 @@ ReturnDataFiles(Select){
                     future.onIOPub = msg.content;
 
                     let refine_inputs = future.onIOPub.data['application/json'];
-                    // if (refine_inputs.startsWith("'")){
-                    //     refine_inputs = refine_inputs.slice(1,-1);
-                    // }
 
                     try { 
                         //######################################## //Fix me in future
@@ -1139,9 +1113,12 @@ ReturnDataFiles(Select){
 
                         var HID = self.element.querySelector('#History_IDs')
                         self.removeAllChildNodes(FormParent)
-                       //  console.log(HID)
 
-                        self.Main_Form(refine_inputs['inputs'], HID.selectedIndex)
+                       var CallBackData =  self.ReturnDataFiles(Select)
+                       CallBackData['HID'] = HID.selectedIndex
+
+                       self.Main_Form(refine_inputs['inputs'], CallBackData)
+
                       } catch(err){
                         console.log(err);
                       }
@@ -1158,7 +1135,8 @@ ReturnDataFiles(Select){
  
         FormParent.append(row)
         return row
-     }
+    }
+
  
      AddInteger (input_def, FormParent, NamePrefix) {
  
@@ -1210,7 +1188,7 @@ ReturnDataFiles(Select){
          return row
      }
  
-     AddConditionalSelectField (input_def, ElID, NamePrefix) {
+     AddConditionalSelectField (input_def, ElID, NamePrefix, call_back_data={} ) {
 
 
         input_def.id = this.uid()
@@ -1305,7 +1283,7 @@ ReturnDataFiles(Select){
  
                      try { 
 
-                        self.Main_Form(refine_inputs['inputs']);
+                        self.Main_Form(refine_inputs['inputs'], call_back_data);
                       } catch(err){
                         console.log(err);
                       }
@@ -1450,7 +1428,7 @@ ReturnDataFiles(Select){
      }
  
  
-     AddConditoinalSection2 (input_def, parent, NamePrefix) {
+     AddConditoinalSection2 (input_def, parent, NamePrefix, call_back_data={}) {
  
          // console.log(input_def['test_param']['options'])
  
@@ -1488,7 +1466,7 @@ ReturnDataFiles(Select){
         
                  for (var j in input_def.cases[l].inputs) {
  
-                     this.add(input_def.cases[l].inputs[j], ConditionalDiv, NewNamePrefix )
+                     this.add(input_def.cases[l].inputs[j], ConditionalDiv, NewNamePrefix, call_back_data)
                        
                      input_def.cases[l].inputs[j].id = this.uid()
          
