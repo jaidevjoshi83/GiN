@@ -125,6 +125,8 @@
 
      Data_Tool(selected_history='default'){
 
+        //add Data Widget to the main form
+
         var DataList = this.el.querySelector('.dataset-list');
         DataList.append(this.AddDataSetTable())
 
@@ -149,15 +151,16 @@
     
 ReturnDataFiles(Select){
 
+    //1. Return data for dynamic update 
+    //2. Extracts parameter value from data file widget
+
    var Data = {}
    var InputPerameters ={}
    var Values = {}
    var Indexes = []
 
-    // var Select = tableChild.querySelector('.selectbox-scrollable')
         var selected1 = [];
         for (var i = 0; i < Select.length; i++) {
-            // console.log(Select.options[i].selected)
             if (Select.options[i].selected) {
                 selected1.push(Select.options[i].value);
                 Indexes.push(i)
@@ -166,6 +169,8 @@ ReturnDataFiles(Select){
         }
 
         Values['values'] = selected1
+
+
         InputPerameters[Select.name] = Values
 
         Data['Inputs_data_files'] = InputPerameters
@@ -185,8 +190,6 @@ ReturnDataFiles(Select){
 
             if (FormEelements[i].className == 'ui-form-element section-row'){
                 var tableChild = FormEelements[i];
-
-                // console.log(tableChild)
 
                 if (tableChild.querySelector('.InputData') !== null){
                     InputPerameters[tableChild.querySelector('.InputData').name] = tableChild.querySelector('.InputData').value
@@ -266,7 +269,6 @@ ReturnDataFiles(Select){
                 break
             case "text":
                 this.AddText(input_def, FormParent, NamePrefix);
-                // this.el.querySelector('.Galaxy-form').append(this.AddText(input_def))
                 break
             case "integer":
                 this.AddInteger(input_def, FormParent, NamePrefix)
@@ -319,8 +321,6 @@ ReturnDataFiles(Select){
             
         } 
         return values
-
-        
         
     }
 
@@ -880,8 +880,6 @@ ReturnDataFiles(Select){
  
     FileUpLoad (input_def, FormParent, NamePrefix, call_back_data={}) {
 
-        console.log(call_back_data)
-
         input_def.id = this.uid()
         var self = this
 
@@ -952,33 +950,33 @@ ReturnDataFiles(Select){
 
     //    Select.selectedIndex = '-1';
 
-        Select.addEventListener("dragover", function(event) {
-            // prevent default to allow drop
-            event.preventDefault();
-            // console.log('its Drag over')
-        }, false);
+        // Select.addEventListener("dragover", function(event) {
+        //     // prevent default to allow drop
+        //     event.preventDefault();
+        //     // console.log('its Drag over')
+        // }, false);
 
-        Select.addEventListener("drop", function(event) {
-            // prevent default action (open as link for some elements)
-            event.preventDefault();
-            // move dragged elem to the selected drop target
-            if (event.target.className == "InputData") {
+        // Select.addEventListener("drop", function(event) {
+        //     // prevent default action (open as link for some elements)
+        //     event.preventDefault();
+        //     // move dragged elem to the selected drop target
+        //     if (event.target.className == "InputData") {
 
-                event.target.style.background = "";
-                //   dragged.parentNode.removeChild( dragged );
-                //   event.target.appendChild( dragged );
+        //         event.target.style.background = "";
+        //         //   dragged.parentNode.removeChild( dragged );
+        //         //   event.target.appendChild( dragged );
 
-                var draged_item = self.dragged.firstElementChild
-                self.removeAllChildNodes(Select)
+        //         var draged_item = self.dragged.firstElementChild
+        //         self.removeAllChildNodes(Select)
 
-                const opt = JSON.parse(draged_item.value)['name']
-                const el = document.createElement("option");
-                el.textContent = opt;
-                el.value = 'Input_data:'+`{values:[${draged_item.value}]}` //Fix me 
+        //         const opt = JSON.parse(draged_item.value)['name']
+        //         const el = document.createElement("option");
+        //         el.textContent = opt;
+        //         el.value = 'Input_data:'+`{values:[${draged_item.value}]}` //Fix me 
 
-                Select.appendChild(el);
-            }
-        }, false);
+        //         Select.appendChild(el);
+        //     }
+        // }, false);
 
 
 
@@ -1075,60 +1073,63 @@ ReturnDataFiles(Select){
 
     Select.addEventListener("change", function() {
 
+        console.log(Select.value)
 
-            var children = self.element.querySelector('.Galaxy-form').children;
-            var Inputs = self.ReturnData(children)
+        var children = self.element.querySelector('.Galaxy-form').children;
+        var Inputs = self.ReturnData(children)
 
-            var HistoryID = self.element.querySelector('#History_IDs').value
+        console.log(Inputs)
 
-            const notebook = ContextManager.tool_registry.current
-            var future = notebook.context.sessionContext.session.kernel.requestExecute({code: `from galaxylab import GalaxyTaskWidget\nGalaxyTaskWidget.UpdateForm(${JSON.stringify(self.model.get('GalInstace'))}, ${JSON.stringify(Inputs)}, ${JSON.stringify(self.model.get('ToolID'))}, ${JSON.stringify(HistoryID)})`})    
-        
-            future.onIOPub  = (msg) => {
-                 var queryID  = Select.selectedIndex
+        var HistoryID = self.element.querySelector('#History_IDs').value
 
-                const msgType = msg.header.msg_type;
-                switch (msgType) {
-                  case 'execute_result':
-                  case 'display_data':
-                  case 'update_display_data':
-                    future.onIOPub = msg.content;
+        const notebook = ContextManager.tool_registry.current
+        var future = notebook.context.sessionContext.session.kernel.requestExecute({code: `from galaxylab import GalaxyTaskWidget\nGalaxyTaskWidget.UpdateForm(${JSON.stringify(self.model.get('GalInstace'))}, ${JSON.stringify(Inputs)}, ${JSON.stringify(self.model.get('ToolID'))}, ${JSON.stringify(HistoryID)})`})    
+    
+        future.onIOPub  = (msg) => {
+                var queryID  = Select.selectedIndex
 
-                    let refine_inputs = future.onIOPub.data['application/json'];
+            const msgType = msg.header.msg_type;
+            switch (msgType) {
+                case 'execute_result':
+                case 'display_data':
+                case 'update_display_data':
+                future.onIOPub = msg.content;
 
-                    try { 
-                        //######################################## //Fix me in future
+                let refine_inputs = future.onIOPub.data['application/json'];
 
-                        const Button = document.createElement('button')
-                        Button.style.display = 'none'
-                        Button.type = 'button'
-                        Button.id = 'submit'
-                        Button.className  = 'Galaxy-form-button'
+                try { 
+                    //######################################## //Fix me in future
 
-                        var FormParent = self.el.querySelector('.Galaxy-form')
-                   
-                        FormParent.append(Button)
+                    const Button = document.createElement('button')
+                    Button.style.display = 'none'
+                    Button.type = 'button'
+                    Button.id = 'submit'
+                    Button.className  = 'Galaxy-form-button'
 
-                        //########################################
+                    var FormParent = self.el.querySelector('.Galaxy-form')
+                
+                    FormParent.append(Button)
 
-                        var HID = self.element.querySelector('#History_IDs')
-                        self.removeAllChildNodes(FormParent)
+                    //########################################
 
-                       var CallBackData =  self.ReturnDataFiles(Select)
-                       CallBackData['HID'] = HID.selectedIndex
+                    var HID = self.element.querySelector('#History_IDs')
+                    self.removeAllChildNodes(FormParent)
 
-                       self.Main_Form(refine_inputs['inputs'], CallBackData)
+                    var CallBackData =  self.ReturnDataFiles(Select)
+                    CallBackData['HID'] = HID.selectedIndex
 
-                      } catch(err){
-                        console.log(err);
-                      }
+                    self.Main_Form(refine_inputs['inputs'], CallBackData)
 
-                    break;
-                  default:
-                    break;
-                }
-                 return
-              };
+                    } catch(err){
+                    console.log(err);
+                    }
+
+                break;
+                default:
+                break;
+            }
+                return
+            };
 
         }, false);
 
@@ -1597,7 +1598,7 @@ ReturnDataFiles(Select){
  
             var children = self.element.querySelector('.Galaxy-form').children;
             var Inputs = self.ReturnData(children)
-            console.log(Inputs)
+
             notebook.context.sessionContext.session.kernel.requestExecute({code: `from galaxylab import GalaxyTaskWidget\nGalaxyTaskWidget.submit_job(${JSON.stringify(this.model.get('GalInstace'))}, ${JSON.stringify(Inputs)}, ${JSON.stringify(HistoryID)})`})
  
             // console.log('@@@@@@@@@@@@@@@@@@@@');

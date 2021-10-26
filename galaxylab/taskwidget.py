@@ -113,6 +113,8 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
 
     def submit_job(GInstace, Tool_inputs, HistoryID):
 
+
+
         gi = GalaxyInstance(GInstace['URL'], email=GInstace['email_ID'], api_key=GInstace['API_key'], verify=True)
         tool_inputs  = json5.loads(Tool_inputs)
 
@@ -135,23 +137,31 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
         # display(GalaxyJobWidget(job, gi.gi))
         print('##### its job sbumit ########')
 
+    def RefinedInputs(inputs, gi):
+    
+        for i in inputs.keys():
+            if type(inputs[i]) == dict:
+                if list(inputs[i].keys())[0] == 'values':
+                    new_values = []
+                    for j in inputs[i]['values']:
+                        Dataset = gi.gi.datasets.gi.datasets.show_dataset(dataset_id=j)
+                        new_values.append({'src':Dataset['hda_ldda'],'id':Dataset['id']})
+                    inputs[i]['values'] = new_values
+        return inputs
+
+
     def UpdateForm(GInstace={}, Tool_inputs=None, toolID=None, HistoryID=None, Python_side=False):
+
 
         gi = GalaxyInstance(GInstace['URL'], email=GInstace['email_ID'], api_key=GInstace['API_key'], verify=True)
        
         if (Tool_inputs != None) and (toolID != None):
 
-            NewInputs = {}
+            NewInputs = GalaxyTaskWidget.RefinedInputs(Tool_inputs, gi)
 
-            for a in Tool_inputs.keys():
-                NewInputs[a] = Tool_inputs[a]
-                if 'Input_data:' in Tool_inputs[a]:
-                    NewInputs[a] = json.loads(Tool_inputs[a].split('Input_data:')[1])
-
-
-            print('############','UpdateForm')
-            print(NewInputs)
-            print('############','UpdateForm')
+            print('newinputs')
+            print(Tool_inputs)
+            print('newinputs')
 
             inputs = gi.gi.tools.gi.tools.build_tool(tool_id=toolID, inputs=NewInputs, history_id=HistoryID)
 
