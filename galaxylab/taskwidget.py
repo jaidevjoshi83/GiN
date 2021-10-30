@@ -57,7 +57,7 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
             ###########################Job run######################### 
             #self.job = 
 
-            display(GalaxyJobWidget(self.job, gi))
+            IPython.display.display(GalaxyJobWidget(self.job, gi))
             ##########################Job run ######################### 
 
         submit_job.__qualname__ = tool.wrapped['name']
@@ -111,31 +111,47 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
 
         #####################
 
+
+    def RetrivParm(inputs, prefix=''):
+        
+        OutDict = {}
+        
+        for i in inputs:
+
+            full_name = prefix+i['name']
+
+            OutDict[full_name] = i
+            if i['model_class'] == 'Conditional':
+                for j in i['cases']:
+                    Dict1 = GalaxyTaskWidget.RetrivParm(j['inputs'], full_name+'|')
+                    OutDict = dict(list(OutDict.items()) + list(Dict1.items()))
+            elif i['model_class'] == 'Repeat':
+                Dict2 = GalaxyTaskWidget.RetrivParm(i['inputs'], full_name+'|')
+                OutDict = dict(list(OutDict.items()) + list(Dict2.items()))
+            elif i['model_class'] == 'Section':
+                    Dict3 =  GalaxyTaskWidget.RetrivParm(i['inputs'], full_name+'|')  
+                    OutDict = dict(list(OutDict.items()) + list(Dict3.items()))
+                    
+        return OutDict
+
+
+
     def submit_job(GInstace, Tool_inputs, HistoryID):
-
-
 
         gi = GalaxyInstance(GInstace['URL'], email=GInstace['email_ID'], api_key=GInstace['API_key'], verify=True)
         tool_inputs  = json5.loads(Tool_inputs)
 
-        for a in tool_inputs.keys():
-            if 'Input_data:' in tool_inputs[a]:
-                                  
-                tool_inputs[a] = json.loads(tool_inputs[a].split('Input_data:')[1])
-                # tool_inputs[a] = tool_inputs[a].split('Input_data:')[1]
-
-        print("*****************")
         print(tool_inputs)
-        print("*****************")
 
-        job = gi.tools.gi.tools.run_tool(history_id=HistoryID, tool_id=GInstace['tool_ID'], tool_inputs=tool_inputs)
-
+        NewInputs = GalaxyTaskWidget.RefinedInputs(tool_inputs, gi)
 
         print('##### its job sbumit ########')
+        print(NewInputs)
+        print('##### its job sbumit ########')
+
+        job = gi.tools.gi.tools.run_tool(history_id=HistoryID, tool_id=GInstace['tool_ID'], tool_inputs=NewInputs)
 
         IPython.display.display(GalaxyJobWidget(job, gi.gi))
-        # display(GalaxyJobWidget(job, gi.gi))
-        print('##### its job sbumit ########')
 
     def RefinedInputs(inputs, gi):
     
@@ -150,7 +166,7 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
         return inputs
 
 
-    def UpdateForm(GInstace={}, Tool_inputs=None, toolID=None, HistoryID=None, Python_side=False):
+    def UpdateForm(GInstace={}, Tool_inputs=None, toolID=None, HistoryID=None, Python_side=False, InputDataParam=False):
 
 
         gi = GalaxyInstance(GInstace['URL'], email=GInstace['email_ID'], api_key=GInstace['API_key'], verify=True)
@@ -158,21 +174,28 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
         if (Tool_inputs != None) and (toolID != None):
 
             NewInputs = GalaxyTaskWidget.RefinedInputs(Tool_inputs, gi)
-
+         
             print('newinputs')
             print(Tool_inputs)
             print('newinputs')
 
             inputs = gi.gi.tools.gi.tools.build_tool(tool_id=toolID, inputs=NewInputs, history_id=HistoryID)
 
-            print('############','UpdateForm 1')
-            print(inputs)
-            print('############','UpdateForm 1')
+            # print('############','UpdateForm 1')
+            # print(inputs)
+            # print('############','UpdateForm 1')
 
-            return IPython.display.JSON(data=inputs)
+            if InputDataParam == False:
+                return IPython.display.JSON(data=inputs)
+            else:
+                print('############','Up')
+                print(GalaxyTaskWidget.RetrivParm(inputs['inputs']) )
+                return IPython.display.JSON(GalaxyTaskWidget.RetrivParm(inputs['inputs']))
+                
+        
 
         else:
-            HistoryData = gi.gi.datasets.gi.datasets.get_datasets(history_id=HistoryID, state='ok', deleted=False, purged=False, visible=True)
+            HistoryData = gi.gi.datasets.gi.datasets.get_datasets(history_id=HistoryID, state='ok', deleted=False,  purged=False, visible=True)
 
             if Python_side==True:
                 return HistoryData
@@ -319,7 +342,10 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
         self.parameter_spec = self.create_param_spec(self.tool) # Create run task function
         # self.parameter_spec = None
         self.History_IDs = self.tool.gi.histories.gi.histories.get_histories()
-        inputs = self.tool.gi.tools.gi.tools.build_tool(tool_id=tool.wrapped['id'], history_id=self.History_IDs[1]['id'])
+
+        inputs = self.tool.gi.tools.gi.tools.build_tool(tool_id=tool.wrapped['id'], history_id=self.History_IDs[0]['id'])
+
+
         self.HistoryData = GalaxyTaskWidget.UpdateForm(GInstace=self.galInstace, HistoryID=self.History_IDs[0]['id'], Python_side=True)
 
 

@@ -16,7 +16,7 @@
  import { KernelModel } from './model';
  import _ from "underscore";
  
- export class GalaxyUIBuilderModel extends BaseWidgetModel{
+export class GalaxyUIBuilderModel extends BaseWidgetModel{
      
      defaults() {
          return Object.assign(Object.assign(Object.assign({}, super.defaults()), { _model_name: GalaxyUIBuilderModel.model_name, _model_module: GalaxyUIBuilderModel.model_module, _model_module_version: GalaxyUIBuilderModel.model_module_version, _view_name: GalaxyUIBuilderModel.view_name, _view_module: GalaxyUIBuilderModel.view_module, _view_module_version: GalaxyUIBuilderModel.view_module_version, name: 'Python Function', description: '', origin: '', _parameters: [], parameter_groups: [], function_import: '', register_tool: true, collapse: true, events: {}, buttons: {}, display_header: true, display_footer: true, busy: false, run_label: 'Execute', GalInstace: {}, output: undefined, inputs:{}, form_output:{}, History_Data:[], UI:{}, ToolID:'', HistoryData:[] }));
@@ -31,133 +31,134 @@
  GalaxyUIBuilderModel.serializers = Object.assign(Object.assign({}, BaseWidgetModel.serializers), { tool: {
          deserialize: (value, manager) => unpack_models(value, manager)
      } });
- export class GalaxyUIBuilderView extends BaseWidgetView {
+export class GalaxyUIBuilderView extends BaseWidgetView {
      constructor() {
-         super(...arguments);
-         this.dom_class = 'nbtools-uibuilder';
-         this.traitlets = [...super.basics(), 'origin', '_parameters', 'function_import', 'register_tool', 'collapse',
-             'events', 'run_label', 'tool'];
-         this.renderers = {
-             "error": this.render_error,
-             "info": this.render_info
-         };
-         this.body = `
-         <div class="nbtools-buttons">
-             <button class="nbtools-run" type="button" data-traitlet="run_label"></button>
-         </div>
-         <div class="nbtools-description" data-traitlet="description"></div>
-         <div class="nbtools-busy">
-             <div>
-                 <i class="fas fa-circle-notch fa-spin"></i>
-             </div>
-         </div>
-         <div class="nbtools-error" data-traitlet="error"></div>
-         <div class="nbtools-info" data-traitlet="info"></div>
-         <div class="dataset-list"></div> 
-         <div class="nbtools-form"></div>
-         <div class="nbtools-footer"></div>
-         <div class="nbtools-buttons">
-             <button class="nbtools-run" type="button" data-traitlet="run_label"></button>
-         </div>`;
-         this.dragged = ''
-         this.KernelOutPut = ''
+        super(...arguments);
+        this.dom_class = 'nbtools-uibuilder';
+        this.traitlets = [...super.basics(), 'origin', '_parameters', 'function_import', 'register_tool', 'collapse',
+            'events', 'run_label', 'tool'];
+        this.renderers = {
+            "error": this.render_error,
+            "info": this.render_info
+        };
+        this.body = `
+        <div class="nbtools-buttons">
+            <button class="nbtools-run" type="button" data-traitlet="run_label"></button>
+        </div>
+        <div class="nbtools-description" data-traitlet="description"></div>
+        <div class="nbtools-busy">
+            <div>
+                <i class="fas fa-circle-notch fa-spin"></i>
+            </div>
+        </div>
+        <div class="nbtools-error" data-traitlet="error"></div>
+        <div class="nbtools-info" data-traitlet="info"></div>
+        <div class="dataset-list"></div> 
+        <div class="nbtools-form"></div>
+        <div class="nbtools-footer"></div>
+        <div class="nbtools-buttons">
+            <button class="nbtools-run" type="button" data-traitlet="run_label"></button>
+        </div>`;
+        this.dragged = ''
+        this.KernelOutPut = ''
  
-     }
+    }
  
-     render() {
- 
-         // super.render()
-         // this.activate_run_buttons();
-         // this.toggle_code(false);
- 
-         super.render();
- 
-         const inputs = this.model.get('inputs')
-         
-         //########################
- 
-         this.CreateForm()
-         this.Main_Form(inputs['inputs'])
-         this.AddHelpSection(inputs['help'])
-         this.Data_Tool()
+    render() {
 
-         //########################
+        // super.render()
+        // this.activate_run_buttons();
+        // this.toggle_code(false);
+
+        super.render();
+
+        const inputs = this.model.get('inputs')
+        
+        //########################
+
+        this.CreateForm()
+        this.Main_Form(inputs['inputs'])
+        this.AddHelpSection(inputs['help'])
+        this.Data_Tool()
+
+        //########################
+
+        // // Hide the header or footer, if necessary
+        this.display_header_changed();
+        this.display_footer_changed();
+        this.model.on(`change:display_header`, this.display_header_changed, this);
+        this.model.on(`change:display_footer`, this.display_footer_changed, this);
+        // // Show or hide the "busy" UI
+        this.busy_changed();
+        this.model.on(`change:busy`, this.busy_changed, this);
+        // Attach the Reset Parameters gear option
+        this.add_menu_item('Reset Parameters', () => this.reset_parameters());
+        // Attach the Run button callbacks
+        this.activate_run_buttons();
+        // Attach custom buttons
+        this.activate_custom_buttons();
+        //Add the interactive form widget
+        // this.attach_child_widget('.nbtools-form', 'form');
+        // // After the view is rendered
+        // element_rendered(this.el).then(() => {
+        //     // Attach ID and event callbacks
+        //     this._attach_callbacks();
+        //     // Create parameter groups
+        //     this._init_parameter_groups();
+        // });
+        
+    }
  
-         // // Hide the header or footer, if necessary
-         this.display_header_changed();
-         this.display_footer_changed();
-         this.model.on(`change:display_header`, this.display_header_changed, this);
-         this.model.on(`change:display_footer`, this.display_footer_changed, this);
-         // // Show or hide the "busy" UI
-         this.busy_changed();
-         this.model.on(`change:busy`, this.busy_changed, this);
-         // Attach the Reset Parameters gear option
-         this.add_menu_item('Reset Parameters', () => this.reset_parameters());
-         // Attach the Run button callbacks
-         this.activate_run_buttons();
-         // Attach custom buttons
-         this.activate_custom_buttons();
-         //Add the interactive form widget
-         // this.attach_child_widget('.nbtools-form', 'form');
-         // // After the view is rendered
-         // element_rendered(this.el).then(() => {
-         //     // Attach ID and event callbacks
-         //     this._attach_callbacks();
-         //     // Create parameter groups
-         //     this._init_parameter_groups();
-         // });
-         
-     }
+    Main_Form (inputs, call_back_data={}) {
+
+
+        var FormParent = this.el.querySelector('.Galaxy-form');
+
+        var HistList = this.AddHistoryList(call_back_data['HID'])
+        FormParent.append(HistList)
+
+        var self = this
+        _.each(inputs, (input) => {
+        //  console.log(selected_value)
+            self.add(input, FormParent, '', call_back_data);
+        });
+    }
+
+    Data_Tool(selected_history='default'){
+
+    //add Data Widget to the main form
+
+    var DataList = this.el.querySelector('.dataset-list');
+    DataList.append(this.AddDataSetTable())
+
+    }
  
-     Main_Form (inputs, call_back_data={}) {
+    CreateForm() {  //Fix me in future
 
-         var FormParent = this.el.querySelector('.Galaxy-form');
+        var self = this
 
-         var HistList = this.AddHistoryList(call_back_data['HID'])
-         FormParent.append(HistList)
+        const GalaxyForm = document.createElement('form')
+        GalaxyForm.className = 'Galaxy-form'
+        this.el.querySelector('div.nbtools-form').append(GalaxyForm)
+        const Button = document.createElement('button')
+        Button.style.display = 'none'
+        Button.type = 'button'
+        Button.id = 'submit'
+        Button.className  = 'Galaxy-form-button'
 
-         var self = this
-         _.each(inputs, (input) => {
-            //  console.log(selected_value)
-             self.add(input, FormParent, '', call_back_data);
-         });
-     }
-
-     Data_Tool(selected_history='default'){
-
-        //add Data Widget to the main form
-
-        var DataList = this.el.querySelector('.dataset-list');
-        DataList.append(this.AddDataSetTable())
-
-     }
- 
-     CreateForm() {  //Fix me in future
- 
-         var self = this
- 
-         const GalaxyForm = document.createElement('form')
-         GalaxyForm.className = 'Galaxy-form'
-         this.el.querySelector('div.nbtools-form').append(GalaxyForm)
-         const Button = document.createElement('button')
-         Button.style.display = 'none'
-         Button.type = 'button'
-         Button.id = 'submit'
-         Button.className  = 'Galaxy-form-button'
- 
-         GalaxyForm.append(Button)
-     }
+        GalaxyForm.append(Button)
+    }
 
     
-ReturnDataFiles(Select){
+    ReturnDataFiles(Select){
 
     //1. Return data for dynamic update 
     //2. Extracts parameter value from data file widget
 
-   var Data = {}
-   var InputPerameters ={}
-   var Values = {}
-   var Indexes = []
+        var Data = {}
+        var InputPerameters ={}
+        var Values = {}
+        var Indexes = []
 
         var selected1 = [];
         for (var i = 0; i < Select.length; i++) {
@@ -165,7 +166,7 @@ ReturnDataFiles(Select){
                 selected1.push(Select.options[i].value);
                 Indexes.push(i)
             }
-           
+        
         }
 
         Values['values'] = selected1
@@ -179,12 +180,12 @@ ReturnDataFiles(Select){
 
         return  Data 
 
-}
+    }
  
     ReturnData(FormEelements){
  
-         var InputPerameters = {}
-         var Values = {}
+        var InputPerameters = {}
+        var Values = {}
  
         for (var i = 0; i < FormEelements.length; i++) {
 
@@ -259,7 +260,10 @@ ReturnDataFiles(Select){
             input_def.id = this.uid()
         }
 
+        // console.log(input_def.type)
+
         switch (input_def.type) {
+            
 
             case "conditional":
                 this.AddConditoinalSection2(input_def, FormParent, NamePrefix, data);
@@ -287,7 +291,10 @@ ReturnDataFiles(Select){
                 break
             case "section":
                 this.AddSection(input_def, FormParent, NamePrefix) 
+                break
             case "drill_down":
+                console.log('drill_ok')
+                console.log(input_def)
                 this.AddDrill_Down(input_def, FormParent, NamePrefix)
                 break
         }
@@ -465,176 +472,176 @@ ReturnDataFiles(Select){
 
     AddDataSetTable(selected_value='default') {
 
-            var self = this
-    
-            const options =  this.model.get('History_IDs')
-            const select = document.createElement('select')
-            select.id = `Data-History_IDs`  
-            select.className = 'InputData'   
-            // select.name = NamePrefix+input_def['name']
+        var self = this
 
-            var Selected_value = select.value 
+        const options =  this.model.get('History_IDs')
+        const select = document.createElement('select')
+        select.id = `Data-History_IDs`  
+        select.className = 'InputData'   
+        // select.name = NamePrefix+input_def['name']
 
-            for(var i = 0; i < options.length; i++) {
-                  const opt = `${i+1}: ${options[i]['name']}`;
-                  const el = document.createElement("option");
-                  el.textContent = opt;
-                  el.value =  `${options[i]['id']}`;
-                  select.appendChild(el);
-            }
+        var Selected_value = select.value 
 
-            const DataHistoryList = document.createElement('div')
+        for(var i = 0; i < options.length; i++) {
+                const opt = `${i+1}: ${options[i]['name']}`;
+                const el = document.createElement("option");
+                el.textContent = opt;
+                el.value =  `${options[i]['id']}`;
+                select.appendChild(el);
+        }
 
-            const title = document.createElement('div')
-            title.className = 'history-title'
-            const TitleSpan = document.createElement('span')
-            TitleSpan.className = "galaxy-history-title"
-            TitleSpan.textContent = 'Select the hiostory for available datasets'
-            TitleSpan.style.display = 'inline'
-            title.append(TitleSpan)
-            DataHistoryList.append(title)
-    
-            DataHistoryList.className = "galaxy-history-list"
-            DataHistoryList.append(select)
+        const DataHistoryList = document.createElement('div')
 
-            var DataTable = document.createElement('ul')
-            DataTable.className = 'galaxy-data-panel'
+        const title = document.createElement('div')
+        title.className = 'history-title'
+        const TitleSpan = document.createElement('span')
+        TitleSpan.className = "galaxy-history-title"
+        TitleSpan.textContent = 'Select the hiostory for available datasets'
+        TitleSpan.style.display = 'inline'
+        title.append(TitleSpan)
+        DataHistoryList.append(title)
 
-            DataTable.style.height = this.element.querySelector('.Galaxy-form').style.offsetHeight
+        DataHistoryList.className = "galaxy-history-list"
+        DataHistoryList.append(select)
 
-            var InitialData = this.model.get('HistoryData')
+        var DataTable = document.createElement('ul')
+        DataTable.className = 'galaxy-data-panel'
 
-            for(var i = 0; i < InitialData.length; i++) {
+        DataTable.style.height = this.element.querySelector('.Galaxy-form').style.offsetHeight
 
-                var Data = JSON.stringify(InitialData[i]['id'])
+        var InitialData = this.model.get('HistoryData')
 
-                var DataTableElement = document.createElement('li')
-                DataTableElement.className = 'data-set-row'
+        for(var i = 0; i < InitialData.length; i++) {
 
-                var DataHeader = document.createElement('div')
-                DataHeader.className = 'data-header'
+            var Data = JSON.stringify(InitialData[i]['id'])
 
-                var DataDescription =  document.createElement('div')
-                DataDescription.className = 'data-description'
-                DataDescription.innerText = InitialData[i]['create_time']
+            var DataTableElement = document.createElement('li')
+            DataTableElement.className = 'data-set-row'
 
-                var BoldText = document.createElement('b')
-                BoldText.innerText = InitialData[i]['name']
-                DataHeader.append(BoldText)
+            var DataHeader = document.createElement('div')
+            DataHeader.className = 'data-header'
 
-                DataHeader.value = JSON.stringify(InitialData[i])
-                DataTableElement.append(DataHeader )
-                DataTableElement.append(DataDescription)
+            var DataDescription =  document.createElement('div')
+            DataDescription.className = 'data-description'
+            DataDescription.innerText = InitialData[i]['create_time']
 
-                DataTableElement.draggable = 'true'
-                // DataTableElement.ondragstart = "event.dataTransfer.setData('text/plain',null)"
+            var BoldText = document.createElement('b')
+            BoldText.innerText = InitialData[i]['name']
+            DataHeader.append(BoldText)
 
-                DataTableElement.addEventListener("drag", function(event) {
-                    console.log("its Dragable")
-                }, false)
+            DataHeader.value = JSON.stringify(InitialData[i])
+            DataTableElement.append(DataHeader )
+            DataTableElement.append(DataDescription)
 
-                DataTableElement.addEventListener("dragstart", function(event) {
-                    // store a ref. on the dragged elem
-                    self.dragged = event.target;
-                    // make it half transparent
-                    // event.target.style.opacity = .5;
-                  }, false);
+            DataTableElement.draggable = 'true'
+            // DataTableElement.ondragstart = "event.dataTransfer.setData('text/plain',null)"
 
-                DataTable.append(DataTableElement)
-            }
+            DataTableElement.addEventListener("drag", function(event) {
+                console.log("its Dragable")
+            }, false)
 
-            DataHistoryList.append(select)
-            DataHistoryList.append(DataTable)
+            DataTableElement.addEventListener("dragstart", function(event) {
+                // store a ref. on the dragged elem
+                self.dragged = event.target;
+                // make it half transparent
+                // event.target.style.opacity = .5;
+                }, false);
 
-            select.addEventListener("change", () => {
-     
-                var HistoryID = select.value
-    
-                // var children = self.element.querySelector('.Galaxy-form').children;
-                // var Inputs = self.ReturnData(children)
-    
-                const notebook = ContextManager.tool_registry.current
-    
-                var future = notebook.context.sessionContext.session.kernel.requestExecute({code: `from galaxylab import GalaxyTaskWidget\nGalaxyTaskWidget.UpdateForm( GInstace=${JSON.stringify(self.model.get('GalInstace'))}, HistoryID=${JSON.stringify(HistoryID)})`}) 
-                var Origin = self.element.querySelector('.galaxy-data-panel')
+            DataTable.append(DataTableElement)
+        }
 
-                self.removeAllChildNodes(Origin)
-                
-                 future.onIOPub  = (msg) => {
-     
-                    const msgType = msg.header.msg_type;
-                    switch (msgType) {
-                      case 'execute_result':
-                      case 'display_data':
-                      case 'update_display_data':
-                        future.onIOPub = msg.content;
-     
-                        let refine_inputs = future.onIOPub.data['application/json'];
-     
-                            //########################################
-     
-                        try { 
-                            
-                            for(var i = 0; i < refine_inputs.length; i++) {
+        DataHistoryList.append(select)
+        DataHistoryList.append(DataTable)
 
-                                var DataTableElement = document.createElement('li')
-                                DataTableElement.className = 'data-set-row'
+        select.addEventListener("change", () => {
 
-                                var DataHeader = document.createElement('div')
-                                DataHeader.className = 'data-header'
+            var HistoryID = select.value
 
-                                var BoldText = document.createElement('b')
+            // var children = self.element.querySelector('.Galaxy-form').children;
+            // var Inputs = self.ReturnData(children)
 
-                                BoldText.innerText = refine_inputs[i]['name']
-                                DataHeader.append(BoldText)
+            const notebook = ContextManager.tool_registry.current
 
-                                DataHeader.value = JSON.stringify(refine_inputs[i])
-                
-                                var DataDescription =  document.createElement('div')
-                                DataDescription.className = 'data-description'
-                                DataDescription.innerText =  refine_inputs[i]['create_time']
+            var future = notebook.context.sessionContext.session.kernel.requestExecute({code: `from galaxylab import GalaxyTaskWidget\nGalaxyTaskWidget.UpdateForm( GInstace=${JSON.stringify(self.model.get('GalInstace'))}, HistoryID=${JSON.stringify(HistoryID)})`}) 
+            var Origin = self.element.querySelector('.galaxy-data-panel')
 
-                                DataTableElement.append(DataHeader)
-                                DataTableElement.append(DataDescription)
-                                DataTableElement.draggable = 'true'
-                                DataTableElement.ondragstart = "drag(event)"
+            self.removeAllChildNodes(Origin)
+            
+                future.onIOPub  = (msg) => {
 
-                                DataTableElement.addEventListener("drag", function(event) {
-                                    
-                                }, false)
+                const msgType = msg.header.msg_type;
+                switch (msgType) {
+                    case 'execute_result':
+                    case 'display_data':
+                    case 'update_display_data':
+                    future.onIOPub = msg.content;
 
-                                DataTableElement.addEventListener("dragstart", function(event) {
-                                    // store a ref. on the dragged elem
-                                    self.dragged = event.target;
-                                    // make it half transparent
-                                    // event.target.style.opacity = .5;
-                                  }, false);
+                    let refine_inputs = future.onIOPub.data['application/json'];
 
-                                Origin.append(DataTableElement)
+                        //########################################
 
-                            }
+                    try { 
+                        
+                        for(var i = 0; i < refine_inputs.length; i++) {
 
-                            //######################################## //Fix me in future
+                            var DataTableElement = document.createElement('li')
+                            DataTableElement.className = 'data-set-row'
 
-                            // DataHistoryList.append(InnerDataTable)
-                            
-                        } catch(err){
-                            console.log(err);
+                            var DataHeader = document.createElement('div')
+                            DataHeader.className = 'data-header'
+
+                            var BoldText = document.createElement('b')
+
+                            BoldText.innerText = refine_inputs[i]['name']
+                            DataHeader.append(BoldText)
+
+                            DataHeader.value = JSON.stringify(refine_inputs[i])
+            
+                            var DataDescription =  document.createElement('div')
+                            DataDescription.className = 'data-description'
+                            DataDescription.innerText =  refine_inputs[i]['create_time']
+
+                            DataTableElement.append(DataHeader)
+                            DataTableElement.append(DataDescription)
+                            DataTableElement.draggable = 'true'
+                            DataTableElement.ondragstart = "drag(event)"
+
+                            DataTableElement.addEventListener("drag", function(event) {
+                                
+                            }, false)
+
+                            DataTableElement.addEventListener("dragstart", function(event) {
+                                // store a ref. on the dragged elem
+                                self.dragged = event.target;
+                                // make it half transparent
+                                // event.target.style.opacity = .5;
+                                }, false);
+
+                            Origin.append(DataTableElement)
+
                         }
-     
-                        break;
-                      default:
-                        break;
+
+                        //######################################## //Fix me in future
+
+                        // DataHistoryList.append(InnerDataTable)
+                        
+                    } catch(err){
+                        console.log(err);
                     }
-                     return
-                  };
-    
-            });
+
+                    break;
+                    default:
+                    break;
+                }
+                    return
+            };
+
+        });
         return DataHistoryList
-     }
+    }
 
 
-     AddHistoryList(selected_value='default') {
+    AddHistoryList(selected_value='default') {
 
         var self = this
 
@@ -695,7 +702,7 @@ ReturnDataFiles(Select){
  
                         //########################################
  
-                     try { 
+                     
 
                         var FormParent = self.el.querySelector('.Galaxy-form')                        
                         self.removeAllChildNodes(FormParent)
@@ -713,8 +720,11 @@ ReturnDataFiles(Select){
                         var SelectedIndex = {}
                         SelectedIndex['HID'] = select.selectedIndex
 
+                     try { 
+
                         self.Main_Form(refine_inputs['inputs'],  SelectedIndex)
-                        
+
+                    
                       } catch(err){
                         console.log(err);
                       }
@@ -770,7 +780,7 @@ ReturnDataFiles(Select){
     }
  
 
-     AddRepeat(input_def, FormParent, NamePrefix) {
+    AddRepeat(input_def, FormParent, NamePrefix) {
 
         var self = this
         input_def.id = this.uid()
@@ -877,8 +887,10 @@ ReturnDataFiles(Select){
          }
      }
 
- 
-    FileUpLoad (input_def, FormParent, NamePrefix, call_back_data={}) {
+
+    FileUpLoad (input_def, FormParent, NamePrefix, call_back_data={}) {    
+        
+        console.log(input_def)
 
         input_def.id = this.uid()
         var self = this
@@ -902,24 +914,28 @@ ReturnDataFiles(Select){
         Label_file.id = 'label-1'
         Label_file.className = 'ui-option'
         Label_file.append(SingleFile)
+        Label_file.style.display = 'none'
 
         var Label_files = document.createElement('label')
         Label_files.style.width = '5px'
         Label_files.id = 'label-2'
         Label_files.className = 'ui-option'
         Label_files.append(MultFiles)
+        Label_files.style.display = 'none'
+        Label_files.style.backgroundColor = 'rgb(133, 131, 120)'
 
         var Label_collection = document.createElement('label')
         Label_collection.style.width = '5px'
         Label_collection.id = 'label-3'
         Label_collection.className = 'ui-option'
         Label_collection.append(Collection)
+        Label_collection.style.display = 'none'
 
         var FileManu = document.createElement('div')
 
         FileManu.className = 'multi-selectbox'
 
-        FileManu.append(Label_file)
+        // FileManu.append(Label_file)
         FileManu.append(Label_files)
         FileManu.append(Label_collection)
 
@@ -930,8 +946,12 @@ ReturnDataFiles(Select){
         Select.className = 'selectbox-scrollable'
 
         Select.style.width = '100%'
-        Select.multiple = false
-        Select.style.height = '40px'
+
+        if (input_def.multiple == true ){
+            Select.multiple = true
+            Select.style.height = '200px'
+        }
+
 
         Select.name = NamePrefix+input_def['name']
 
@@ -940,132 +960,126 @@ ReturnDataFiles(Select){
         Select.ondrop="drop(event)"
         Select.ondragover="allowDrop(event)"
 
+        const title = document.createElement('div')
+        title.className = 'ui-from-title'
+        const TitleSpan = document.createElement('span')
+        TitleSpan.className = "ui-form-title-text"
+        TitleSpan.textContent = input_def.label
+        TitleSpan.style.display = 'inline'
+        title.append(TitleSpan)
+
 
         for (var i = 0; i < options['hda'].length; i++) {
             Select.insertAdjacentHTML('beforeend', `
-            <option selected="false" value="${options['hda'][i]['id']}">${options['hda'][i].name}</option>
+            <option  value="${options['hda'][i]['id']}">${options['hda'][i].name}</option>
           `)
-
         }
+
+
+        for (var i, j = 0; i = Select.options[j]; j++) {
+ 
+            if (input_def.value == null) {
+                Select.selectedIndex = 0;
+            } else {
+                if (i.value == input_def.value.values[0]['id']) { //fix me 
+                    Select.selectedIndex = j;
+                    break;
+                }
+            }
+        }
+
 
     //    Select.selectedIndex = '-1';
 
-        // Select.addEventListener("dragover", function(event) {
-        //     // prevent default to allow drop
-        //     event.preventDefault();
-        //     // console.log('its Drag over')
-        // }, false);
+        Select.addEventListener("dragover", function(event) {
+            // prevent default to allow drop
+            event.preventDefault();
+            console.log('its Drag over')
+        }, false);
 
-        // Select.addEventListener("drop", function(event) {
-        //     // prevent default action (open as link for some elements)
-        //     event.preventDefault();
-        //     // move dragged elem to the selected drop target
-        //     if (event.target.className == "InputData") {
+        Select.addEventListener("drop", function(event) {
+            // prevent default action (open as link for some elements)
+            event.preventDefault();
+            // move dragged elem to the selected drop target
+            console.log(event.target.className)
+            if (event.target.className == "selectbox-scrollable") {
 
-        //         event.target.style.background = "";
-        //         //   dragged.parentNode.removeChild( dragged );
-        //         //   event.target.appendChild( dragged );
+                event.target.style.background = "";
+                //   dragged.parentNode.removeChild( dragged );
+                //   event.target.appendChild( dragged );
 
-        //         var draged_item = self.dragged.firstElementChild
-        //         self.removeAllChildNodes(Select)
+                var draged_item = self.dragged.firstElementChild
+                // self.removeAllChildNodes(Select)
 
-        //         const opt = JSON.parse(draged_item.value)['name']
-        //         const el = document.createElement("option");
-        //         el.textContent = opt;
-        //         el.value = 'Input_data:'+`{values:[${draged_item.value}]}` //Fix me 
+                const opt = JSON.parse(draged_item.value)['name']
+                const el = document.createElement("option");
+                el.textContent = opt;
+                el.value = `${JSON.parse(draged_item.value)['id']}` //Fix me 
 
-        //         Select.appendChild(el);
-        //     }
-        // }, false);
+                Select.appendChild(el);
+            }
+        }, false);
 
 
 
         var children = self.element.querySelector('.Galaxy-form').children;
         var Inputs = self.ReturnData(children)
 
+        // InputTypeLabel = 
+
+        row.append(title)
         FileManu.append(Select)
+        // FileManu.append()
         row.append(FileManu)
 
-        const UploadFileLabel = document.createElement("div")
-        UploadFileLabel.className = 'upload-file-label'
-        UploadFileLabel.style.display = 'none'
 
-        var BatchIcon = document.createElement("li") 
-        BatchIcon.className = 'fa fa-sitemap'
 
-        var Span = document.createElement("span") 
-        Span.innerText = '  This is a batch mode input field. Separate jobs will be triggered for each dataset selection.'
+        // var BatchIcon = document.createElement("li") 
+        // BatchIcon.className = 'fa fa-sitemap'
 
-        UploadFileLabel.append(BatchIcon)
-        UploadFileLabel.append(Span)
+        // var Span = document.createElement("span") 
+        // Span.innerText = '  This is a batch mode input field. Separate jobs will be triggered for each dataset selection.'
 
-        var TempLabels = row.querySelectorAll('.ui-option')
+        // UploadFileLabel.append(BatchIcon)
+        // UploadFileLabel.append(Span)
 
-        if (call_back_data['select_type'] === true) {
 
-            Label_files.style.backgroundColor = 'rgb(143, 145, 145)'
-            Select.multiple = true    
-            Select.style.height = '100%'
-            UploadFileLabel.style.display = 'block'
-            Select.selectedIndex = '-1';
-        } else {
+        if (input_def.multiple === true ){
 
-            TempLabels[0].style.backgroundColor = 'rgb(143, 145, 145)'
-            Select.style.height = '40px'
+            Label_files.style.display = 'block'
+            Label_collection.style.display = 'block'
+            Select.multiple = true
 
         }
 
+   
+
         row.querySelectorAll('.ui-option').forEach((Label) => Label.addEventListener('click', () => {
 
+            console.log('ok')
 
-                for (var i = 0; i < TempLabels.length; i++ ){
-                    if (TempLabels[i].id == Label.id) {
-                        TempLabels[i].style.backgroundColor = 'rgb(143, 145, 145)'
-                    } else{
-                        TempLabels[i].style.backgroundColor = 'white'
-                    }
-                }
+            if (Label.id == 'label-2'){
+                Label_files.style.backgroundColor = 'rgb(133, 131, 120)'
+                Label_collection.style.backgroundColor = 'white'
 
-            if (Label.id == 'label-1'){
-
-                Select.multiple = false
-                UploadFileLabel.style.display = 'none'
-
-            } else if (Label.id == 'label-2') {
-                Select.multiple = true
-                Select.style.height = '100%'
-                Select.selectedIndex = '-1';
-                UploadFileLabel.style.display = 'block'
+            } else if (Label.id == 'label-3') {
+                Label_collection.style.backgroundColor = 'rgb(133, 131, 120)'
+                Label_files.style.backgroundColor = 'white'
     
-
             } else {
                 Select.multiple = false
                 UploadFileLabel.style.display = 'block'
 
             }
-        // }
+        
 
         }));
         
-         //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
-         const title = document.createElement('div')
-         title.className = 'ui-from-title'
-         const TitleSpan = document.createElement('span')
-         TitleSpan.className = "ui-form-title-text"
-         TitleSpan.textContent = input_def.label
-         TitleSpan.style.display = 'inline'
-         title.append(TitleSpan)
-         const Label = document.createElement('label')
-         Label.className = 'custom_file_upload'
-         const Div = document.createElement('div')
 
+        FileManu.style.width = '100%'
 
-         FileManu.style.width = '100%'
-
-
-        row.append(title)
+        // row.append(title)
         row.append(FileManu)
-        row.append(UploadFileLabel)
         
 
         var OutValue = []
@@ -1097,7 +1111,7 @@ ReturnDataFiles(Select){
 
                 let refine_inputs = future.onIOPub.data['application/json'];
 
-                try { 
+                
                     //######################################## //Fix me in future
 
                     const Button = document.createElement('button')
@@ -1117,6 +1131,7 @@ ReturnDataFiles(Select){
 
                     var CallBackData =  self.ReturnDataFiles(Select)
                     CallBackData['HID'] = HID.selectedIndex
+                    try { 
 
                     self.Main_Form(refine_inputs['inputs'], CallBackData)
 
@@ -1138,405 +1153,444 @@ ReturnDataFiles(Select){
         return row
     }
 
- 
-     AddInteger (input_def, FormParent, NamePrefix) {
- 
-         input_def.id = this.uid()
-         const input = document.createElement('input')
-         input.value = input_def['value']
-         input.className = 'InputData'
-         input.name = NamePrefix+input_def['name']
-         input.id = input_def.id
-         const row = document.createElement('div')
-         const title = document.createElement('div')
-         title.className = 'ui-from-title'
-         const TitleSpan = document.createElement('span')
-         TitleSpan.className = "ui-form-title-text"
-         TitleSpan.textContent = input_def.label
-         TitleSpan.style.display = 'inline'
-         title.append(TitleSpan)
-         row.className = 'ui-form-element section-row'
-         row.id = input_def.id
-         row.append(title)
-         row.append(input)
-         FormParent.append(row)
-         
-         return row
-     }
- 
- 
-     AddFloat (input_def, FormParent, NamePrefix) {
- 
-         input_def.id = this.uid()
-         const input = document.createElement('input')
-         input.value = input_def['value']
-         input.name = NamePrefix+input_def.name
-         input.id = `input-${input_def.id}`
-         input.className = 'InputData'
-         const row = document.createElement('div')
-         const title = document.createElement('div')
-         title.className = 'ui-from-title'
-         const TitleSpan = document.createElement('span')
-         TitleSpan.className = "ui-form-title-text"
-         TitleSpan.textContent = input_def.label
-         TitleSpan.style.display = 'inline'
-         title.append(TitleSpan)
-         row.className = 'ui-form-element section-row'
-         row.id = input_def.id
-         row.append(title)
-         row.append(input)
-         FormParent.append(row)
-         return row
-     }
- 
-     AddConditionalSelectField (input_def, ElID, NamePrefix, call_back_data={} ) {
 
+
+    AddInteger (input_def, FormParent, NamePrefix) {
 
         input_def.id = this.uid()
- 
-         var self = this
- 
-         const options =  input_def['test_param']['options']
-         const select = document.createElement('select')
-         select.name = NamePrefix+input_def['name']+"|"+input_def['test_param']['name']
- 
-         select.id = `select-${input_def.id}`    
-         select.className = 'InputData' 
-      
-         for(var i = 0; i < options.length; i++) {
-               const opt = options[i][0];
-               const el = document.createElement("option");
-               el.textContent = opt;
-               el.value = options[i][1];
-               select.appendChild(el);
-         }
- 
-         for(var i, j = 0; i = select.options[j]; j++) {
-             if(i.value == input_def.test_param.value) {
-                 select.selectedIndex = j;
-                 break;
-             }
-         }
-      
-         const row = document.createElement('div')
-         const title = document.createElement('div')
-         title.className = 'ui-from-title'
-         const TitleSpan = document.createElement('span')
-         TitleSpan.className = "ui-form-title-text"
-         TitleSpan.textContent = input_def['test_param']['label']
- 
-         TitleSpan.style.display = 'inline'
-         title.append(TitleSpan)
-         row.className = 'ui-form-element section-row conditional'
-         row.id = input_def.id
-         row.append(title)
-         row.append(select)
-         
-         select.addEventListener("change", () => {
- 
-             // //##################################### Recently Added 
-             var queryID = select.value
-
-             for (var i in ElID) {
-       
-                 if (options[i][1] == queryID ) {
-                     this.el.querySelector(`#${ElID[i]}`).style.display = 'block'
-                 } 
-                 else {
-                     this.el.querySelector(`#${ElID[i]}`).style.display = 'none'
-                 }
-             }
- 
-            var children = self.element.querySelector('.Galaxy-form').children;
-            var Inputs = self.ReturnData(children)
-
-            var HistoryID = self.element.querySelector('#History_IDs').value
-
-            const notebook = ContextManager.tool_registry.current
-            var future = notebook.context.sessionContext.session.kernel.requestExecute({code: `from galaxylab import GalaxyTaskWidget\nGalaxyTaskWidget.UpdateForm(${JSON.stringify(self.model.get('GalInstace'))}, ${JSON.stringify(Inputs)}, ${JSON.stringify(self.model.get('ToolID'))}, ${JSON.stringify(HistoryID)})`})  
-
- 
-             future.onIOPub  = (msg) => {
- 
-                const msgType = msg.header.msg_type;
-                switch (msgType) {
-                  case 'execute_result':
-                  case 'display_data':
-                  case 'update_display_data':
-                    future.onIOPub = msg.content;
- 
-                    let refine_inputs = future.onIOPub.data['application/json'];
- 
-                        var FormParent = self.el.querySelector('.Galaxy-form')
-                        self.removeAllChildNodes(FormParent)
- 
-                        //######################################## //Fix me in future
- 
-                        const Button = document.createElement('button')
-                        Button.style.display = 'none'
-                        Button.type = 'button'
-                        Button.id = 'submit'
-                        Button.className  = 'Galaxy-form-button'
-                
-                        FormParent.append(Button)
- 
-                        //########################################
- 
-                     try { 
-
-                        self.Main_Form(refine_inputs['inputs'], call_back_data);
-                      } catch(err){
-                        console.log(err);
-                      }
- 
-                    break;
-                  default:
-                    break;
-                }
-                 return
-              };
- 
-             //##################################### Recently Added 
- 
-         });
- 
-         //#################### Recently Added 
-         // FormParent.append(row)
-         //#################### Recently Added 
-         return row
-     }
- 
- 
-     AddSelectField (input_def, FormParent, NamePrefix) {
- 
-         input_def.id = this.uid()
-         var self = this
- 
-         const Div = document.createElement('div')
-         const row = document.createElement('div')
- 
-         if (input_def.display== 'checkboxes') {
- 
-             const title = document.createElement('div')
-             title.className = 'ui-from-title'
-             const TitleSpan = document.createElement('span')
-             TitleSpan.className = "ui-form-title-text"
-             TitleSpan.textContent = input_def['label']
-     
-             // TitleSpan.style.display = 'inline'
-             title.append(TitleSpan)
-             Div.append(title)
- 
-             for(var i = 0; i < input_def.options.length; i++) {
-                 const CheckBox = document.createElement('input')
-                 CheckBox.className = 'ui-checkbox'
-                 CheckBox.id = `select-${input_def.id}-${i}`
-                 const Label = document.createElement('label')
-                 Label.htmlFor = `select-${input_def.id}-${i}`
-                 Label.innerText = input_def.options[i][0]
-                 
-                 CheckBox.type = 'checkbox'
-                 Div.append(CheckBox)
-                 Div.append(Label)
-             }
- 
-             row.append(Div)
-            
-         } else {
- 
-             const options =  input_def['options']
-             const select = document.createElement('select')
-             select.id = `select-${input_def.id}`  
-             select.className = 'InputData'   
-             select.name = NamePrefix+input_def['name']
-          
-             for(var i = 0; i < options.length; i++) {
-                   const opt = options[i][0];
-                   const el = document.createElement("option");
-                   el.textContent = opt;
-                   el.value =  options[i][1];
-                   select.appendChild(el);
-             }
- 
-             const title = document.createElement('div')
-             title.className = 'ui-from-title'
-             const TitleSpan = document.createElement('span')
-             TitleSpan.className = "ui-form-title-text"
-             TitleSpan.textContent = input_def['label']
-     
-             TitleSpan.style.display = 'inline'
-             title.append(TitleSpan)
-             row.className = 'ui-form-element section-row'
-             row.id = input_def.id
-             row.append(title)
-             row.append(select)
- 
-             select.addEventListener("change", () => {
- 
-                 var queryID = select.value
-             });
-         }
- 
-         FormParent.append(row)
- 
-         return row
- 
-     }
- 
- 
- 
-     AddBooleanField (input_def, FormParent, NamePrefix ) {
- 
-         input_def.id = this.uid()
- 
-         const options =  [['True', 'True', 'True'],
-                         ['False', 'False', 'False']]
- 
-         const select = document.createElement('select')
- 
-         select.name = NamePrefix+input_def['name']
- 
-         for(var i = 0; i < options.length; i++) {
-             const opt = options[i][0];
-             const el = document.createElement("option");
-             el.textContent = opt;
-             el.value = options[i][1];
-             select.appendChild(el);
-         }
- 
-         select.id = `input-${input_def.id}`
-         select.className = 'InputData' 
-         const row = document.createElement('div')
-         const title = document.createElement('div')
-         title.className = 'ui-from-title'
-         const TitleSpan = document.createElement('span')
-         TitleSpan.className = "ui-form-title-text"
-         TitleSpan.textContent = input_def.label
-         TitleSpan.style.display = 'inline'
-         title.append(TitleSpan)
-         row.className = 'ui-form-element section-row'
-         row.id = input_def.id
-         row.append(title)
-         row.append(select)
-         
-         this.el.querySelector('.nbtools-form').append(row)
-         FormParent.append(row)
-         return row
-     }
- 
-     collect_data(){
-         const Childrens  = this.el.querySelector('.nbtools-form').children;
-     }
- 
- 
-     AddConditoinalSection2 (input_def, parent, NamePrefix, call_back_data={}) {
- 
-         // console.log(input_def['test_param']['options'])
- 
-         var NewNamePrefix = NamePrefix+input_def['name']+"|"
-         input_def.id = this.uid()
- 
-         const ElementIDs = []
- 
-         for (var e in input_def.cases) {
-             ElementIDs.push(`${input_def.id}-section-${e}`)
-         }
- 
-         const Selectfiled = this.AddConditionalSelectField(input_def, ElementIDs, NamePrefix)
- 
-         parent.append(Selectfiled)
- 
-         var ConditionalDiv
- 
-         for (var i in input_def['test_param']['options']) {
- 
-             ConditionalDiv = document.createElement('div')
-             ConditionalDiv.className = 'ui-form-element section-row pl-2'
-             ConditionalDiv.id = `${ElementIDs[i]}`
-             if (input_def.test_param.value == input_def.test_param.options[i][1]){
-                ConditionalDiv.style.display = 'block'
-
-             } else {
-                ConditionalDiv.style.display = 'none'
-             }
-
- 
-          for (var l in input_def.cases){
-             
-             if  (input_def.cases[l].value == input_def['test_param']['options'][i][1]) {
+        const input = document.createElement('input')
+        input.value = input_def['value']
+        input.className = 'InputData'
+        input.name = NamePrefix+input_def['name']
+        input.id = input_def.id
+        const row = document.createElement('div')
+        const title = document.createElement('div')
+        title.className = 'ui-from-title'
+        const TitleSpan = document.createElement('span')
+        TitleSpan.className = "ui-form-title-text"
+        TitleSpan.textContent = input_def.label
+        TitleSpan.style.display = 'inline'
+        title.append(TitleSpan)
+        row.className = 'ui-form-element section-row'
+        row.id = input_def.id
+        row.append(title)
+        row.append(input)
+        FormParent.append(row)
         
-                 for (var j in input_def.cases[l].inputs) {
+        return row
+    }
  
-                     this.add(input_def.cases[l].inputs[j], ConditionalDiv, NewNamePrefix, call_back_data)
-                       
-                     input_def.cases[l].inputs[j].id = this.uid()
-         
-                   }
-             }
-          }
  
-           parent.append(ConditionalDiv)
-         }
-     }
+    AddFloat (input_def, FormParent, NamePrefix) {
+
+        input_def.id = this.uid()
+        const input = document.createElement('input')
+        input.value = input_def['value']
+        input.name = NamePrefix+input_def.name
+        input.id = `input-${input_def.id}`
+        input.className = 'InputData'
+        const row = document.createElement('div')
+        const title = document.createElement('div')
+        title.className = 'ui-from-title'
+        const TitleSpan = document.createElement('span')
+        TitleSpan.className = "ui-form-title-text"
+        TitleSpan.textContent = input_def.label
+        TitleSpan.style.display = 'inline'
+        title.append(TitleSpan)
+        row.className = 'ui-form-element section-row'
+        row.id = input_def.id
+        row.append(title)
+        row.append(input)
+        FormParent.append(row)
+        return row
+    }
+ 
+    AddConditionalSelectField (input_def, ElID, NamePrefix, call_back_data={} ) {
+
+
+    input_def.id = this.uid()
+
+        var self = this
+
+        const options =  input_def['test_param']['options']
+        const select = document.createElement('select')
+        select.name = NamePrefix+input_def['name']+"|"+input_def['test_param']['name']
+
+        select.id = `select-${input_def.id}`    
+        select.className = 'InputData' 
+    
+        for(var i = 0; i < options.length; i++) {
+            const opt = options[i][0];
+            const el = document.createElement("option");
+            el.textContent = opt;
+            el.value = options[i][1];
+            select.appendChild(el);
+        }
+
+        for(var i, j = 0; i = select.options[j]; j++) {
+            if(i.value == input_def.test_param.value) {
+                select.selectedIndex = j;
+                break;
+            }
+        }
+    
+        const row = document.createElement('div')
+        const title = document.createElement('div')
+        title.className = 'ui-from-title'
+        const TitleSpan = document.createElement('span')
+        TitleSpan.className = "ui-form-title-text"
+        TitleSpan.textContent = input_def['test_param']['label']
+
+        TitleSpan.style.display = 'inline'
+        title.append(TitleSpan)
+        row.className = 'ui-form-element section-row conditional'
+        row.id = input_def.id
+        row.append(title)
+        row.append(select)
+        
+        select.addEventListener("change", () => {
+
+            // //##################################### Recently Added 
+            var queryID = select.value
+
+            for (var i in ElID) {
+    
+                if (options[i][1] == queryID ) {
+                    this.el.querySelector(`#${ElID[i]}`).style.display = 'block'
+                } 
+                else {
+                    this.el.querySelector(`#${ElID[i]}`).style.display = 'none'
+                }
+            }
+
+        var children = self.element.querySelector('.Galaxy-form').children;
+        var Inputs = self.ReturnData(children)
+
+        var HistoryID = self.element.querySelector('#History_IDs').value
+
+        const notebook = ContextManager.tool_registry.current
+        var future = notebook.context.sessionContext.session.kernel.requestExecute({code: `from galaxylab import GalaxyTaskWidget\nGalaxyTaskWidget.UpdateForm(${JSON.stringify(self.model.get('GalInstace'))}, ${JSON.stringify(Inputs)}, ${JSON.stringify(self.model.get('ToolID'))}, ${JSON.stringify(HistoryID)})`})  
+
+
+            future.onIOPub  = (msg) => {
+
+            const msgType = msg.header.msg_type;
+            switch (msgType) {
+                case 'execute_result':
+                case 'display_data':
+                case 'update_display_data':
+                future.onIOPub = msg.content;
+
+                let refine_inputs = future.onIOPub.data['application/json'];
+
+                    var FormParent = self.el.querySelector('.Galaxy-form')
+                    self.removeAllChildNodes(FormParent)
+
+                    //######################################## //Fix me in future
+
+                    const Button = document.createElement('button')
+                    Button.style.display = 'none'
+                    Button.type = 'button'
+                    Button.id = 'submit'
+                    Button.className  = 'Galaxy-form-button'
+            
+                    FormParent.append(Button)
+
+                    //########################################
+
+                    try { 
+
+                    self.Main_Form(refine_inputs['inputs'], call_back_data);
+                    } catch(err){
+                    console.log(err);
+                    }
+
+                break;
+                default:
+                break;
+            }
+                return
+            };
+
+            //##################################### Recently Added 
+
+        });
+
+        //#################### Recently Added 
+        // FormParent.append(row)
+        //#################### Recently Added 
+        return row
+    }
+ 
+ 
+    AddSelectField (input_def, FormParent, NamePrefix) {
+
+        input_def.id = this.uid()
+        var self = this
+
+        const Div = document.createElement('div')
+        const row = document.createElement('div')
+
+        if (input_def.display== 'checkboxes') {
+
+            const title = document.createElement('div')
+            title.className = 'ui-from-title'
+            const TitleSpan = document.createElement('span')
+            TitleSpan.className = "ui-form-title-text"
+            TitleSpan.textContent = input_def['label']
+    
+            // TitleSpan.style.display = 'inline'
+            title.append(TitleSpan)
+            Div.append(title)
+
+            for(var i = 0; i < input_def.options.length; i++) {
+                const CheckBox = document.createElement('input')
+                CheckBox.className = 'ui-checkbox'
+                CheckBox.id = `select-${input_def.id}-${i}`
+                const Label = document.createElement('label')
+                Label.htmlFor = `select-${input_def.id}-${i}`
+                Label.innerText = input_def.options[i][0]
+                
+                CheckBox.type = 'checkbox'
+                Div.append(CheckBox)
+                Div.append(Label)
+            }
+
+            row.append(Div)
+        
+        } else {
+
+            const options =  input_def['options']
+            const select = document.createElement('select')
+            select.id = `select-${input_def.id}`  
+            select.className = 'InputData'   
+            select.name = NamePrefix+input_def['name']
+        
+            for(var i = 0; i < options.length; i++) {
+                const opt = options[i][0];
+                const el = document.createElement("option");
+                el.textContent = opt;
+                el.value =  options[i][1];
+                select.appendChild(el);
+            }
+
+            const title = document.createElement('div')
+            title.className = 'ui-from-title'
+            const TitleSpan = document.createElement('span')
+            TitleSpan.className = "ui-form-title-text"
+            TitleSpan.textContent = input_def['label']
+    
+            TitleSpan.style.display = 'inline'
+            title.append(TitleSpan)
+            row.className = 'ui-form-element section-row'
+            row.id = input_def.id
+            row.append(title)
+            row.append(select)
+
+            select.addEventListener("change", () => {
+
+                var queryID = select.value
+            });
+        }
+
+        FormParent.append(row)
+
+        return row
+
+    }
+
+
+    TestAddSelectField (input_def, FormParent, NamePrefix) {
+
+        input_def.id = this.uid()
+        var self = this
+
+        const options =  input_def['options']['hda']
+        const select = document.createElement('select')
+        select.id = `select-${input_def.id}`  
+        select.className = 'InputData'   
+        select.name = NamePrefix
+
+        console.log(options)
+    
+        for(var i = 0; i < options.length; i++) {
+            const opt = options[i]['name'];
+            const el = document.createElement("option");
+            el.textContent = opt;
+            el.value =  options[i]['id'];
+            select.appendChild(el);
+        }
+
+        const title = document.createElement('div')
+        title.className = 'ui-from-title'
+        const TitleSpan = document.createElement('span')
+        TitleSpan.className = "ui-form-title-text"
+        TitleSpan.textContent = input_def['label']
+
+        TitleSpan.style.display = 'inline'
+        title.append(TitleSpan)
+
+        select.addEventListener("change", () => {
+
+            var queryID = select.value
+        });
+   
+        return select
+
+    }
+ 
+ 
+    AddBooleanField (input_def, FormParent, NamePrefix ) {
+
+        input_def.id = this.uid()
+
+        const options =  [['True', 'True', 'True'],
+                        ['False', 'False', 'False']]
+
+        const select = document.createElement('select')
+
+        select.name = NamePrefix+input_def['name']
+
+        for(var i = 0; i < options.length; i++) {
+            const opt = options[i][0];
+            const el = document.createElement("option");
+            el.textContent = opt;
+            el.value = options[i][1];
+            select.appendChild(el);
+        }
+
+        select.id = `input-${input_def.id}`
+        select.className = 'InputData' 
+        const row = document.createElement('div')
+        const title = document.createElement('div')
+        title.className = 'ui-from-title'
+        const TitleSpan = document.createElement('span')
+        TitleSpan.className = "ui-form-title-text"
+        TitleSpan.textContent = input_def.label
+        TitleSpan.style.display = 'inline'
+        title.append(TitleSpan)
+        row.className = 'ui-form-element section-row'
+        row.id = input_def.id
+        row.append(title)
+        row.append(select)
+        
+        this.el.querySelector('.nbtools-form').append(row)
+        FormParent.append(row)
+        return row
+    }
+
+    collect_data(){
+        const Childrens  = this.el.querySelector('.nbtools-form').children;
+    }
+ 
+ 
+    AddConditoinalSection2 (input_def, parent, NamePrefix, call_back_data={}) {
+
+        // console.log(input_def['test_param']['options'])
+
+        var NewNamePrefix = NamePrefix+input_def['name']+"|"
+        input_def.id = this.uid()
+
+        const ElementIDs = []
+
+        for (var e in input_def.cases) {
+            ElementIDs.push(`${input_def.id}-section-${e}`)
+        }
+
+        const Selectfiled = this.AddConditionalSelectField(input_def, ElementIDs, NamePrefix)
+
+        parent.append(Selectfiled)
+
+        var ConditionalDiv
+
+        for (var i in input_def['test_param']['options']) {
+
+            ConditionalDiv = document.createElement('div')
+            ConditionalDiv.className = 'ui-form-element section-row pl-2'
+            ConditionalDiv.id = `${ElementIDs[i]}`
+            if (input_def.test_param.value == input_def.test_param.options[i][1]){
+            ConditionalDiv.style.display = 'block'
+
+            } else {
+            ConditionalDiv.style.display = 'none'
+            }
+
+
+        for (var l in input_def.cases){
+            
+            if  (input_def.cases[l].value == input_def['test_param']['options'][i][1]) {
+    
+                for (var j in input_def.cases[l].inputs) {
+
+                    this.add(input_def.cases[l].inputs[j], ConditionalDiv, NewNamePrefix, call_back_data)
+                    
+                    input_def.cases[l].inputs[j].id = this.uid()
+        
+                }
+            }
+        }
+
+        parent.append(ConditionalDiv)
+        }
+    }
      //#############################################################################
  
-     AddSection (input_def, parent, NamePrefix) {
- 
-         var self = this
-         var NewNamePrefix = NamePrefix+input_def['name']+"|"
-         input_def.id = this.uid()
- 
-         const UpperDiv = document.createElement('div')
-         UpperDiv.className = `ui-portlet-section section-row`
-         UpperDiv.id = `${input_def.id}`
- 
-         const Button = document.createElement('button')
-         Button.className = 'collapsible'
-         Button.innerText = input_def['title']
- 
-         var ConditionalDiv  = document.createElement('div')
- 
-         UpperDiv.appendChild(Button)
- 
-         ConditionalDiv.className = `ui-form-element section-row sections`
-         
- 
-         ConditionalDiv.id = `${input_def.id}-sections`
- 
-         UpperDiv.append(ConditionalDiv)
- 
-         for (var j in input_def['inputs']){
- 
-             this.add(input_def['inputs'][j] ,ConditionalDiv , NewNamePrefix)
-         }
- 
-         if (input_def.expanded == true) {
-             ConditionalDiv.style.display = 'block';  
- 
-         } else  {
-             ConditionalDiv.style.display = 'none'; 
- 
-         }
- 
-         parent.append(UpperDiv)
- 
-         Button.addEventListener("click", function(e) {
-             e.preventDefault();
- 
-             let nextSibling = Button.nextElementSibling;   
- 
-             // console.log(nextSibling.id)
- 
-             if (nextSibling.style.display == 'none'){
-                 nextSibling.style.display = 'block'
-             } else {
-                 nextSibling.style.display = 'none'
-             }
-         });
-     }
+    AddSection (input_def, parent, NamePrefix) {
+
+        var self = this
+        var NewNamePrefix = NamePrefix+input_def['name']+"|"
+        input_def.id = this.uid()
+
+        const UpperDiv = document.createElement('div')
+        UpperDiv.className = `ui-portlet-section section-row`
+        UpperDiv.id = `${input_def.id}`
+
+        const Button = document.createElement('button')
+        Button.className = 'collapsible'
+        Button.innerText = input_def['title']
+
+        var ConditionalDiv  = document.createElement('div')
+
+        UpperDiv.appendChild(Button)
+
+        ConditionalDiv.className = `ui-form-element section-row sections`
+        
+
+        ConditionalDiv.id = `${input_def.id}-sections`
+
+        UpperDiv.append(ConditionalDiv)
+
+        for (var j in input_def['inputs']){
+
+            this.add(input_def['inputs'][j] ,ConditionalDiv , NewNamePrefix)
+        }
+
+        if (input_def.expanded == true) {
+            ConditionalDiv.style.display = 'block';  
+
+        } else  {
+            ConditionalDiv.style.display = 'none'; 
+
+        }
+
+        parent.append(UpperDiv)
+
+        Button.addEventListener("click", function(e) {
+            e.preventDefault();
+
+            let nextSibling = Button.nextElementSibling;   
+
+            // console.log(nextSibling.id)
+
+            if (nextSibling.style.display == 'none'){
+                nextSibling.style.display = 'block'
+            } else {
+                nextSibling.style.display = 'none'
+            }
+        });
+    }
      
-  
-     
+
      //#############################################################################
      
      busy_changed() {
@@ -2073,4 +2127,3 @@ ReturnDataFiles(Select){
          }
      }
  }
- 

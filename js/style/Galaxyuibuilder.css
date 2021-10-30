@@ -396,6 +396,7 @@
     border-radius: 2px;
     position:  relative;
     float: left;
+    /* width: 10px; */
     /* width: 5px; */
     /* margin-top: 2px;
     padding-top: 2px; */
@@ -461,4 +462,3 @@
     width:5px;
     border-radius:px;
   } */
-
