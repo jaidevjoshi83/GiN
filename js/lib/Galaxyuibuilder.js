@@ -78,8 +78,9 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         this.CreateForm()
         this.Main_Form(inputs['inputs'])
-        this.AddHelpSection(inputs['help'])
         this.Data_Tool()
+        this.AddHelpSection(inputs['help'])
+       
 
         //########################
 
@@ -126,12 +127,12 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
     Data_Tool(selected_history='default'){
 
-    //add Data Widget to the main form
-
-    var DataList = this.el.querySelector('.dataset-list');
-    DataList.append(this.AddDataSetTable())
-
-    }
+        //add Data Widget to the main form
+    
+        var DataList = this.el.querySelector('.dataset-list');
+        DataList.append(this.AddDataSetTable())
+    
+        }
  
     CreateForm() {  //Fix me in future
 
@@ -890,7 +891,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
     FileUpLoad (input_def, FormParent, NamePrefix, call_back_data={}) {    
         
-        console.log(input_def)
 
         input_def.id = this.uid()
         var self = this
@@ -952,7 +952,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             Select.style.height = '200px'
         }
 
-
         Select.name = NamePrefix+input_def['name']
 
         var options = input_def.options
@@ -968,25 +967,54 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         TitleSpan.style.display = 'inline'
         title.append(TitleSpan)
 
-
         for (var i = 0; i < options['hda'].length; i++) {
             Select.insertAdjacentHTML('beforeend', `
             <option  value="${options['hda'][i]['id']}">${options['hda'][i].name}</option>
           `)
         }
 
+        if (call_back_data['RecCall'] == true) {
 
-        for (var i, j = 0; i = Select.options[j]; j++) {
- 
-            if (input_def.value == null) {
-                Select.selectedIndex = 0;
-            } else {
-                if (i.value == input_def.value.values[0]['id']) { //fix me 
-                    Select.selectedIndex = j;
-                    break;
+            for(var i =0; i < Select.options.length; i++) {
+                    for(var k = 0; k < input_def.value.values.length; k++ ) {                    
+                    if (Select.options[i].value == input_def.value.values[k]['id']){
+                        console.log(Select.options[i].value, input_def.value.values[k]['id'])
+                        Select.options[i].selected = true
+                    }
                 }
             }
-        }
+
+        } 
+
+    //    }
+
+
+
+
+    // if (call_back_data !== {} ) {
+
+    
+    //     for (var i, j = 0; i = Select.options[j]; j++) {
+ 
+    //         if (input_def.value == null) {
+    //                 // Select.selectedIndex = 0;
+    //         } else {
+
+    //             for (var k = 0; k < input_def.value.values.length; k++) {
+    //                 if (i.value == input_def.value.values[k]['id']) { //fix me 
+    //                     console.log(i.value, input_def.value.values[k]['id'])
+    //                     i.selected == true
+    //                     // break;
+    //                 }
+    //             }
+
+    //         }
+            
+
+    //     }
+
+    // }
+
 
 
     //    Select.selectedIndex = '-1';
@@ -1087,12 +1115,11 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
     Select.addEventListener("change", function() {
 
-        console.log(Select.value)
 
         var children = self.element.querySelector('.Galaxy-form').children;
         var Inputs = self.ReturnData(children)
 
-        console.log(Inputs)
+        // console.log(Inputs)
 
         var HistoryID = self.element.querySelector('#History_IDs').value
 
@@ -1131,6 +1158,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
                     var CallBackData =  self.ReturnDataFiles(Select)
                     CallBackData['HID'] = HID.selectedIndex
+                    CallBackData['RecCall'] = true
                     try { 
 
                     self.Main_Form(refine_inputs['inputs'], CallBackData)
