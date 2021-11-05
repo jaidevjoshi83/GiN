@@ -15,11 +15,12 @@
  import { SessionContext, sessionContextDialogs, } from '@jupyterlab/apputils';
  import { KernelModel } from './model';
  import _ from "underscore";
+ import { Toolbox } from '@genepattern/nbtools';
  
 export class GalaxyUIBuilderModel extends BaseWidgetModel{
      
      defaults() {
-         return Object.assign(Object.assign(Object.assign({}, super.defaults()), { _model_name: GalaxyUIBuilderModel.model_name, _model_module: GalaxyUIBuilderModel.model_module, _model_module_version: GalaxyUIBuilderModel.model_module_version, _view_name: GalaxyUIBuilderModel.view_name, _view_module: GalaxyUIBuilderModel.view_module, _view_module_version: GalaxyUIBuilderModel.view_module_version, name: 'Python Function', description: '', origin: '', _parameters: [], parameter_groups: [], function_import: '', register_tool: true, collapse: true, events: {}, buttons: {}, display_header: true, display_footer: true, busy: false, run_label: 'Execute', GalInstace: {}, output: undefined, inputs:{}, form_output:{}, History_Data:[], UI:{}, ToolID:'', HistoryData:[] }));
+         return Object.assign(Object.assign(Object.assign({}, super.defaults()), { _model_name: GalaxyUIBuilderModel.model_name, _model_module: GalaxyUIBuilderModel.model_module, _model_module_version: GalaxyUIBuilderModel.model_module_version, _view_name: GalaxyUIBuilderModel.view_name, _view_module: GalaxyUIBuilderModel.view_module, _view_module_version: GalaxyUIBuilderModel.view_module_version, name: 'Python Function', description: '', origin: '', _parameters: [], parameter_groups: [], function_import: '', register_tool: true, collapse: true, events: {}, buttons: {}, display_header: true, display_footer: true, busy: false, run_label: 'Execute', GalInstance: {}, output: undefined, inputs:{}, form_output:{}, History_Data:[], UI:{}, ToolID:'', HistoryData:[] }));
      }
  }
  GalaxyUIBuilderModel.model_name = 'GalaxyUIBuilderModel';
@@ -61,6 +62,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         </div>`;
         this.dragged = ''
         this.KernelOutPut = ''
+        this.JOBID = {}
  
     }
  
@@ -148,6 +150,52 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         Button.className  = 'Galaxy-form-button'
 
         GalaxyForm.append(Button)
+    }
+
+    TimerFunc(value){
+
+        var i = 0, howManyTimes = 10;
+
+        function f() {
+        console.log(value);
+        i++;
+        if (i < howManyTimes) {
+            setTimeout(f, 3000);
+        }
+        }
+   
+        f();
+
+        return value
+
+    }
+
+    RunKernelFunction(Code){
+
+        const notebook = ContextManager.tool_registry.current
+        var future =  notebook.context.sessionContext.session.kernel.requestExecute({code: Code})
+
+        future.onIOPub  = (msg) => {
+
+            const msgType = msg.header.msg_type;
+            switch (msgType) {
+                case 'execute_result':
+                case 'display_data':
+                case 'update_display_data':
+                future.onIOPub = msg.content;
+
+                var JOB = future.onIOPub.data['application/json'];
+
+                console.log(JOB)
+        
+            
+                break;
+                default:
+                break;
+            }
+            return JOB;
+        };
+        return future.onIOPub
     }
 
     
@@ -378,6 +426,12 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         return OuterDrillDown
     }
 
+    addJobOutPut(){
+
+        var Help = this.el.querySelector('.help-section')
+
+    }
+
 
     AddDrill_Down(input_def, FormParent, NamePrefix) {
         input_def.id = this.uid()
@@ -563,7 +617,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
             const notebook = ContextManager.tool_registry.current
 
-            var future = notebook.context.sessionContext.session.kernel.requestExecute({code: `from galaxylab import GalaxyTaskWidget\nGalaxyTaskWidget.UpdateForm( GInstace=${JSON.stringify(self.model.get('GalInstace'))}, HistoryID=${JSON.stringify(HistoryID)})`}) 
+            var future = notebook.context.sessionContext.session.kernel.requestExecute({code: `from galaxylab import GalaxyTaskWidget\nGalaxyTaskWidget.UpdateForm( GalInstance=${JSON.stringify(self.model.get('GalInstance'))}, HistoryID=${JSON.stringify(HistoryID)})`}) 
             var Origin = self.element.querySelector('.galaxy-data-panel')
 
             self.removeAllChildNodes(Origin)
@@ -687,9 +741,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             var Inputs = self.ReturnData(children)
 
             const notebook = ContextManager.tool_registry.current
-            var future = notebook.context.sessionContext.session.kernel.requestExecute({code: `from galaxylab import GalaxyTaskWidget\nGalaxyTaskWidget.UpdateForm(${JSON.stringify(self.model.get('GalInstace'))}, ${JSON.stringify(Inputs)}, ${JSON.stringify(self.model.get('ToolID'))}, ${JSON.stringify(HistoryID)})`})  
+            var future = notebook.context.sessionContext.session.kernel.requestExecute({code: `from galaxylab import GalaxyTaskWidget\nGalaxyTaskWidget.UpdateForm(${JSON.stringify(self.model.get('GalInstance'))}, ${JSON.stringify(Inputs)}, ${JSON.stringify(self.model.get('ToolID'))}, ${JSON.stringify(HistoryID)})`})  
 
- 
              future.onIOPub  = (msg) => {
  
                 const msgType = msg.header.msg_type;
@@ -986,38 +1039,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         } 
 
-    //    }
-
-
-
-
-    // if (call_back_data !== {} ) {
-
-    
-    //     for (var i, j = 0; i = Select.options[j]; j++) {
- 
-    //         if (input_def.value == null) {
-    //                 // Select.selectedIndex = 0;
-    //         } else {
-
-    //             for (var k = 0; k < input_def.value.values.length; k++) {
-    //                 if (i.value == input_def.value.values[k]['id']) { //fix me 
-    //                     console.log(i.value, input_def.value.values[k]['id'])
-    //                     i.selected == true
-    //                     // break;
-    //                 }
-    //             }
-
-    //         }
-            
-
-    //     }
-
-    // }
-
-
-
-    //    Select.selectedIndex = '-1';
 
         Select.addEventListener("dragover", function(event) {
             // prevent default to allow drop
@@ -1081,7 +1102,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         }
 
    
-
         row.querySelectorAll('.ui-option').forEach((Label) => Label.addEventListener('click', () => {
 
             console.log('ok')
@@ -1124,7 +1144,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         var HistoryID = self.element.querySelector('#History_IDs').value
 
         const notebook = ContextManager.tool_registry.current
-        var future = notebook.context.sessionContext.session.kernel.requestExecute({code: `from galaxylab import GalaxyTaskWidget\nGalaxyTaskWidget.UpdateForm(${JSON.stringify(self.model.get('GalInstace'))}, ${JSON.stringify(Inputs)}, ${JSON.stringify(self.model.get('ToolID'))}, ${JSON.stringify(HistoryID)})`})    
+        var future = notebook.context.sessionContext.session.kernel.requestExecute({code: `from galaxylab import GalaxyTaskWidget\nGalaxyTaskWidget.UpdateForm(${JSON.stringify(self.model.get('GalInstance'))}, ${JSON.stringify(Inputs)}, ${JSON.stringify(self.model.get('ToolID'))}, ${JSON.stringify(HistoryID)})`})    
     
         future.onIOPub  = (msg) => {
                 var queryID  = Select.selectedIndex
@@ -1297,7 +1317,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         var HistoryID = self.element.querySelector('#History_IDs').value
 
         const notebook = ContextManager.tool_registry.current
-        var future = notebook.context.sessionContext.session.kernel.requestExecute({code: `from galaxylab import GalaxyTaskWidget\nGalaxyTaskWidget.UpdateForm(${JSON.stringify(self.model.get('GalInstace'))}, ${JSON.stringify(Inputs)}, ${JSON.stringify(self.model.get('ToolID'))}, ${JSON.stringify(HistoryID)})`})  
+        var future = notebook.context.sessionContext.session.kernel.requestExecute({code: `from galaxylab import GalaxyTaskWidget\nGalaxyTaskWidget.UpdateForm(${JSON.stringify(self.model.get('GalInstance'))}, ${JSON.stringify(Inputs)}, ${JSON.stringify(self.model.get('ToolID'))}, ${JSON.stringify(HistoryID)})`})  
 
 
             future.onIOPub  = (msg) => {
@@ -1617,7 +1637,195 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             }
         });
     }
-     
+
+    sleep (time) {
+        return new Promise((resolve) => setTimeout(resolve, time));
+      }
+
+
+    async executePythonCode(pythonCode, isExpectingOutput){
+	 	
+        var self=this;
+
+        const notebook = ContextManager.tool_registry.current
+
+       return await new Promise(async (resolve, reject) => {  
+           //Also see
+           //https://jupyter-client.readthedocs.io/en/latest/messaging.html#execute
+           //https://github.com/jupyterlab/extension-examples/tree/master/advanced/kernel-messaging
+           var feature = notebook.context.sessionContext.session.kernel.requestExecute({ 'code': pythonCode, 'stop_on_error' : true});
+           feature.onReply(msg=>{
+               console.log(msg);
+           });
+           feature.onIOPub = (msg) =>{
+               var msgType = msg.header.msg_type;
+               switch (msgType) {
+                   case 'status':
+                      if(!isExpectingOutput){
+                          if(msg.content.execution_state === 'idle'){
+                              resolve();
+                          }
+                      }
+                      return;
+                   case 'execute_input':
+                       return;
+                   case 'stream':
+                       var content = msg.content;
+                       var type = content.name;
+                       switch(type){
+                           case 'stdout':
+                               var message = content.text;    	    		    	    
+                               resolve(message);								
+                               break;
+                           case 'stderr':
+                               var message = content.text;    	    		    	    				    
+                               reject(message);
+                               break;
+                           default:
+                               var message = '[jupyterLabTerminal]: Unknown stream type ' + type;												    
+                               reject(message);
+                       } 
+                       break;   	    		    
+                   case 'error':    
+                       //stderr does not yield output for all errors	    
+                       var message = msg.content.ename + '\n' + msg.content.evalue;		   	    		   				    
+                       reject(message);
+                       break;						
+                   case 'execute_result':
+                       var result = msg.content;						
+                       resolve(result);						
+                       break;
+                   case 'display_data':
+                       var result = msg.content;
+                       resolve(result);											
+                       break;
+                   case 'update_display_data':
+                       var result = msg.content;
+                       resolve(result);											
+                       break;
+                   default:
+                       var message = '[jupyterLabTerminal]: Unknown message type ' + msgType;					  				    
+                       reject(message);
+
+               };
+           }; 		 	
+       });	
+   }
+
+   waitforme(milisec) {
+    return new Promise(resolve => {
+        setTimeout(() => { resolve('') }, milisec);
+    })
+    }
+
+
+    async operationSystem(code){
+        var system = await this.executePythonCode(code);
+        return system;
+    }
+
+    async Test(Inputs, HistoryID) {
+        var NewLabel = document.createElement('label')
+        NewLabel.className = 'testLabel'
+        var HelpSection = this.el.querySelector('.help-section')
+        HelpSection.append(NewLabel)
+
+        this.AddJobStatusWidget()
+
+        try {
+            var job  = await this.operationSystem(`from galaxylab import GalaxyTaskWidget\nGalaxyTaskWidget.submit_job(GalInstance=${JSON.stringify(this.model.get('GalInstance'))}, Tool_inputs=${JSON.stringify(Inputs)}, HistoryID=${JSON.stringify(HistoryID)})`)
+        
+        }catch(err) {
+            NewLabel.innerText  = err.message;
+          }
+
+        var states = ['ok', 'error']
+        for (let i = 0; i < Infinity; ++i) {
+            
+            console.log(job['data']['text/plain'].split("$")[1]);
+            var os = await this.operationSystem(`from galaxylab import GalaxyTaskWidget\nGalaxyTaskWidget.TestOut(GalInstance=${JSON.stringify(this.model.get('GalInstance'))}, JobID=${JSON.stringify(job['data']['text/plain'].split("$")[1])} )`);
+            console.log(os['data']['text/plain'].split("$")[1])
+            NewLabel.innerText = i+os['data']['text/plain'].split("$")[1]
+
+            await this.waitforme(5000);
+
+            if (states.includes(os['data']['text/plain'].split("$")[1]) === true ) {
+                break;
+            }      
+
+        }
+        console.log("Loop execution finished!)");
+        
+        // if(os !== 'Windows'){
+        //     console.log(os)
+        // }
+    }
+
+
+    AddJobStatusWidget(){
+
+        var JobStatus  = `<div class="job-status-widget">
+                    <div class="job-header">
+                        <div class="indicator">
+
+                            <div class="gear-rotate">
+                            </div>
+                            <div class="job-done-text">
+                             Job Complete
+                            </div>
+                        </div>
+                        <div class=job-status>
+                            <div class="job-id">
+                                Job ID : 934928374hf
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="job-output-files">
+                        <div class="input-file-names">
+                        <div> The tool uses this input:  </div>
+
+                        <table>
+                            <tr>
+                            <td>Alfreds Futterkiste</td>
+                           </tr>
+                        <tr>
+                            <td>Centro comercial Moctezuma</td>
+                        </tr>
+                        <tr>
+                            <td>Ernst Handel</td>
+                        </tr>
+                        </table>
+
+                        </div>
+                        
+                    </div>
+
+                    <div class="job-footer">
+                    <div class=job-details>
+                    <div class="job-detail-text-name">
+                       <h3>Submitted by joshij  2021-11-05T12:07:08+00:00</h3>
+                    </div>
+                    <div class="job-detail-text-time">
+                      <h3>2021-11-05T12:07:08+00:00</h3>
+                    </div>
+
+                    </div>
+                </div>
+                </div>`
+
+            const Job = new DOMParser().parseFromString(JobStatus, 'text/html').querySelector('.job-status-widget')
+
+            var toolForm = this.el.querySelector('.Galaxy-form')
+            this.removeAllChildNodes(toolForm)
+
+            toolForm.append(Job)
+
+            console.log(Job)
+
+    }
+
+
 
      //#############################################################################
      
@@ -1665,32 +1873,23 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
              // Validate required parameters and return if not valid
              if (!this.validate())
                  return;
-             // Execute the interact instance
-            //this.el.querySelector('.widget-interact > .jupyter-button').click();
- 
-            // this.el.querySelector('#submit').click();
- 
-            // console.log('@@@@@@@@@@@@@@@@@@@@');
+
             const notebook = ContextManager.tool_registry.current
 
-            var HistoryID = self.element.querySelector('#History_IDs').value
-
-            // console.log(self.element.querySelector('.Galaxy-form'))
-            // console.log(self.element.querySelector('.Galaxy-form').offsetHeight)
- 
+            var HistoryID = self.element.querySelector('#History_IDs').value 
             var children = self.element.querySelector('.Galaxy-form').children;
             var Inputs = self.ReturnData(children)
 
-            notebook.context.sessionContext.session.kernel.requestExecute({code: `from galaxylab import GalaxyTaskWidget\nGalaxyTaskWidget.submit_job(${JSON.stringify(this.model.get('GalInstace'))}, ${JSON.stringify(Inputs)}, ${JSON.stringify(HistoryID)})`})
- 
-            // console.log('@@@@@@@@@@@@@@@@@@@@');
- 
-            //Collapse the widget, if collapse=True
- 
+           this.Test(Inputs, HistoryID)
+
+           this.addJobOutPut()
+
              if (this.model.get('collapse'))
                  this.el.querySelector('.nbtools-collapse').click();
          }));
      }
+
+
      /**
       * Check to make sure required parameters are checked out.
       * Highlight missing parameters. Return whether valid.
