@@ -1646,13 +1646,10 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
     async executePythonCode(pythonCode, isExpectingOutput){
 	 	
         var self=this;
-
         const notebook = ContextManager.tool_registry.current
 
        return await new Promise(async (resolve, reject) => {  
-           //Also see
-           //https://jupyter-client.readthedocs.io/en/latest/messaging.html#execute
-           //https://github.com/jupyterlab/extension-examples/tree/master/advanced/kernel-messaging
+
            var feature = notebook.context.sessionContext.session.kernel.requestExecute({ 'code': pythonCode, 'stop_on_error' : true});
            feature.onReply(msg=>{
                console.log(msg);
@@ -1718,34 +1715,59 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
     })
     }
 
-
     async operationSystem(code){
         var system = await this.executePythonCode(code);
         return system;
     }
 
     async Test(Inputs, HistoryID) {
-        var NewLabel = document.createElement('label')
-        NewLabel.className = 'testLabel'
-        var HelpSection = this.el.querySelector('.help-section')
-        HelpSection.append(NewLabel)
 
         this.AddJobStatusWidget()
 
         try {
             var job  = await this.operationSystem(`from galaxylab import GalaxyTaskWidget\nGalaxyTaskWidget.submit_job(GalInstance=${JSON.stringify(this.model.get('GalInstance'))}, Tool_inputs=${JSON.stringify(Inputs)}, HistoryID=${JSON.stringify(HistoryID)})`)
-        
+            var ParamList = job['data']['text/plain'].split("#")[1].split("$$$")
+            console.log(ParamList)
+            this.el.querySelector('.job-id').innerText = 'Job ID : '+ ParamList[1]
+            this.el.querySelector('.job-detail-text-name').innerText = 'Submitted by : '+ ParamList[3]+' on '+ ParamList[4]
+
         }catch(err) {
             NewLabel.innerText  = err.message;
           }
 
         var states = ['ok', 'error']
         for (let i = 0; i < Infinity; ++i) {
-            
-            console.log(job['data']['text/plain'].split("$")[1]);
-            var os = await this.operationSystem(`from galaxylab import GalaxyTaskWidget\nGalaxyTaskWidget.TestOut(GalInstance=${JSON.stringify(this.model.get('GalInstance'))}, JobID=${JSON.stringify(job['data']['text/plain'].split("$")[1])} )`);
-            console.log(os['data']['text/plain'].split("$")[1])
-            NewLabel.innerText = i+os['data']['text/plain'].split("$")[1]
+
+            var os = await this.operationSystem(`from galaxylab import GalaxyTaskWidget\nGalaxyTaskWidget.TestOut(GalInstance=${JSON.stringify(this.model.get('GalInstance'))}, JobID=${JSON.stringify(ParamList[1])} )`);
+
+            var JobState = os['data']['text/plain'].split("$")[1]
+
+            if (JobState=='running'){
+                var gearrotate = this.el.querySelector('.gear-rotate')
+                gearrotate.style.display = 'block'
+                var JobDoneText = this.el.querySelector(".job-done-text")
+                JobDoneText.innerText = 'Job Running'
+                JobDoneText.style.color = '#F5A207'
+
+            } else if (JobState == 'new') {
+                var gearrotate = this.el.querySelector('.gear-rotate')
+                gearrotate.style.display = 'none'
+                var JobDoneText = this.el.querySelector(".job-done-text")
+                JobDoneText.innerText = 'New Job'
+
+            } else if (JobState == 'ok'){
+                var gearrotate = this.el.querySelector('.gear-rotate')
+                gearrotate.style.display = 'none'
+                var JobDoneText = this.el.querySelector(".job-done-text")
+                JobDoneText.innerText = 'Job Completed'
+
+            } else if (JobState == 'error'){
+                var gearrotate = this.el.querySelector('.gear-rotate')
+                gearrotate.style.display = 'none'
+                var JobDoneText = this.el.querySelector(".job-done-text")
+                JobDoneText.innerText = 'Fetal Error'
+                JobDoneText.style.color = 'red'
+            }
 
             await this.waitforme(5000);
 
@@ -1754,11 +1776,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             }      
 
         }
-        console.log("Loop execution finished!)");
-        
-        // if(os !== 'Windows'){
-        //     console.log(os)
-        // }
     }
 
 
@@ -1782,45 +1799,36 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                     </div>
 
                     <div class="job-output-files">
-                        <div class="input-file-names">
-                        <div> The tool uses this input:  </div>
-
-                        <table>
-                            <tr>
-                            <td>Alfreds Futterkiste</td>
-                           </tr>
-                        <tr>
-                            <td>Centro comercial Moctezuma</td>
-                        </tr>
-                        <tr>
-                            <td>Ernst Handel</td>
-                        </tr>
-                        </table>
-
+                        <div class="output-file-names">
+                          
+                                <table>
+                                    <tr>
+                                        <td>Alfreds Futterkiste</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Centro comercial Moctezuma</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Ernst Handel</td>
+                                    </tr>
+                                </table>
                         </div>
-                        
                     </div>
 
                     <div class="job-footer">
-                    <div class=job-details>
-                    <div class="job-detail-text-name">
-                       <h3>Submitted by joshij  2021-11-05T12:07:08+00:00</h3>
-                    </div>
-                    <div class="job-detail-text-time">
-                      <h3>2021-11-05T12:07:08+00:00</h3>
-                    </div>
-
-                    </div>
-                </div>
+                        <div class=job-details>
+                            <div class="job-detail-text-name">
+                            </div>
+                        </div>
+                   </div>
                 </div>`
 
             const Job = new DOMParser().parseFromString(JobStatus, 'text/html').querySelector('.job-status-widget')
-
             var toolForm = this.el.querySelector('.Galaxy-form')
+            toolForm.style.height = '350px'
             this.removeAllChildNodes(toolForm)
 
             toolForm.append(Job)
-
             console.log(Job)
 
     }

@@ -61,16 +61,20 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
 
         NewInputs = GalaxyTaskWidget.RefinedInputs(tool_inputs, gi)
         job = gi.tools.gi.tools.run_tool(history_id=HistoryID, tool_id=GalInstance['tool_ID'], tool_inputs=NewInputs)
+        showJob = gi.jobs.gi.jobs.show_job(job['jobs'][0]['id'],full_details=True)
+        MyKeys = ['id', 'tool_id', 'user_email', 'create_time']
+        MyOut = ''
+        for i in MyKeys:
+            MyOut = MyOut+'$$$'+str(showJob[i])
+        return '#'+MyOut+'#'
 
-        gi.jobs.gi.jobs.show_job(job['jobs'][0]['id'],full_details=True)
-        name = job['jobs'][0]['id']
-        status = gi.jobs.gi.jobs.get_state(job['jobs'][0]['id'])
 
-        return '$'+job['jobs'][0]['id']+'$'
+
 
     def TestOut( GalInstance=None, JobID=None):
         gi = GalaxyInstance(GalInstance['URL'], email=GalInstance['email_ID'], api_key=GalInstance['API_key'], verify=True)
         status = gi.jobs.gi.jobs.get_state(JobID)
+        gi.jobs.gi.jobs.show_job(JobID,full_details=True)
         return '$'+status+'$'
   
 
@@ -87,7 +91,7 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
         return inputs
 
 
-    def UpdateForm( GalInstance={}, Tool_inputs=None, toolID=None, HistoryID=None, Python_side=False, InputDataParam=False):
+    def UpdateForm( GalInstance=None, Tool_inputs=None, toolID=None, HistoryID=None, Python_side=False, InputDataParam=False):
 
 
         gi = GalaxyInstance(GalInstance['URL'], email=GalInstance['email_ID'], api_key=GalInstance['API_key'], verify=True)
@@ -98,7 +102,10 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
          
             print('newinputs')
             print(NewInputs)
+            print(toolID)
+            print(HistoryID)
             print('newinputs')
+
 
             inputs = gi.gi.tools.gi.tools.build_tool(tool_id=toolID, inputs=NewInputs, history_id=HistoryID)
 
@@ -146,6 +153,8 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
 
             self.tool = tool
 
+            print(self.tool.wrapped['id'])
+
             self.GalInstance= { 
                                 "API_key":  self.tool.gi.gi._key,
                                 "email_ID": self.tool.gi.gi.users.get_current_user()['email'],
@@ -157,7 +166,7 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
             inputs = self.tool.gi.tools.gi.tools.build_tool(tool_id=tool.wrapped['id'], history_id=History_IDs[0]['id'] )
             HistoryData = GalaxyTaskWidget.UpdateForm(GalInstance=self.GalInstance, HistoryID=History_IDs[0]['id'], Python_side=True)    
 
-            GalaxyUIBuilder.__init__(self, inputs=inputs, History_IDs=History_IDs, HistoryData=HistoryData, GalInstance=self.GalInstance,
+            GalaxyUIBuilder.__init__(self, inputs=inputs,ToolID=self.tool.wrapped['id'], History_IDs=History_IDs, HistoryData=HistoryData, GalInstance=self.GalInstance,
                             color=self.default_color,
                             logo=self.default_logo,
                         **kwargs)

@@ -47,16 +47,16 @@ class GalaxyUIBuilder(BaseWidget, NBTool):
     HistoryData = List(['Hello']).tag(sync=True)
 
     UI =  Dict(sync=True)
-    # ToolID = Unicode(sync=True)
+    ToolID = Unicode(sync=True)
 
-    def __init__(self, inputs, History_IDs, HistoryData, GalInstance,   **kwargs):
+    def __init__(self, inputs,ToolID, History_IDs, HistoryData, GalInstance,   **kwargs):
         # Apply defaults based on function docstring/annotations
 
         self._apply_defaults()
         self.inputs = inputs
         self.GalInstance =  GalInstance
         self.History_IDs = History_IDs
-        # self.ToolID = ToolID
+        self.ToolID = ToolID
         self.HistoryData = HistoryData
 
         BaseWidget.__init__(self, **kwargs)
