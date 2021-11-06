@@ -313,7 +313,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         switch (input_def.type) {
             
-
             case "conditional":
                 this.AddConditoinalSection2(input_def, FormParent, NamePrefix, data);
                 break;
@@ -1534,8 +1533,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
  
     AddConditoinalSection2 (input_def, parent, NamePrefix, call_back_data={}) {
 
-        // console.log(input_def['test_param']['options'])
-
         var NewNamePrefix = NamePrefix+input_def['name']+"|"
         input_def.id = this.uid()
 
@@ -1642,7 +1639,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         return new Promise((resolve) => setTimeout(resolve, time));
       }
 
-
     async executePythonCode(pythonCode, isExpectingOutput){
 	 	
         var self=this;
@@ -1651,59 +1647,27 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
        return await new Promise(async (resolve, reject) => {  
 
            var feature = notebook.context.sessionContext.session.kernel.requestExecute({ 'code': pythonCode, 'stop_on_error' : true});
-           feature.onReply(msg=>{
-               console.log(msg);
-           });
            feature.onIOPub = (msg) =>{
                var msgType = msg.header.msg_type;
+
+               console.log(msgType)
                switch (msgType) {
-                   case 'status':
-                      if(!isExpectingOutput){
-                          if(msg.content.execution_state === 'idle'){
-                              resolve();
-                          }
-                      }
-                      return;
-                   case 'execute_input':
-                       return;
-                   case 'stream':
-                       var content = msg.content;
-                       var type = content.name;
-                       switch(type){
-                           case 'stdout':
-                               var message = content.text;    	    		    	    
-                               resolve(message);								
-                               break;
-                           case 'stderr':
-                               var message = content.text;    	    		    	    				    
-                               reject(message);
-                               break;
-                           default:
-                               var message = '[jupyterLabTerminal]: Unknown stream type ' + type;												    
-                               reject(message);
-                       } 
-                       break;   	    		    
-                   case 'error':    
-                       //stderr does not yield output for all errors	    
+                   case 'error':    	    
                        var message = msg.content.ename + '\n' + msg.content.evalue;		   	    		   				    
                        reject(message);
                        break;						
                    case 'execute_result':
-                       var result = msg.content;						
-                       resolve(result);						
+                       feature.onIOPub  = msg.content;	
+                       resolve(feature.onIOPub.data['application/json']);						
                        break;
                    case 'display_data':
-                       var result = msg.content;
-                       resolve(result);											
+                       feature.onIOPub  = msg.content;	
+                       resolve(feature.onIOPub.data['application/json']);											
                        break;
                    case 'update_display_data':
-                       var result = msg.content;
-                       resolve(result);											
+                       feature.onIOPub  = msg.content;	
+                       resolve(feature.onIOPub.data['application/json']);											
                        break;
-                   default:
-                       var message = '[jupyterLabTerminal]: Unknown message type ' + msgType;					  				    
-                       reject(message);
-
                };
            }; 		 	
        });	
@@ -1724,23 +1688,17 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         this.AddJobStatusWidget()
 
-        try {
-            var job  = await this.operationSystem(`from galaxylab import GalaxyTaskWidget\nGalaxyTaskWidget.submit_job(GalInstance=${JSON.stringify(this.model.get('GalInstance'))}, Tool_inputs=${JSON.stringify(Inputs)}, HistoryID=${JSON.stringify(HistoryID)})`)
-            var ParamList = job['data']['text/plain'].split("#")[1].split("$$$")
-            console.log(ParamList)
-            this.el.querySelector('.job-id').innerText = 'Job ID : '+ ParamList[1]
-            this.el.querySelector('.job-detail-text-name').innerText = 'Submitted by : '+ ParamList[3]+' on '+ ParamList[4]
-
-        }catch(err) {
-            NewLabel.innerText  = err.message;
-          }
+        var job  = await this.operationSystem(`from galaxylab import GalaxyTaskWidget\nGalaxyTaskWidget.submit_job(GalInstance=${JSON.stringify(this.model.get('GalInstance'))}, Tool_inputs=${JSON.stringify(Inputs)}, HistoryID=${JSON.stringify(HistoryID)})`)
+        this.el.querySelector('.job-id').innerText = 'Job ID : '+ job['id']
+        this.el.querySelector('.job-detail-text-name').innerText = 'Submitted by : '+ job['user_email']+' on '+ job['update_time']
 
         var states = ['ok', 'error']
         for (let i = 0; i < Infinity; ++i) {
 
-            var os = await this.operationSystem(`from galaxylab import GalaxyTaskWidget\nGalaxyTaskWidget.TestOut(GalInstance=${JSON.stringify(this.model.get('GalInstance'))}, JobID=${JSON.stringify(ParamList[1])} )`);
-
-            var JobState = os['data']['text/plain'].split("$")[1]
+            var os = await this.operationSystem(`from galaxylab import GalaxyTaskWidget\nGalaxyTaskWidget.TestOut(GalInstance=${JSON.stringify(this.model.get('GalInstance'))}, JobID=${JSON.stringify(job['id'])} )`);
+            console.log(os)
+            
+            var JobState = os['status']
 
             if (JobState=='running'){
                 var gearrotate = this.el.querySelector('.gear-rotate')
@@ -1771,7 +1729,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
             await this.waitforme(5000);
 
-            if (states.includes(os['data']['text/plain'].split("$")[1]) === true ) {
+            if (states.includes(JobState) === true ) {
                 break;
             }      
 

@@ -52,7 +52,6 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
                     
         return OutDict
 
-
     def submit_job( GalInstance=None, Tool_inputs=None, HistoryID=None):
         import time
 
@@ -62,21 +61,21 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
         NewInputs = GalaxyTaskWidget.RefinedInputs(tool_inputs, gi)
         job = gi.tools.gi.tools.run_tool(history_id=HistoryID, tool_id=GalInstance['tool_ID'], tool_inputs=NewInputs)
         showJob = gi.jobs.gi.jobs.show_job(job['jobs'][0]['id'],full_details=True)
+        print(showJob)
         MyKeys = ['id', 'tool_id', 'user_email', 'create_time']
         MyOut = ''
         for i in MyKeys:
             MyOut = MyOut+'$$$'+str(showJob[i])
-        return '#'+MyOut+'#'
-
-
-
+        # return '#'+MyOut+'#'
+        return IPython.display.JSON(showJob)
 
     def TestOut( GalInstance=None, JobID=None):
+        print(JobID)
         gi = GalaxyInstance(GalInstance['URL'], email=GalInstance['email_ID'], api_key=GalInstance['API_key'], verify=True)
         status = gi.jobs.gi.jobs.get_state(JobID)
         gi.jobs.gi.jobs.show_job(JobID,full_details=True)
-        return '$'+status+'$'
-  
+        print(status)
+        return IPython.display.JSON({'status':status})
 
     def RefinedInputs(inputs, gi):
     
@@ -93,7 +92,6 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
 
     def UpdateForm( GalInstance=None, Tool_inputs=None, toolID=None, HistoryID=None, Python_side=False, InputDataParam=False):
 
-
         gi = GalaxyInstance(GalInstance['URL'], email=GalInstance['email_ID'], api_key=GalInstance['API_key'], verify=True)
        
         if (Tool_inputs != None) and (toolID != None):
@@ -106,19 +104,13 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
             print(HistoryID)
             print('newinputs')
 
-
             inputs = gi.gi.tools.gi.tools.build_tool(tool_id=toolID, inputs=NewInputs, history_id=HistoryID)
-
-            # print('############','UpdateForm 1')
-            # print(inputs)
-            # print('############','UpdateForm 1')
 
             if InputDataParam == False:
                 return IPython.display.JSON(data=inputs)
             else:
                 return IPython.display.JSON(GalaxyTaskWidget.RetrivParm(inputs['inputs']))
     
-
         else:
             HistoryData = gi.gi.datasets.gi.datasets.get_datasets(history_id=HistoryID, state='ok', deleted=False,  purged=False, visible=True)
 
@@ -127,12 +119,6 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
             else:
                 return IPython.display.JSON(data=HistoryData)
 
-
-        # return inputs['inputs']
-
-    # def CopyDataset(GInstace={}, HistoryID, DatasetID):
-
-    #     a.gi.histories.gi.histories.copy_dataset(history_id=HistoryID, dataset_id=DatasetID)
 
     def handle_error_task(self, error_message, name='Galaxy Module', **kwargs):
         """Display an error message if the task is None"""
