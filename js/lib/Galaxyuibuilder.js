@@ -524,7 +524,9 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         return row
      }
 
-    AddDataSetTable(selected_value='default') {
+    
+
+   AddDataSetTable(selected_value='default') {
 
         var self = this
 
@@ -607,89 +609,49 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         DataHistoryList.append(select)
         DataHistoryList.append(DataTable)
 
-        select.addEventListener("change", () => {
+        select.addEventListener("change", async () => {
 
             var HistoryID = select.value
+            var refine_inputs  = await this.ReturnKernelSideDataObjects(`from galaxylab import GalaxyTaskWidget\nGalaxyTaskWidget.UpdateForm( GalInstance=${JSON.stringify(self.model.get('GalInstance'))}, HistoryID=${JSON.stringify(HistoryID)})`)
 
-            // var children = self.element.querySelector('.Galaxy-form').children;
-            // var Inputs = self.ReturnData(children)
-
-            const notebook = ContextManager.tool_registry.current
-
-            var future = notebook.context.sessionContext.session.kernel.requestExecute({code: `from galaxylab import GalaxyTaskWidget\nGalaxyTaskWidget.UpdateForm( GalInstance=${JSON.stringify(self.model.get('GalInstance'))}, HistoryID=${JSON.stringify(HistoryID)})`}) 
             var Origin = self.element.querySelector('.galaxy-data-panel')
 
             self.removeAllChildNodes(Origin)
-            
-                future.onIOPub  = (msg) => {
+        
+            for(var i = 0; i < refine_inputs.length; i++) {
 
-                const msgType = msg.header.msg_type;
-                switch (msgType) {
-                    case 'execute_result':
-                    case 'display_data':
-                    case 'update_display_data':
-                    future.onIOPub = msg.content;
+                var DataTableElement = document.createElement('li')
+                DataTableElement.className = 'data-set-row'
 
-                    let refine_inputs = future.onIOPub.data['application/json'];
+                var DataHeader = document.createElement('div')
+                DataHeader.className = 'data-header'
 
-                        //########################################
+                var BoldText = document.createElement('b')
 
-                    try { 
-                        
-                        for(var i = 0; i < refine_inputs.length; i++) {
+                BoldText.innerText = refine_inputs[i]['name']
+                DataHeader.append(BoldText)
 
-                            var DataTableElement = document.createElement('li')
-                            DataTableElement.className = 'data-set-row'
+                DataHeader.value = JSON.stringify(refine_inputs[i])
 
-                            var DataHeader = document.createElement('div')
-                            DataHeader.className = 'data-header'
+                var DataDescription =  document.createElement('div')
+                DataDescription.className = 'data-description'
+                DataDescription.innerText =  refine_inputs[i]['create_time']
 
-                            var BoldText = document.createElement('b')
+                DataTableElement.append(DataHeader)
+                DataTableElement.append(DataDescription)
+                DataTableElement.draggable = 'true'
+                DataTableElement.ondragstart = "drag(event)"
 
-                            BoldText.innerText = refine_inputs[i]['name']
-                            DataHeader.append(BoldText)
+                DataTableElement.addEventListener("drag", function(event) {
+                    
+                }, false)
 
-                            DataHeader.value = JSON.stringify(refine_inputs[i])
-            
-                            var DataDescription =  document.createElement('div')
-                            DataDescription.className = 'data-description'
-                            DataDescription.innerText =  refine_inputs[i]['create_time']
+                DataTableElement.addEventListener("dragstart", function(event) {
+                    self.dragged = event.target;
+                    }, false);
+                Origin.append(DataTableElement)
 
-                            DataTableElement.append(DataHeader)
-                            DataTableElement.append(DataDescription)
-                            DataTableElement.draggable = 'true'
-                            DataTableElement.ondragstart = "drag(event)"
-
-                            DataTableElement.addEventListener("drag", function(event) {
-                                
-                            }, false)
-
-                            DataTableElement.addEventListener("dragstart", function(event) {
-                                // store a ref. on the dragged elem
-                                self.dragged = event.target;
-                                // make it half transparent
-                                // event.target.style.opacity = .5;
-                                }, false);
-
-                            Origin.append(DataTableElement)
-
-                        }
-
-                        //######################################## //Fix me in future
-
-                        // DataHistoryList.append(InnerDataTable)
-                        
-                    } catch(err){
-                        console.log(err);
-                    }
-
-                    break;
-                    default:
-                    break;
-                }
-                    return
-            };
-
+            }
         });
         return DataHistoryList
     }
@@ -731,63 +693,30 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         HistoryList.className = "galaxy-history-list"
         HistoryList.append(select)
 
-
-        select.addEventListener("change", () => {
+        select.addEventListener("change", async () => {
  
             var HistoryID = select.value
 
             var children = self.element.querySelector('.Galaxy-form').children;
             var Inputs = self.ReturnData(children)
 
-            const notebook = ContextManager.tool_registry.current
-            var future = notebook.context.sessionContext.session.kernel.requestExecute({code: `from galaxylab import GalaxyTaskWidget\nGalaxyTaskWidget.UpdateForm(${JSON.stringify(self.model.get('GalInstance'))}, ${JSON.stringify(Inputs)}, ${JSON.stringify(self.model.get('ToolID'))}, ${JSON.stringify(HistoryID)})`})  
+            var refine_inputs  = await this.ReturnKernelSideDataObjects(`from galaxylab import GalaxyTaskWidget\nGalaxyTaskWidget.UpdateForm(${JSON.stringify(self.model.get('GalInstance'))}, ${JSON.stringify(Inputs)}, ${JSON.stringify(self.model.get('ToolID'))}, ${JSON.stringify(HistoryID)})`)
 
-             future.onIOPub  = (msg) => {
- 
-                const msgType = msg.header.msg_type;
-                switch (msgType) {
-                  case 'execute_result':
-                  case 'display_data':
-                  case 'update_display_data':
-                    future.onIOPub = msg.content;
- 
-                    let refine_inputs = future.onIOPub.data['application/json'];
- 
-                        //########################################
- 
-                     
+            var FormParent = self.el.querySelector('.Galaxy-form')                        
+            self.removeAllChildNodes(FormParent)
 
-                        var FormParent = self.el.querySelector('.Galaxy-form')                        
-                        self.removeAllChildNodes(FormParent)
+            const Button = document.createElement('button')
+            Button.style.display = 'none'
+            Button.type = 'button'
+            Button.id = 'submit'
+            Button.className  = 'Galaxy-form-button'
+    
+            FormParent.append(Button)
 
-                        //######################################## //Fix me in future
+            var SelectedIndex = {}
+            SelectedIndex['HID'] = select.selectedIndex
 
-                        const Button = document.createElement('button')
-                        Button.style.display = 'none'
-                        Button.type = 'button'
-                        Button.id = 'submit'
-                        Button.className  = 'Galaxy-form-button'
-                
-                        FormParent.append(Button)
-
-                        var SelectedIndex = {}
-                        SelectedIndex['HID'] = select.selectedIndex
-
-                     try { 
-
-                        self.Main_Form(refine_inputs['inputs'],  SelectedIndex)
-
-                    
-                      } catch(err){
-                        console.log(err);
-                      }
- 
-                    break;
-                  default:
-                    break;
-                }
-                 return 
-              };
+            self.Main_Form(refine_inputs['inputs'],  SelectedIndex)
 
         });
 
@@ -819,8 +748,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         HelpButton.addEventListener("click", function() {
 
             let nextSibling = HelpButton.nextElementSibling;   
- 
-            // console.log(nextSibling.id)
+
 
             if (nextSibling.style.display == 'none'){
                 nextSibling.style.display = 'block'
@@ -943,7 +871,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
     FileUpLoad (input_def, FormParent, NamePrefix, call_back_data={}) {    
         
-
         input_def.id = this.uid()
         var self = this
 
@@ -1073,24 +1000,10 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         var children = self.element.querySelector('.Galaxy-form').children;
         var Inputs = self.ReturnData(children)
 
-        // InputTypeLabel = 
-
         row.append(title)
         FileManu.append(Select)
-        // FileManu.append()
+
         row.append(FileManu)
-
-
-
-        // var BatchIcon = document.createElement("li") 
-        // BatchIcon.className = 'fa fa-sitemap'
-
-        // var Span = document.createElement("span") 
-        // Span.innerText = '  This is a batch mode input field. Separate jobs will be triggered for each dataset selection.'
-
-        // UploadFileLabel.append(BatchIcon)
-        // UploadFileLabel.append(Span)
-
 
         if (input_def.multiple === true ){
 
@@ -1100,7 +1013,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         }
 
-   
         row.querySelectorAll('.ui-option').forEach((Label) => Label.addEventListener('click', () => {
 
             console.log('ok')
@@ -1128,78 +1040,45 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         // row.append(title)
         row.append(FileManu)
         
-
         var OutValue = []
 
+        // var children = self.el.querySelector('.Galaxy-form').children;
 
-    Select.addEventListener("change", function() {
 
+    Select.addEventListener("change", async () => {
 
-        var children = self.element.querySelector('.Galaxy-form').children;
+        var self  = this;
+
+        var children = self.el.querySelector('.Galaxy-form').children;
+       
         var Inputs = self.ReturnData(children)
 
-        // console.log(Inputs)
-
         var HistoryID = self.element.querySelector('#History_IDs').value
+        var refine_inputs  = await self.ReturnKernelSideDataObjects(`from galaxylab import GalaxyTaskWidget\nGalaxyTaskWidget.UpdateForm(${JSON.stringify(self.model.get('GalInstance'))}, ${JSON.stringify(Inputs)}, ${JSON.stringify(self.model.get('ToolID'))}, ${JSON.stringify(HistoryID)})`)
+   
+        const Button = document.createElement('button')
+        Button.style.display = 'none'
+        Button.type = 'button'
+        Button.id = 'submit'
+        Button.className  = 'Galaxy-form-button'
 
-        const notebook = ContextManager.tool_registry.current
-        var future = notebook.context.sessionContext.session.kernel.requestExecute({code: `from galaxylab import GalaxyTaskWidget\nGalaxyTaskWidget.UpdateForm(${JSON.stringify(self.model.get('GalInstance'))}, ${JSON.stringify(Inputs)}, ${JSON.stringify(self.model.get('ToolID'))}, ${JSON.stringify(HistoryID)})`})    
-    
-        future.onIOPub  = (msg) => {
-                var queryID  = Select.selectedIndex
+        var FormParent = self.el.querySelector('.Galaxy-form')
+        FormParent.append(Button)
 
-            const msgType = msg.header.msg_type;
-            switch (msgType) {
-                case 'execute_result':
-                case 'display_data':
-                case 'update_display_data':
-                future.onIOPub = msg.content;
+        var HID = self.element.querySelector('#History_IDs')
+        self.removeAllChildNodes(FormParent)
 
-                let refine_inputs = future.onIOPub.data['application/json'];
-
-                
-                    //######################################## //Fix me in future
-
-                    const Button = document.createElement('button')
-                    Button.style.display = 'none'
-                    Button.type = 'button'
-                    Button.id = 'submit'
-                    Button.className  = 'Galaxy-form-button'
-
-                    var FormParent = self.el.querySelector('.Galaxy-form')
-                
-                    FormParent.append(Button)
-
-                    //########################################
-
-                    var HID = self.element.querySelector('#History_IDs')
-                    self.removeAllChildNodes(FormParent)
-
-                    var CallBackData =  self.ReturnDataFiles(Select)
-                    CallBackData['HID'] = HID.selectedIndex
-                    CallBackData['RecCall'] = true
-                    try { 
-
-                    self.Main_Form(refine_inputs['inputs'], CallBackData)
-
-                    } catch(err){
-                    console.log(err);
-                    }
-
-                break;
-                default:
-                break;
-            }
-                return
-            };
+        var CallBackData =  self.ReturnDataFiles(Select)
+        CallBackData['HID'] = HID.selectedIndex
+        CallBackData['RecCall'] = true
+  
+        self.Main_Form(refine_inputs['inputs'], CallBackData)
 
         }, false);
 
- 
         FormParent.append(row)
         return row
     }
-
 
 
     AddInteger (input_def, FormParent, NamePrefix) {
@@ -1295,7 +1174,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         row.append(title)
         row.append(select)
         
-        select.addEventListener("change", () => {
+        select.addEventListener("change", async () => {
 
             // //##################################### Recently Added 
             var queryID = select.value
@@ -1313,54 +1192,21 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         var children = self.element.querySelector('.Galaxy-form').children;
         var Inputs = self.ReturnData(children)
 
-        var HistoryID = self.element.querySelector('#History_IDs').value
+        var HistoryID = self.element.querySelector('#History_IDs').value 
+        var refine_inputs   = await this.ReturnKernelSideDataObjects(`from galaxylab import GalaxyTaskWidget\nGalaxyTaskWidget.UpdateForm(${JSON.stringify(self.model.get('GalInstance'))}, ${JSON.stringify(Inputs)}, ${JSON.stringify(self.model.get('ToolID'))}, ${JSON.stringify(HistoryID)})`)
 
-        const notebook = ContextManager.tool_registry.current
-        var future = notebook.context.sessionContext.session.kernel.requestExecute({code: `from galaxylab import GalaxyTaskWidget\nGalaxyTaskWidget.UpdateForm(${JSON.stringify(self.model.get('GalInstance'))}, ${JSON.stringify(Inputs)}, ${JSON.stringify(self.model.get('ToolID'))}, ${JSON.stringify(HistoryID)})`})  
+        var FormParent = self.el.querySelector('.Galaxy-form')
+        self.removeAllChildNodes(FormParent)
+        //######################################## //Fix me in future
+        const Button = document.createElement('button')
+        Button.style.display = 'none'
+        Button.type = 'button'
+        Button.id = 'submit'
+        Button.className  = 'Galaxy-form-button'
 
-
-            future.onIOPub  = (msg) => {
-
-            const msgType = msg.header.msg_type;
-            switch (msgType) {
-                case 'execute_result':
-                case 'display_data':
-                case 'update_display_data':
-                future.onIOPub = msg.content;
-
-                let refine_inputs = future.onIOPub.data['application/json'];
-
-                    var FormParent = self.el.querySelector('.Galaxy-form')
-                    self.removeAllChildNodes(FormParent)
-
-                    //######################################## //Fix me in future
-
-                    const Button = document.createElement('button')
-                    Button.style.display = 'none'
-                    Button.type = 'button'
-                    Button.id = 'submit'
-                    Button.className  = 'Galaxy-form-button'
-            
-                    FormParent.append(Button)
-
-                    //########################################
-
-                    try { 
-
-                    self.Main_Form(refine_inputs['inputs'], call_back_data);
-                    } catch(err){
-                    console.log(err);
-                    }
-
-                break;
-                default:
-                break;
-            }
-                return
-            };
-
-            //##################################### Recently Added 
-
+        FormParent.append(Button)
+        self.Main_Form(refine_inputs['inputs'], call_back_data);
+    
         });
 
         //#################### Recently Added 
@@ -1679,7 +1525,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
     })
     }
 
-    async operationSystem(code){
+    async ReturnKernelSideDataObjects(code){
         var system = await this.executePythonCode(code);
         return system;
     }
@@ -1688,15 +1534,14 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         this.AddJobStatusWidget()
 
-        var job  = await this.operationSystem(`from galaxylab import GalaxyTaskWidget\nGalaxyTaskWidget.submit_job(GalInstance=${JSON.stringify(this.model.get('GalInstance'))}, Tool_inputs=${JSON.stringify(Inputs)}, HistoryID=${JSON.stringify(HistoryID)})`)
+        var job  = await this.ReturnKernelSideDataObjects(`from galaxylab import GalaxyTaskWidget\nGalaxyTaskWidget.submit_job(GalInstance=${JSON.stringify(this.model.get('GalInstance'))}, Tool_inputs=${JSON.stringify(Inputs)}, HistoryID=${JSON.stringify(HistoryID)})`)
         this.el.querySelector('.job-id').innerText = 'Job ID : '+ job['id']
         this.el.querySelector('.job-detail-text-name').innerText = 'Submitted by : '+ job['user_email']+' on '+ job['update_time']
 
         var states = ['ok', 'error']
         for (let i = 0; i < Infinity; ++i) {
 
-            var os = await this.operationSystem(`from galaxylab import GalaxyTaskWidget\nGalaxyTaskWidget.TestOut(GalInstance=${JSON.stringify(this.model.get('GalInstance'))}, JobID=${JSON.stringify(job['id'])} )`);
-            console.log(os)
+            var os = await this.ReturnKernelSideDataObjects(`from galaxylab import GalaxyTaskWidget\nGalaxyTaskWidget.TestOut(GalInstance=${JSON.stringify(this.model.get('GalInstance'))}, JobID=${JSON.stringify(job['id'])} )`);
             
             var JobState = os['status']
 
