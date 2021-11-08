@@ -3,13 +3,11 @@ from urllib.error import HTTPError
 
 from ipywidgets import Dropdown, Button, VBox, HBox
 
-
 from .shim import get_permissions, set_permissions, get_token
 from nbtools import EventManager, ToolManager, UIOutput
 from .util import DEFAULT_COLOR, DEFAULT_LOGO
 
 from .uioutput import GalaxyUIOutput
-
 
 
 class GalaxyJobWidget(GalaxyUIOutput):
@@ -36,7 +34,7 @@ class GalaxyJobWidget(GalaxyUIOutput):
         """Poll the Galaxy server for the job info and display it in the widget"""
         if self.job is not None:
             try:  # Attempt to load the job info from the Galaxy server
-                self.gi.jobs.show_job(self.job['jobs'][0]['id'], full_details=True)
+                self.gi.jobs.show_job(self.job['jobs'][0]['id'], full_details=True) #### changed
             except HTTPError:  # Handle HTTP errors contacting the server
                 self.name = 'Error Loading Job'
                 self.error = 'Error loading job #'+self.job['jobs'][0]['id']
@@ -101,10 +99,10 @@ class GalaxyJobWidget(GalaxyUIOutput):
         """Return pretty job submission text"""
         if self.job is None: 
             return  # Ensure the job has been set
-        user = self.gi.users.get_current_user()
+        user = self.gi.users.get_current_user() ##changed
         user = user.get('username') or user.get('email')
         #user = self.gi.jobs.show_job(self.job['jobs'][0]['id'], full_details=True)['user_email']
-        time = self.gi.jobs.show_job(self.job['jobs'][0]['id'], full_details=True)['create_time']
+        time = self.gi.jobs.show_job(self.job['jobs'][0]['id'], full_details=True)['create_time'] #changed
 
         return 'Submitted by '+user+' on '+time
 

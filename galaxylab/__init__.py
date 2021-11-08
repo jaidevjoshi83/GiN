@@ -14,6 +14,10 @@ from .jobwidget import GalaxyJobWidget
 from .sessions import session, get_session
 #from .galaxyoutput import GalaxyOutputWidget
 from .uioutput import GalaxyUIOutput
+from .Galaxyuibuilder import GalaxyUIBuilder
+from .JobSubmit import Job
+
+from .example1 import GalaxyTools
 from ._version import __version__
 
 
@@ -43,7 +47,7 @@ def _jupyter_labextension_paths():
     """
     return [{
         'src': 'labextension',
-        'dest': '@galaxy/galaxylab',
+        'dest': 'galaxylab',
     }]
 
 
@@ -77,7 +81,3 @@ __copyright__ = 'Copyright 2021 Galaxy Contributors'
 __version__ = '0.1.0'
 __status__ = 'prealpha'
 __license__ = 'BSD-3-Clause'
-
-
-
-

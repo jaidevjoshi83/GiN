@@ -19,4 +19,4 @@ def display(content):
     #elif isinstance(content, ToDo):
     #    IPython.display.display(GalaxywJobWidget(content))
     #else:
-    IPython.display.display(content)
+    IPython.display.display(content)  

@@ -1,3 +1,4 @@
+############################## Full installation method ########################
 
 # galaxylab
 
@@ -48,31 +49,39 @@ conda create -n galaxy-lab JupyterLab=3.0.7 ipywidgets=7.5.1 nodejs=14.15.1 yarn
     jupyter nbextension enable nbtools --py
     
     ```
-     
-
--- galaxylab installatoin
+      
 
 
-    ```
-    git clone -b working_3Xlab_with_client_build  https://github.com/jaidevjoshi83/galaxylab.git
+galaxylab installation
+===============================
 
-    cd galaxylab/
-   
-    yalc add @genepattern/nbtools
-   
-    pip install -e . (Work smoothly most of the time rarely throws an error, if dint work and throws package related errors, run "npm install" first and then "pip install -e .") 
+A Custom Jupyter Widget Library
 
-    jupyter labextension develop . --overwrite
-    
-    jupyter nbextension install --py galaxylab --symlink
-    
-    jupyter nbextension enable galaxylab --py
-    
-    ```
-    
-    Note: If galaxy login dint appear in the side panel manually "import galaxylab" and refresh/reload the page.
-    
-    
-  
-  
-  
+Installation
+------------
+
+To install use pip:
+
+    $ pip install galaxylab
+
+For a development installation (requires [Node.js](https://nodejs.org) and [Yarn version 1](https://classic.yarnpkg.com/)),
+
+    $ git clone https://github.com/jaidevjoshi83/galaxylab.git -b galaxylab-js
+    $ cd galaxylab/js
+    $ yalc add @genepattern/nbtools
+    $ cd ..
+    $ pip install -e .
+    $ jupyter nbextension install --py --symlink --overwrite --sys-prefix galaxylab
+    $ jupyter nbextension enable --py --sys-prefix galaxylab
+
+When actively developing your extension for JupyterLab, run the command:
+
+    $ jupyter labextension develop --overwrite galaxylab
+
+Then you need to rebuild the JS when you make a code change:
+
+    $ cd js
+    $ yarn run build
+
+You then need to refresh the JupyterLab page when your javascript changes.
+

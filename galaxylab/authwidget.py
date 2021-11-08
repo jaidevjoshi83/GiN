@@ -41,17 +41,19 @@ class GalaxyAuthWidget(UIBuilder):
                 'type': 'choice',
                 'combo': True,
                 'sendto': False,
-                'default': GALAXY_SERVERS['Galaxy Main'],
+                'default': GALAXY_SERVERS['Galaxy Local'],
                 'choices': GALAXY_SERVERS
             },
             'email': {
                 'name': 'Email',
                 'sendto': False,
+                'default':'jaidev53ster@gmail.com'
             },
             'password': {
                 'name': 'Password',
                 'type': 'password',
                 'sendto': False,
+                'default':'12212283.j'
             }
         }
     }
@@ -105,6 +107,9 @@ class GalaxyAuthWidget(UIBuilder):
         try:
             if session is not None and session.gi.key:
                 return True
+        except HTTPError:
+            self.error = 'Invalid username or password. Please try again.'
+            return False
         except BaseException as e:
             self.error = str(e)
         return False

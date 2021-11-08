@@ -1,26 +1,9 @@
-#!/usr/bin/env python
-# coding: utf-8
+# Module version
+version_info = (0, 1, 0, 'alpha', 0)
 
-# Copyright (c) Jayadev Joshi.
-# Distributed under the terms of the Modified BSD License.
+# Module version stage suffix map
+_specifier_ = {'alpha': 'a', 'beta': 'b', 'candidate': 'rc', 'final': ''}
 
-import json
-from pathlib import Path
-
-__all__ = ["__version__"]
-
-
-def _fetch_version():
-    HERE = Path(__file__).parent.resolve()
-
-    for settings in HERE.rglob("package.json"): 
-        try:
-            with settings.open() as f:
-                return json.load(f)["version"]
-        except FileNotFoundError:
-            pass
-
-    raise FileNotFoundError(f"Could not find package.json under dir {HERE!s}")
-
-
-__version__ = _fetch_version()
+# Module version accessible using galaxylab.__version__
+__version__ = '%s.%s.%s%s'%(version_info[0], version_info[1], version_info[2],
+  '' if version_info[3]=='final' else _specifier_[version_info[3]]+str(version_info[4]))
