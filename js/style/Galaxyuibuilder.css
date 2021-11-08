@@ -85,7 +85,7 @@
     display: none;
 }
 
-.nbtools-input > div.widget-label:first-child {
+/* .nbtools-input > div.widget-label:first-child {
     font-weight: bold;
     text-align: right;
     padding-right: 20px;
@@ -99,7 +99,7 @@
 .nbtools-input > div.widget-label:last-child {
     height: auto;
     min-height: 5px;
-}
+} */
 
 .nbtools-input.missing {
     border: red solid 2px;
@@ -330,7 +330,7 @@
   .dataset-list {
       background: rgb(182, 179, 179);
       float: right;
-      width: 50%;
+      width: 35%;
   }
 
   .galaxy-data-panel {
@@ -344,6 +344,7 @@
     margin: 2px;
     background: rgb(163, 167, 167);
     padding: 20px;
+    width: 250px;
   }
 
 
@@ -390,3 +391,327 @@
 
   }
 
+  .ui-option {
+    /* padding: 2px; */
+    border: 2px solid rgb(128, 111, 95);
+    border-radius: 2px;
+    position:  relative;
+    float: left;
+    /* width: 10px; */
+    /* width: 5px; */
+    /* margin-top: 2px;
+    padding-top: 2px; */
+    
+}
+
+
+
+
+  /* * {
+    box-sizing: border-box;
+  } */
+  .multi-selectbox{
+
+    width: 100%;
+    /* position:relative;
+    overflow:hidden;
+    margin: 15px auto;
+    margin-top: 5px;
+    /* height:100px;
+    width:100%; */
+    /* width: 600px;
+    max-width: 300px;
+    margin-left: 2px;
+    margin: left;
+    background:#ddd; 
+    border: 1px solid #ddd; */
+   
+  }
+
+  .gear-rotate::before, .gear-rotate-left::before {
+    width: 2.8em;
+    height: 2.8em;
+    background: 
+      -webkit-linear-gradient(0deg,transparent 39%,#E9E581 39%,#E9E581 61%, transparent 61%),
+      -webkit-linear-gradient(60deg,transparent 42%,#E9E581 42%,#E9E581 58%, transparent 58%),
+      -webkit-linear-gradient(120deg,transparent 42%,#E9E581 42%,#E9E581 58%, transparent 58%);
+    background: 
+      -moz-linear-gradient(0deg,transparent 39%,#E9E581 39%,#47EC19 61%, transparent 61%),
+      -moz-linear-gradient(60deg,transparent 42%,#E9E581 42%,#E9E581 58%, transparent 58%),
+      -moz-linear-gradient(120deg,transparent 42%,#E9E581 42%,#E9E581 58%, transparent 58%);
+    background: 
+      -o-linear-gradient(0deg,transparent 39%,#E9E581 39%,#E9E581 61%, transparent 61%),
+      -o-linear-gradient(60deg,transparent 42%,#E9E581 42%,#E9E581 58%, transparent 58%),
+      -o-linear-gradient(120deg,transparent 42%,#47EC19 42%,#E9E581 58%, transparent 58%);
+    background: -ms-linear-gradient(0deg,transparent 39%,#E9E581 39%,#E9E581 61%, transparent 61%),-ms-linear-gradient(60deg,transparent 42%,#E9E581 42%,#E9E581 58%, transparent 58%),-ms-linear-gradient(120deg,transparent 42%,#E9E581 42%,#E9E581 58%, transparent 58%);
+    background: 
+        linear-gradient(0deg,transparent 39%,#E9E581 39%,#E9E581 61%, transparent 61%),
+      linear-gradient(60deg,transparent 42%,#E9E581 42%,#E9E581 58%, transparent 58%),
+      linear-gradient(120deg,transparent 42%,#E9E581 42%,#E9E581 58%, transparent 58%);
+    position: absolute;
+    content:"";
+    top: -.4em;
+    left: -.4em;
+    border-radius:1.4em;
+  }
+  
+  .gear-rotate::after, .gear-rotate-left::after {
+    width: 1em;
+    height: 1em;
+    background: #2B2B2B;
+    position: absolute;
+    font-size: 10px;
+    content:"";
+    top: .5em;
+    left: .5em;
+    border-radius: .5em;
+  }
+  
+  /*
+   * Keyframe Animations 
+   */ 
+  
+  @-webkit-keyframes gear-rotate {
+    0% { 
+      -webkit-transform: rotate(0deg);
+    }
+    100% { 
+      -webkit-transform: rotate(-180deg); 
+    }
+  }
+  
+  @-moz-keyframes gear-rotate {
+    0% { 
+      transform: rotate(0deg);
+    }
+    100% { 
+      transform: rotate(-180deg); 
+    }
+  }
+  
+  @keyframes gear-rotate {
+    0% { 
+      transform: rotate(0deg); 
+    }
+    100% { 
+      transform: rotate(-180deg); 
+    }
+  }
+  
+  @-webkit-keyframes gear-rotate-left {
+   0% {
+     -webkit-transform: rotate(30deg); 
+    }
+    100% {
+      -webkit-transform: rotate(210deg);
+    }
+  }
+  
+  @-moz-keyframes gear-rotate-left {
+   0% { 
+     -webkit-transform: rotate(30deg); 
+    }
+    100% { 
+      -webkit-transform: rotate(210deg);
+    }
+  }
+  
+  @keyframes gear-rotate-left {
+   0% { 
+     -webkit-transform: rotate(30deg); 
+    }
+    100% { 
+      -webkit-transform: rotate(210deg);
+    }
+  }
+  
+  
+  .job-status-widget{
+    background: hsl(0, 4%, 66%);
+    width: 100%;
+    height: 300px;
+  
+  }
+  
+  .job-header{
+    width: 100%;
+    height: 30px;
+    height: 30px;
+  }
+  
+  .indicator{
+    background: hsl(240, 66%, 55%);
+    float: left;
+    width: 5%;
+    height: 30px;
+  }
+  
+  .job-status{
+    background: hsl(240, 66%, 55%);
+    width: 75%;
+    float: left;
+    height: 30px;
+  }
+  
+  .tool-form-reset{
+    background: hsl(240, 66%, 55%);
+    width: 5%;
+    float: right;
+    height: 30px;
+  }
+  
+  
+  .rerun-button{
+  
+    height: 100%;
+    width: 100%;
+  
+  }
+  
+  .job-input-files{
+    background: hsl(0, 85%, 48%);
+    width: 380px;
+    height: 200px;
+  }
+  
+
+  .job-output-files{
+    background: rgb(255, 255, 255);
+    width: 100%;
+    height: 100%;
+    overflow-x: auto;
+    overflow-y: auto;
+  }
+  
+  .output-file-names {
+    overflow-x: auto;
+    overflow-y: auto;
+    margin-left: 10px;
+    background: rgb(255, 255, 255);
+  }
+  
+  .gear-rotate{
+    width: 2em;
+    height: 2em;
+    font-size: 5px;
+    top: 8%;
+    left: 4%; 
+    background: #E9E581;
+    position: relative;
+    border-radius: 1em;
+    -webkit-animation: 1s gear-rotate linear infinite;
+    -moz-animation: 1s gear-rotate linear infinite;
+    animation: 1s gear-rotate linear infinite;
+    display: block;
+    margin-left: 3px;
+    margin-top: 3px;
+    font-size: 10px;
+    text-align: center;
+  } 
+  
+  .job-id{  
+    text-align: center;
+    font-size: 15px;
+    float: left;
+    color: #F6F6F6;
+    height:  30px;
+    margin-left: 10px;
+    margin-top: 5px;
+  }
+  
+  .job-footer{
+    background: hsl(240, 66%, 55%);
+    width: 100%;
+    height:  20px;
+    float: right;
+  }
+
+  .job-detail-text-name {
+    float: left;
+    text-align: center;
+    font-size: 15px;
+    color: #F6F6F6;
+  }
+  
+  .job-done-text {
+    text-align: center;
+    font-size: 13px;
+    color: rgb(255, 255, 255);
+    display: block;
+    width: 15%;
+    float: left;
+    background: hsl(240, 66%, 55%);
+    height: 100%;
+  }
+
+  .job-state-text{
+    font-weight: 600;
+    height: 100%;
+    margin-top: 5px;
+  }
+  
+  .job-done-icon{
+    display: none;
+    width: 100%;
+    height: 100%;
+    color: #47EC19;
+    font-size: 22px;
+    display: none;
+    text-align: center;
+
+  }
+  
+  .job-error-icon{
+    display: block;
+    width: 100%;
+    height: 100%;
+    color: #ec1919;
+    display: none;
+    text-align: center;
+    font-size: 22px;
+  }
+  
+  .gear-rotate-icon{
+    display: none;
+    width: 100%;
+    height: 100%;
+    color: #ec1919;
+    display: block;
+    float: left;
+    font-size: 22px;
+    margin-left: 3px;
+  }
+  
+  .form{
+    width: 600px;
+    height: 300px;
+  }
+  
+  .rbtn {
+    border: none;
+    background: none;
+    font-size: 22px;
+    color: white;
+    text-align: center;
+  }
+  
+  /* Darker background on mouse-over */
+  .rbtn:hover {
+    border: none;
+    background: none;
+    font-size: 22.5px;
+  }
+
+  .fa.fa-refresh {
+
+  }
+
+  .Galaxy-form{
+
+    width: 55%;
+
+  }
+  
+  
+  
+  

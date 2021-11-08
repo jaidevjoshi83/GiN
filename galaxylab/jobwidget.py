@@ -3,13 +3,11 @@ from urllib.error import HTTPError
 
 from ipywidgets import Dropdown, Button, VBox, HBox
 
-
 from .shim import get_permissions, set_permissions, get_token
 from nbtools import EventManager, ToolManager, UIOutput
 from .util import DEFAULT_COLOR, DEFAULT_LOGO
 
 from .uioutput import GalaxyUIOutput
-
 
 
 class GalaxyJobWidget(GalaxyUIOutput):

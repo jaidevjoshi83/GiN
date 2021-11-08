@@ -31,53 +31,14 @@ class GalaxyTools(BaseWidget):
     # a = bioblend.galaxy.objects.client.ObjToolClient(gi)
     # tool = a.get(id_='toolshed.g2.bx.psu.edu/repos/jay/pdaug_peptide_sequence_analysis/pdaug_peptide_sequence_analysis/0.1.0',  io_details=True)
 
+    # gi = GalaxyInstance("http://localhost:8080", email="jaidev53ster@gmail.com", api_key="b6b0868d4c27b745be2bd68d04c1c213", verify=True)
+    # a = bioblend.galaxy.objects.client.ObjToolClient(gi)
+    # tool = a.get(id_='vcf_to_maf_customtrack1',  io_details=True)
 
-    gi = GalaxyInstance("http://localhost:8080", email="jaidev53ster@gmail.com", api_key="b6b0868d4c27b745be2bd68d04c1c213", verify=True)
-    a = bioblend.galaxy.objects.client.ObjToolClient(gi)
-    tool = a.get(id_='vcf_to_maf_customtrack1',  io_details=True)
-
-    inputs = tool.wrapped['inputs']
-    inputs = List(inputs).tag(sync=True)
+    # inputs = tool.wrapped['inputs']
+    # inputs = List(inputs).tag(sync=True)
 
     def __init__(self, **kwargs):
         # Initialize the child widget container
         self.appendix = VBox()
-
         BaseWidget.__init__(self, **kwargs)
-
-
-
-
-# # 'inputs': {'Plot': 'HeatMap', 'InFile': {'src': 'hda', 'id': '1315e38e117019d3'}, 'IndexColumn': 'Index', 'x_label': 'x-axis', 'y_label': 'y-axis'}
-
-# # 'inputs': {'infile': {'values': [{'id': '0a104a51724928c1', 'hid': 628, 'name': 'PDAUG Peptide Data Access  - AMPvsTMP (tabular)', 'tags': [], 'src': 'hda', 'keep': False}], 'batch': False}, 'peps': 'name', 'selmethod|method': 'withlabel', 'selmethod|classlabel': 'class_label', 'selmethod|advancefeature|columnselect': 'normalfeature'}
-
-# # 'inputs': {'SelPlotting|Plot': 'BoxPlot', 'SelPlotting|InFile': {'values': [{'id': '035579cc588f5c92', 'hid': 630, 'name': 'PDAUG TSVtoFASTA on data 628 - First (fasta) (as tabular)', 'tags': [], 'src': 'hda', 'keep': False}], 'batch': False}, 'SelPlotting|Feature': 'Feature', 'SelPlotting|Label': 'class label'}}
-
-# # 'inputs': {'infile': {'values': [{'id': 'b1d0a8de1661cd49', 'hid': 630, 'name': 'PDAUG TSVtoFASTA on data 628 - First (fasta) (as tabular)', 'tags': [], 'src': 'hda', 'keep': False}], 'batch': False}, 'peps': '', 'selmethod|method': 'withlabel', 'selmethod|classlabel': 'Class_label', 'selmethod|advancefeature|columnselect': 'advancefeature', 'selmethod|advancefeature|clmname': ''}
-
-
-# # {"infile":{"Input Data ID: 1c35dae9a1f78ad6"},"peps":"hi","method":"withoutlabel","classlabel":"Class_label","columnselect":"advancefeature","clmname":"hi"}
-
-#  {'SelPlotting|Plot': 'ScatterPlot', 'SelPlotting|InFile': {'values': [{'id': 'b1d0a8de1661cd49', 'hid': 630, 'name': 'PDAUG TSVtoFASTA on data 628 - First (fasta) (as tabular)', 'tags': [], 'src': 'hda', 'keep': False}], 'batch': False}, 'SelPlotting|PlotType|SelectPlot': '3D', 'SelPlotting|PlotType|Features1': 'feature1', 'SelPlotting|PlotType|Features2': 'feature2', 'SelPlotting|PlotType|Features3': 'feature3', 'SelPlotting|Label': 'class label'}
-
-
-# #  {'SelPlotting|Plot': 'ScatterPlot', 'SelPlotting|InFile': {'values': [{'id': 'b1d0a8de1661cd49', 'hid': 630, 'name': 'PDAUG TSVtoFASTA on data 628 - First (fasta) (as tabular)', 'tags': [], 'src': 'hda', 'keep': False}], 'batch': False}, 'SelPlotting|PlotType|SelectPlot': '3D', 'SelPlotting|PlotType|Features1': 'feature1', 'SelPlotting|PlotType|Features2': 'feature2', 'SelPlotting|PlotType|Features3': 'feature3', 'SelPlotting|Label': 'class label'}
-
-
-# # {'SelPlotting|Plot': 'ScatterPlot', 'SelPlotting|InFile': {'values': [{'id': 'b1d0a8de1661cd49', 'hid': 630, 'name': 'PDAUG TSVtoFASTA on data 628 - First (fasta) (as tabular)', 'tags': [], 'src': 'hda', 'keep': False}], 'batch': False}, 'SelPlotting|PlotType|SelectPlot': '3D', 'SelPlotting|PlotType|Features1': 'feature1', 'SelPlotting|PlotType|Features2': 'feature2', 'SelPlotting|PlotType|Features3': 'feature3', 'SelPlotting|Label': 'class label'}
-
-
-# 'input1': {'values': [{'id': 'c89a7b7b675d5362', 'hid': 664, 'name': 'Line/Word/Character count on data 661', 'tags': [], 'src': 'hda', 'keep': False}], 'batch': False}, 'SelMLAlgo|MLAlgo': 'SVMC', 'SelMLAlgo|settings|advanced': 'advanced', 'SelMLAlgo|settings|C': '1.0', 'SelMLAlgo|settings|kernel': 'rbf', 'SelMLAlgo|settings|degree': 3, 'SelMLAlgo|settings|gamma': 'scale', 'SelMLAlgo|settings|coef0': '0.0', 'SelMLAlgo|settings|shrinking': 'false', 'SelMLAlgo|settings|probability': 'false', 'SelMLAlgo|settings|tol': '0.001', 'SelMLAlgo|settings|verbose': 'false', 'SelMLAlgo|settings|max_iter': -1, 'SelMLAlgo|settings|decision_function_shape': 'ovo', 'SelMLAlgo|settings|randomState': 100, 'SelMLAlgo|settings|breakties': 'false', 'SelMLAlgo|settings|cache_size': '100.0', 'TestMethods|SelTestMethods': 'Internal', 'TestMethods|nFolds': 5, 'scalling': 'Min_Max'}
-
-
-# 'inputs': {'infile': {'src': 'hda', 'id': '3226521ce19dcb7a'}, 'peps': 'hi', 'selmethod|method': 'withoutlabel', 'classlabel': 'Class_label', 'advancefeature|columnselect': 'advancefeature', 'clmname': 'hi'}
-
-
-# 'inputs': {'SelPlotting|Plot': 'ScatterPlot', 'SelPlotting|InFile': {'values': [{'id': 'c89a7b7b675d5362', 'hid': 664, 'name': 'Line/Word/Character count on data 661', 'tags': [], 'src': 'hda', 'keep': False}], 'batch': False}, 'SelPlotting|PlotType|SelectPlot': '3D', 'SelPlotting|PlotType|Features1': 'feature1', 'SelPlotting|PlotType|Features2': 'feature2', 'SelPlotting|PlotType|Features3': 'feature3', 'SelPlotting|Label': 'class label'}
-
-
-# 'inputs': {'input1': {'values': [{'id': 'c89a7b7b675d5362', 'hid': 664, 'name': 'Line/Word/Character count on data 661', 'tags': [], 'src': 'hda', 'keep': False}], 'batch': False}, 'SelMLAlgo|MLAlgo': 'SVMC', 'SelMLAlgo|settings|advanced': 'advanced', 'SelMLAlgo|settings|C': '1.0', 'SelMLAlgo|settings|kernel': 'rbf', 'SelMLAlgo|settings|degree': 3, 'SelMLAlgo|settings|gamma': 'scale', 'SelMLAlgo|settings|coef0': '0.0', 'SelMLAlgo|settings|shrinking': 'false', 'SelMLAlgo|settings|probability': 'false', 'SelMLAlgo|settings|tol': '0.001', 'SelMLAlgo|settings|verbose': 'false', 'SelMLAlgo|settings|max_iter': -1, 'SelMLAlgo|settings|decision_function_shape': 'ovo', 'SelMLAlgo|settings|randomState': 100, 'SelMLAlgo|settings|breakties': 'false', 'SelMLAlgo|settings|cache_size': '100.0', 'TestMethods|SelTestMethods': 'Internal', 'TestMethods|nFolds': 5, 'scalling': 'Min_Max'}}
-
-
-# {'history_id': 'f597429621d6eb2b', 'tool_id': 'toolshed.g2.bx.psu.edu/repos/jay/pdaug_ml_models/pdaug_ml_models/0.1.0', 'tool_version': '0.1.0', 'inputs': {'input1': {'values': [{'id': 'c89a7b7b675d5362', 'hid': 664, 'name': 'Line/Word/Character count on data 661', 'tags': [], 'src': 'hda', 'keep': False}], 'batch': False}, 'SelMLAlgo|MLAlgo': 'SVMC', 'SelMLAlgo|settings|advanced': 'advanced', 'SelMLAlgo|settings|C': '1.0', 'SelMLAlgo|settings|kernel': 'rbf', 'SelMLAlgo|settings|degree': 3, 'SelMLAlgo|settings|gamma': 'scale', 'SelMLAlgo|settings|coef0': '0.0', 'SelMLAlgo|settings|shrinking': 'false', 'SelMLAlgo|settings|probability': 'false', 'SelMLAlgo|settings|tol': '0.001', 'SelMLAlgo|settings|verbose': 'false', 'SelMLAlgo|settings|max_iter': -1, 'SelMLAlgo|settings|decision_function_shape': 'ovo', 'SelMLAlgo|settings|randomState': 100, 'SelMLAlgo|settings|breakties': 'false', 'SelMLAlgo|settings|cache_size': '100.0', 'TestMethods|SelTestMethods': 'Internal', 'TestMethods|nFolds': 5, 'scalling': 'Min_Max'}}
