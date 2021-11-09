@@ -109,6 +109,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         //     // Create parameter groups
         //     this._init_parameter_groups();
         // });
+
         
     }
  
@@ -1531,14 +1532,13 @@ async AddDataSetTable(selected_value='default', Dt=[], state='') {
 
     async Test(Inputs, HistoryID) {
 
-        this.AddJobStatusWidget()
+        this.AddJobStatusWidget(HistoryID)
+        this.hide_run_buttons(true)
 
         var job  = await this.ReturnKernelSideDataObjects(`from galaxylab import GalaxyTaskWidget\nGalaxyTaskWidget.submit_job(GalInstance=${JSON.stringify(this.model.get('GalInstance'))}, Tool_inputs=${JSON.stringify(Inputs)}, HistoryID=${JSON.stringify(HistoryID)})`)
    
         this.el.querySelector('.job-id').innerText = 'Job ID : '+ job['id']
         this.el.querySelector('.job-detail-text-name').innerText = 'Submitted by : '+ job['user_email']+' on '+ job['update_time']
-
-       
 
         var states = ['ok', 'error']
         for (let i = 0; i < Infinity; ++i) {
@@ -1608,7 +1608,9 @@ async AddDataSetTable(selected_value='default', Dt=[], state='') {
     }
 
 
-    AddJobStatusWidget(){
+    AddJobStatusWidget(HistoryID){
+
+        var self = this
 
         var JobStatus = `<div class="form">    
                         <div class="job-status-widget">
@@ -1664,11 +1666,23 @@ async AddDataSetTable(selected_value='default', Dt=[], state='') {
                     </div>`
 
             const Job = new DOMParser().parseFromString(JobStatus, 'text/html').querySelector('.job-status-widget')
-            var toolForm = this.el.querySelector('.Galaxy-form')
-            toolForm.style.height = '350px'
-            this.removeAllChildNodes(toolForm)
 
+            var toolForm = this.el.querySelector('.Galaxy-form')
+    
+            this.removeAllChildNodes(toolForm)
             toolForm.append(Job)
+
+            var BTN = this.el.querySelector('.rbtn')
+
+            BTN.addEventListener('click', async (e) => {
+
+                var refine_inputs  = await self.ReturnKernelSideDataObjects(`from galaxylab import GalaxyTaskWidget\nGalaxyTaskWidget.UpdateForm(GalInstance=${JSON.stringify(self.model.get('GalInstance'))}, toolID=${JSON.stringify(self.model.get('ToolID'))}, HistoryID=${JSON.stringify(HistoryID)})`)
+                
+                var toolForm = self.el.querySelector('.Galaxy-form')
+                self.removeAllChildNodes(toolForm)
+                self.Main_Form(refine_inputs['inputs'])
+                self.hide_run_buttons()
+            } );
     }
 
 
@@ -1731,6 +1745,18 @@ async AddDataSetTable(selected_value='default', Dt=[], state='') {
                  this.el.querySelector('.nbtools-collapse').click();
          }));
      }
+
+
+     hide_run_buttons(hide) {
+        var self  = this;
+        this.el.querySelectorAll('.nbtools-run').forEach((button) =>{
+            if (hide == true){
+                button.style.display = 'none';
+            } else { 
+                button.style.display = 'block';
+            }
+        });
+    }
 
 
      /**
