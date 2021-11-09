@@ -340,11 +340,11 @@
 
   .data-set-row {
     list-style-type: none;
-    height: 50px;
+    height: 30px;
     margin: 2px;
     background: rgb(163, 167, 167);
-    padding: 20px;
-    width: 250px;
+    padding: 10px;
+    width: 300px;
   }
 
 
@@ -529,7 +529,7 @@
   .job-status-widget{
     background: hsl(0, 4%, 66%);
     width: 100%;
-    height: 300px;
+    height: 250px;
   
   }
   
@@ -571,14 +571,14 @@
   .job-input-files{
     background: hsl(0, 85%, 48%);
     width: 380px;
-    height: 200px;
+    height: 250px;
   }
   
 
   .job-output-files{
     background: rgb(255, 255, 255);
     width: 100%;
-    height: 100%;
+    height: 250px;
     overflow-x: auto;
     overflow-y: auto;
   }
@@ -702,15 +702,17 @@
     font-size: 22.5px;
   }
 
-  .fa.fa-refresh {
+.data-description {
+  font-size: 10px;
+}
+.data-header{
+  font-size: 12px;
+}
 
-  }
-
-  .Galaxy-form{
-
-    width: 55%;
-
-  }
+.Galaxy-form{
+  width: 55%;
+  height: 100%;
+}
   
   
   

@@ -86,10 +86,7 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
             print('#############')
             DataList.append(gi.gi.datasets.gi.datasets.show_dataset(dataset_id=showJob['outputs'][i]['id'],hda_ldda=showJob['outputs'][i]['src']))
 
-        print(DataList[0])
-
         return IPython.display.JSON(DataList)
-
 
     def RefinedInputs(inputs, gi):
     
@@ -106,10 +103,8 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
 
     def UpdateForm( GalInstance=None, Tool_inputs=None, toolID=None, HistoryID=None, Python_side=False, InputDataParam=False):
 
-        print (GalInstance, HistoryID,Python_side )
-
         gi = GalaxyInstance(GalInstance['URL'], email=GalInstance['email_ID'], api_key=GalInstance['API_key'], verify=True)
-       
+
         if (Tool_inputs != None) and (toolID != None):
 
             NewInputs = GalaxyTaskWidget.RefinedInputs(Tool_inputs, gi)
@@ -119,7 +114,12 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
                 return IPython.display.JSON(data=inputs)
             else:
                 return IPython.display.JSON(GalaxyTaskWidget.RetrivParm(inputs['inputs']))
-    
+
+        elif (Tool_inputs == None) and (toolID != None):
+
+            inputs = gi.gi.tools.gi.tools.build_tool(tool_id=toolID, history_id=HistoryID)
+            return IPython.display.JSON(data=inputs)
+
         else:
             HistoryData = gi.gi.datasets.gi.datasets.get_datasets(history_id=HistoryID, state='ok', deleted=False,  purged=False, visible=True)
 
