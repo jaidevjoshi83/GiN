@@ -9,8 +9,11 @@ import * as galaxyuibuilder_exports from './Galaxyuibuilder';
 import * as utils_exports from './utils';
 import * as example1_exports from './example1';
 import * as model_exports from './model'
-const module_exports = Object.assign(Object.assign(Object.assign(Object.assign(Object.assign({},   galaxyuioutput_exports), example1_exports), galaxyuibuilder_exports), utils_exports),model_exports) ;
+import * as historydata_export from './historydata'
+
+const module_exports = Object.assign(Object.assign(Object.assign(Object.assign(Object.assign(Object.assign({},   galaxyuioutput_exports), example1_exports), galaxyuibuilder_exports), utils_exports),model_exports),  historydata_export);
 import { MODULE_NAME, MODULE_VERSION } from './version';
+import { Utils } from '@genepattern/nbtools/node_modules/@blueprintjs/core/lib/cjs/common';
 const EXTENSION_ID = 'galaxylab:plugin';
 /**
  * The example plugin.
@@ -33,7 +36,7 @@ function activateWidgetExtension(app, registry, mainmenu, restorer, shell, noteb
     init_context(app, notebook_tracker)
     const tool_registry = new ToolRegistry();
 
-    console.log(notebook_tracker)
+    // console.log(notebook_tracker)
 
     
     registry.registerWidget({

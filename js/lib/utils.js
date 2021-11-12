@@ -1,3 +1,5 @@
+import { ContextManager } from '@genepattern/nbtools';
+
 /**
  * Send a browser notification
  *
@@ -145,6 +147,7 @@ export function process_template(template, template_vars) {
     });
     return template;
 }
+
 export function pulse_red(element, count = 0, count_up = true) {
     setTimeout(() => {
         element.style.border = `rgba(255, 0, 0, ${count / 10}) solid ${Math.ceil(count / 2)}px`;
@@ -157,4 +160,41 @@ export function pulse_red(element, count = 0, count_up = true) {
         else
             element.style.border = `none`;
     }, 25);
+}
+
+export async function executePython(pythonCode, isExpectingOutput){
+
+    const notebook = ContextManager.tool_registry.current
+
+    return await new Promise(async (resolve, reject) => {  
+
+        var feature = notebook.context.sessionContext.session.kernel.requestExecute({ 'code': pythonCode, 'stop_on_error' : true});
+        feature.onIOPub = (msg) =>{
+            var msgType = msg.header.msg_type;
+
+            switch (msgType) {
+                case 'error':    	    
+                    var message = msg.content.ename + '\n' + msg.content.evalue;		   	    		   				    
+                    reject(message);
+                    break;						
+                case 'execute_result':
+                    feature.onIOPub  = msg.content;	
+                    resolve(feature.onIOPub.data['application/json']);						
+                    break;
+                case 'display_data':
+                    feature.onIOPub  = msg.content;	
+                    resolve(feature.onIOPub.data['application/json']);											
+                    break;
+                case 'update_display_data':
+                    feature.onIOPub  = msg.content;	
+                    resolve(feature.onIOPub.data['application/json']);											
+                    break;
+            };
+        }; 		 	
+    });	
+}
+
+export async function  KernelSideDataObjects(code) {
+    var system = await executePython(code);
+    return system;
 }

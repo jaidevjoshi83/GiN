@@ -344,7 +344,7 @@
     margin: 2px;
     background: rgb(163, 167, 167);
     padding: 10px;
-    width: 300px;
+    width: 350px;
   }
 
 
@@ -682,10 +682,10 @@
     margin-left: 3px;
   }
   
-  .form{
+  /* .form{
     width: 600px;
     height: 300px;
-  }
+  } */
   
   .rbtn {
     border: none;
@@ -709,11 +709,13 @@
   font-size: 12px;
 }
 
-.Galaxy-form{
+.Galaxy-form {
+  border-left: 2px solid rgb(221, 218, 196);
+  border-radius: 5px;
+  background-color: #f2f2f2;
+  padding: 20px;
   width: 55%;
   height: 100%;
 }
-  
-  
-  
+
   
