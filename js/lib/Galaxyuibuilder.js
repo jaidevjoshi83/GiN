@@ -583,22 +583,19 @@ async AddDataSetTable(selected_value='default', Dt=[], state='') {
 
         DataTable.style.height = this.element.querySelector('.Galaxy-form').style.offsetHeight
 
-        // if (selected_value !== 'default') {
-        //     for(var i = 0; i < options.length; i++) {
-        //         if (options[i]['id'] == selected_value){
-        //             select.selectedIndex = i
-        //         }
-        //     }
-
-        //     var InitialData = await KernelSideDataObjects(`from galaxylab import GalaxyTaskWidget\nGalaxyTaskWidget.UpdateForm( GalInstance=${JSON.stringify(this.model.get('GalInstance'))}, HistoryID=${JSON.stringify(selected_value)})`)
-        // } else{
-        //     var InitialData = this.model.get('HistoryData')
-        // }
-
-        console.log(options[0]['id'])
-
         DataHistoryList.append(select)
-        DataHistoryList.append(await this.data_row_list(this.model.get('GalInstance'), options[0]['id']))
+        DataHistoryList.append(await this.data_row_list(this.model.get('GalInstance'), options[select.selectedIndex]['id']))
+
+        select.addEventListener("change", async (event)=> {
+
+            var ListItem = DataHistoryList.querySelector('.list-item')
+            ListItem.parentNode.removeChild(ListItem)
+
+            DataHistoryList.append(await self.data_row_list(self.model.get('GalInstance'), options[select.selectedIndex]['id']))
+    
+            console.log(options[select.selectedIndex]['id'])
+    
+                }, false);
   
         return DataHistoryList
    }
@@ -937,8 +934,6 @@ async AddDataSetTable(selected_value='default', Dt=[], state='') {
             }
         }, false);
 
-
-
         var children = self.element.querySelector('.Galaxy-form').children;
         var Inputs = self.ReturnData(children)
 
@@ -952,7 +947,6 @@ async AddDataSetTable(selected_value='default', Dt=[], state='') {
             Label_files.style.display = 'block'
             Label_collection.style.display = 'block'
             Select.multiple = true
-
         }
 
         row.querySelectorAll('.ui-option').forEach((Label) => Label.addEventListener('click', () => {
@@ -1068,9 +1062,7 @@ async AddDataSetTable(selected_value='default', Dt=[], state='') {
  
     AddConditionalSelectField (input_def, ElID, NamePrefix, call_back_data={} ) {
 
-
-    input_def.id = this.uid()
-
+        input_def.id = this.uid()
         var self = this
 
         const options =  input_def['test_param']['options']
@@ -1219,7 +1211,6 @@ async AddDataSetTable(selected_value='default', Dt=[], state='') {
         FormParent.append(row)
 
         return row
-
     }
 
 
@@ -1259,7 +1250,6 @@ async AddDataSetTable(selected_value='default', Dt=[], state='') {
         });
    
         return select
-
     }
  
  
@@ -1355,7 +1345,6 @@ async AddDataSetTable(selected_value='default', Dt=[], state='') {
         }
     }
 
- 
     AddSection (input_def, parent, NamePrefix) {
 
         var self = this
@@ -1401,7 +1390,6 @@ async AddDataSetTable(selected_value='default', Dt=[], state='') {
             }
         });
     }
-
 
    waitforme(milisec) {
     return new Promise(resolve => {
@@ -1504,7 +1492,6 @@ async AddDataSetTable(selected_value='default', Dt=[], state='') {
         return Tbl
     }
 
-
     async dataset_error_details(dataset){
 
         var details =  `<div class="details" style="display: none;">
@@ -1528,7 +1515,6 @@ async AddDataSetTable(selected_value='default', Dt=[], state='') {
 
         return error_details_html
     }
-
 
     async dataset_row_queued_state(dataset){
 
@@ -1594,10 +1580,7 @@ async AddDataSetTable(selected_value='default', Dt=[], state='') {
                             </div>
                             <div class="actions clear">
                                 <div class="left">
-                                    <a class="download-btn icon-btn" href="/datasets/${dataset['dataset_id']}/display?to_ext=bed" title="" data-original-title="Download"> <span class="fa fa-save"></span> </a>
-                                    <a class="icon-btn" title="" href="javascript:void(0);" data-original-title="Copy link"><span class="fa fa-chain" style=""></span></a><a class="icon-btn params-btn" title="" target="_blank" href="/datasets/${dataset['dataset_id']}/show_params" data-original-title="View details"><span class="fa fa-info-circle" style=""></span></a>
-                                    <a class="icon-btn visualization-link" title="" href="/visualizations?dataset_id=${dataset['dataset_id']}" data-original-title="Visualize this data"><span class="fa fa-bar-chart" style=""></span></a>
-                                    <a class="icon-btn icon-btn" title="" href="#" data-original-title="Tool Help"><span class="fa fa-question" style=""></span></a>
+                                    <a class="download-btn icon-btn" href="/datasets/${dataset['dataset_id']}/display?to_ext=bed" title="" data-original-title="Download"> <span class="fa fa-save"></span> </a><a class="icon-btn" title="" href="javascript:void(0);" data-original-title="Copy link"><span class="fa fa-chain" style=""></span></a><a class="icon-btn params-btn" title="" target="_blank" href="/datasets/${dataset['dataset_id']}/show_params" data-original-title="View details"><span class="fa fa-info-circle" style=""></span></a><a class="icon-btn visualization-link" title="" href="/visualizations?dataset_id=${dataset['dataset_id']}" data-original-title="Visualize this data"><span class="fa fa-bar-chart" style=""></span></a><a class="icon-btn icon-btn" title="" href="#" data-original-title="Tool Help"><span class="fa fa-question" style=""></span></a>
                                 </div>
                             </div>
 
@@ -1625,7 +1608,7 @@ async AddDataSetTable(selected_value='default', Dt=[], state='') {
                             <div class="selector"><span class="fa fa-2x fa-square-o"></span></div>
                             <div class="primary-actions"><a class="icon-btn display-btn" title="" target="galaxy_main" href="/datasets/${dataset['dataset_id']}/display/?preview=True" data-original-title="View data"><span class="fa fa-eye" style=""></span></a><a class="icon-btn edit-btn" title="" href="/datasets/edit?dataset_id=${dataset['dataset_id']}" data-original-title="Edit attributes"><span class="fa fa-pencil" style=""></span></a><a class="icon-btn delete-btn" title="" href="javascript:void(0);" data-original-title="Delete"><span class="fa fa-times" style=""></span></a></div>
                             <div class="title-bar clear" tabindex="0" draggable="true"> <span class="state-icon"></span>
-                                <div class="title"> <span class="hid">901</span> <span class="name">test.tsv</span> </div>
+                                <div class="title"> <span class="hid">${dataset['hid']}</span> <span class="name">${dataset['name']}</span> </div>
                                 <br>
                                 <div class="nametags"></div>
                             </div>
@@ -1664,7 +1647,7 @@ async AddDataSetTable(selected_value='default', Dt=[], state='') {
                             <div class="selector"><span class="fa fa-2x fa-square-o"></span></div>
                             <div class="primary-actions"><a class="icon-btn display-btn" title="" target="galaxy_main" href="/datasets/${dataset['dataset_id']}/display/?preview=True" data-original-title="View data"><span class="fa fa-eye" style=""></span></a><a class="icon-btn edit-btn" title="" href="/datasets/edit?dataset_id=${dataset['dataset_id']}" data-original-title="Edit attributes"><span class="fa fa-pencil" style=""></span></a><a class="icon-btn delete-btn" title="" href="javascript:void(0);" data-original-title="Delete"><span class="fa fa-times" style=""></span></a></div>
                             <div class="title-bar clear" tabindex="0" draggable="true"> <span class="state-icon"></span>
-                                <div class="title"> <span class="hid">901</span> <span class="name">test.tsv</span> </div>
+                                <div class="title"> <span class="hid">${dataset['hid']}</span> <span class="name">${dataset['name']}/span> </div>
                                 <br>
                                 <div class="nametags"></div>
                             </div>
@@ -1701,7 +1684,7 @@ async AddDataSetTable(selected_value='default', Dt=[], state='') {
         }
     
     async attach_event  (Node, className) { 
-            // var DataSets = Node.querySelectorAll('.list-item.dataset.history-content.state-error, .list-item.dataset.history-content.state-ok')
+
             var DataSets = Node.querySelectorAll(className)
         
             DataSets.forEach((button) => button.querySelector('.title').addEventListener('click', (e) => {
@@ -1718,16 +1701,27 @@ async AddDataSetTable(selected_value='default', Dt=[], state='') {
     
     async AddJobStatusWidget(Inputs, HistoryID) {
 
-
         this.JobStatusTemplate(HistoryID)
         this.hide_run_buttons(true)
 
         var job  = await KernelSideDataObjects(`from galaxylab import GalaxyTaskWidget\nGalaxyTaskWidget.submit_job(GalInstance=${JSON.stringify(this.model.get('GalInstance'))}, Tool_inputs=${JSON.stringify(Inputs)}, HistoryID=${JSON.stringify(HistoryID)})`)
 
-        console.log(job)
-   
         this.el.querySelector('.job-id').innerText = 'Job ID : '+ job['id']
         this.el.querySelector('.job-detail-text-name').innerText = 'Submitted by : '+ job['user_email']+' on '+ job['update_time']
+
+        var DHL = this.el.querySelector('.galaxy-history-list')
+
+        var ListItem =  this.el.querySelector('.list-item')
+
+        DHL.removeChild(ListItem)
+
+       for (var i = 0; i <  DHL.querySelector('#Data-History_IDs').length; i++ ){
+            if (DHL.querySelector('#Data-History_IDs')[i].value == HistoryID) {
+                DHL.querySelector('#Data-History_IDs').selectedIndex = i
+            }
+        }
+
+        DHL.append(await this.data_row_list(this.model.get('GalInstance'), HistoryID))
 
         var states = ['ok', 'error']
         for (let i = 0; i < Infinity; ++i) {
@@ -1735,11 +1729,7 @@ async AddDataSetTable(selected_value='default', Dt=[], state='') {
             // var os = await KernelSideDataObjects(`from galaxylab import GalaxyTaskWidget\nGalaxyTaskWidget.TestOut(GalInstance=${JSON.stringify(this.model.get('GalInstance'))}, JobID=${JSON.stringify(job['id'])} )`);
 
             var data = await KernelSideDataObjects(`from galaxylab import GalaxyTaskWidget\nGalaxyTaskWidget.OutPutData(GalInstance=${JSON.stringify(this.model.get('GalInstance'))}, JobID=${JSON.stringify(job['id'])} )`);
-
-            
             var JobState = data[0]['state']
-
-            console.log(JobState)
             var ListItem =  this.el.querySelector('.list-item')
 
             if (JobState=='running'){
@@ -1762,9 +1752,6 @@ async AddDataSetTable(selected_value='default', Dt=[], state='') {
                     if (ListItem.querySelector(`#dataset-${data[j]['dataset_id']}`) == null ) {
                         ListItem.prepend(await this.dataset_row_running_state(data[j]))
                     }
-
-
-
                 }
 
             } else if (['queued', 'new'].includes(JobState)) {
@@ -1775,21 +1762,21 @@ async AddDataSetTable(selected_value='default', Dt=[], state='') {
                 for (var j =0; j < data.length; j++){
 
                     if (ListItem.querySelector(`#dataset-${data[j]['dataset_id']}`) == null ) {
-
-                        // var e = ListItem.querySelector(`#dataset-${data[j]['dataset_id']}`)
-                        // e.parentNode.removeChild(e)
                         ListItem.prepend(await this.dataset_row_queued_state(data[j]))
                     }
-
                 }
 
             } else if (JobState == 'ok'){
 
+
                 for (var j =0; j < data.length; j++){
                     var id=`dataset-${data[j]['dataset_id']}`
-                    console.log(id)
-                    var e = this.el.querySelector(`#${id}`)
-                    e.parentElement.removeChild(e)
+
+                    if ( ListItem.querySelector(`#${id}`) !== null) {
+                        var e = ListItem.querySelector(`#${id}`)
+                        e.parentElement.removeChild(e)
+                    }
+
                     ListItem.prepend(await this.dataset_row_ok_state(data[j]))
                 }
 
@@ -1802,18 +1789,14 @@ async AddDataSetTable(selected_value='default', Dt=[], state='') {
                 var gearrotate = this.el.querySelector('.job-done-icon')
                 gearrotate.style.display = 'block'
 
-                // var Dt
-                // Dt = await this.AddOutPutDataTable(job['id'])
-                // this.Data_Tool(job['history_id'], Dt, '#5dc11f')
-
             } else if (JobState == 'error'){
 
                 for (var j =0; j < data.length; j++){
 
                     var id=`dataset-${data[j]['dataset_id']}`
 
-                    if(this.el.querySelector(`#${id}`) !== null){
-                        var e = this.el.querySelector(`#${id}`)
+                    if ( ListItem.querySelector(`#${id}`) !== null) {
+                        var e = ListItem.querySelector(`#${id}`)
                         e.parentElement.removeChild(e)
                     }
         
@@ -1847,8 +1830,6 @@ async AddDataSetTable(selected_value='default', Dt=[], state='') {
             }      
         }
     }
-
-
 
     JobStatusTemplate(HistoryID){
 
@@ -1930,7 +1911,6 @@ async AddDataSetTable(selected_value='default', Dt=[], state='') {
                 self.hide_run_buttons()
             } );
     }
-
 
      //#############################################################################
      
