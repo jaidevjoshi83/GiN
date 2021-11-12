@@ -132,13 +132,15 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
         
         gi = GalaxyInstance(GalInstance['URL'], email=GalInstance['email_ID'], api_key=GalInstance['API_key'], verify=True)
         HistoryData = gi.gi.datasets.gi.datasets.get_datasets(history_id=HistoryID, deleted=False,  purged=False, visible=True)
-        for i in HistoryData:
-            datasets.append(gi.gi.datasets.gi.datasets.show_dataset(dataset_id=i['id']))
+        # for i in HistoryData:
+        #     datasets.append(gi.gi.datasets.gi.datasets.show_dataset(dataset_id=i['id']))
 
-        return IPython.display.JSON(datasets)
-            
-        
+        return IPython.display.JSON(HistoryData)
 
+    def show_data_set(GalInstance=None, dataset_id=None):        
+        gi = GalaxyInstance(GalInstance['URL'], email=GalInstance['email_ID'], api_key=GalInstance['API_key'], verify=True)
+        show_dataset = gi.gi.datasets.gi.datasets.show_dataset(dataset_id=dataset_id)
+        return IPython.display.JSON(show_dataset)
 
     def handle_error_task(self, error_message, name='Galaxy Module', **kwargs):
         """Display an error message if the task is None"""
