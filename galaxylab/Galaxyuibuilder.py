@@ -70,14 +70,12 @@ class GalaxyUIBuilder(BaseWidget, NBTool):
         self.id = 'BASICID' #function_or_method.__qualname__
 
         # Set the description based on the docstring
-        self.description = "Basic_Plot_Descriptor"
+        self.description = "Basic Plotting"
 
         # Set the origin based on the package name or "Notebook"
         # self.origin = 'Notebook' if function_or_method.__module__ == '__main__' else function_or_method.__module__
 
         # register_tool and collapse are True by default
         self.register_tool = True
-        self.collapse = True
-    def TestMethod(self):
-        for i in dir(self):
-            print (i)
+        self.collapse = False
+

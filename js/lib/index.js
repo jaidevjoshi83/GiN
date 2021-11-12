@@ -9,3 +9,4 @@ export * from './example1';
 export * from './Galaxyuibuilder';
 export * from './utils';
 export * from './model';
+export * from './historydata';
