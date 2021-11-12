@@ -62,12 +62,10 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
         job = gi.tools.gi.tools.run_tool(history_id=HistoryID, tool_id=GalInstance['tool_ID'], tool_inputs=NewInputs)
         showJob = gi.jobs.gi.jobs.show_job(job['jobs'][0]['id'],full_details=True)
         print('#################showJob################')
-        print(showJob)
+        # print(showJob)
         print('#################showJob################')
-        MyKeys = ['id', 'tool_id', 'user_email', 'create_time']
-        MyOut = ''
-        for i in MyKeys:
-            MyOut = MyOut+'$$$'+str(showJob[i])
+
+
         return IPython.display.JSON(showJob)
 
     def TestOut(GalInstance=None, JobID=None):
@@ -127,6 +125,19 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
                 return HistoryData
             else:
                 return IPython.display.JSON(data=HistoryData)
+
+    def history_data_list( GalInstance=None, HistoryID=None):
+
+        datasets = []
+        
+        gi = GalaxyInstance(GalInstance['URL'], email=GalInstance['email_ID'], api_key=GalInstance['API_key'], verify=True)
+        HistoryData = gi.gi.datasets.gi.datasets.get_datasets(history_id=HistoryID, deleted=False,  purged=False, visible=True)
+        for i in HistoryData:
+            datasets.append(gi.gi.datasets.gi.datasets.show_dataset(dataset_id=i['id']))
+
+        return IPython.display.JSON(datasets)
+            
+        
 
 
     def handle_error_task(self, error_message, name='Galaxy Module', **kwargs):
