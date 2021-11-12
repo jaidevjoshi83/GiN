@@ -11,9 +11,6 @@
 
 }
 
-.Galaxy-form {
-  width: 40%;
-}
 
 .Galaxy-form input:not(.fileid, .buttonid){
   width: 100%;
@@ -25,13 +22,14 @@
   box-sizing: border-box;
 }
 
-
-.Galaxy-form {
+/* .Galaxy-form {
   border-left: 2px solid rgb(221, 218, 196);
   border-radius: 5px;
   background-color: #f2f2f2;
   padding: 20px;
-}
+  width: 40%;
+  height: 100%;
+} */
 
 .Galaxy-form select{
   width: 100%;
