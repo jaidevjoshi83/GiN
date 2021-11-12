@@ -1523,7 +1523,7 @@ async AddDataSetTable(selected_value='default', Dt=[], state='') {
                     <div class="selector"><span class="fa fa-clock-o"></span></div>
                     <div class="primary-actions"><a class="icon-btn display-btn" title="" target="galaxy_main" href="/datasets/${dataset['dataset_id']}/display/?preview=True" data-original-title="View data"><span class="fa fa-eye" style=""></span></a><a class="icon-btn edit-btn" title="" href="/datasets/edit?dataset_id=${dataset['dataset_id']}" data-original-title="Edit attributes"><span class="fa fa-pencil" style=""></span></a><a class="icon-btn delete-btn" title="" href="javascript:void(0);" data-original-title="Delete"><span class="fa fa-times" style=""></span></a></div>
                     <div class="title-bar clear" tabindex="0" draggable="true"> <span class="fa fa-clock-o"></span>
-                        <div class="title"> <span class="hid">901</span> <span class="name">test.tsv</span> </div>
+                        <div class="title"> <span class="hid">${dataset['hid']}</span> <span class="name">${dataset['name']}</span> </div>
                         <br>
                         <div class="nametags"></div>
                     </div>
