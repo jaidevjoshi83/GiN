@@ -142,3 +142,20 @@ pre{overflow:auto;word-wrap:normal;white-space:pre;}
 th:focus{outline:none!important;}
 
 .state-queued.dataset{background:#7d959d70;}
+
+
+*,:after,:before{box-sizing:border-box;}
+p{margin-top:0;margin-bottom:1rem;}
+ul{margin-bottom:1rem;}
+ul{margin-top:0;}
+b{font-weight:bolder;}
+.donemessagelarge{position:relative;padding:.75rem 1.25rem;margin-bottom:1rem;border:1px solid transparent;border-radius:.25rem;}
+.donemessagelarge{color:#38504a;background-color:#c2ebc2;border-color:#94db94;}
+
+*,:after,:before{text-shadow:none!important;box-shadow:none!important;}
+p{orphans:3;widows:3;}
+
+.donemessagelarge{word-wrap:break-word;}
+.donemessagelarge{border-color:transparent;}
+.donemessagelarge{min-height:36px;padding-left:52px;background-repeat:no-repeat;background-position:10px 5px;}
+.donemessagelarge{padding-left:52px;}
