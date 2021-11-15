@@ -166,6 +166,8 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
                                 "email_ID": self.tool.gi.gi.users.get_current_user()['email'],
                                 "URL":      self.tool.gi.gi.base_url,
                                 "tool_ID": self.tool.wrapped['id'],
+                                "tool_name": self.tool.wrapped['name'],
+                                "tool_description": self.tool.wrapped['description'],
                             }
 
             History_IDs = self.tool.gi.histories.gi.histories.get_histories()
