@@ -1423,47 +1423,50 @@ async AddDataSetTable(selected_value='default', Dt=[], state='') {
     }
     
     async dataset_row_ok_state (dataset){
+
+        var URL = this.model.get('GalInstance')['URL']
         
-            var k = 'test'
-            var row = `<div id="dataset-${dataset['dataset_id']}" class="list-item dataset history-content state-ok">
-                        <div class="warnings"></div>
-                        <div class="selector"><span class="fa fa-2x fa-square-o"></span></div>
-                        <div class="primary-actions"><a class="icon-btn display-btn" title="" target="_blank" href="/datasets/${dataset['id']}/display/?preview=True" data-original-title="View data"><span class="fas fa-eye" style=""></span></a><a class="icon-btn edit-btn" title="" href="/datasets/edit?dataset_id=${dataset['id']}" data-original-title="Edit attributes"><span class="fa fa-pencil" style=""></span></a><a class="icon-btn delete-btn" title="" href="javascript:void(0);" data-original-title="Delete"><span class="fa fa-times" style=""></span></a></div>
-                        <div class="title-bar clear" tabindex="0" draggable="true"> <span class="state-icon"></span>
-                            <div class="title"> <span class="hid">${dataset['hid']}</span> <span class="name">${dataset['name']}</span> </div>
-                            <br>
-                            <div title="0 nametags" class="nametags"></div>
-                        </div>
+        var row = `<div id="dataset-${dataset['dataset_id']}" class="list-item dataset history-content state-ok">
+                    <div class="warnings"></div>
+                    <div class="selector"><span class="fa fa-2x fa-square-o"></span></div>
+                    <div class="primary-actions"><a class="icon-btn display-btn" title="" target="_blank" href="${URL}/datasets/${dataset['id']}/display/?preview=True" data-original-title="View data"><span class="fas fa-eye" style=""></span></a><a class="icon-btn edit-btn" title="" href="${URL}/datasets/edit?dataset_id=${dataset['id']}" data-original-title="Edit attributes"><span class="fa fa-pencil" style=""></span></a><a class="icon-btn delete-btn" title="" href="" data-original-title="Delete"><span class="fa fa-times" style=""></span></a></div>
+                    <div class="title-bar clear" tabindex="0" draggable="true"> <span class="state-icon"></span>
+                        <div class="title"> <span class="hid">${dataset['hid']}</span> <span class="name">${dataset['name']}</span> </div>
+                        <br>
+                        <div title="0 nametags" class="nametags"></div>
+                    </div>
 
-                    </div>`
+                </div>`
         
-                    const Tbl = new DOMParser().parseFromString(row, 'text/html').querySelector('.list-item.dataset.history-content.state-ok')
+        const Tbl = new DOMParser().parseFromString(row, 'text/html').querySelector('.list-item.dataset.history-content.state-ok')
 
-                    Tbl.addEventListener('click', async (e) => {
+        Tbl.addEventListener('click', async (e) => {
 
-                        if (Tbl.querySelector('.details') == null ){
-                            var show_dataset = await KernelSideDataObjects(`from galaxylab  import GalaxyTaskWidget\nGalaxyTaskWidget.show_data_set(GalInstance=${JSON.stringify(this.model.get('GalInstance'))}, dataset_id=${JSON.stringify(dataset['id'])} )`) 
-                            console.log(show_dataset)
-                            var error_details = await this.dataset_ok_details(show_dataset)
-                            Tbl.append(error_details)
-                        }
+            if (Tbl.querySelector('.details') == null ){
+                var show_dataset = await KernelSideDataObjects(`from galaxylab  import GalaxyTaskWidget\nGalaxyTaskWidget.show_data_set(GalInstance=${JSON.stringify(this.model.get('GalInstance'))}, dataset_id=${JSON.stringify(dataset['id'])} )`) 
+                console.log(show_dataset)
+                var error_details = await this.dataset_ok_details(show_dataset)
+                Tbl.append(error_details)
+            }
 
-                        if (Tbl.querySelector('.details').style.display == 'block') {
-                            Tbl.querySelector('.details').style.display = 'none'
-                        } else{
-                            Tbl.querySelector('.details').style.display = 'block'
-                        }
-                    });
+            if (Tbl.querySelector('.details').style.display == 'block') {
+                Tbl.querySelector('.details').style.display = 'none'
+            } else{
+                Tbl.querySelector('.details').style.display = 'block'
+            }
+        });
 
-            return Tbl
+        return Tbl
     } 
     
     async dataset_row_error_state (dataset)  {
 
+        var URL = this.model.get('GalInstance')['URL']
+
         var row = `<div id="dataset-${dataset['dataset_id']}" class="list-item dataset history-content state-error">
                         <div class="warnings"></div>
                         <div class="selector"><span class="fa fa-2x fa-square-o"></span></div>
-                        <div class="primary-actions"><a class="icon-btn display-btn" title="" target="galaxy_main" href="/datasets/6875c703d2301e12/display/?preview=True" data-original-title="View data"><span class="fa fa-eye" style=""></span></a><a class="icon-btn edit-btn" title="" href="/datasets/edit?dataset_id=6875c703d2301e12" data-original-title="Edit attributes"><span class="fa fa-pencil" style=""></span></a><a class="icon-btn delete-btn" title="" href="javascript:void(0);" data-original-title="Delete"><span class="fa fa-times" style=""></span></a></div>
+                        <div class="primary-actions"><a class="icon-btn display-btn" title="" target="galaxy_main" href="${URL}/datasets/${dataset['id']}/display/?preview=True" data-original-title="View data"><span class="fa fa-eye" style=""></span></a><a class="icon-btn edit-btn" title="" href="${URL}/datasets/edit?dataset_id=${dataset['dataset_id']}" data-original-title="Edit attributes"><span class="fa fa-pencil" style=""></span></a><a class="icon-btn delete-btn" title="" href="" data-original-title="Delete"><span class="fa fa-times" style=""></span></a></div>
                         <div class="title-bar clear" tabindex="0" draggable="true"> <span class="state-icon"></span>
                             <div class="title"> <span class="hid">${dataset['hid']}</span> <span class="name">${dataset['name']}</span> </div>
                             <br>
@@ -1494,6 +1497,8 @@ async AddDataSetTable(selected_value='default', Dt=[], state='') {
 
     async dataset_error_details(dataset){
 
+        var URL = this.model.get('GalInstance')['URL']
+
         var details =  `<div class="details" style="display: none;">
                         <div class="summary">
                             <div class="detail-messages">${dataset['misc_blurb']}</div>
@@ -1502,8 +1507,8 @@ async AddDataSetTable(selected_value='default', Dt=[], state='') {
                             <div class="job-error-text"> ${dataset['misc_info']} </div>
                         </div>
                         <div class="actions clear">
-                            <div class="left"><a class="icon-btn report-error-btn" title="" href="/datasets/error?dataset_id=${dataset['dataset_id']}" data-original-title="View or report this error"><span class="fa fa-bug" style=""></span></a><a class="icon-btn params-btn" title="" target="galaxy_main" href="/datasets/${dataset['dataset_id']}/show_params" data-original-title="View details"><span class="fa fa-info-circle" style=""></span></a><a class="icon-btn rerun-btn" title="" target="galaxy_main" href="/tool_runner/rerun?id=${dataset['dataset_id']}" data-original-title="Run this job again"><span class="fa fa-refresh" style=""></span></a><a class="icon-btn icon-btn" title="" href="#" data-original-title="Tool Help"><span class="fa fa-question" style=""></span></a></div>
-                            <div class="right"><a class="icon-btn tag-btn" title="" href="javascript:void(0);" data-original-title="Edit dataset tags"><span class="fa fa-tags" style=""></span></a><a class="icon-btn annotate-btn" title="" href="javascript:void(0);" data-original-title="Edit dataset annotation"><span class="fa fa-comment" style=""></span></a></div>
+                            <div class="left"><a class="icon-btn report-error-btn" title="" href="${URL}/datasets/error?dataset_id=${dataset['dataset_id']}" data-original-title="View or report this error"><span class="fa fa-bug" style=""></span></a><a class="icon-btn params-btn" title="" target="galaxy_main" href="${URL}/datasets/${dataset['dataset_id']}/show_params" data-original-title="View details"><span class="fa fa-info-circle" style=""></span></a><a class="icon-btn rerun-btn" title="" target="galaxy_main" href="${URL}/tool_runner/rerun?id=${dataset['dataset_id']}" data-original-title="Run this job again"><span class="fa fa-refresh" style=""></span></a><a class="icon-btn icon-btn" title="" href="#" data-original-title="Tool Help"><span class="fa fa-question" style=""></span></a></div>
+                            <div class="right"><a class="icon-btn tag-btn" title="" href="javascript:void(0);" data-original-title="Edit dataset tags"><span class="fa fa-tags" style=""></span></a><a class="icon-btn annotate-btn" title="" href="#" data-original-title="Edit dataset annotation"><span class="fa fa-comment" style=""></span></a></div>
                         </div>
 
                         <div class="annotation-display"></div>
@@ -1518,10 +1523,12 @@ async AddDataSetTable(selected_value='default', Dt=[], state='') {
 
     async dataset_row_queued_state(dataset){
 
+    var URL = this.model.get('GalInstance')['URL']
+
     var row =   `<div id="dataset-${dataset['dataset_id']}-queued" class="list-item dataset history-content state-queued" style="display: block;">
                     <div class="warnings"></div>
                     <div class="selector"><span class="fa fa-clock-o"></span></div>
-                    <div class="primary-actions"><a class="icon-btn display-btn" title="" target="galaxy_main" href="/datasets/${dataset['dataset_id']}/display/?preview=True" data-original-title="View data"><span class="fa fa-eye" style=""></span></a><a class="icon-btn edit-btn" title="" href="/datasets/edit?dataset_id=${dataset['dataset_id']}" data-original-title="Edit attributes"><span class="fa fa-pencil" style=""></span></a><a class="icon-btn delete-btn" title="" href="javascript:void(0);" data-original-title="Delete"><span class="fa fa-times" style=""></span></a></div>
+                    <div class="primary-actions"><a class="icon-btn display-btn" title="" target="galaxy_main" href="${URL}/datasets/${dataset['dataset_id']}/display/?preview=True" data-original-title="View data"><span class="fa fa-eye" style=""></span></a><a class="icon-btn edit-btn" title="" href="${URL}/datasets/edit?dataset_id=${dataset['dataset_id']}" data-original-title="Edit attributes"><span class="fa fa-pencil" style=""></span></a><a class="icon-btn delete-btn" title="" href="#" data-original-title="Delete"><span class="fa fa-times" style=""></span></a></div>
                     <div class="title-bar clear" tabindex="0" draggable="true"> <span class="fa fa-clock-o"></span>
                         <div class="title"> <span class="hid">${dataset['hid']}</span> <span class="name">${dataset['name']}</span> </div>
                         <br>
@@ -1533,8 +1540,8 @@ async AddDataSetTable(selected_value='default', Dt=[], state='') {
                             <div>This job is waiting to run</div>
                         </div>
                         <div class="actions clear">
-                            <div class="left"><a class="icon-btn params-btn" title="" target="galaxy_main" href="/datasets/${dataset['dataset_id']}/show_params" data-original-title="View details"><span class="fa fa-info-circle" style=""></span></a><a class="icon-btn rerun-btn" title="" target="galaxy_main" href="/tool_runner/rerun?id=${dataset['dataset_id']}" data-original-title="Run this job again"><span class="fa fa-refresh" style=""></span></a><a class="icon-btn icon-btn" title="" href="#" data-original-title="Tool Help"><span class="fa fa-question" style=""></span></a></div>
-                            <div class="right"><a class="icon-btn tag-btn" title="" href="javascript:void(0);" data-original-title="Edit dataset tags"><span class="fa fa-tags" style=""></span></a><a class="icon-btn annotate-btn" title="" href="javascript:void(0);" data-original-title="Edit dataset annotation"><span class="fa fa-comment" style=""></span></a></div>
+                            <div class="left"><a class="icon-btn params-btn" title="" target="galaxy_main" href="${URL}/datasets/${dataset['dataset_id']}/show_params" data-original-title="View details"><span class="fa fa-info-circle" style=""></span></a><a class="icon-btn rerun-btn" title="" target="galaxy_main" href="${URL}/tool_runner/rerun?id=${dataset['dataset_id']}" data-original-title="Run this job again"><span class="fa fa-refresh" style=""></span></a><a class="icon-btn icon-btn" title="" href="#" data-original-title="Tool Help"><span class="fa fa-question" style=""></span></a></div>
+                            <div class="right"><a class="icon-btn tag-btn" title="" href="" data-original-title="Edit dataset tags"><span class="fa fa-tags" style=""></span></a><a class="icon-btn annotate-btn" title="" href="" data-original-title="Edit dataset annotation"><span class="fa fa-comment" style=""></span></a></div>
                         </div>
                         
                         <div class="annotation-display"></div>
@@ -1566,6 +1573,8 @@ async AddDataSetTable(selected_value='default', Dt=[], state='') {
 
     async dataset_ok_details(dataset){
 
+        var URL = this.model.get('GalInstance')['URL']
+
         var details =  ` <div class="details" style="display: none;">
                             <div class="summary">
                                 <div class="detail-messages"></div>
@@ -1580,7 +1589,7 @@ async AddDataSetTable(selected_value='default', Dt=[], state='') {
                             </div>
                             <div class="actions clear">
                                 <div class="left">
-                                    <a class="download-btn icon-btn" href="/datasets/${dataset['dataset_id']}/display?to_ext=bed" title="" data-original-title="Download"> <span class="fa fa-save"></span> </a><a class="icon-btn" title="" href="javascript:void(0);" data-original-title="Copy link"><span class="fa fa-chain" style=""></span></a><a class="icon-btn params-btn" title="" target="_blank" href="/datasets/${dataset['dataset_id']}/show_params" data-original-title="View details"><span class="fa fa-info-circle" style=""></span></a><a class="icon-btn visualization-link" title="" href="/visualizations?dataset_id=${dataset['dataset_id']}" data-original-title="Visualize this data"><span class="fa fa-bar-chart" style=""></span></a><a class="icon-btn icon-btn" title="" href="#" data-original-title="Tool Help"><span class="fa fa-question" style=""></span></a>
+                                    <a class="download-btn icon-btn" href="${URL}/datasets/${dataset['id']}/display?to_ext=${dataset['extension']}" title="" data-original-title="Download"> <span class="fa fa-save"></span> </a><a class="icon-btn" title="" href="" data-original-title="Copy link"><span class="fa fa-chain" style=""></span></a><a class="icon-btn params-btn" title="" target="_blank" href="${URL}/datasets/${dataset['id']}/show_params" data-original-title="View details"><span class="fa fa-info-circle" style=""></span></a><a class="icon-btn visualization-link" title="" href="${URL}/visualizations?dataset_id=${dataset['dataset_id']}" data-original-title="Visualize this data"><span class="fa fa-bar-chart" style=""></span></a><a class="icon-btn icon-btn" title="" href="#" data-original-title="Tool Help"><span class="fa fa-question" style=""></span></a>
                                 </div>
                             </div>
 
@@ -1601,12 +1610,12 @@ async AddDataSetTable(selected_value='default', Dt=[], state='') {
 
     async dataset_row_running_state (dataset) {
         
-            console.log('its running')
+        var URL = this.model.get('GalInstance')['URL']
         
             var row = `<div id="dataset-${dataset['dataset_id']}" class="list-item dataset history-content state-running" >
                             <div class="warnings"></div>
                             <div class="selector"><span class="fa fa-2x fa-square-o"></span></div>
-                            <div class="primary-actions"><a class="icon-btn display-btn" title="" target="galaxy_main" href="/datasets/${dataset['dataset_id']}/display/?preview=True" data-original-title="View data"><span class="fa fa-eye" style=""></span></a><a class="icon-btn edit-btn" title="" href="/datasets/edit?dataset_id=${dataset['dataset_id']}" data-original-title="Edit attributes"><span class="fa fa-pencil" style=""></span></a><a class="icon-btn delete-btn" title="" href="javascript:void(0);" data-original-title="Delete"><span class="fa fa-times" style=""></span></a></div>
+                            <div class="primary-actions"><a class="icon-btn display-btn" title="" target="galaxy_main" href="${URL}/datasets/${dataset['dataset_id']}/display/?preview=True" data-original-title="View data"><span class="fa fa-eye" style=""></span></a><a class="icon-btn edit-btn" title="" href="${URL}/datasets/edit?dataset_id=${dataset['dataset_id']}" data-original-title="Edit attributes"><span class="fa fa-pencil" style=""></span></a><a class="icon-btn delete-btn" title="" href="javascript:void(0);" data-original-title="Delete"><span class="fa fa-times" style=""></span></a></div>
                             <div class="title-bar clear" tabindex="0" draggable="true"> <span class="state-icon"></span>
                                 <div class="title"> <span class="hid">${dataset['hid']}</span> <span class="name">${dataset['name']}</span> </div>
                                 <br>
@@ -1618,7 +1627,7 @@ async AddDataSetTable(selected_value='default', Dt=[], state='') {
                                     <div>This job is currently running</div>
                                 </div>
                                 <div class="actions clear">
-                                    <div class="left"><a class="icon-btn params-btn" title="" target="galaxy_main" href="/datasets/${dataset['dataset_id']}/show_params" data-original-title="View details"><span class="fa fa-info-circle" style=""></span></a><a class="icon-btn rerun-btn" title="" target="galaxy_main" href="/tool_runner/rerun?id=${dataset['dataset_id']}" data-original-title="Run this job again"><span class="fa fa-refresh" style=""></span></a><a class="icon-btn icon-btn" title="" href="#" data-original-title="Tool Help"><span class="fa fa-question" style=""></span></a></div>
+                                    <div class="left"><a class="icon-btn params-btn" title="" target="galaxy_main" href="${URL}/datasets/${dataset['dataset_id']}/show_params" data-original-title="View details"><span class="fa fa-info-circle" style=""></span></a><a class="icon-btn rerun-btn" title="" target="galaxy_main" href="${URL}/tool_runner/rerun?id=${dataset['dataset_id']}" data-original-title="Run this job again"><span class="fa fa-refresh" style=""></span></a><a class="icon-btn icon-btn" title="" href="#" data-original-title="Tool Help"><span class="fa fa-question" style=""></span></a></div>
                                     <div class="right"><a class="icon-btn tag-btn" title="" href="javascript:void(0);" data-original-title="Edit dataset tags"><span class="fa fa-tags" style=""></span></a><a class="icon-btn annotate-btn" title="" href="javascript:void(0);" data-original-title="Edit dataset annotation"><span class="fa fa-comment" style=""></span></a></div>
                                 </div>
                             
@@ -1641,11 +1650,13 @@ async AddDataSetTable(selected_value='default', Dt=[], state='') {
         }
     
     async dataset_row_new_state  (dataset) {
+
+           var URL = this.model.get('GalInstance')['URL']
         
             var row = `<div id="dataset-${dataset['dataset_id']}" class="list-item dataset history-content state-running" style="display: none;">
                             <div class="warnings"></div>
                             <div class="selector"><span class="fa fa-2x fa-square-o"></span></div>
-                            <div class="primary-actions"><a class="icon-btn display-btn" title="" target="galaxy_main" href="/datasets/${dataset['dataset_id']}/display/?preview=True" data-original-title="View data"><span class="fa fa-eye" style=""></span></a><a class="icon-btn edit-btn" title="" href="/datasets/edit?dataset_id=${dataset['dataset_id']}" data-original-title="Edit attributes"><span class="fa fa-pencil" style=""></span></a><a class="icon-btn delete-btn" title="" href="javascript:void(0);" data-original-title="Delete"><span class="fa fa-times" style=""></span></a></div>
+                            <div class="primary-actions"><a class="icon-btn display-btn" title="" target="galaxy_main" href="${URL}/datasets/${dataset['dataset_id']}/display/?preview=True" data-original-title="View data"><span class="fa fa-eye" style=""></span></a><a class="icon-btn edit-btn" title="" href="${URL}/datasets/edit?dataset_id=${dataset['dataset_id']}" data-original-title="Edit attributes"><span class="fa fa-pencil" style=""></span></a><a class="icon-btn delete-btn" title="" href="javascript:void(0);" data-original-title="Delete"><span class="fa fa-times" style=""></span></a></div>
                             <div class="title-bar clear" tabindex="0" draggable="true"> <span class="state-icon"></span>
                                 <div class="title"> <span class="hid">${dataset['hid']}</span> <span class="name">${dataset['name']}/span> </div>
                                 <br>
@@ -1657,21 +1668,8 @@ async AddDataSetTable(selected_value='default', Dt=[], state='') {
                                     <div>This job is currently running</div>
                                 </div>
                                 <div class="actions clear">
-                                    <div class="left"><a class="icon-btn params-btn" title="" target="galaxy_main" href="/datasets/${dataset['dataset_id']}show_params" data-original-title="View details"><span class="fa fa-info-circle" style=""></span></a><a class="icon-btn rerun-btn" title="" target="galaxy_main" href="/tool_runner/rerun?id=${dataset['dataset_id']}" data-original-title="Run this job again"><span class="fa fa-refresh" style=""></span></a><a class="icon-btn icon-btn" title="" href="#" data-original-title="Tool Help"><span class="fa fa-question" style=""></span></a></div>
-                                    <div class="right"><a class="icon-btn tag-btn" title="" href="javascript:void(0);" data-original-title="Edit dataset tags"><span class="fa fa-tags" style=""></span></a><a class="icon-btn annotate-btn" title="" href="javascript:void(0);" data-original-title="Edit dataset annotation"><span class="fa fa-comment" style=""></span></a></div>
-                                </div>
-                                <div class="tags-display">
-                                    <!---->
-                                    <div data-v-61d92e31="" class="vue-tags-input tags-input tag-area">
-                                        <div data-v-61d92e31="" class="ti-input">
-                                            <ul data-v-61d92e31="" class="ti-tags">
-                                                <li data-v-61d92e31="" class="ti-new-tag-input-wrapper">
-                                                    <input data-v-61d92e31="" placeholder="Add Tags" type="text" size="1" class="ti-new-tag-input ti-valid">
-                                                </li>
-                                            </ul>
-                                        </div>
-                                        <!---->
-                                    </div>
+                                    <div class="left"><a class="icon-btn params-btn" title="" target="galaxy_main" href="${URL}/datasets/${dataset['dataset_id']}show_params" data-original-title="View details"><span class="fa fa-info-circle" style=""></span></a><a class="icon-btn rerun-btn" title="" target="galaxy_main" href="${URL}/tool_runner/rerun?id=${dataset['dataset_id']}" data-original-title="Run this job again"><span class="fa fa-refresh" style=""></span></a><a class="icon-btn icon-btn" title="" href="#" data-original-title="Tool Help"><span class="fa fa-question" style=""></span></a></div>
+                                    <div class="right"><a class="icon-btn tag-btn" title="" href="" data-original-title="Edit dataset tags"><span class="fa fa-tags" style=""></span></a><a class="icon-btn annotate-btn" title="" href="" data-original-title="Edit dataset annotation"><span class="fa fa-comment" style=""></span></a></div>
                                 </div>
                                 <div class="annotation-display"></div>
                                 <div class="display-applications"></div>
@@ -1706,11 +1704,13 @@ async AddDataSetTable(selected_value='default', Dt=[], state='') {
 
         var job  = await KernelSideDataObjects(`from galaxylab import GalaxyTaskWidget\nGalaxyTaskWidget.submit_job(GalInstance=${JSON.stringify(this.model.get('GalInstance'))}, Tool_inputs=${JSON.stringify(Inputs)}, HistoryID=${JSON.stringify(HistoryID)})`)
 
+        var OutFileName = this.el.querySelector('.job-output-files')
+        OutFileName.append(await this.input_output_file_name(job))
+
         this.el.querySelector('.job-id').innerText = 'Job ID : '+ job['id']
         this.el.querySelector('.job-detail-text-name').innerText = 'Submitted by : '+ job['user_email']+' on '+ job['update_time']
 
         var DHL = this.el.querySelector('.galaxy-history-list')
-
         var ListItem =  this.el.querySelector('.list-item')
 
         DHL.removeChild(ListItem)
@@ -1744,8 +1744,8 @@ async AddDataSetTable(selected_value='default', Dt=[], state='') {
 
                     var id=`dataset-${data[j]['dataset_id']}-queued`
 
-                    if(this.el.querySelector(`#${id}`) !== null){
-                        var e = this.el.querySelector(`#${id}`)
+                    if(ListItem.querySelector(`#${id}`) !== null){
+                        var e = ListItem.querySelector(`#${id}`)
                         e.parentElement.removeChild(e)
                     }
 
@@ -1781,7 +1781,7 @@ async AddDataSetTable(selected_value='default', Dt=[], state='') {
                 }
 
                 var JobDoneText = this.el.querySelector(".job-state-text")
-                JobDoneText.innerText = 'Job Completed'
+                JobDoneText.innerText = 'Job queued'
 
                 var gearrotate = this.el.querySelector('.gear-rotate-icon')
                 gearrotate.style.display = 'none'
@@ -1815,7 +1815,7 @@ async AddDataSetTable(selected_value='default', Dt=[], state='') {
                 gearrotate.style.display = 'block'
 
                 var StdError  = this.el.querySelector('.job-output-files')
-                StdError.style.background  = 'black'
+                // StdError.style.background  = 'black'
 
                 // StdError.innerText = os['stderr'];
                 // StdError.style.overflow = 'scroll';
@@ -1875,8 +1875,7 @@ async AddDataSetTable(selected_value='default', Dt=[], state='') {
                             </div>
 
                             <div class="job-output-files">
-                                <div class="output-file-names">
-                                </div>
+ 
                             </div>
 
                             <div class="job-footer">
@@ -1890,12 +1889,19 @@ async AddDataSetTable(selected_value='default', Dt=[], state='') {
 
             const Job = new DOMParser().parseFromString(JobStatus, 'text/html').querySelector('.job-status-widget')
 
+            var GBody = this.el.querySelector('.nbtools-form')
             var toolForm = this.el.querySelector('.Galaxy-form')
+            var Help = this.el.querySelector('.help-section')
+
+            GBody.removeChild(toolForm)
+            GBody.removeChild(Help)
+
+            toolForm.style.backgroundColor = 'white'
             // toolForm.style.height = '300px';
     
             this.removeAllChildNodes(toolForm)
 
-            toolForm.append(Job)
+            GBody.append(Job)
             
 
             var BTN = this.el.querySelector('.rbtn')
@@ -1910,6 +1916,51 @@ async AddDataSetTable(selected_value='default', Dt=[], state='') {
                 self.Main_Form(refine_inputs['inputs'])
                 self.hide_run_buttons()
             } );
+    }
+
+
+
+    async input_output_file_name(job) {
+
+        var Table = `<div class="donemessagelarge">
+                        <p> Executed <b>${this.model.get('GalInstance')['tool_name']}</b> and successfully added 1 job to the queue. </p>
+                        <p>The tool uses this input:</p>
+                        <ul class="inputs">
+                        </ul>
+                        <p>It produces this output:</p>
+                        <ul class=outputs>
+                        </ul> 
+
+                        <p> You can check the status of queued jobs and view the resulting data by refreshing the History panel. When the job has been run the status will change from 'running' to 'finished' if completed successfully or 'error' if problems were encountered. </p>
+                    </div>
+                    `
+
+        var JobPanel = new DOMParser().parseFromString(Table, 'text/html').querySelector('.donemessagelarge')
+
+        var inputs = JobPanel.querySelector('.inputs')
+        var outputs = JobPanel.querySelector('.outputs')
+
+        for (var j =0; j < Object.keys(job['inputs']).length; j++){
+            console.log(Object.keys(job['inputs']))
+            var show_dataset = await KernelSideDataObjects(`from galaxylab  import GalaxyTaskWidget\nGalaxyTaskWidget.show_data_set(GalInstance=${JSON.stringify(this.model.get('GalInstance'))}, dataset_id=${JSON.stringify(job['inputs'][Object.keys(job['inputs'])[j]]['id'])} )`) 
+            var ILi  = document.createElement('li')
+            var Ib = document.createElement('b')
+            Ib.innerText = `${show_dataset['name']}`
+            ILi.append(Ib)
+            inputs.append(ILi)
+        }
+
+        for (var k =0; k < Object.keys(job['outputs']).length; k++){
+            console.log(Object.keys(job['outputs']))
+            var OLi  = document.createElement('li')
+            var Ob = document.createElement('b')
+            var show_dataset = await KernelSideDataObjects(`from galaxylab  import GalaxyTaskWidget\nGalaxyTaskWidget.show_data_set(GalInstance=${JSON.stringify(this.model.get('GalInstance'))}, dataset_id=${JSON.stringify(job['outputs'][Object.keys(job['outputs'])[k]]['id'])} )`) 
+            Ob.innerText =  `${show_dataset['name']}`
+            OLi.append(Ob)
+            outputs.append(OLi)
+            }
+
+    return JobPanel
     }
 
      //#############################################################################
