@@ -330,7 +330,7 @@
   .dataset-list {
       background: rgb(182, 179, 179);
       float: right;
-      width: 25%;
+      width: 29%;
   }
 
   .galaxy-data-panel {
@@ -347,13 +347,12 @@
     width: 350px;
   }
 
-
   .help-button {
     background-color: rgb(143, 145, 145);
     color: rgb(255, 255, 255);
     cursor: pointer;
     padding: 18px;
-    width: 97.5%;
+    width: 100%;
     border: none;
     text-align: left;
     outline: none;
@@ -529,7 +528,8 @@
   .job-status-widget{
     background: hsl(0, 4%, 66%);
     width: 70%;
-    height: 500px;
+    height: 290px;
+    margin-bottom: 200px;
   
   }
   
