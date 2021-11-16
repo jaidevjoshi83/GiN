@@ -77,7 +77,6 @@ input[type=text]{font-size:.85rem;line-height:1.5;}
 .dataset .details .actions .left{float:left;}
 .dataset .details .actions .left .icon-btn{margin-right:2px;}
 .dataset .details .annotation-display{display:none;}
-.dataset .details .dataset-peek{width:100%;margin:0;border-radius:3px;background:#fff;color:#000;font-size:10px;overflow:auto;}
 .dataset .details .dataset-peek th{color:#fff;background:#25537b;}
 .dataset .details .dataset-peek table,.dataset .details .dataset-peek td,.dataset .details .dataset-peek th,.dataset .details .dataset-peek tr{font-family:Monaco,Menlo,Consolas,Courier New,monospace;font-size:10px;}
 .fa,.state-icon{-moz-osx-font-smoothing:grayscale;-webkit-font-smoothing:antialiased;display:inline-block;font-style:normal;font-variant:normal;text-rendering:auto;line-height:1;}
@@ -149,8 +148,9 @@ p{margin-top:0;margin-bottom:1rem;}
 ul{margin-bottom:1rem;}
 ul{margin-top:0;}
 b{font-weight:bolder;}
+
 .donemessagelarge{position:relative;padding:.75rem 1.25rem;margin-bottom:1rem;border:1px solid transparent;border-radius:.25rem;}
-.donemessagelarge{color:#38504a;background-color:#c2ebc2;border-color:#94db94;}
+.donemessagelarge{color:#38504a;background-color:#7d959d70;border-color:#94db94;}
 
 *,:after,:before{text-shadow:none!important;box-shadow:none!important;}
 p{orphans:3;widows:3;}
@@ -159,3 +159,7 @@ p{orphans:3;widows:3;}
 .donemessagelarge{border-color:transparent;}
 .donemessagelarge{min-height:36px;padding-left:52px;background-repeat:no-repeat;background-position:10px 5px;}
 .donemessagelarge{padding-left:52px;}
+
+.list-item{
+    padding-left: 0;
+  }
