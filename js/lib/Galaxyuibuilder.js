@@ -851,31 +851,28 @@ async AddDataSetTable(selected_value='default', Dt=[], state='') {
 
         } 
 
-
         Select.addEventListener("dragover", function(event) {
             // prevent default to allow drop
             event.preventDefault();
-            console.log('its Drag over')
+      
         }, false);
 
-        Select.addEventListener("drop", function(event) {
+
+        Select.addEventListener("drop", async function(event) {
             // prevent default action (open as link for some elements)
             event.preventDefault();
-            // move dragged elem to the selected drop target
-            console.log(event.target.className)
+            // move dragged elem to the selected drop targe
             if (event.target.className == "selectbox-scrollable") {
 
                 event.target.style.background = "";
-                //   dragged.parentNode.removeChild( dragged );
-                //   event.target.appendChild( dragged );
-
                 var draged_item = self.dragged.firstElementChild
-                // self.removeAllChildNodes(Select)
 
-                const opt = JSON.parse(draged_item.value)['name']
+                self.removeAllChildNodes(Select)
+
+                const opt = draged_item.querySelector('.name').innerText
                 const el = document.createElement("option");
                 el.textContent = opt;
-                el.value = `${JSON.parse(draged_item.value)['id']}` //Fix me 
+                el.value = draged_item.getAttribute('data-value') //Fix me 
 
                 Select.appendChild(el);
             }
@@ -1373,12 +1370,12 @@ async AddDataSetTable(selected_value='default', Dt=[], state='') {
 
         var URL = this.model.get('GalInstance')['URL']
         
-        var row = `<div id="dataset-${dataset['dataset_id']}" class="list-item dataset history-content state-ok">
+        var row = `<div id="dataset-${dataset['dataset_id']}"   class="list-item dataset history-content state-ok" >
                     <div class="warnings"></div>
                     <div class="selector"><span class="fa fa-2x fa-square-o"></span></div>
                     <div class="primary-actions"><a class="icon-btn display-btn" title="" target="_blank" href="${URL}/datasets/${dataset['id']}/display/?preview=True" data-original-title="View data"><span class="fas fa-eye" style=""></span></a><a class="icon-btn edit-btn" title="" href="${URL}/datasets/edit?dataset_id=${dataset['id']}" data-original-title="Edit attributes"><span class="fa fa-pencil" style=""></span></a><a class="icon-btn delete-btn" title="" href="" data-original-title="Delete"><span class="fa fa-times" style=""></span></a></div>
-                    <div class="title-bar clear" tabindex="0" draggable="true"> <span class="state-icon"></span>
-                        <div class="title"> <span class="hid">${dataset['hid']}: </span> <span class="name">${dataset['name']}</span> </div>
+                    <div class="title-bar clear"  tabindex="0" draggable="true" ondragstart="event.dataTransfer.setData('text/plain',null) > <span class="state-icon"></span>
+                        <div class="title" data-value=${dataset['id']} > <span class="hid">${dataset['hid']}: </span> <span class="name">${dataset['name']}</span> </div>
                         <br>
                         <div title="0 nametags" class="nametags"></div>
                     </div>
@@ -1401,6 +1398,18 @@ async AddDataSetTable(selected_value='default', Dt=[], state='') {
                 Tbl.querySelector('.details').style.display = 'block'
             }
         });
+
+
+       var Title = Tbl.querySelector('.title-bar.clear')
+
+       var dragged
+
+       Title.addEventListener("dragstart", (event) => {
+
+            this.dragged = event.target;
+
+            }, false);
+
 
         return Tbl
     } 
@@ -1803,7 +1812,7 @@ async AddDataSetTable(selected_value='default', Dt=[], state='') {
 
                                 <div class="job-done-text">
                                     <div class="job-state-text">
-                                        Job Complete
+                                        
                                     </div>
                                 </div> 
                                 
