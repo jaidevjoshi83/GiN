@@ -1334,8 +1334,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         DataList.style.overflowY = 'scroll'
     
         var datasets = await KernelSideDataObjects(`from galaxylab  import GalaxyTaskWidget\nGalaxyTaskWidget.history_data_list(GalInstance=${JSON.stringify(GalInstance)}, HistoryID=${JSON.stringify(HistoryID)} )`) 
-        
-        console.log(datasets)
 
         for (var i = 0; i < datasets.length; i++){
             // if (datasets[i]['state']=='ok') {
@@ -1363,7 +1361,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         var URL = this.model.get('GalInstance')['URL']
 
         var show_dataset = await KernelSideDataObjects(`from galaxylab  import GalaxyTaskWidget\nGalaxyTaskWidget.show_dataset_collection(GalInstance=${JSON.stringify(this.model.get('GalInstance'))}, dataset_id=${JSON.stringify(dataset['id'])} )`) 
-        console.log(show_dataset)
 
         var row = `<div id="${dataset['type_id']}"   class="list-item ${show_dataset['history_content_type']} history-content state-${show_dataset['populated_state']}" >
                     <div class="warnings"></div>
@@ -1790,19 +1787,20 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
                 for (var j =0; j < data.length; j++){
 
-                    var id=`dataset-${data[j]['dataset_id']}`
+                    var id=`dataset-${data[j]['id']}`
 
                     if(ListItem.querySelector(`#${id}`) !== null){
                         var e = ListItem.querySelector(`#${id}`)
                         e.parentElement.removeChild(e)
                     }
 
-                    if (ListItem.querySelector(`#dataset-${data[j]['dataset_id']}`) == null ) {
+                    if (ListItem.querySelector(`#dataset-${data[j]['id']}`) == null ) {
                         ListItem.prepend(await this.dataset_row_running_state(data[j]))
                     }
                 }
 
-            } else if (['queued', 'new'].includes(JobState)) {
+            } 
+            else if (['queued', 'new'].includes(JobState)) {
 
                 var JobDoneText = this.el.querySelector(".job-state-text")
                 JobDoneText.innerText = 'Job queued'
@@ -1812,16 +1810,20 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
                 for (var j =0; j < data.length; j++){
 
-                    if (ListItem.querySelector(`#dataset-${data[j]['dataset_id']}`) == null ) {
+                   
+
+                    if (ListItem.querySelector(`#dataset-${data[j]['id']}`) == null ) {
+                        console.log(`#dataset-${data[j]['id']}`)
+                        console.log(await this.dataset_row_queued_state(data[j]))
                         ListItem.prepend(await this.dataset_row_queued_state(data[j]))
                     }
                 }
 
-            } else if (JobState == 'ok'){
-
+            } 
+            else if (JobState == 'ok'){
 
                 for (var j =0; j < data.length; j++){
-                    var id=`dataset-${data[j]['dataset_id']}`
+                    var id=`dataset-${data[j]['id']}`
 
                     if ( ListItem.querySelector(`#${id}`) !== null) {
                         var e = ListItem.querySelector(`#${id}`)
@@ -1843,19 +1845,18 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 var gearrotate = this.el.querySelector('.job-done-icon')
                 gearrotate.style.display = 'block'
 
-            } else if (JobState == 'error'){
+            } 
+            else if (JobState == 'error'){
 
                 for (var j =0; j < data.length; j++){
 
-                    var id=`dataset-${data[j]['dataset_id']}`
+                    var id=`dataset-${data[j]['id']}`
 
                     if ( ListItem.querySelector(`#${id}`) !== null) {
                         var e = ListItem.querySelector(`#${id}`)
                         e.parentElement.removeChild(e)
                     }
-        
                     ListItem.prepend(await this.dataset_row_error_state(data[j]))
-      
                  }
 
                 var JobDoneText = this.el.querySelector(".job-state-text")
