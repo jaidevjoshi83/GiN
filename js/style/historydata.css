@@ -142,7 +142,6 @@ th:focus{outline:none!important;}
 
 .state-queued.dataset{background:#7d959d70;}
 
-
 *,:after,:before{box-sizing:border-box;}
 p{margin-top:0;margin-bottom:1rem;}
 ul{margin-bottom:1rem;}
@@ -159,6 +158,8 @@ p{orphans:3;widows:3;}
 .donemessagelarge{border-color:transparent;}
 .donemessagelarge{min-height:36px;padding-left:52px;background-repeat:no-repeat;background-position:10px 5px;}
 .donemessagelarge{padding-left:52px;}
+
+.list-item.dataset_collection.history-content.state-ok{background:#c2ebc2;}
 
 .list-item{
     padding-left: 0;

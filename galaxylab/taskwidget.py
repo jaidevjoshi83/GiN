@@ -141,6 +141,19 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
         gi = GalaxyInstance(GalInstance['URL'], email=GalInstance['email_ID'], api_key=GalInstance['API_key'], verify=True)
         show_dataset = gi.gi.datasets.gi.datasets.show_dataset(dataset_id=dataset_id)
         return IPython.display.JSON(show_dataset)
+    
+    def delete_dataset(GalInstance=None, history_id=None, dataset_id=None):
+        gi = GalaxyInstance(GalInstance['URL'], email=GalInstance['email_ID'], api_key=GalInstance['API_key'], verify=True)
+        show_dataset = gi.gi.histories.gi.histories.delete_dataset(history_id=history_id, dataset_id=dataset_id, purge=True)
+
+    def delete_dataset_collection(GalInstance=None, history_id=None, dataset_collection_id=None):
+        gi = GalaxyInstance(GalInstance['URL'], email=GalInstance['email_ID'], api_key=GalInstance['API_key'], verify=True)
+        show_dataset = gi.gi.histories.gi.histories.delete_dataset_collection(history_id=history_id, dataset_collection_id=dataset_collection_id, purge=True)
+
+    def show_dataset_collection(GalInstance=None, dataset_id=None):        
+        gi = GalaxyInstance(GalInstance['URL'], email=GalInstance['email_ID'], api_key=GalInstance['API_key'], verify=True)
+        show_dataset = gi.gi.dataset_collections.show_dataset_collection(dataset_collection_id=dataset_id)
+        return IPython.display.JSON(show_dataset)
 
     def handle_error_task(self, error_message, name='Galaxy Module', **kwargs):
         """Display an error message if the task is None"""
