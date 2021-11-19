@@ -29,6 +29,7 @@ export class GalaxyUIBuilderModel extends BaseWidgetModel{
  GalaxyUIBuilderModel.serializers = Object.assign(Object.assign({}, BaseWidgetModel.serializers), { tool: {
          deserialize: (value, manager) => unpack_models(value, manager)
      } });
+
 export class GalaxyUIBuilderView extends BaseWidgetView {
     constructor() {
     super(...arguments);
@@ -87,7 +88,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         this.activate_custom_buttons();
     }
  
-    Main_Form (inputs, call_back_data={}) {
+    Main_Form(inputs, call_back_data={}) {
 
         var FormParent = this.el.querySelector('.Galaxy-form');
         var HistList = this.AddHistoryList(call_back_data['HID'])
@@ -107,12 +108,9 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             this.removeAllChildNodes(DataList)
         }
         DataList.append(await this.AddDataSetTable(selected_value, Dt, state))
-
-        
-    
     }
  
-    CreateForm() {  //Fix me in future
+    CreateForm(){  //Fix me in future
 
         var self = this
         const GalaxyForm = document.createElement('form')
@@ -213,12 +211,12 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         return InputPerameters
     }
  
-    uid () {
+    uid(){
         top.__utils__uid__ = top.__utils__uid__ || 0;
         return `uid-${top.__utils__uid__++}`;
     }
  
-    add  (input, FormParent, NamePrefix, data={}) {
+    add(input, FormParent, NamePrefix, data={}){
 
         var input_def = input;
 
@@ -296,7 +294,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         
     }
 
-
     Drill_down(options, param_name='default'){
 
         var OuterDrillDown = document.createElement('div')
@@ -342,7 +339,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         return OuterDrillDown
     }
 
-    AddDrill_Down(input_def, FormParent, NamePrefix) {
+    AddDrill_Down(input_def, FormParent, NamePrefix){
         input_def.id = this.uid()
 
         const title = document.createElement('div')
@@ -404,8 +401,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         return row
     }
 
- 
-    AddText (input_def, FormParent, NamePrefix) {
+    AddText (input_def, FormParent, NamePrefix){
 
          input_def.id = this.uid()
  
@@ -430,10 +426,9 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         row.append(input)
         FormParent.append(row)
         return row
-     }
+    }
 
-
-    async AddOutPutDataTable( JobID) {
+    async AddOutPutDataTable( JobID){
 
         var InitialData = await KernelSideDataObjects(`from galaxylab import GalaxyTaskWidget\nGalaxyTaskWidget.OutPutData(GalInstance=${JSON.stringify(this.model.get('GalInstance'))}, JobID=${JSON.stringify(JobID)} )`);
 
@@ -492,63 +487,59 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         return Dt
     }
 
+    async AddDataSetTable(selected_value='default', Dt=[], state=''){
 
+        var self = this
 
+            const options =  this.model.get('History_IDs')
+            const select = document.createElement('select')
+            select.id = `Data-History_IDs`  
+            select.className = 'InputData'   
 
-async AddDataSetTable(selected_value='default', Dt=[], state='') {
+            for(var i = 0; i < options.length; i++) {
+                    const opt = `${i+1}: ${options[i]['name']}`;
+                    const el = document.createElement("option");
+                    el.textContent = opt;
+                    el.value =  `${options[i]['id']}`;
+                    select.appendChild(el);
+            }
 
-    var self = this
+            const DataHistoryList = document.createElement('div')
 
-        const options =  this.model.get('History_IDs')
-        const select = document.createElement('select')
-        select.id = `Data-History_IDs`  
-        select.className = 'InputData'   
+            const title = document.createElement('div')
+            title.className = 'history-title'
+            const TitleSpan = document.createElement('span')
+            TitleSpan.className = "galaxy-history-title"
+            TitleSpan.textContent = 'Select the hiostory for available datasets'
+            TitleSpan.style.display = 'inline'
+            title.append(TitleSpan)
+            DataHistoryList.append(title)
 
-        for(var i = 0; i < options.length; i++) {
-                const opt = `${i+1}: ${options[i]['name']}`;
-                const el = document.createElement("option");
-                el.textContent = opt;
-                el.value =  `${options[i]['id']}`;
-                select.appendChild(el);
-        }
+            DataHistoryList.className = "galaxy-history-list"
+            DataHistoryList.append(select)
 
-        const DataHistoryList = document.createElement('div')
+            var DataTable = document.createElement('ul')
+            DataTable.className = 'galaxy-data-panel'
 
-        const title = document.createElement('div')
-        title.className = 'history-title'
-        const TitleSpan = document.createElement('span')
-        TitleSpan.className = "galaxy-history-title"
-        TitleSpan.textContent = 'Select the hiostory for available datasets'
-        TitleSpan.style.display = 'inline'
-        title.append(TitleSpan)
-        DataHistoryList.append(title)
+            DataTable.style.height = this.element.querySelector('.Galaxy-form').style.offsetHeight
 
-        DataHistoryList.className = "galaxy-history-list"
-        DataHistoryList.append(select)
+            DataHistoryList.append(select)
+            DataHistoryList.append(await this.data_row_list(this.model.get('GalInstance'), options[select.selectedIndex]['id']))
 
-        var DataTable = document.createElement('ul')
-        DataTable.className = 'galaxy-data-panel'
+            select.addEventListener("change", async (event)=> {
 
-        DataTable.style.height = this.element.querySelector('.Galaxy-form').style.offsetHeight
+                var ListItem = DataHistoryList.querySelector('.list-item')
+                ListItem.parentNode.removeChild(ListItem)
 
-        DataHistoryList.append(select)
-        DataHistoryList.append(await this.data_row_list(this.model.get('GalInstance'), options[select.selectedIndex]['id']))
-
-        select.addEventListener("change", async (event)=> {
-
-            var ListItem = DataHistoryList.querySelector('.list-item')
-            ListItem.parentNode.removeChild(ListItem)
-
-            DataHistoryList.append(await self.data_row_list(self.model.get('GalInstance'), options[select.selectedIndex]['id']))
+                DataHistoryList.append(await self.data_row_list(self.model.get('GalInstance'), options[select.selectedIndex]['id']))
+        
+        
+                    }, false);
     
-    
-                }, false);
-  
-        return DataHistoryList
-   }
+            return DataHistoryList
+    }
 
-
-    AddHistoryList(selected_value='default') {
+    AddHistoryList(selected_value='default'){
 
         var self = this
 
@@ -650,8 +641,7 @@ async AddDataSetTable(selected_value='default', Dt=[], state='') {
         return Help
     }
  
-
-    AddRepeat(input_def, FormParent, NamePrefix) {
+    AddRepeat(input_def, FormParent, NamePrefix){
 
         var self = this
         input_def.id = this.uid()
@@ -751,14 +741,13 @@ async AddDataSetTable(selected_value='default', Dt=[], state='') {
         return row
     }
  
-     removeAllChildNodes(parent) {
+    removeAllChildNodes(parent){
          while (parent.firstChild) {
              parent.removeChild(parent.firstChild);
          }
-     }
+    }
 
-
-    FileUpLoad (input_def, FormParent, NamePrefix, call_back_data={}) {    
+    FileUpLoad (input_def, FormParent, NamePrefix, call_back_data={}){    
         
         input_def.id = this.uid()
         var self = this
@@ -953,8 +942,7 @@ async AddDataSetTable(selected_value='default', Dt=[], state='') {
             return row
     }
 
-
-    AddInteger (input_def, FormParent, NamePrefix) {
+    AddInteger (input_def, FormParent, NamePrefix){
 
         input_def.id = this.uid()
         const input = document.createElement('input')
@@ -979,8 +967,7 @@ async AddDataSetTable(selected_value='default', Dt=[], state='') {
         return row
     }
  
- 
-    AddFloat (input_def, FormParent, NamePrefix) {
+    AddFloat (input_def, FormParent, NamePrefix){
 
         input_def.id = this.uid()
         const input = document.createElement('input')
@@ -1004,7 +991,7 @@ async AddDataSetTable(selected_value='default', Dt=[], state='') {
         return row
     }
  
-    AddConditionalSelectField (input_def, ElID, NamePrefix, call_back_data={} ) {
+    AddConditionalSelectField (input_def, ElID, NamePrefix, call_back_data={}){
 
         input_def.id = this.uid()
         var self = this
@@ -1082,8 +1069,7 @@ async AddDataSetTable(selected_value='default', Dt=[], state='') {
         return row
     }
  
- 
-    AddSelectField (input_def, FormParent, NamePrefix) {
+    AddSelectField (input_def, FormParent, NamePrefix){
 
         input_def.id = this.uid()
         var self = this
@@ -1157,8 +1143,7 @@ async AddDataSetTable(selected_value='default', Dt=[], state='') {
         return row
     }
 
-
-    TestAddSelectField (input_def, FormParent, NamePrefix) {
+    TestAddSelectField (input_def, FormParent, NamePrefix){
 
         input_def.id = this.uid()
         var self = this
@@ -1196,8 +1181,7 @@ async AddDataSetTable(selected_value='default', Dt=[], state='') {
         return select
     }
  
- 
-    AddBooleanField (input_def, FormParent, NamePrefix ) {
+    AddBooleanField (input_def, FormParent, NamePrefix ){
 
         input_def.id = this.uid()
 
@@ -1236,12 +1220,11 @@ async AddDataSetTable(selected_value='default', Dt=[], state='') {
         return row
     }
 
-    collect_data(){
+    collect_data() {
         const Childrens  = this.el.querySelector('.nbtools-form').children;
     }
  
- 
-    AddConditoinalSection2 (input_def, parent, NamePrefix, call_back_data={}) {
+    AddConditoinalSection2 (input_def, parent, NamePrefix, call_back_data={}){
 
         var NewNamePrefix = NamePrefix+input_def['name']+"|"
         input_def.id = this.uid()
@@ -1289,7 +1272,7 @@ async AddDataSetTable(selected_value='default', Dt=[], state='') {
         }
     }
 
-    AddSection (input_def, parent, NamePrefix) {
+    AddSection (input_def, parent, NamePrefix){
 
         var self = this
         var NewNamePrefix = NamePrefix+input_def['name']+"|"
@@ -1335,13 +1318,13 @@ async AddDataSetTable(selected_value='default', Dt=[], state='') {
         });
     }
 
-   waitforme(milisec) {
+    waitforme(milisec){
     return new Promise(resolve => {
         setTimeout(() => { resolve('') }, milisec);
     })
     }
 
-    async data_row_list (GalInstance, HistoryID) {
+    async data_row_list (GalInstance, HistoryID){
 
         var DataList = document.createElement('ul')
         DataList.className = 'list-item'
@@ -1351,45 +1334,121 @@ async AddDataSetTable(selected_value='default', Dt=[], state='') {
         DataList.style.overflowY = 'scroll'
     
         var datasets = await KernelSideDataObjects(`from galaxylab  import GalaxyTaskWidget\nGalaxyTaskWidget.history_data_list(GalInstance=${JSON.stringify(GalInstance)}, HistoryID=${JSON.stringify(HistoryID)} )`) 
-
-    
-        for (var i = 0; i < datasets.length; i++){
-            if (datasets[i]['state']=='ok') {
-               DataList.append( await this.dataset_row_ok_state(datasets[i]))
-            }
-            else if (datasets[i]['state']=='error') {
-                DataList.append(await this.dataset_row_error_state(datasets[i]))
-            }
-        }
         
-    
+        console.log(datasets)
+
+        for (var i = 0; i < datasets.length; i++){
+            // if (datasets[i]['state']=='ok') {
+
+            if (datasets[i]['history_content_type'] == 'dataset') {
+                DataList.append( await this.dataset_row_ok_state(datasets[i], HistoryID))
+            } 
+            else if (datasets[i]['history_content_type'] == 'dataset_collection') {
+                DataList.append( await this.dataset_collection_row_state (datasets[i], HistoryID))
+            }
+
+            // }
+            // else if (datasets[i]['state']=='error') {
+            //     DataList.append(await this.dataset_row_error_state(datasets[i], HistoryID))
+            // }
+        }
+
         return DataList
     }
+
+    async dataset_collection_row_state (dataset, history_id){
+
+        var self = this
+
+        var URL = this.model.get('GalInstance')['URL']
+
+        var show_dataset = await KernelSideDataObjects(`from galaxylab  import GalaxyTaskWidget\nGalaxyTaskWidget.show_dataset_collection(GalInstance=${JSON.stringify(this.model.get('GalInstance'))}, dataset_id=${JSON.stringify(dataset['id'])} )`) 
+        console.log(show_dataset)
+
+        var row = `<div id="${dataset['type_id']}"   class="list-item ${show_dataset['history_content_type']} history-content state-${show_dataset['populated_state']}" >
+                    <div class="warnings"></div>
+                    <div class="selector"><span class="fa fa-2x fa-square-o"></span></div>
+                    <div class="primary-actions">
+                        <a class="download-btn icon-btn" href="${URL}/api/dataset_collections/${dataset['id']}/download" title="" data-original-title="Download"> <span class="fa fa-floppy-o"></span> </a><a class="icon-btn delete-btn" title="" href="javascript:void(0);" data-original-title="Delete"><span class="fa fa-times" style=""></span></a>
+                    </div>
+                    <div class="title-bar clear"  tabindex="0" draggable="true" ondragstart="event.dataTransfer.setData('text/plain',null) > 
+                        <span class="state-icon"></span>
+                        <div class="title" data-value=${show_dataset['id']} > 
+                            <span class="hid">${show_dataset['hid']}: </span> <span class="name">${show_dataset['name']}</span>
+                        </div>
+                        <br>
+                        <div>a list with ${show_dataset['element_count']} items</div>
+                    </div>
+                    
+                    <div class="list-items"  style="display: none; "></div>
+                </div>`
+        
+        const Tbl = new DOMParser().parseFromString(row, 'text/html').querySelector(`.list-item.${dataset['history_content_type']}.history-content.state-${show_dataset['populated_state']}`)
+
+        for (var i = 0; i < show_dataset['elements'].length; i++){
+            Tbl.querySelector('.list-items').append(await self.dataset_collection_list_item(show_dataset['elements'][i]))
+        }
+
+        Tbl.querySelector('.name').addEventListener('click', async (e) => {
+
+            if (Tbl.querySelector('.list-items').style.display == 'block') {
+                Tbl.querySelector('.list-items').style.display = 'none'
+            } else{
+                Tbl.querySelector('.list-items').style.display = 'block'
+            }
+        });
+
+       var Title = Tbl.querySelector('.title-bar.clear')
+
+       var dragged
+
+        Title.addEventListener("dragstart", (event) => {
+
+            this.dragged = event.target;
+
+        }, false);
+
+        this.delete_dataset(Tbl, dataset['id'],  history_id, 'collection')
+
+        return Tbl
+    } 
     
-    async dataset_row_ok_state (dataset){
+    async dataset_row_ok_state (dataset, history_id){
 
         var URL = this.model.get('GalInstance')['URL']
         
-        var row = `<div id="dataset-${dataset['dataset_id']}"   class="list-item dataset history-content state-ok" >
+        var row = `<div id="${dataset['type_id']}"   class="list-item ${dataset['history_content_type']} history-content state-${dataset['state']}" >
                     <div class="warnings"></div>
                     <div class="selector"><span class="fa fa-2x fa-square-o"></span></div>
-                    <div class="primary-actions"><a class="icon-btn display-btn" title="" target="_blank" href="${URL}/datasets/${dataset['id']}/display/?preview=True" data-original-title="View data"><span class="fas fa-eye" style=""></span></a><a class="icon-btn edit-btn" title="" href="${URL}/datasets/edit?dataset_id=${dataset['id']}" data-original-title="Edit attributes"><span class="fa fa-pencil" style=""></span></a><a class="icon-btn delete-btn" title="" href="" data-original-title="Delete"><span class="fa fa-times" style=""></span></a></div>
-                    <div class="title-bar clear"  tabindex="0" draggable="true" ondragstart="event.dataTransfer.setData('text/plain',null) > <span class="state-icon"></span>
-                        <div class="title" data-value=${dataset['id']} > <span class="hid">${dataset['hid']}: </span> <span class="name">${dataset['name']}</span> </div>
+                    <div class="primary-actions"><a class="icon-btn display-btn" title="" target="_blank" href="${URL}/datasets/${dataset['id']}/display/?preview=True" data-original-title="View data">
+                        <span class="fas fa-eye" style=""></span></a>
+                        <a class="icon-btn edit-btn" title="" target="_blank"  href="${URL}/datasets/edit?dataset_id=${dataset['id']}" data-original-title="Edit attributes"><span class="fa fa-pencil" style=""></span></a><a class="icon-btn delete-btn" title="" href="javascript:void(0);" data-original-title="Delete"><span class="fa fa-times" style=""></span></a>
+                    </div>
+                    <div class="title-bar clear"  tabindex="0" draggable="true" ondragstart="event.dataTransfer.setData('text/plain',null) > 
+                    <span class="state-icon"></span>
+                        <div class="title" data-value=${dataset['id']} > 
+                            <span class="hid">${dataset['hid']}: </span> <span class="name">${dataset['name']}</span>
+                        </div>
                         <br>
                         <div title="0 nametags" class="nametags"></div>
                     </div>
-
                 </div>`
         
-        const Tbl = new DOMParser().parseFromString(row, 'text/html').querySelector('.list-item.dataset.history-content.state-ok')
+        const Tbl = new DOMParser().parseFromString(row, 'text/html').querySelector(`.list-item.${dataset['history_content_type']}.history-content.state-${dataset['state']}`)
 
         Tbl.addEventListener('click', async (e) => {
 
             if (Tbl.querySelector('.details') == null ){
                 var show_dataset = await KernelSideDataObjects(`from galaxylab  import GalaxyTaskWidget\nGalaxyTaskWidget.show_data_set(GalInstance=${JSON.stringify(this.model.get('GalInstance'))}, dataset_id=${JSON.stringify(dataset['id'])} )`) 
-                var error_details = await this.dataset_ok_details(show_dataset)
-                Tbl.append(error_details)
+
+                if (dataset['state'] == 'ok') {
+                    var error_details = await this.dataset_ok_details(show_dataset)
+                    Tbl.append(error_details)
+                }
+                else if (dataset['state'] == 'error')  {
+                    var ok_details = await this.dataset_error_details(show_dataset)
+                    Tbl.append(ok_details)
+                }
             }
 
             if (Tbl.querySelector('.details').style.display == 'block') {
@@ -1404,24 +1463,25 @@ async AddDataSetTable(selected_value='default', Dt=[], state='') {
 
        var dragged
 
-       Title.addEventListener("dragstart", (event) => {
+        Title.addEventListener("dragstart", (event) => {
 
             this.dragged = event.target;
 
-            }, false);
+        }, false);
 
+        this.delete_dataset(Tbl, dataset['id'],  history_id)
 
         return Tbl
     } 
     
-    async dataset_row_error_state (dataset)  {
+    async dataset_row_error_state (dataset, HistoryID){
 
         var URL = this.model.get('GalInstance')['URL']
 
-        var row = `<div id="dataset-${dataset['dataset_id']}" class="list-item dataset history-content state-error">
+        var row = `<div id="${dataset['type_id']}" class="list-item ${dataset['history_content_type']} history-content state-error">
                         <div class="warnings"></div>
                         <div class="selector"><span class="fa fa-2x fa-square-o"></span></div>
-                        <div class="primary-actions"><a class="icon-btn delete-btn" title="" href="" data-original-title="Delete"><span class="fa fa-times" style=""></span></a></div>
+                        <div class="primary-actions"><a class="icon-btn display-btn" title="" target="_blank" href="${URL}/datasets/${dataset['id']}/display/?preview=True" data-original-title="View data"><span class="fas fa-eye" style=""></span></a><a class="icon-btn edit-btn" title="" target="_blank"  href="${URL}/datasets/edit?dataset_id=${dataset['id']}" data-original-title="Edit attributes"><span class="fa fa-pencil" style=""></span></a><a class="icon-btn delete-btn" title="" href="javascript:void(0);" data-original-title="Delete"><span class="fa fa-times" style=""></span></a></div>
                         <div class="title-bar clear" tabindex="0" draggable="true"> <span class="state-icon"></span>
                             <div class="title"> <span class="hid">${dataset['hid']}: </span> <span class="name">${dataset['name']}</span> </div>
                             <br>
@@ -1430,7 +1490,7 @@ async AddDataSetTable(selected_value='default', Dt=[], state='') {
 
                     </div>`
 
-        const Tbl = new DOMParser().parseFromString(row, 'text/html').querySelector('.list-item.dataset.history-content.state-error')
+        const Tbl = new DOMParser().parseFromString(row, 'text/html').querySelector(`.list-item.${dataset['history_content_type']}.history-content.state-error`)
         
         Tbl.addEventListener('click', async (e) => {
 
@@ -1447,6 +1507,8 @@ async AddDataSetTable(selected_value='default', Dt=[], state='') {
             }
         });
 
+        this.delete_dataset(Tbl, dataset['id'],  HistoryID)
+
         return Tbl
     }
 
@@ -1454,19 +1516,21 @@ async AddDataSetTable(selected_value='default', Dt=[], state='') {
 
         var URL = this.model.get('GalInstance')['URL']
 
+
         var details =  `<div class="details" style="display: none;">
-                        <div class="summary">
+                            <div class="summary">
                             <div class="detail-messages">${dataset['misc_blurb']}</div>
                             <span class="help-text">An error occurred with this dataset:</span>
-                            <div class="job-error-text"> ${dataset['misc_info']} </div>
-                        </div>
-                        <div class="actions clear">
-                            <div class="left"><a class="icon-btn report-error-btn" title="" href="${URL}/datasets/error?dataset_id=${dataset['dataset_id']}" data-original-title="View or report this error"><span class="fa fa-bug" style=""></span></a><a class="icon-btn params-btn" title="" target="galaxy_main" href="${URL}/datasets/${dataset['dataset_id']}/show_params" data-original-title="View details"><span class="fa fa-info-circle" style=""></span></a><a class="icon-btn icon-btn" title="" href="#" data-original-title="Tool Help"><span class="fa fa-question" style=""></span></a></div></div>
-                        <div class="annotation-display"></div>
-                        <div class="display-applications"></div>
-                    </div>
-                  `
+                            <div class="job-error-text">${dataset['misc_info']}</div>
+                            </div>
+                            <div class="actions clear">
+                            <div class="left"><a class="icon-btn report-error-btn" title="" href="${URL}/datasets/error?dataset_id=${dataset['dataset_id']}" data-original-title="View or report this error"><span class="fa fa-bug" style=""></span></a><a class="icon-btn params-btn" title="" target="galaxy_main" href="${URL}/datasets/${dataset['dataset_id']}/show_params" data-original-title="View details"><span class="fa fa-info-circle" style=""></span></a><a class="icon-btn rerun-btn" title="" target="galaxy_main" href="${URL}/tool_runner/rerun?id=${dataset['dataset_id']}" data-original-title="Run this job again"><span class="fa fa-refresh" style=""></span></a><a class="icon-btn icon-btn" title="" href="#" data-original-title="Tool Help"><span class="fa fa-question" style=""></span></a></div>
+                            </div>
 
+                            <div class="annotation-display"></div>
+                            <div class="display-applications"></div>
+                        </div>`
+            
         const error_details_html = new DOMParser().parseFromString(details, 'text/html').querySelector('.details')
 
         return error_details_html
@@ -1476,7 +1540,7 @@ async AddDataSetTable(selected_value='default', Dt=[], state='') {
 
     var URL = this.model.get('GalInstance')['URL']
 
-    var row =   `<div id="dataset-${dataset['dataset_id']}" class="list-item dataset history-content state-queued" style="display: block;">
+    var row =   `<div id="${dataset['type_id']}" class="list-item dataset history-content state-queued" style="display: block;">
                     <div class="warnings"></div>
                     <div class="selector"><span class="fa fa-clock-o"></span></div>
                     <div class="primary-actions"><a class="icon-btn display-btn" title="" target="galaxy_main" href="${URL}/datasets/${dataset['dataset_id']}/display/?preview=True" data-original-title="View data"><span class="fa fa-eye" style=""></span></a><a class="icon-btn edit-btn" title="" href="${URL}/datasets/edit?dataset_id=${dataset['dataset_id']}" data-original-title="Edit attributes"><span class="fa fa-pencil" style=""></span></a><a class="icon-btn delete-btn" title="" href="#" data-original-title="Delete"><span class="fa fa-times" style=""></span></a></div>
@@ -1538,30 +1602,36 @@ async AddDataSetTable(selected_value='default', Dt=[], state='') {
                             </div>
                             <div class="actions clear">
                                 <div class="left">
-                                    <a class="download-btn icon-btn" href="${URL}/datasets/${dataset['id']}/display?to_ext=${dataset['extension']}" title="" data-original-title="Download"> <span class="fa fa-save"></span> </a><a class="icon-btn" title="" href="" data-original-title="Copy link"><span class="fa fa-chain" style=""></span></a><a class="icon-btn params-btn" title="" target="_blank" href="${URL}/datasets/${dataset['id']}/show_params" data-original-title="View details"><span class="fa fa-info-circle" style=""></span></a><a class="icon-btn visualization-link" title="" href="${URL}/visualizations?dataset_id=${dataset['dataset_id']}" data-original-title="Visualize this data"><span class="fa fa-bar-chart" style=""></span></a><a class="icon-btn icon-btn" title="" href="#" data-original-title="Tool Help"><span class="fa fa-question" style=""></span></a>
+                                    <a class="download-btn icon-btn"  href="${URL}/datasets/${dataset['id']}/display?to_ext=${dataset['extension']}" title="" data-original-title="Download"> <span class="fa fa-save"></span> </a>
+                                    <a class="icon-btn" title=""  href="javascript:void(0);" data-original-title="Copy link"><span class="fa fa-chain" style=""></span></a>
+                                    <a class="icon-btn params-btn" title="" target="_blank" href="${URL}/datasets/${dataset['id']}/show_params" data-original-title="View details"><span class="fa fa-info-circle" style=""></span></a>
+                                    <a class="icon-btn visualization-link" title="" target="_blank" href="${URL}/visualizations?dataset_id=${dataset['dataset_id']}" data-original-title="Visualize this data"><span class="fa fa-bar-chart" style=""></span></a>
+                                    <a class="icon-btn icon-btn" title="" target="_blank" href="#" data-original-title="Tool Help"><span class="fa fa-question" style=""></span></a>
                                 </div>
                             </div>
 
                             <div class="annotation-display"></div>
 
-                            <div class="display-applications">
-                                <div class="display-application"><span class="display-application-location">display in IGB</span> <span class="display-application-links"><a target="_blank" href="/display_application/${dataset['dataset_id']}/igb_bed/View">View</a> </span></div>
-                                <div class="display-application"><span class="display-application-location">display with IGV</span> <span class="display-application-links"><a target="_blank" href="/display_application/${dataset['dataset_id']}/igv_interval_as_bed/local_default">local</a> <a target="_blank" href="/display_application/${dataset['dataset_id']}/igv_interval_as_bed/hg38">Human hg38</a> </span></div>
-                                <div class="display-application"><span class="display-application-location">display at UCSC</span> <span class="display-application-links"><a target="_blank" href="/datasets/942/display_at/ucsc_main?redirect_url=http%3A%2F%2Fgenome.ucsc.edu%2Fcgi-bin%2FhgTracks%3Fdb%3Dhg38%26position%3Dchr1%3A11868-827796%26hgt.customText%3D%25s&amp;display_url=http%3A%2F%2F127.0.0.1%3A8080%2Froot%2Fdisplay_as%3Fid%3D942%26display_app%3Ducsc%26authz_method%3Ddisplay_at">main</a> <a target="_blank" href="/datasets/942/display_at/ucsc_test?redirect_url=http%3A%2F%2Fgenome-test.gi.ucsc.edu%2Fcgi-bin%2FhgTracks%3Fdb%3Dhg38%26position%3Dchr1%3A11868-827796%26hgt.customText%3D%25s&amp;display_url=http%3A%2F%2F127.0.0.1%3A8080%2Froot%2Fdisplay_as%3Fid%3D942%26display_app%3Ducsc%26authz_method%3Ddisplay_at">test</a> </span></div>
-                            </div><pre class="dataset-peek"> ${dataset['peek']} </pre></div>
+                            <div class="display-applications"></div>
+
+                            <pre class="dataset-peek">${dataset['peek']}</pre>
                         </div>
                        `
 
         const ok_details_html = new DOMParser().parseFromString(details, 'text/html').querySelector('.details')
 
+
+        this.copy_download_link(ok_details_html)
+ 
+
         return ok_details_html
     }
 
-    async dataset_row_running_state (dataset) {
+    async dataset_row_running_state (dataset){
         
         var URL = this.model.get('GalInstance')['URL']
         
-            var row = `<div id="dataset-${dataset['dataset_id']}" class="list-item dataset history-content state-running" >
+            var row = `<div id="${dataset['type_id']}" class="list-item dataset history-content state-running" >
                             <div class="warnings"></div>
                             <div class="selector"><span class="fa fa-2x fa-square-o"></span></div>
                             <div class="primary-actions"><a class="icon-btn display-btn" title="" target="galaxy_main" href="${URL}/datasets/${dataset['dataset_id']}/display/?preview=True" data-original-title="View data"><span class="fa fa-eye" style=""></span></a><a class="icon-btn edit-btn" title="" href="${URL}/datasets/edit?dataset_id=${dataset['dataset_id']}" data-original-title="Edit attributes"><span class="fa fa-pencil" style=""></span></a><a class="icon-btn delete-btn" title="" href="javascript:void(0);" data-original-title="Delete"><span class="fa fa-times" style=""></span></a></div>
@@ -1597,9 +1667,9 @@ async AddDataSetTable(selected_value='default', Dt=[], state='') {
             })
         
             return Tbl
-        }
+    }
     
-    async dataset_row_new_state  (dataset) {
+    async dataset_row_new_state  (dataset){
 
            var URL = this.model.get('GalInstance')['URL']
         
@@ -1629,9 +1699,9 @@ async AddDataSetTable(selected_value='default', Dt=[], state='') {
             const Tbl = new DOMParser().parseFromString(row, 'text/html').querySelector('.list-item.dataset.history-content.state-error')
         
             return Tbl
-        }
+    }
     
-    async attach_event  (Node, className) { 
+    async attach_event  (Node, className){ 
 
             var DataSets = Node.querySelectorAll(className)
         
@@ -1646,8 +1716,33 @@ async AddDataSetTable(selected_value='default', Dt=[], state='') {
             }));
         
     }
+
+    async delete_dataset(row, dataset_id,  HistoryID, datatype='dataset'){
+
+        var DeleteButton = row.querySelector('.fa.fa-times')
+
+        DeleteButton.addEventListener('click', async (e) => {
+            DeleteButton.parentNode.parentNode.parentNode.parentNode.removeChild(DeleteButton.parentNode.parentNode.parentNode)
+            if (dataset == 'dataset') {
+                await KernelSideDataObjects(`from galaxylab import GalaxyTaskWidget\nGalaxyTaskWidget.delete_dataset(GalInstance=${JSON.stringify(this.model.get('GalInstance'))}, history_id=${JSON.stringify(HistoryID)}, dataset_id=${JSON.stringify(dataset_id)})`)
+            } else if (dataset == 'collection') {
+                await KernelSideDataObjects(`from galaxylab import GalaxyTaskWidget\nGalaxyTaskWidget.delete_dataset_collection(GalInstance=${JSON.stringify(this.model.get('GalInstance'))}, history_id=${JSON.stringify(HistoryID)}, dataset_collection_id=${JSON.stringify(dataset_id)})`)
+            }    
+        });
+    }
+
+    copy_download_link(ok_details_html){
+
+        var chain_button = ok_details_html.querySelector('.fa.fa-chain')
+
+        chain_button.addEventListener('click', (e) => {
+            console.log(ok_details_html.querySelector('.download-btn.icon-btn')['href'])
+            // console.log(document.execCommand("copy"))
+        });
+
+    }
     
-    async AddJobStatusWidget(Inputs, HistoryID) {
+    async AddJobStatusWidget(Inputs, HistoryID){
 
         this.JobStatusTemplate(HistoryID)
         this.hide_run_buttons(true)
@@ -1872,7 +1967,7 @@ async AddDataSetTable(selected_value='default', Dt=[], state='') {
             } );
     }
 
-    async input_output_file_name(job) {
+    async input_output_file_name(job){
 
         var Table = `<div class="donemessagelarge">
                         <p> Executed <b>${this.model.get('GalInstance')['tool_name']}</b> and successfully added 1 job to the queue. </p>
@@ -1895,7 +1990,7 @@ async AddDataSetTable(selected_value='default', Dt=[], state='') {
         var outputs = JobPanel.querySelector('.outputs')
 
         for (var j =0; j < Object.keys(job['inputs']).length; j++){
-            console.log(Object.keys(job['inputs']))
+
             var show_dataset = await KernelSideDataObjects(`from galaxylab  import GalaxyTaskWidget\nGalaxyTaskWidget.show_data_set(GalInstance=${JSON.stringify(this.model.get('GalInstance'))}, dataset_id=${JSON.stringify(job['inputs'][Object.keys(job['inputs'])[j]]['id'])} )`) 
             var ILi  = document.createElement('li')
             var Ib = document.createElement('b')
@@ -1905,7 +2000,7 @@ async AddDataSetTable(selected_value='default', Dt=[], state='') {
         }
 
         for (var k =0; k < Object.keys(job['outputs']).length; k++){
-            console.log(Object.keys(job['outputs']))
+
             var OLi  = document.createElement('li')
             var Ob = document.createElement('b')
             var show_dataset = await KernelSideDataObjects(`from galaxylab  import GalaxyTaskWidget\nGalaxyTaskWidget.show_data_set(GalInstance=${JSON.stringify(this.model.get('GalInstance'))}, dataset_id=${JSON.stringify(job['outputs'][Object.keys(job['outputs'])[k]]['id'])} )`) 
@@ -1917,18 +2012,66 @@ async AddDataSetTable(selected_value='default', Dt=[], state='') {
     return JobPanel
     }
 
-     //#############################################################################
-     
-     busy_changed() {
+    async dataset_collection_list_item(elements){
+
+        var URL = this.model.get('GalInstance')['URL']
+
+        var ListItem = `<div id="dataset-${elements['object']['id']}" class="list-item dataset state-${elements['object']['state']}" style="margin-left:20px; margin-right:20px;">
+                          <div class="warnings"></div>
+                          <div class="selector"><span class="fa fa-2x fa-square-o"></span></div>
+                          <div class="primary-actions"><a class="icon-btn display-btn" title="" target="galaxy_main" href="${URL}/datasets/${elements['object']['id']}/display/?preview=True" data-original-title="View data"><span class="fa fa-eye" style=""></span></a><a class="icon-btn edit-btn" title="" href="${URL}/datasets/edit?dataset_id=${elements['object']['id']}" data-original-title="Edit attributes"><span class="fa fa-pencil" style=""></span></a></div>
+                          <div class="title-bar clear" tabindex="${elements['element_index']}" draggable="true"><span class="state-icon"></span>
+                          <div class="title"><span class="name">${elements['element_index']}</span></div>
+                          </div>
+                          <div class="details" style="display: none;">
+                          <div class="summary">
+                                <div class="detail-messages"></div>
+                                <div class="blurb"><span class="value">${elements['object']['misc_blurb']}</span></div>
+                                <div class="datatype">
+                                    <label class="prompt">format</label><span class="value">${elements['object']['file_ext']}</span></div>
+                                <div class="dbkey">
+                                    <label class="prompt">database</label><a class="value" href="/datasets/edit?dataset_id=${elements['object']['id']}" target="_top">?</a></div>
+                                <div class="info"><span class="value">${elements['object']['misc_info']}</span></div>
+                            </div>
+                            <div class="actions clear">
+                                <div class="left">
+                                    <a class="download-btn icon-btn" href="${URL}/datasets/${elements['object']['id']}/display?to_ext=data&amp;hdca_id=f597429621d6eb2b&amp;element_identifier=0" title="" data-original-title="Download"> <span class="fa fa-floppy-o"></span> </a><a class="icon-btn" title="" href="javascript:void(0);" data-original-title="Copy link"><span class="fa fa-chain" style=""></span></a><a class="icon-btn params-btn" title="" target="galaxy_main" href="${URL}/datasets/${elements['object']['id']}/show_params" data-original-title="View details"><span class="fa fa-info-circle" style=""></span></a><a class="icon-btn visualization-link" title="" href="${URL}/visualizations?dataset_id=${elements['object']['id']}" data-original-title="Visualize this data"><span class="fa fa-bar-chart-o" style=""></span></a><a class="icon-btn icon-btn" title="" href="#" data-original-title="Tool Help"><span class="fa fa-question" style=""></span></a></div>
+                                <div class="right"><a class="icon-btn tag-btn" title="" href="javascript:void(0);" data-original-title="Edit dataset tags"><span class="fa fa-tags" style=""></span></a><a class="icon-btn annotate-btn" title="" href="javascript:void(0);" data-original-title="Edit dataset annotation"><span class="fa fa-comment" style=""></span></a></div>
+                            </div>
+                            <div class="annotation-display"></div>
+                            <div class="display-applications"></div>
+                            <pre class="dataset-peek">${elements['object']['peek']}</pre>
+                         </div>
+                         </div>`
+      
+         const row = new DOMParser().parseFromString(ListItem, 'text/html').querySelector('.list-item.dataset.state-ok')
+
+         row.querySelector('.name').addEventListener('click', async (e) => {
+
+            if (row.querySelector('.details').style.display == 'block') {
+                row.querySelector('.details').style.display = 'none'
+            } else{
+                row.querySelector('.details').style.display = 'block'
+            }
+
+         });
+      
+         return row
+      
+    }
+
+    busy_changed(){
          const display = this.model.get('busy') ? 'block' : 'none';
          this.element.querySelector('.nbtools-busy').style.display = display;
-     }
-     display_header_changed() {
-         const display = this.model.get('display_header') ? 'block' : 'none';
-         this.element.querySelector('.nbtools-buttons:first-of-type').style.display = display;
-         this.element.querySelector('.nbtools-description').style.display = display;
-     }
-     display_footer_changed() {
+    }
+
+    display_header_changed(){
+        const display = this.model.get('display_header') ? 'block' : 'none';
+        this.element.querySelector('.nbtools-buttons:first-of-type').style.display = display;
+        this.element.querySelector('.nbtools-description').style.display = display;
+    }
+
+    display_footer_changed(){
          const display = this.model.get('display_footer') ? 'block' : 'none';
          this.element.querySelector('.nbtools-buttons:last-of-type').style.display = display;
          this.element.querySelector('.nbtools-footer').style.display = display;
@@ -1936,12 +2079,14 @@ async AddDataSetTable(selected_value='default', Dt=[], state='') {
          if (!this.output_var_displayed())
              return;
          this.element.querySelector('.nbtools-input:last-of-type').style.display = display;
-     }
-     output_var_displayed() {
-         const output_var = this.model.get('_parameters')['output_var'];
-         return !!(output_var && output_var['hide'] == false);
-     }
-     activate_custom_buttons() {
+    }
+
+    output_var_displayed(){
+        const output_var = this.model.get('_parameters')['output_var'];
+        return !!(output_var && output_var['hide'] == false);
+    }
+
+    activate_custom_buttons(){
          this.el.querySelectorAll('.nbtools-buttons').forEach((box) => {
              const buttons = this.model.get('buttons');
              Object.keys(buttons).forEach((label) => {
@@ -1952,11 +2097,9 @@ async AddDataSetTable(selected_value='default', Dt=[], state='') {
                  box.prepend(button);
              });
          });
-     }
-     /**
-      * Attach the click event to each Run button
-      */
-    activate_run_buttons() {
+    }
+
+    activate_run_buttons(){
  
         var self  = this;
         this.el.querySelectorAll('.nbtools-run').forEach((button) => button.addEventListener('click', () => {
@@ -1970,10 +2113,9 @@ async AddDataSetTable(selected_value='default', Dt=[], state='') {
         //  if (this.model.get('collapse'))
         //      this.el.querySelector('.nbtools-collapse').click();
          }));
-     }
+    }
 
-
-    hide_run_buttons(hide) {
+    hide_run_buttons(hide){
         var self  = this;
         this.el.querySelectorAll('.nbtools-run').forEach((button) =>{
             if (hide == true){
@@ -1984,14 +2126,12 @@ async AddDataSetTable(selected_value='default', Dt=[], state='') {
         });
     }
 
-    form_refresh_button(element) {
+    form_refresh_button(element){
         var self  = this;
 
         var button = element.querySelector('.icon-btn.rerun-btn')
 
         button.addEventListener('click', async (e) => {
-
-            console.log(button)
 
             var refine_inputs  = await KernelSideDataObjects(`from galaxylab import GalaxyTaskWidget\nGalaxyTaskWidget.UpdateForm(GalInstance=${JSON.stringify(self.model.get('GalInstance'))}, toolID=${JSON.stringify(self.model.get('ToolID'))}, HistoryID='df7a1f0c02a5b08e')`)
             var FormParent = self.el.querySelector('.Galaxy-form')
@@ -2000,4 +2140,4 @@ async AddDataSetTable(selected_value='default', Dt=[], state='') {
 
         });
     }
- }
+}
