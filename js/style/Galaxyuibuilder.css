@@ -330,7 +330,7 @@
   .dataset-list {
       background: rgb(182, 179, 179);
       float: right;
-      width: 29%;
+      width: 300px;
   }
 
   .galaxy-data-panel {
@@ -727,4 +727,14 @@
 
 }
 
-  
+.data-load-status{
+  width: 100%; 
+  height: 30px; 
+  border: solid rgb(135, 160, 122) 1px; 
+  background: rgb(56, 72, 122);
+  margin-top: 2px;
+  margin-bottom: 2px;
+  color: #f1f1f1;
+
+}
+

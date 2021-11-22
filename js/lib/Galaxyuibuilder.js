@@ -1,9 +1,9 @@
 /**
- * Define the UI Builder widget for Jupyter Notebook
+ * Define the GalaxyUI Builder for GalaxyLab
  *
- * @author Thorin Tabor
+ * @author Jayadev Joshi
  *
- * Copyright 2020 Regents of the University of California and the Broad Institute
+ * Copyright 2021 Regents of the Cleveland Clinic, Cleveland 
  */
  import '../style/Galaxyuibuilder.css';
  import '../style/historydata.css';
@@ -13,6 +13,7 @@
  import { BaseWidgetModel, BaseWidgetView } from "@genepattern/nbtools";
  import _ from "underscore";
  import {  KernelSideDataObjects } from './utils';
+ import { Toolbox } from '@genepattern/nbtools';
 
 export class GalaxyUIBuilderModel extends BaseWidgetModel{
      
@@ -33,9 +34,8 @@ export class GalaxyUIBuilderModel extends BaseWidgetModel{
 export class GalaxyUIBuilderView extends BaseWidgetView {
     constructor() {
     super(...arguments);
-    this.dom_class = 'nbtools-uibuilder';
-    this.traitlets = [...super.basics(), 'origin', '_parameters', 'function_import', 'register_tool', 'collapse',
-        'events', 'run_label', 'tool'];
+    this.dom_class = 'galaxy-uibuilder';
+    this.traitlets = [...super.basics(),  'register_tool', 'collapse', 'run_label', 'tool'];
     this.renderers = {
         "error": this.render_error,
         "info": this.render_info
@@ -110,7 +110,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         DataList.append(await this.AddDataSetTable(selected_value, Dt, state))
     }
  
-    CreateForm(){  //Fix me in future
+    CreateForm(){  
 
         var self = this
         const GalaxyForm = document.createElement('form')
@@ -526,8 +526,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             select.addEventListener("change", async (event)=> {
 
                 var ListItem = DataHistoryList.querySelector('.list-item')
-
-                console.log(ListItem)
 
                 // self.removeAllChildNodes(FormParent)
                
@@ -1420,10 +1418,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         var row = `<div id="${dataset['type_id']}"   class="list-item ${dataset['history_content_type']} history-content state-ok" >
                     <div class="warnings"></div>
                     <div class="selector"><span class="fa fa-2x fa-square-o"></span></div>
-                    <div class="primary-actions"><a class="icon-btn display-btn" title="" target="_blank" href="${URL}/datasets/${dataset['id']}/display/?preview=True" data-original-title="View data">
-                        <span class="fas fa-eye" style=""></span></a>
-                        <a class="icon-btn edit-btn" title="" target="_blank"  href="${URL}/datasets/edit?dataset_id=${dataset['id']}" data-original-title="Edit attributes"><span class="fa fa-pencil" style=""></span></a><a class="icon-btn delete-btn" title="" href="javascript:void(0);" data-original-title="Delete"><span class="fa fa-times" style=""></span></a>
-                    </div>
+                    <div class="primary-actions"><a class="icon-btn display-btn" title="" target="_blank" href="${URL}/datasets/${dataset['id']}/display/?preview=True" data-original-title="View data"><span class="fas fa-eye" style=""></span></a><a class="icon-btn edit-btn" title="" target="_blank"  href="${URL}/datasets/edit?dataset_id=${dataset['id']}" data-original-title="Edit attributes"><span class="fa fa-pencil" style=""></span></a><a class="icon-btn delete-btn" title="" href="javascript:void(0);" data-original-title="Delete"><span class="fa fa-times" style=""></span></a><a class="icon-btn display-btn" title="" target="" href="javascript:void(0);" data-original-title="View data"><span class="fa fa-download" style=""></span></a></div>
                     <div class="title-bar clear"  tabindex="0" draggable="true" ondragstart="event.dataTransfer.setData('text/plain',null) > 
                     <span class="state-icon"></span>
                         <div class="title" data-value=${dataset['id']} > 
@@ -1469,6 +1464,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         }, false);
 
         this.delete_dataset(Tbl, dataset['id'],  history_id)
+        // this.attach_data_load_event(Tbl, dataset, `${URL}/datasets/${dataset['id']}/display/?preview=True`)
+        this.attach_data_load_event(Tbl, dataset,  `${URL}/datasets/${dataset['id']}/display?to_ext=${dataset['extension']}`, `${dataset['extension']}`)
 
         return Tbl
     } 
@@ -1523,7 +1520,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                             <div class="job-error-text">${dataset['misc_info']}</div>
                             </div>
                             <div class="actions clear">
-                            <div class="left"><a class="icon-btn report-error-btn" title="" href="${URL}/datasets/error?dataset_id=${dataset['dataset_id']}" data-original-title="View or report this error"><span class="fa fa-bug" style=""></span></a><a class="icon-btn params-btn" title="" target="galaxy_main" href="${URL}/datasets/${dataset['dataset_id']}/show_params" data-original-title="View details"><span class="fa fa-info-circle" style=""></span></a><a class="icon-btn rerun-btn" title="" target="galaxy_main" href="${URL}/tool_runner/rerun?id=${dataset['dataset_id']}" data-original-title="Run this job again"><span class="fa fa-refresh" style=""></span></a><a class="icon-btn icon-btn" title="" href="#" data-original-title="Tool Help"><span class="fa fa-question" style=""></span></a></div>
+                                <div class="left"><a class="icon-btn report-error-btn" title="" target="_blank" href="${URL}/datasets/error?dataset_id=${dataset['dataset_id']}" data-original-title="View or report this error"><span class="fa fa-bug" style=""></span></a><a class="icon-btn params-btn" title="" target="galaxy_main" href="${URL}/datasets/${dataset['dataset_id']}/show_params" data-original-title="View details"><span class="fa fa-info-circle" style=""></span></a>
                             </div>
 
                             <div class="annotation-display"></div>
@@ -1601,19 +1598,14 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                             </div>
                             <div class="actions clear">
                                 <div class="left">
-                                    <a class="download-btn icon-btn"  href="${URL}/datasets/${dataset['id']}/display?to_ext=${dataset['extension']}" title="" data-original-title="Download"> <span class="fa fa-save"></span> </a>
-                                    <a class="icon-btn" title=""  href="javascript:void(0);" data-original-title="Copy link"><span class="fa fa-chain" style=""></span></a>
-                                    <a class="icon-btn params-btn" title="" target="_blank" href="${URL}/datasets/${dataset['id']}/show_params" data-original-title="View details"><span class="fa fa-info-circle" style=""></span></a>
-                                    <a class="icon-btn visualization-link" title="" target="_blank" href="${URL}/visualizations?dataset_id=${dataset['dataset_id']}" data-original-title="Visualize this data"><span class="fa fa-bar-chart" style=""></span></a>
-                                    <a class="icon-btn icon-btn" title="" target="_blank" href="#" data-original-title="Tool Help"><span class="fa fa-question" style=""></span></a>
+                                    <a class="download-btn icon-btn"  href="${URL}/datasets/${dataset['id']}/display?to_ext=${dataset['extension']}" title="" data-original-title="Download"> <span class="fa fa-save"></span> </a><a class="icon-btn" title=""  href="javascript:void(0);" data-original-title="Copy link"><span class="fa fa-chain" style=""></span></a><a class="icon-btn params-btn" title="" target="_blank" href="${URL}/datasets/${dataset['id']}/show_params" data-original-title="View details"><span class="fa fa-info-circle" style=""></span></a><a class="icon-btn visualization-link" title="" target="_blank" href="${URL}/visualizations?dataset_id=${dataset['dataset_id']}" data-original-title="Visualize this data"><span class="fa fa-bar-chart" style=""></span></a>
                                 </div>
                             </div>
 
                             <div class="annotation-display"></div>
-
                             <div class="display-applications"></div>
 
-                            <pre class="dataset-peek">${dataset['peek']}</pre>
+                            <pre class="dataset-peek"> ${dataset['peek']}</pre> 
                         </div>
                        `
 
@@ -1675,7 +1667,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             var row = `<div id="dataset-${dataset['dataset_id']}" class="list-item dataset history-content state-running" style="display: none;">
                             <div class="warnings"></div>
                             <div class="selector"><span class="fa fa-2x fa-square-o"></span></div>
-                            <div class="primary-actions"><a class="icon-btn display-btn" title="" target="galaxy_main" href="${URL}/datasets/${dataset['dataset_id']}/display/?preview=True" data-original-title="View data"><span class="fa fa-eye" style=""></span></a><a class="icon-btn edit-btn" title="" href="${URL}/datasets/edit?dataset_id=${dataset['dataset_id']}" data-original-title="Edit attributes"><span class="fa fa-pencil" style=""></span></a><a class="icon-btn delete-btn" title="" href="javascript:void(0);" data-original-title="Delete"><span class="fa fa-times" style=""></span></a></div>
+                            <div class="primary-actions"><a class="icon-btn display-btn" title="" target="galaxy_main" href="${URL}/datasets/${dataset['dataset_id']}/display/?preview=True" data-original-title="View data"><span class="fa fa-eye" style=""></span></a><a class="icon-btn edit-btn" title="" href="${URL}/datasets/edit?dataset_id=${dataset['dataset_id']}" data-original-title="Edit attributes"><span class="fa fa-pencil" style=""></span></a><a class="icon-btn delete-btn" title="" href="javascript:void(0);" data-original-title="Delete"><span class="fa fa-times" style=""></span></a><a class="icon-btn display-btn" title="" target="galaxy_main" href="${URL}/datasets/${dataset['dataset_id']}/display/?preview=True" data-original-title="View data"><span class="fa fa-eye" style=""></span></a></div>
                             <div class="title-bar clear" tabindex="0" draggable="true"> <span class="state-icon"></span>
                                 <div class="title"> <span class="hid">${dataset['hid']}</span> <span class="name">${dataset['name']}/span> </div>
                                 <br>
@@ -2146,7 +2138,60 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             var FormParent = self.el.querySelector('.Galaxy-form')
             self.removeAllChildNodes(FormParent)
             self.Main_Form(refine_inputs['inputs'])
-
         });
+    }
+
+    load_tabular_files(hid, data_url, ext){
+
+        console.log(ext)
+        // Toolbox.add_code_cell(`from galaxylab import GalaxyTaskWidget\ndata = GalaxyTaskWidget.read_tabular_files(${JSON.stringify(data_url)})`);
+        KernelSideDataObjects(`from galaxylab import GalaxyTaskWidget\ndata_${hid} = GalaxyTaskWidget.read_datafiles_files(${JSON.stringify(data_url)}, ${JSON.stringify(ext)})`);
+        KernelSideDataObjects(`print('data_${hid}')`);
+    }
+
+    attach_data_load_event(headnode, dataset, url, ext){
+
+        var self = this
+
+        var LoadButton = headnode.querySelector('.fa.fa-download')
+
+        var details =  `<div class="data-load-status" >
+                            <div class="title" style="float: left; margin-top: 5px; margin-left: 5px; overflow-x: auto;" > 
+                                 <span class="hid"><b>${dataset['hid']}</b>: </span> <span class="name" >Data <b>${dataset['name']}</b> loaded successfully, can be accessed inside the current notebook cell via <a href="javascript:void(0);" ><b style="color: white;"> data_${dataset['hid']}</b></a> variable. </span>
+                            </div>
+                            <div class="primary-actions" style="float: right;"><a class="icon-btn delete-btn" title="" href="javascript:void(0);" data-original-title="Delete"><span class="fa fa-plus" style=""></span></a><a class="icon-btn delete-btn" title="" href="javascript:void(0);" data-original-title="Delete"><span class="fa fa-times" style=""></span></a></div>
+                        </div>`
+
+        const ok_details_html = new DOMParser().parseFromString(details, 'text/html').querySelector('.data-load-status')
+
+        LoadButton.addEventListener('click', ()=>{
+
+            var  NbtoolsForm =  self.el.querySelector('.nbtools-form')
+            NbtoolsForm.append(ok_details_html)
+
+
+            this.load_tabular_files (dataset['hid'], url, ext)
+        });
+
+        var DeleteButton = ok_details_html.querySelector('.fa.fa-times')
+
+        DeleteButton.addEventListener('click', () => {
+            ok_details_html.parentNode.removeChild(ok_details_html)
+            KernelSideDataObjects(`del data_${dataset['hid']}`);
+        })
+
+        var AddCellButton = ok_details_html.querySelector('.fa.fa-plus')
+
+        AddCellButton.addEventListener('click', () => {
+    
+            Toolbox.add_code_cell(`data_${dataset['hid']}`);
+        })
+
+
+
+
+
+
+        
     }
 }

@@ -18,6 +18,14 @@ from ipywidgets import DOMWidget
 from urllib.error import HTTPError
 from time import sleep
 from ipywidgets import interactive
+import io
+import requests
+import pandas as pd
+
+from PIL import Image
+import requests
+from urllib.request import urlopen
+from Bio import SeqIO
 
 
 class GalaxyTaskWidget(GalaxyUIBuilder):
@@ -154,6 +162,25 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
         gi = GalaxyInstance(GalInstance['URL'], email=GalInstance['email_ID'], api_key=GalInstance['API_key'], verify=True)
         show_dataset = gi.gi.dataset_collections.show_dataset_collection(dataset_collection_id=dataset_id)
         return IPython.display.JSON(show_dataset)
+
+    def read_datafiles_files(data_url, ext):
+
+        if ext == 'csv' or ext == 'tabular' or  ext == 'txt':
+            s=requests.get(data_url).content
+            dataframe = pd.read_csv(io.StringIO(s.decode('utf-8')))
+       
+            return dataframe
+
+        elif ext == 'png':
+            im = Image.open(requests.get(data_url, stream=True).raw)
+            return im
+
+        elif ext == 'fasta':
+            response = urlopen(data_url)
+            fasta = response.read().decode("utf-8", "ignore")
+            return fasta
+
+
 
     def handle_error_task(self, error_message, name='Galaxy Module', **kwargs):
         """Display an error message if the task is None"""
