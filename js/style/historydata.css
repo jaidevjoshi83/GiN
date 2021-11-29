@@ -164,3 +164,17 @@ p{orphans:3;widows:3;}
 .list-item{
     padding-left: 0;
   }
+
+.display-application-links{
+  margin-left: 2px;
+  margin-top: 2px;
+}
+
+/* .display-application-links a{color:#25537b;text-decoration:none;background-color:transparent;}
+.display-application-links a:hover{color:#132b40;text-decoration:underline;}
+.display-application-links a:not(.btn):not(.menubutton:active):not(.menubutton:hover):not(.menubutton):not(.action-button:active):not(.action-button:hover):not(.action-button):not(input[type=submit]):not(button){text-decoration:underline;} */
+
+.display-application-links a {
+  margin-left: 2px;
+  margin-right: 2px;
+}

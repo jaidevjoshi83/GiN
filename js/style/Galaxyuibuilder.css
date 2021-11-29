@@ -310,9 +310,14 @@
     padding: 5px; 
     border-color: rgb(143, 145, 145);
     border-width: 1px;
+
     /* margin: 5px; */
     /* width: 40%; */
 
+  }
+
+  .dataset-list{
+    margin-bottom: 20px;
   }
 
   .galaxy-history-list select{
@@ -721,7 +726,6 @@
 }
 
 .Data-History_IDs{
-
   background: hsl(240, 4%, 22%);
   color: #ffffff;
 
@@ -735,6 +739,7 @@
   margin-top: 2px;
   margin-bottom: 2px;
   color: #f1f1f1;
+  bottom: 5px;
 
 }
 

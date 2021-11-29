@@ -100,7 +100,6 @@ class GalaxyAuthWidget(UIBuilder):
         if not self.session._notebook_password: return False              # Test password
         return True
 
-
     def validate_credentials(self, session):
         """Validate the provided credentials"""
         # TODO: Is there a bioblend call to verify the user's login credentials? If so, add it here

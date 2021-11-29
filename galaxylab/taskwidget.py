@@ -165,22 +165,32 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
 
     def read_datafiles_files(data_url, ext):
 
-        if ext == 'csv' or ext == 'tabular' or  ext == 'txt':
+        if ext == 'csv' or ext == 'tabular' or  ext == 'txt' :
             s=requests.get(data_url).content
             dataframe = pd.read_csv(io.StringIO(s.decode('utf-8')))
-       
             return dataframe
 
         elif ext == 'png':
             im = Image.open(requests.get(data_url, stream=True).raw)
             return im
 
-        elif ext == 'fasta':
+        elif ext == 'fasta' or ext == 'bed':
             response = urlopen(data_url)
             fasta = response.read().decode("utf-8", "ignore")
             return fasta
 
+    def download_file_to_jupyter_server(data_url, file_name, ext):
 
+        galaxy_data = os.path.join(os.getcwd(), 'galaxy_data')
+
+        if not os.path.exists(galaxy_data):
+            os.mkdir(galaxy_data)
+   
+        response = urlopen(data_url)
+        data = response.read()
+        f = open(os.path.join(galaxy_data, file_name)+'.'+ext, 'wb')
+        print (os.path.join(galaxy_data, file_name)+'.'+ext)
+        f.write(data)
 
     def handle_error_task(self, error_message, name='Galaxy Module', **kwargs):
         """Display an error message if the task is None"""

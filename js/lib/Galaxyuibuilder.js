@@ -837,7 +837,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                     }
                 }
             }
-
         } 
 
         Select.addEventListener("dragover", function(event) {
@@ -897,10 +896,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             } else {
                 Select.multiple = false
                 UploadFileLabel.style.display = 'block'
-
             }
-        
-
         }));
         
         FileManu.style.width = '100%'
@@ -1051,6 +1047,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         var HistoryID = self.element.querySelector('#History_IDs').value 
         var refine_inputs   = await KernelSideDataObjects(`from galaxylab import GalaxyTaskWidget\nGalaxyTaskWidget.UpdateForm(${JSON.stringify(self.model.get('GalInstance'))}, ${JSON.stringify(Inputs)}, ${JSON.stringify(self.model.get('ToolID'))}, ${JSON.stringify(HistoryID)})`)
+        console.log(refine_inputs)
 
         var FormParent = self.el.querySelector('.Galaxy-form')
         self.removeAllChildNodes(FormParent)
@@ -1318,7 +1315,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         });
     }
 
-    waitforme(milisec){
+    waitforme (milisec){
     return new Promise(resolve => {
         setTimeout(() => { resolve('') }, milisec);
     })
@@ -1508,7 +1505,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         return Tbl
     }
 
-    async dataset_error_details(dataset){
+    async dataset_error_details (dataset){
 
         var URL = this.model.get('GalInstance')['URL']
 
@@ -1532,7 +1529,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         return error_details_html
     }
 
-    async dataset_row_queued_state(dataset){
+    async dataset_row_queued_state (dataset){
 
     var URL = this.model.get('GalInstance')['URL']
 
@@ -1580,7 +1577,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
     return Tbl
     }
 
-    async dataset_ok_details(dataset){
+    async dataset_ok_details (dataset){
 
         var URL = this.model.get('GalInstance')['URL']
 
@@ -1611,9 +1608,11 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         const ok_details_html = new DOMParser().parseFromString(details, 'text/html').querySelector('.details')
 
+        var display_apps = ok_details_html.querySelector('.display-applications')
+
+        this.add_display_application(display_apps, dataset)
 
         this.copy_download_link(ok_details_html)
- 
 
         return ok_details_html
     }
@@ -1660,55 +1659,55 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             return Tbl
     }
     
-    async dataset_row_new_state  (dataset){
+    async dataset_row_new_state (dataset){
 
-           var URL = this.model.get('GalInstance')['URL']
-        
-            var row = `<div id="dataset-${dataset['dataset_id']}" class="list-item dataset history-content state-running" style="display: none;">
-                            <div class="warnings"></div>
-                            <div class="selector"><span class="fa fa-2x fa-square-o"></span></div>
-                            <div class="primary-actions"><a class="icon-btn display-btn" title="" target="galaxy_main" href="${URL}/datasets/${dataset['dataset_id']}/display/?preview=True" data-original-title="View data"><span class="fa fa-eye" style=""></span></a><a class="icon-btn edit-btn" title="" href="${URL}/datasets/edit?dataset_id=${dataset['dataset_id']}" data-original-title="Edit attributes"><span class="fa fa-pencil" style=""></span></a><a class="icon-btn delete-btn" title="" href="javascript:void(0);" data-original-title="Delete"><span class="fa fa-times" style=""></span></a><a class="icon-btn display-btn" title="" target="galaxy_main" href="${URL}/datasets/${dataset['dataset_id']}/display/?preview=True" data-original-title="View data"><span class="fa fa-eye" style=""></span></a></div>
-                            <div class="title-bar clear" tabindex="0" draggable="true"> <span class="state-icon"></span>
-                                <div class="title"> <span class="hid">${dataset['hid']}</span> <span class="name">${dataset['name']}/span> </div>
-                                <br>
-                                <div class="nametags"></div>
+        var URL = this.model.get('GalInstance')['URL']
+    
+        var row = `<div id="dataset-${dataset['dataset_id']}" class="list-item dataset history-content state-running" style="display: none;">
+                        <div class="warnings"></div>
+                        <div class="selector"><span class="fa fa-2x fa-square-o"></span></div>
+                        <div class="primary-actions"><a class="icon-btn display-btn" title="" target="galaxy_main" href="${URL}/datasets/${dataset['dataset_id']}/display/?preview=True" data-original-title="View data"><span class="fa fa-eye" style=""></span></a><a class="icon-btn edit-btn" title="" href="${URL}/datasets/edit?dataset_id=${dataset['dataset_id']}" data-original-title="Edit attributes"><span class="fa fa-pencil" style=""></span></a><a class="icon-btn delete-btn" title="" href="javascript:void(0);" data-original-title="Delete"><span class="fa fa-times" style=""></span></a><a class="icon-btn display-btn" title="" target="galaxy_main" href="${URL}/datasets/${dataset['dataset_id']}/display/?preview=True" data-original-title="View data"><span class="fa fa-eye" style=""></span></a></div>
+                        <div class="title-bar clear" tabindex="0" draggable="true"> <span class="state-icon"></span>
+                            <div class="title"> <span class="hid">${dataset['hid']}</span> <span class="name">${dataset['name']}/span> </div>
+                            <br>
+                            <div class="nametags"></div>
+                        </div>
+                        <div class="details" style="display: block;">
+                            <div class="summary">
+                                <div class="detail-messages"></div>
+                                <div>This job is currently running</div>
                             </div>
-                            <div class="details" style="display: block;">
-                                <div class="summary">
-                                    <div class="detail-messages"></div>
-                                    <div>This job is currently running</div>
-                                </div>
-                                <div class="actions clear">
-                                    <div class="left"><a class="icon-btn params-btn" title="" target="galaxy_main" href="${URL}/datasets/${dataset['dataset_id']}show_params" data-original-title="View details"><span class="fa fa-info-circle" style=""></span></a><a class="icon-btn rerun-btn" title="" target="galaxy_main" href="${URL}/tool_runner/rerun?id=${dataset['dataset_id']}" data-original-title="Run this job again"><span class="fa fa-refresh" style=""></span></a><a class="icon-btn icon-btn" title="" href="#" data-original-title="Tool Help"><span class="fa fa-question" style=""></span></a></div>
-                                    <div class="right"><a class="icon-btn tag-btn" title="" href="" data-original-title="Edit dataset tags"><span class="fa fa-tags" style=""></span></a><a class="icon-btn annotate-btn" title="" href="" data-original-title="Edit dataset annotation"><span class="fa fa-comment" style=""></span></a></div>
-                                </div>
-                                <div class="annotation-display"></div>
-                                <div class="display-applications"></div>
+                            <div class="actions clear">
+                                <div class="left"><a class="icon-btn params-btn" title="" target="galaxy_main" href="${URL}/datasets/${dataset['dataset_id']}show_params" data-original-title="View details"><span class="fa fa-info-circle" style=""></span></a><a class="icon-btn rerun-btn" title="" target="galaxy_main" href="${URL}/tool_runner/rerun?id=${dataset['dataset_id']}" data-original-title="Run this job again"><span class="fa fa-refresh" style=""></span></a><a class="icon-btn icon-btn" title="" href="#" data-original-title="Tool Help"><span class="fa fa-question" style=""></span></a></div>
+                                <div class="right"><a class="icon-btn tag-btn" title="" href="" data-original-title="Edit dataset tags"><span class="fa fa-tags" style=""></span></a><a class="icon-btn annotate-btn" title="" href="" data-original-title="Edit dataset annotation"><span class="fa fa-comment" style=""></span></a></div>
                             </div>
-                        </div>`
-        
-            const Tbl = new DOMParser().parseFromString(row, 'text/html').querySelector('.list-item.dataset.history-content.state-error')
-        
-            return Tbl
+                            <div class="annotation-display"></div>
+                            <div class="display-applications"></div>
+                        </div>
+                    </div>`
+    
+        const Tbl = new DOMParser().parseFromString(row, 'text/html').querySelector('.list-item.dataset.history-content.state-error')
+    
+        return Tbl
     }
     
-    async attach_event  (Node, className){ 
+    async attach_event (Node, className){ 
 
-            var DataSets = Node.querySelectorAll(className)
-        
-            DataSets.forEach((button) => button.querySelector('.title').addEventListener('click', (e) => {
-        
-                if (button.querySelector('.details').style.display == 'block') {
-                    button.querySelector('.details').style.display = 'none'
-                } else{
-                    button.querySelector('.details').style.display = 'block'
-                }
-        
-            }));
+        var DataSets = Node.querySelectorAll(className)
+    
+        DataSets.forEach((button) => button.querySelector('.title').addEventListener('click', (e) => {
+    
+            if (button.querySelector('.details').style.display == 'block') {
+                button.querySelector('.details').style.display = 'none'
+            } else{
+                button.querySelector('.details').style.display = 'block'
+            }
+    
+        }));
         
     }
 
-    async delete_dataset(row, dataset_id,  HistoryID, datatype='dataset'){
+    async delete_dataset (row, dataset_id,  HistoryID, datatype='dataset'){
 
         var DeleteButton = row.querySelector('.fa.fa-times')
 
@@ -1723,7 +1722,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         });
     }
 
-    copy_download_link(ok_details_html){
+    copy_download_link (ok_details_html){
 
         var chain_button = ok_details_html.querySelector('.fa.fa-chain')
 
@@ -1734,7 +1733,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
     }
     
-    async AddJobStatusWidget(Inputs, HistoryID){
+    async AddJobStatusWidget (Inputs, HistoryID){
 
         this.JobStatusTemplate(HistoryID)
         this.hide_run_buttons(true)
@@ -1881,7 +1880,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         }
     }
 
-    JobStatusTemplate(HistoryID){
+    JobStatusTemplate (HistoryID){
 
         var self = this
 
@@ -1948,7 +1947,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
             toolForm.style.backgroundColor = 'white'
             this.removeAllChildNodes(toolForm)
-            GBody.append(Job)
+            GBody.prepend(Job)
             var BTN = this.el.querySelector('.rbtn')
 
             BTN.addEventListener('click', async (e) => {
@@ -1959,7 +1958,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 var GbForm = document.createElement('div')
                 GbForm.className = 'Galaxy-form'
                 
-                GBody.append(GbForm)
+                GBody.prepend(GbForm)
                 JobStatus.parentNode.removeChild(JobStatus)
 
                 self.Main_Form(refine_inputs['inputs'])
@@ -1968,7 +1967,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             } );
     }
 
-    async input_output_file_name(job){
+    async input_output_file_name (job){
 
         var Table = `<div class="donemessagelarge">
                         <p> Executed <b>${this.model.get('GalInstance')['tool_name']}</b> and successfully added 1 job to the queue. </p>
@@ -2013,7 +2012,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
     return JobPanel
     }
 
-    async dataset_collection_list_item(elements){
+    async dataset_collection_list_item (elements){
 
         var URL = this.model.get('GalInstance')['URL']
 
@@ -2061,46 +2060,46 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
       
     }
 
-    busy_changed(){
+    busy_changed (){
          const display = this.model.get('busy') ? 'block' : 'none';
          this.element.querySelector('.nbtools-busy').style.display = display;
     }
 
-    display_header_changed(){
+    display_header_changed (){
         const display = this.model.get('display_header') ? 'block' : 'none';
         this.element.querySelector('.nbtools-buttons:first-of-type').style.display = display;
         this.element.querySelector('.nbtools-description').style.display = display;
     }
 
-    display_footer_changed(){
-         const display = this.model.get('display_footer') ? 'block' : 'none';
-         this.element.querySelector('.nbtools-buttons:last-of-type').style.display = display;
-         this.element.querySelector('.nbtools-footer').style.display = display;
-         // If there is an output_var element, hide or show it as necessary
-         if (!this.output_var_displayed())
-             return;
-         this.element.querySelector('.nbtools-input:last-of-type').style.display = display;
+    display_footer_changed (){
+        const display = this.model.get('display_footer') ? 'block' : 'none';
+        this.element.querySelector('.nbtools-buttons:last-of-type').style.display = display;
+        this.element.querySelector('.nbtools-footer').style.display = display;
+        // If there is an output_var element, hide or show it as necessary
+        if (!this.output_var_displayed())
+            return;
+        this.element.querySelector('.nbtools-input:last-of-type').style.display = display;
     }
 
-    output_var_displayed(){
+    output_var_displayed (){
         const output_var = this.model.get('_parameters')['output_var'];
         return !!(output_var && output_var['hide'] == false);
     }
 
-    activate_custom_buttons(){
-         this.el.querySelectorAll('.nbtools-buttons').forEach((box) => {
-             const buttons = this.model.get('buttons');
-             Object.keys(buttons).forEach((label) => {
-                 const button = new DOMParser().parseFromString(`<button>${label}</button>`, "text/html")
-                     .querySelector('button');
-                 const button_event = new Function(buttons[label]);
-                 button.addEventListener('click', button_event);
-                 box.prepend(button);
-             });
-         });
+    activate_custom_buttons (){
+        this.el.querySelectorAll('.nbtools-buttons').forEach((box) => {
+            const buttons = this.model.get('buttons');
+            Object.keys(buttons).forEach((label) => {
+                const button = new DOMParser().parseFromString(`<button>${label}</button>`, "text/html")
+                    .querySelector('button');
+                const button_event = new Function(buttons[label]);
+                button.addEventListener('click', button_event);
+                box.prepend(button);
+            });
+        });
     }
 
-    activate_run_buttons(){
+    activate_run_buttons (){
  
         var self  = this;
         this.el.querySelectorAll('.nbtools-run').forEach((button) => button.addEventListener('click', () => {
@@ -2116,7 +2115,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
          }));
     }
 
-    hide_run_buttons(hide){
+    hide_run_buttons (hide){
         var self  = this;
         this.el.querySelectorAll('.nbtools-run').forEach((button) =>{
             if (hide == true){
@@ -2127,7 +2126,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         });
     }
 
-    form_refresh_button(element){
+    form_refresh_button (element){
         var self  = this;
 
         var button = element.querySelector('.icon-btn.rerun-btn')
@@ -2141,15 +2140,21 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         });
     }
 
-    load_tabular_files(hid, data_url, ext){
+    load_tabular_files (hid, data_url, ext){
 
         console.log(ext)
         // Toolbox.add_code_cell(`from galaxylab import GalaxyTaskWidget\ndata = GalaxyTaskWidget.read_tabular_files(${JSON.stringify(data_url)})`);
-        KernelSideDataObjects(`from galaxylab import GalaxyTaskWidget\ndata_${hid} = GalaxyTaskWidget.read_datafiles_files(${JSON.stringify(data_url)}, ${JSON.stringify(ext)})`);
+        // KernelSideDataObjects(`from galaxylab import GalaxyTaskWidget\ndata_${hid} = GalaxyTaskWidget.read_datafiles_files(${JSON.stringify(data_url)}, ${JSON.stringify(ext)})`);
+        KernelSideDataObjects(`from galaxylab import GalaxyTaskWidget\ndata_${hid} = GalaxyTaskWidget.download_file_to_jupyter_server(${JSON.stringify(data_url)}, ${JSON.stringify(ext)})`);
         KernelSideDataObjects(`print('data_${hid}')`);
     }
 
-    attach_data_load_event(headnode, dataset, url, ext){
+    download_datafiles_to_server (data_url, file_name, ext){
+
+        KernelSideDataObjects(`from galaxylab import GalaxyTaskWidget\nGalaxyTaskWidget.download_file_to_jupyter_server(${JSON.stringify(data_url)}, ${JSON.stringify(file_name)}, ${JSON.stringify(ext)})`);
+    }
+
+    attach_data_load_event (headnode, dataset, url){
 
         var self = this
 
@@ -2159,39 +2164,70 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                             <div class="title" style="float: left; margin-top: 5px; margin-left: 5px; overflow-x: auto;" > 
                                  <span class="hid"><b>${dataset['hid']}</b>: </span> <span class="name" >Data <b>${dataset['name']}</b> loaded successfully, can be accessed inside the current notebook cell via <a href="javascript:void(0);" ><b style="color: white;"> data_${dataset['hid']}</b></a> variable. </span>
                             </div>
-                            <div class="primary-actions" style="float: right;"><a class="icon-btn delete-btn" title="" href="javascript:void(0);" data-original-title="Delete"><span class="fa fa-plus" style=""></span></a><a class="icon-btn delete-btn" title="" href="javascript:void(0);" data-original-title="Delete"><span class="fa fa-times" style=""></span></a></div>
+                            <div class="primary-actions" style="float: right; margin-top: 2px;"><a class="icon-btn delete-btn" title="" href="javascript:void(0);" data-original-title="Delete"><span class="fa fa-plus" style=""></span></a><a class="icon-btn delete-btn" title="" href="javascript:void(0);" data-original-title="Delete"><span class="fa fa-times" style=""></span></a></div>
                         </div>`
 
         const ok_details_html = new DOMParser().parseFromString(details, 'text/html').querySelector('.data-load-status')
 
         LoadButton.addEventListener('click', ()=>{
-
-            var  NbtoolsForm =  self.el.querySelector('.nbtools-form')
-            NbtoolsForm.append(ok_details_html)
-
-
-            this.load_tabular_files (dataset['hid'], url, ext)
+            // var  NbtoolsForm =  self.el.querySelector('.nbtools-form')
+            // NbtoolsForm.append(ok_details_html)
+            // this.load_tabular_files (dataset['hid'], url, dataset['name'])
+            this.download_datafiles_to_server(url, dataset['name'], dataset['extension'])
         });
 
-        var DeleteButton = ok_details_html.querySelector('.fa.fa-times')
+        // var DeleteButton = ok_details_html.querySelector('.fa.fa-times')
 
-        DeleteButton.addEventListener('click', () => {
-            ok_details_html.parentNode.removeChild(ok_details_html)
-            KernelSideDataObjects(`del data_${dataset['hid']}`);
-        })
+        // DeleteButton.addEventListener('click', () => {
+        //     ok_details_html.parentNode.removeChild(ok_details_html)
+        //     KernelSideDataObjects(`del data_${dataset['hid']}`);
+        // })
 
-        var AddCellButton = ok_details_html.querySelector('.fa.fa-plus')
+        // var AddCellButton = ok_details_html.querySelector('.fa.fa-plus')
 
-        AddCellButton.addEventListener('click', () => {
-    
-            Toolbox.add_code_cell(`data_${dataset['hid']}`);
-        })
-
-
-
-
-
-
-        
+        // AddCellButton.addEventListener('click', () => {
+        //     Toolbox.add_code_cell(`data_${dataset['hid']}`);
+        // })        
     }
+
+    add_display_application (display_apps, data) {
+
+         var url = this.model.get('GalInstance')['URL']
+
+        var apps1 = data['display_apps']
+        var apps2 = data['display_types']
+        var data = apps1.concat(apps2)
+
+        for (var i = 0; i < data.length; i++){
+
+            var display_app = document.createElement('div')
+            display_app.className = 'display-application'
+
+            var DisAppsSpan = document.createElement('span')
+            DisAppsSpan.className = 'display-application-location'
+            DisAppsSpan.innerText = data[i]['label']
+
+            var DisAppsSpanLink = document.createElement('span')
+            DisAppsSpanLink.className = 'display-application-links'
+
+            display_app.append(DisAppsSpan)
+            display_app.append(DisAppsSpanLink)
+            display_apps.append(display_app)
+
+            for (var j = 0; j < data[i]['links'].length; j++) {
+
+            var Link = document.createElement('a')
+            Link.target = data[i]['links'][j]['target']
+            Link.href = url+data[i]['links'][j]['href']
+            Link.innerText = data[i]['links'][j]['text']
+
+            DisAppsSpanLink.append(Link)
+
+            }
+        // <div class="display-application"><span class="display-application-location">data[i]['label']</span> <span class="display-application-links"><a target="_blank" href="data[i]['label']">View</a> </span></div>
+        }
+
+        return display_apps
+    }
+    
 }
