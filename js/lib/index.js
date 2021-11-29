@@ -5,7 +5,6 @@
 
 export * from './version';
 export * from './galaxyoutput';
-export * from './example1';
 export * from './Galaxyuibuilder';
 export * from './utils';
 export * from './model';
