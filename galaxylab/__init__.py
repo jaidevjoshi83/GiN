@@ -16,8 +16,6 @@ from .sessions import session, get_session
 from .uioutput import GalaxyUIOutput
 from .Galaxyuibuilder import GalaxyUIBuilder
 from .JobSubmit import Job
-
-from .example1 import GalaxyTools
 from ._version import __version__
 
 
