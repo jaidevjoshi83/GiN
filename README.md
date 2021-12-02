@@ -44,7 +44,7 @@ conda create -n galaxy-lab JupyterLab=3.0.7 ipywidgets=7.5.1 nodejs=14.15.1 yarn
     
     jupyter labextension develop . --overwrite
     
-    jupyter nbextension install --py nbtools --symlink
+    jupyter nbextension install --py nbtools --symlink --user
     
     jupyter nbextension enable nbtools --py
     
