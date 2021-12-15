@@ -59,10 +59,6 @@ A Custom Jupyter Widget Library
 Installation
 ------------
 
-To install use pip:
-
-    $ pip install galaxylab
-
 For a development installation (requires [Node.js](https://nodejs.org) and [Yarn version 1](https://classic.yarnpkg.com/)),
 
     $ git clone https://github.com/jaidevjoshi83/galaxylab.git -b galaxylab-js
