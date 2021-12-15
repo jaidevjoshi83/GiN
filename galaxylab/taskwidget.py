@@ -20,12 +20,8 @@ from time import sleep
 from ipywidgets import interactive
 import io
 import requests
-import pandas as pd
-
-from PIL import Image
-import requests
 from urllib.request import urlopen
-from Bio import SeqIO
+
 
 
 class GalaxyTaskWidget(GalaxyUIBuilder):
