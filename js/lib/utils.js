@@ -1,4 +1,4 @@
-import { ContextManager } from '@genepattern/nbtools';
+import { ContextManager } from '@genepattern/nbtools/lib/context';
 
 /**
  * Send a browser notification
