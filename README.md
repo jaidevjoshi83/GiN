@@ -75,7 +75,7 @@ For a development installation (requires [Node.js](https://nodejs.org) and [Yarn
     
 Install bioblend API,
 
-    $ git clone -b build_tool_api https://github.com/jaidevjoshi83/bioblend.git
+    $ git clone -b  build_function https://github.com/jaidevjoshi83/bioblend.git
     $ cd bioblend
     $ pip instal .
 
