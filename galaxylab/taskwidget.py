@@ -110,7 +110,7 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
         if (Tool_inputs != None) and (toolID != None):
 
             NewInputs = GalaxyTaskWidget.RefinedInputs(Tool_inputs, gi)
-            inputs = gi.gi.tools.gi.tools.build_tool(tool_id=toolID, inputs=NewInputs, history_id=HistoryID)
+            inputs = gi.gi.tools.gi.tools.build(tool_id=toolID, inputs=NewInputs, history_id=HistoryID)
 
             if InputDataParam == False:
                 return IPython.display.JSON(data=inputs)
@@ -119,7 +119,7 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
 
         elif (Tool_inputs == None) and (toolID != None):
 
-            inputs = gi.gi.tools.gi.tools.build_tool(tool_id=toolID, history_id=HistoryID)
+            inputs = gi.gi.tools.gi.tools.build(tool_id=toolID, history_id=HistoryID)
             return IPython.display.JSON(data=inputs)
 
         else:
@@ -223,7 +223,7 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
                             }
 
             History_IDs = self.tool.gi.histories.gi.histories.get_histories()
-            inputs = self.tool.gi.tools.gi.tools.build_tool(tool_id=tool.wrapped['id'], history_id=History_IDs[0]['id'] )
+            inputs = self.tool.gi.tools.gi.tools.build(tool_id=tool.wrapped['id'], history_id=History_IDs[0]['id'] )
             HistoryData = GalaxyTaskWidget.UpdateForm(GalInstance=self.GalInstance, HistoryID=History_IDs[0]['id'], Python_side=True)    
 
             GalaxyUIBuilder.__init__(self, inputs=inputs,ToolID=self.tool.wrapped['id'], History_IDs=History_IDs, HistoryData=HistoryData, GalInstance=self.GalInstance,
