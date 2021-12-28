@@ -59,13 +59,15 @@ A Custom Jupyter Widget Library
 Installation
 ------------
 
-To install use pip:
+Install bioblend API,
 
-    $ pip install galaxylab
+    $ git clone -b  build_function https://github.com/jaidevjoshi83/bioblend.git
+    $ cd bioblend
+    $ pip instal .
 
 For a development installation (requires [Node.js](https://nodejs.org) and [Yarn version 1](https://classic.yarnpkg.com/)),
 
-    $ git clone https://github.com/jaidevjoshi83/galaxylab.git -b galaxylab-js
+    $ git clone https://github.com/jaidevjoshi83/galaxylab.git 
     $ cd galaxylab/js
     $ yalc add @genepattern/nbtools
     $ cd ..
@@ -73,12 +75,6 @@ For a development installation (requires [Node.js](https://nodejs.org) and [Yarn
     $ jupyter nbextension install --py --symlink --overwrite --sys-prefix galaxylab
     $ jupyter nbextension enable --py --sys-prefix galaxylab
     
-Install bioblend API,
-
-    $ git clone -b  build_function https://github.com/jaidevjoshi83/bioblend.git
-    $ cd bioblend
-    $ pip instal .
-
 When actively developing your extension for JupyterLab, run the command:
 
     $ jupyter labextension develop --overwrite galaxylab
@@ -89,4 +85,3 @@ Then you need to rebuild the JS when you make a code change:
     $ yarn run build
 
 You then need to refresh the JupyterLab page when your javascript changes.
-
