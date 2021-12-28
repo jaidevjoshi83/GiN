@@ -61,7 +61,7 @@ Installation
 
 For a development installation (requires [Node.js](https://nodejs.org) and [Yarn version 1](https://classic.yarnpkg.com/)),
 
-    $ git clone https://github.com/jaidevjoshi83/galaxylab.git -b galaxylab-js
+    $ git clone https://github.com/jaidevjoshi83/galaxylab.git 
     $ cd galaxylab/js
     $ yalc add @genepattern/nbtools
     $ cd ..
