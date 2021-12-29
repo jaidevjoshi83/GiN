@@ -5,6 +5,7 @@ from .sessions import session
 #from .shim import login, system_message
 from .taskwidget import TaskTool
 from .util import DEFAULT_COLOR, DEFAULT_LOGO
+from urllib.error import HTTPError
 
 
 GALAXY_SERVERS = {
@@ -83,14 +84,20 @@ class GalaxyAuthWidget(UIBuilder):
 
     def login(self, server, email, password):
         """Login to the Galaxy server"""
-        self.session = GalaxyInstance(server, email=email, password=password)
-        self.session._notebook_url = server
-        self.session._notebook_email = email
-        self.session._notebook_password = password
 
-        # Validate the provided credentials
-        if self.validate_credentials(self.session):
-            self.replace_widget()
+        try:
+            self.session = GalaxyInstance(server, email=email, password=password)
+            self.session._notebook_url = server
+            self.session._notebook_email = email
+            self.session._notebook_password = password
+            # Validate the provided credentials
+            if self.validate_credentials(self.session):
+                self.replace_widget()
+        except HTTPError:
+            self.error = 'Invalid username or password. Please try again.'
+        except BaseException as e:
+            self.error = str(e)
+
 
     def has_credentials(self):
         """Test whether the session object is instantiated and whether an email and password have been provided"""
@@ -106,11 +113,13 @@ class GalaxyAuthWidget(UIBuilder):
         try:
             if session is not None and session.gi.key:
                 return True
-        except HTTPError:
-            self.error = 'Invalid username or password. Please try again.'
-            return False
-        except BaseException as e:
-            self.error = str(e)
+        except:
+            pass
+        # except HTTPError:
+        #     self.error = 'Invalid username or password. Please try again.'
+        #     return False
+        # except BaseException as e:
+        #     self.error = str(e)
         return False
 
     def replace_widget(self):
