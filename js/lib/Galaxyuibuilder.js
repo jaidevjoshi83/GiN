@@ -1842,7 +1842,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 StdError.style.background = '#c2ebc2'               
 
                 var JobDoneText = this.el.querySelector(".job-state-text")
-                JobDoneText.innerText = 'Job queued'
+                JobDoneText.innerText = 'Job complete'
 
                 var gearrotate = this.el.querySelector('.gear-rotate-icon')
                 gearrotate.style.display = 'none'

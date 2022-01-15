@@ -48,13 +48,11 @@ class GalaxyAuthWidget(UIBuilder):
             'email': {
                 'name': 'Email',
                 'sendto': False,
-                'default':'jaidev53ster@gmail.com'
             },
             'password': {
                 'name': 'Password',
                 'type': 'password',
                 'sendto': False,
-                'default':'12212283.j'
             }
         }
     }
