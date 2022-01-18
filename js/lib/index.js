@@ -6,6 +6,5 @@
 export * from './version';
 export * from './galaxyoutput';
 export * from './Galaxyuibuilder';
+export * from './FileUpload'
 export * from './utils';
-export * from './model';
-export * from './historydata';

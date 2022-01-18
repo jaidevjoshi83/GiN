@@ -7,12 +7,11 @@ import { ToolRegistry}  from '@genepattern/nbtools'
 import { ContextManager } from '@genepattern/nbtools/lib/context';
 import * as galaxyuioutput_exports from './galaxyoutput';
 import * as galaxyuibuilder_exports from './Galaxyuibuilder';
-import * as utils_exports from './utils';
-import * as model_exports from './model'
-import * as historydata_export from './historydata'
+import * as utils_exports from './utils'
+import * as fileupload from './FileUpload'
 import { MODULE_NAME, MODULE_VERSION } from './version';
 
-const module_exports = Object.assign(Object.assign(Object.assign(Object.assign(Object.assign({},   galaxyuioutput_exports), galaxyuibuilder_exports), utils_exports),model_exports),  historydata_export);
+const module_exports = Object.assign(Object.assign(Object.assign(Object.assign({},   galaxyuioutput_exports), galaxyuibuilder_exports), utils_exports));
 
 
 const EXTENSION_ID = 'galaxylab:plugin';
