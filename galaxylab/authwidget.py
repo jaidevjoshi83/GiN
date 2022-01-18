@@ -91,6 +91,7 @@ class GalaxyAuthWidget(UIBuilder):
             # Validate the provided credentials
             if self.validate_credentials(self.session):
                 self.replace_widget()
+                ToolManager.instance().register(UploadData())
         except HTTPError:
             self.error = 'Invalid username or password. Please try again.'
         except BaseException as e:
@@ -132,11 +133,20 @@ class GalaxyAuthWidget(UIBuilder):
 
     def register_modules(self):
         """Get the list available modules (currently only tools) and register widgets for them with the tool manager"""
-        for tool in self.session.tools.list():
-            tool = self.session.tools.get(tool.id, io_details=True)
-            tool = TaskTool(server_name(self.session._notebook_url), tool)
-            ToolManager.instance().register(tool)
-   
+        url = self.session._notebook_url
+
+        # print(dir(self.session.tools.gi.tools.get_tool_panel()))
+
+        for section in self.session.tools.gi.tools.get_tool_panel():
+            if section['model_class'] == 'ToolSection':
+                for tool in section['elems']:
+                    try:
+                        tool['gi']=self.session.tools.gi
+                        tool = TaskTool(server_name(url), tool)
+                        ToolManager.instance().register(tool)
+                    except:
+                        pass
+
     def system_message(self):
         self.info = "Successfully logged into Galaxy"
 
@@ -161,6 +171,15 @@ class AuthenticationTool(NBTool):
     description = 'Log into a Galaxy server'
     load = lambda x: GalaxyAuthWidget()
 
+class UploadData(NBTool):
+    """Tool wrapper for the authentication widget"""
+    origin = '+'
+    id = 'Galaxylab_Upload_Data'
+    name = 'Upload Data'
+    description = 'Upload Datafilis to galaxy history'
+    load = lambda x: GalaxyUIBuilder()
+
 
 # Register the authentication widget
 ToolManager.instance().register(AuthenticationTool())
+
