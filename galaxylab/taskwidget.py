@@ -214,19 +214,19 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
             self.tool = tool
 
             self.GalInstance= { 
-                                "API_key":  self.tool.gi.gi._key,
-                                "email_ID": self.tool.gi.gi.users.get_current_user()['email'],
-                                "URL":      self.tool.gi.gi.base_url,
-                                "tool_ID": self.tool.wrapped['id'],
-                                "tool_name": self.tool.wrapped['name'],
-                                "tool_description": self.tool.wrapped['description'],
+                                "API_key":  self.tool['gi']._key,
+                                "email_ID": self.tool['gi'].users.get_current_user()['email'],
+                                "URL":      self.tool['gi'].base_url,
+                                "tool_ID": self.tool['id'],
+                                "tool_name": self.tool['name'],
+                                "tool_description": self.tool['description'],
                             }
 
-            History_IDs = self.tool.gi.histories.gi.histories.get_histories()
-            inputs = self.tool.gi.tools.gi.tools.build(tool_id=tool.wrapped['id'], history_id=History_IDs[0]['id'] )
+            History_IDs = self.tool['gi'].histories.gi.histories.get_histories()
+            inputs = self.tool['gi'].tools.gi.tools.build(tool_id=tool['id'], history_id=History_IDs[0]['id'] )
             HistoryData = GalaxyTaskWidget.UpdateForm(GalInstance=self.GalInstance, HistoryID=History_IDs[0]['id'], Python_side=True)    
 
-            GalaxyUIBuilder.__init__(self, inputs=inputs,ToolID=self.tool.wrapped['id'], History_IDs=History_IDs, HistoryData=HistoryData, GalInstance=self.GalInstance,
+            GalaxyUIBuilder.__init__(self, inputs=inputs,ToolID=self.tool['id'], History_IDs=History_IDs, HistoryData=HistoryData, GalInstance=self.GalInstance,
                             color=self.default_color,
                             logo=self.default_logo,
                         **kwargs)
@@ -244,7 +244,7 @@ class TaskTool(NBTool):
     def __init__(self, server_name, tool):
         NBTool.__init__(self)
         self.origin = server_name
-        self.id = tool.wrapped['id']
-        self.name = tool.wrapped['name']
-        self.description = tool.wrapped['description']
+        self.id = tool['id']
+        self.name = tool['name']
+        self.description = tool['description']
         self.load = lambda: GalaxyTaskWidget(tool)
