@@ -90,8 +90,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
  
     Main_Form(inputs, call_back_data={}) {
 
-        console.log(inputs)
-
         var FormParent = this.el.querySelector('.Galaxy-form');
 
         // if (this.model.get('inputs')['id'] != 'galaxylab_data_upload_tool') {
@@ -262,7 +260,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 this.AddDrill_Down(input_def, FormParent, NamePrefix)
                 break
             case "data_upload":
-                console.log('Working')
                 this.DataUpload(FormParent)
                 break
         }
@@ -438,29 +435,26 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         var data_upload = `
                         <div class="upload_tab">
                            <div class="tab">
-                                <button class="tablinks" >Upload</button>
-                                <button class="tablinks">From URL</button>
-                                <button class="tablinks">Create data</button>
+                                <button type="button" class="tablinks" >Upload</button>
+                                <button type="button" class="tablinks">From URL</button>
+                                <button type="button" class="tablinks">Create data</button>
                            </div>
 
                             <!-- Tab content -->
                             <div id="upload" class="tabcontent">
-                                <h3>Upload</h3>
-                                <p>Upload file to the Galaxy server.</p>
-                                <input type="file" style="display: block" name="avatar" >
+                                <p><b>Upload file to the Galaxy server.</b></p>
+                                <input class="input_upload" type="file" style="display: block" >
                             </div>
                           
                             <div id="from_url" class="tabcontent">
-                                <h3>From Url</h3>
-                                <p>Upload file from a Url to the Galaxy server.</p> 
-                                <input  style="display: block" name="avatar" >
+                                <p><b>Upload file from a URL to the Galaxy server.</b></p> 
+                                <input class="input_upload" style="display: block" >
                             </div>
                             
                             <div id="create_data" class="tabcontent">
-                                <h3>Create data</h3>
-                                <p>Create a data file and upload to the Galaxy server.</p>
-                                <textarea id="w3review" name="w3review" rows="4" cols="50">
-                                At w3schools.com you will learn how to make a website. They offer free tutorials in all web development technologies.
+                                <p><b>Create a data file and upload to the Galaxy server.</b></p>
+                                <textarea class="input_upload" style="height: 30vh; width: 45vw;" >
+                                Example test for testing
                                 </textarea>
                             </div>
 
@@ -475,6 +469,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
 
         List.forEach((button) => button.addEventListener('click', () => {
+
 
             if (button.innerText  == 'From URL') {
                 utm.querySelector('#upload').style.display  = 'none'
@@ -497,11 +492,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         var datatypes_genomes = await KernelSideDataObjects(`from galaxylab import GalaxyTaskWidget\nGalaxyTaskWidget.get_data_type_and_genomes(GalInstance=${JSON.stringify(this.model.get('GalInstance'))})`)
 
-        console.log(datatypes_genomes)
-
-
         var datatypeSelect = document.createElement('select')
-        datatypeSelect.className = 'datatypes'
+        datatypeSelect.className = 'datatypes_options'
 
         for(var i = 0; i < datatypes_genomes['datatypes'].length; i++) {
             const opt = datatypes_genomes['datatypes'][i];
@@ -512,7 +504,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         }
 
         var genomeSelect = document.createElement('select')
-        genomeSelect.className = 'genomes'
+        genomeSelect.className = 'genomes_options'
 
         for(var i = 0; i < datatypes_genomes['genomes'].length; i++) {
             const opt = datatypes_genomes['genomes'][i][0];
@@ -528,13 +520,45 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         var genomes_title = document.createElement('p')
         genomes_title.innerText = 'Genomes'
 
-
         utm.append(datatype_title)
         utm.append(datatypeSelect)
         utm.append(genomes_title)
         utm.append(genomeSelect)
 
         FormParent.append(utm)
+
+    }
+
+   async dataupload_job() {
+
+        var children = this.element.querySelector('.Galaxy-form');
+
+        console.log(children)
+
+
+        var upload_link 
+        var  upload_method
+
+
+        for (var i = 0; i < children.querySelectorAll('.tabcontent').length; i++ ) {
+            if (children.querySelectorAll('.tabcontent')[i].style.display == 'block') {
+                upload_link = children.querySelectorAll('.tabcontent')[i].querySelector('.input_upload').value
+                upload_method = children.querySelectorAll('.tabcontent')[i].querySelector('.input_upload').type
+
+                console.log(upload_method, upload_link) 
+            }
+        }
+
+
+        var datatype = children.querySelector('.datatypes_options').value
+        var genome = children.querySelector('.genomes_options').value
+        var history_id = children.querySelector('#History_IDs').value
+
+            
+
+        var InitialData = await KernelSideDataObjects(`from galaxylab import GalaxyTaskWidget\nGalaxyTaskWidget.upload_dataset(file_path=${JSON.stringify(upload_link)}, upload_method=${JSON.stringify(upload_method)}, datatype=${JSON.stringify(datatype)}, genome=${JSON.stringify(genome)}, GalInstance=${JSON.stringify(this.model.get('GalInstance'))}, HistoryID=${JSON.stringify(history_id)} )`);
+
+        console.log('ok1')
 
 
     }
@@ -2226,16 +2250,26 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         var children = self.element.querySelector('.Galaxy-form').children;
         var Inputs = self.ReturnData(children)
 
-        // if (this.model.get('inputs')['id'] != 'galaxylab_data_upload_tool') {
+        if (this.model.get('inputs')['id'] == 'galaxylab_data_upload_tool') {
 
-        this.AddJobStatusWidget(Inputs, HistoryID)
+            console.log('ok')
 
-        // }
+            this.dataupload_job()
+           
+        } else {
 
+            this.AddJobStatusWidget(Inputs, HistoryID)
+
+        }
+
+       
         
-
+        //else if (this.model.get('inputs')['id'] == 'galaxylab_data_upload_tool') {
+        //    console.log('ok')
+        // }
         //  if (this.model.get('collapse'))
         //      this.el.querySelector('.nbtools-collapse').click();
+
          }));
     }
 
