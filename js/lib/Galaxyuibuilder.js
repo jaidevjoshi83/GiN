@@ -93,9 +93,11 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         console.log(inputs)
 
         var FormParent = this.el.querySelector('.Galaxy-form');
+
+        // if (this.model.get('inputs')['id'] != 'galaxylab_data_upload_tool') {
         var HistList = this.AddHistoryList(call_back_data['HID'])
         FormParent.append(HistList)
-
+        // }
         var self = this
         _.each(inputs, (input) => {
         //  console.log(selected_value)
@@ -258,6 +260,10 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 break
             case "drill_down":
                 this.AddDrill_Down(input_def, FormParent, NamePrefix)
+                break
+            case "data_upload":
+                console.log('Working')
+                this.DataUpload(FormParent)
                 break
         }
     }
@@ -427,6 +433,112 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         return row
     }
 
+    async DataUpload(FormParent) {
+
+        var data_upload = `
+                        <div class="upload_tab">
+                           <div class="tab">
+                                <button class="tablinks" >Upload</button>
+                                <button class="tablinks">From URL</button>
+                                <button class="tablinks">Create data</button>
+                           </div>
+
+                            <!-- Tab content -->
+                            <div id="upload" class="tabcontent">
+                                <h3>Upload</h3>
+                                <p>Upload file to the Galaxy server.</p>
+                                <input type="file" style="display: block" name="avatar" >
+                            </div>
+                          
+                            <div id="from_url" class="tabcontent">
+                                <h3>From Url</h3>
+                                <p>Upload file from a Url to the Galaxy server.</p> 
+                                <input  style="display: block" name="avatar" >
+                            </div>
+                            
+                            <div id="create_data" class="tabcontent">
+                                <h3>Create data</h3>
+                                <p>Create a data file and upload to the Galaxy server.</p>
+                                <textarea id="w3review" name="w3review" rows="4" cols="50">
+                                At w3schools.com you will learn how to make a website. They offer free tutorials in all web development technologies.
+                                </textarea>
+                            </div>
+
+                        </div>`
+
+
+        const utm = new DOMParser().parseFromString(data_upload, 'text/html').querySelector('.upload_tab')
+        var List = utm.querySelectorAll('.tablinks')
+
+        utm.querySelector('#upload').style.display  = 'block'
+
+
+
+        List.forEach((button) => button.addEventListener('click', () => {
+
+            if (button.innerText  == 'From URL') {
+                utm.querySelector('#upload').style.display  = 'none'
+                utm.querySelector('#from_url').style.display  = 'block'
+                utm.querySelector('#create_data').style.display  = 'none'
+
+            } else if (button.innerText  == 'Create data') {
+                utm.querySelector('#upload').style.display  = 'none'
+                utm.querySelector('#from_url').style.display  = 'none'
+                utm.querySelector('#create_data').style.display  = 'block'                
+            } else if (button.innerText  == 'Upload') {
+
+                utm.querySelector('#upload').style.display  = 'block'
+                utm.querySelector('#from_url').style.display  = 'none'
+                utm.querySelector('#create_data').style.display  = 'none'
+            }
+
+        }));
+
+
+        var datatypes_genomes = await KernelSideDataObjects(`from galaxylab import GalaxyTaskWidget\nGalaxyTaskWidget.get_data_type_and_genomes(GalInstance=${JSON.stringify(this.model.get('GalInstance'))})`)
+
+        console.log(datatypes_genomes)
+
+
+        var datatypeSelect = document.createElement('select')
+        datatypeSelect.className = 'datatypes'
+
+        for(var i = 0; i < datatypes_genomes['datatypes'].length; i++) {
+            const opt = datatypes_genomes['datatypes'][i];
+            const el = document.createElement("option");
+            el.textContent = opt;
+            el.value =  datatypes_genomes['datatypes'][i];;
+            datatypeSelect.appendChild(el);
+        }
+
+        var genomeSelect = document.createElement('select')
+        genomeSelect.className = 'genomes'
+
+        for(var i = 0; i < datatypes_genomes['genomes'].length; i++) {
+            const opt = datatypes_genomes['genomes'][i][0];
+            const el = document.createElement("option");
+            el.textContent = opt;
+            el.value =  datatypes_genomes['genomes'][i][1];;
+            genomeSelect.appendChild(el);
+        }
+
+        var datatype_title = document.createElement('p')
+        datatype_title.innerText = 'Datatypes'
+
+        var genomes_title = document.createElement('p')
+        genomes_title.innerText = 'Genomes'
+
+
+        utm.append(datatype_title)
+        utm.append(datatypeSelect)
+        utm.append(genomes_title)
+        utm.append(genomeSelect)
+
+        FormParent.append(utm)
+
+
+    }
+
     async AddOutPutDataTable( JobID){
 
         var InitialData = await KernelSideDataObjects(`from galaxylab import GalaxyTaskWidget\nGalaxyTaskWidget.OutPutData(GalInstance=${JSON.stringify(this.model.get('GalInstance'))}, JobID=${JSON.stringify(JobID)} )`);
@@ -468,18 +580,15 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             }, false)
 
             DataTableElement.addEventListener("dragstart", function(event) {
-                // store a ref. on the dragged elem
+
                 self.dragged = event.target;
-                // make it half transparent
-                // event.target.style.opacity = .5;
+
                 }, false);
 
             DataTable.append(DataTableElement)
         }
 
         var OutPutDataSection =  this.el.querySelector('.output-file-names')
-
-
         OutPutDataSection.append(DataTable)
 
         return Dt
@@ -527,15 +636,10 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             select.addEventListener("change", async (event)=> {
 
                 var ListItem = DataHistoryList.querySelector('.list-item')
-
-                // self.removeAllChildNodes(FormParent)
-               
                 ListItem.parentNode.removeChild(ListItem)
-
                 DataHistoryList.append(await self.data_row_list(self.model.get('GalInstance'), options[select.selectedIndex]['id']))
         
-        
-                    }, false);
+                }, false);
     
             return DataHistoryList
     }
@@ -579,27 +683,30 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
  
             var HistoryID = select.value
 
-            var children = self.element.querySelector('.Galaxy-form').children;
-            var Inputs = self.ReturnData(children)
+            if (this.model.get('inputs')['id'] != 'galaxylab_data_upload_tool') {
 
-            var refine_inputs  = await KernelSideDataObjects(`from galaxylab import GalaxyTaskWidget\nGalaxyTaskWidget.UpdateForm(${JSON.stringify(self.model.get('GalInstance'))}, ${JSON.stringify(Inputs)}, ${JSON.stringify(self.model.get('ToolID'))}, ${JSON.stringify(HistoryID)})`)
+                var children = self.element.querySelector('.Galaxy-form').children;
+                var Inputs = self.ReturnData(children)
 
-            var FormParent = self.el.querySelector('.Galaxy-form')                        
-            self.removeAllChildNodes(FormParent)
+                var refine_inputs  = await KernelSideDataObjects(`from galaxylab import GalaxyTaskWidget\nGalaxyTaskWidget.UpdateForm(${JSON.stringify(self.model.get('GalInstance'))}, ${JSON.stringify(Inputs)}, ${JSON.stringify(self.model.get('ToolID'))}, ${JSON.stringify(HistoryID)})`)
 
-            const Button = document.createElement('button')
-            Button.style.display = 'none'
-            Button.type = 'button'
-            Button.id = 'submit'
-            Button.className  = 'Galaxy-form-button'
-    
-            FormParent.append(Button)
+                var FormParent = self.el.querySelector('.Galaxy-form')                        
+                self.removeAllChildNodes(FormParent)
 
-            var SelectedIndex = {}
-            SelectedIndex['HID'] = select.selectedIndex
+                const Button = document.createElement('button')
+                Button.style.display = 'none'
+                Button.type = 'button'
+                Button.id = 'submit'
+                Button.className  = 'Galaxy-form-button'
+        
+                FormParent.append(Button)
 
-            self.Main_Form(refine_inputs['inputs'],  SelectedIndex)
+                var SelectedIndex = {}
+                SelectedIndex['HID'] = select.selectedIndex
 
+                self.Main_Form(refine_inputs['inputs'],  SelectedIndex)
+            }
+            console.log(HistoryID)
         });
 
         return HistoryList
@@ -1771,10 +1878,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         var states = ['ok', 'error']
 
-
         for (let i = 0; i < Infinity; ++i) {
-
-            // var os = await KernelSideDataObjects(`from galaxylab import GalaxyTaskWidget\nGalaxyTaskWidget.TestOut(GalInstance=${JSON.stringify(this.model.get('GalInstance'))}, JobID=${JSON.stringify(job['id'])} )`);
 
             var data = await KernelSideDataObjects(`from galaxylab import GalaxyTaskWidget\nGalaxyTaskWidget.OutPutData(GalInstance=${JSON.stringify(this.model.get('GalInstance'))}, JobID=${JSON.stringify(job['id'])} )`);
 
@@ -2122,7 +2226,13 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         var children = self.element.querySelector('.Galaxy-form').children;
         var Inputs = self.ReturnData(children)
 
+        // if (this.model.get('inputs')['id'] != 'galaxylab_data_upload_tool') {
+
         this.AddJobStatusWidget(Inputs, HistoryID)
+
+        // }
+
+        
 
         //  if (this.model.get('collapse'))
         //      this.el.querySelector('.nbtools-collapse').click();
@@ -2179,8 +2289,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                         </div>`
 
         const ok_details_html = new DOMParser().parseFromString(details, 'text/html').querySelector('.data-load-status')
-
-        console.log(LoadButton)
 
         LoadButton.addEventListener('click', ()=>{
             // var  NbtoolsForm =  self.el.querySelector('.nbtools-form')

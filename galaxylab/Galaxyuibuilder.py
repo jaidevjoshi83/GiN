@@ -37,7 +37,7 @@ class GalaxyUIBuilder(BaseWidget, NBTool):
     UI =  Dict(sync=True)
     ToolID = Unicode(sync=True)
 
-    def __init__(self, inputs,ToolID, History_IDs, HistoryData, GalInstance,   **kwargs):
+    def __init__(self, ToolID, History_IDs, inputs={},  GalInstance={},  HistoryData=[], **kwargs):
 
         self._apply_defaults()
         self.inputs = inputs
@@ -51,11 +51,17 @@ class GalaxyUIBuilder(BaseWidget, NBTool):
 
     def _apply_defaults(self, function_or_method=None):
         # Set the name based on the function name
-        self.name = self.GalInstance['tool_name'] #function_or_method.__qualname__
-        self.id = self.GalInstance['tool_ID'] #function_or_method.__qualname__
 
-        # Set the description based on the docstring
-        self.description = self.GalInstance['tool_description']
+        if self.GalInstance == {}:
+            self.name = 'Data Upload Tool' #function_or_method.__qualname__
+            self.id = 'Galaxylab_Upload_Data'
+            self.description = 'data upload tool'
+        else:
+            self.name = self.GalInstance['tool_name']
+            self.id = self.GalInstance['tool_ID'] #function_or_method.__qualname__
+
+            # Set the description based on the docstring
+            self.description = self.GalInstance['tool_description']
 
         # Set the origin based on the package name or "Notebook"
         # self.origin = 'Notebook' if function_or_method.__module__ == '__main__' else function_or_method.__module__

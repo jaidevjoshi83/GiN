@@ -65,12 +65,26 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
         NewInputs = GalaxyTaskWidget.RefinedInputs(tool_inputs, gi)
         job = gi.tools.gi.tools.run_tool(history_id=HistoryID, tool_id=GalInstance['tool_ID'], tool_inputs=NewInputs)
         showJob = gi.jobs.gi.jobs.show_job(job['jobs'][0]['id'],full_details=True)
-        print('#################showJob################')
-        # print(showJob)
-        print('#################showJob################')
-
 
         return IPython.display.JSON(showJob)
+
+    def get_data_type_and_genomes(GalInstance=None):
+
+        gi = GalaxyInstance(GalInstance['URL'], email=GalInstance['email_ID'], api_key=GalInstance['API_key'], verify=True)
+
+        data_types = gi.gi.datatypes.get_datatypes()
+        genomes = gi.gi.genomes.get_genomes()
+
+        datatypes_genomes = {'datatypes': data_types, 'genomes': genomes}
+
+        return IPython.display.JSON(datatypes_genomes)
+
+
+    def upload_dataset(GalInstance=None, Tool_inputs=None, HistoryID=None):
+        gi = GalaxyInstance(GalInstance['URL'], email=GalInstance['email_ID'], api_key=GalInstance['API_key'], verify=True)
+        h = gi.histories.gi.histories.get_histories()[0]
+        a = g.History(h, gi=gi)
+        a.upload_dataset(path='/Users/joshij/Desktop/non_ACPs.fasta')
 
     def TestOut(GalInstance=None, JobID=None):
         gi = GalaxyInstance(GalInstance['URL'], email=GalInstance['email_ID'], api_key=GalInstance['API_key'], verify=True)
@@ -85,7 +99,6 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
         DataList = []
 
         for i in showJob['outputs'].keys():
-            print('#############')
             DataList.append(gi.gi.datasets.gi.datasets.show_dataset(dataset_id=showJob['outputs'][i]['id'],hda_ldda=showJob['outputs'][i]['src']))
 
         return IPython.display.JSON(DataList)
@@ -187,8 +200,6 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
             gi = GalaxyInstance(GalInstance['URL'], email=GalInstance['email_ID'], api_key=GalInstance['API_key'], verify=True)
             gi.gi.dataset_collections.download_dataset_collection(dataset_collection_id=collection_id, file_path=file_path)
         else:
-
-            print('dataset')
             response = urlopen(data_url)
             data = response.read()
             f = open(os.path.join(galaxy_data, file_name)+'.'+ext, 'wb')
@@ -204,6 +215,9 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
         self.error = error_message
 
     def __init__(self, tool=None, **kwargs):
+
+
+        upload_tool_spec = {}
 
         """Initialize the task widget"""
 
@@ -223,7 +237,14 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
                             }
 
             History_IDs = self.tool['gi'].histories.gi.histories.get_histories()
-            inputs = self.tool['gi'].tools.gi.tools.build(tool_id=tool['id'], history_id=History_IDs[0]['id'] )
+
+            if self.tool['id'] == 'galaxylab_data_upload_tool':
+                # inputs = {'model_class': 'Tool', 'id': 'bed_to_bigBed', 'name': 'BED-to-bigBed', 'version': '1.0.1', 'description': 'converter', 'labels': [], 'edam_operations': ['operation_3434'], 'edam_topics': [], 'hidden': '', 'is_workflow_compatible': True, 'xrefs': [], 'config_file': '/Users/joshij/galaxy/tools/filters/bed_to_bigbed.xml', 'panel_section_id': 'convert', 'panel_section_name': 'Convert Formats', 'form_style': 'regular', 'inputs': [{'model_class': 'DataToolParameter', 'name': 'input1', 'argument': None, 'type': 'data', 'label': 'Convert', 'help': '', 'refresh_on_change': True, 'optional': False, 'hidden': False, 'is_dynamic': False, 'value': None, 'extensions': ['bed'], 'edam': {'edam_formats': ['format_3003'], 'edam_data': ['data_3002']}, 'multiple': False, 'options': {'hda': [], 'hdca': []}, 'default_value': None, 'text_value': 'No dataset.'}, {'model_class': 'Conditional', 'name': 'settings', 'type': 'conditional', 'cases': [{'model_class': 'ConditionalWhen', 'value': 'preset', 'inputs': []}, {'model_class': 'ConditionalWhen', 'value': 'full', 'inputs': [{'model_class': 'IntegerToolParameter', 'name': 'blockSize', 'argument': None, 'type': 'integer', 'label': 'Items to bundle in r-tree', 'help': 'Default is 256 (blockSize)', 'refresh_on_change': False, 'min': None, 'max': None, 'optional': False, 'hidden': False, 'is_dynamic': False, 'value': '256', 'area': False, 'datalist': [], 'default_value': '256', 'text_value': '256'}, {'model_class': 'IntegerToolParameter', 'name': 'itemsPerSlot', 'argument': None, 'type': 'integer', 'label': 'Data points bundled at lowest level', 'help': 'Default is 512 (itemsPerSlot)', 'refresh_on_change': False, 'min': None, 'max': None, 'optional': False, 'hidden': False, 'is_dynamic': False, 'value': '512', 'area': False, 'datalist': [], 'default_value': '512', 'text_value': '512'}, {'model_class': 'BooleanToolParameter', 'name': 'unc', 'argument': None, 'type': 'boolean', 'label': 'Do not use compression', 'help': '(unc)', 'refresh_on_change': False, 'optional': False, 'hidden': False, 'is_dynamic': False, 'value': 'false', 'truevalue': '-unc', 'falsevalue': '', 'default_value': 'false', 'text_value': 'false'}]}], 'test_param': {'model_class': 'SelectToolParameter', 'name': 'settingsType', 'argument': None, 'type': 'select', 'label': 'Converter settings to use', 'help': 'Default settings should usually be used.', 'refresh_on_change': True, 'optional': False, 'hidden': False, 'is_dynamic': False, 'value': 'preset', 'options': [['Default', 'preset', False], ['Full parameter list', 'full', False]], 'display': None, 'multiple': False, 'textable': False, 'text_value': 'Default'}}], 'help': '<p>Upload data tool</p>\n<p>This tool uploads data to the selected history of the Galaxy server. User can select file from the local machine, data can be fetch directly from the URL or can be generated by available UI and uploaded to the server.</p>\n', 'citations': False, 'sharable_url': None, 'message': '', 'warnings': '', 'versions': ['1.0.1'], 'requirements': [{'name': 'ucsc-bedtobigbed', 'version': '357'}], 'errors': {'input1': "parameter 'input1': specify a dataset of the required format / build for parameter"}, 'tool_errors': None, 'state_inputs': {'input1': None, 'settings': {'settingsType': 'preset', '__current_case__': 0}}, 'job_id': None, 'job_remap': None, 'history_id': '417e33144b294c21', 'display': True, 'action': '/tool_runner/index', 'license': None, 'creator': None, 'method': 'post', 'enctype': 'application/x-www-form-urlencoded'}
+                inputs = {'id':'galaxylab_data_upload_tool', 'inputs': [{'model_class': 'DataToolParameter', 'name': 'input1',  'type': 'data_upload'}], 'help': '<p>Upload data tool</p>\n<p>This tool uploads data to the selected history of the Galaxy server. User can select file from the local machine, data can be fetch directly from the URL or can be generated by available UI and uploaded to the server.</p>\n'}  
+                print(inputs['inputs'])
+            else:
+                inputs = self.tool['gi'].tools.gi.tools.build(tool_id=tool['id'], history_id=History_IDs[0]['id'] )
+
             HistoryData = GalaxyTaskWidget.UpdateForm(GalInstance=self.GalInstance, HistoryID=History_IDs[0]['id'], Python_side=True)    
 
             GalaxyUIBuilder.__init__(self, inputs=inputs,ToolID=self.tool['id'], History_IDs=History_IDs, HistoryData=HistoryData, GalInstance=self.GalInstance,

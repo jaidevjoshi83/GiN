@@ -6,6 +6,7 @@ from .sessions import session
 from .taskwidget import TaskTool
 from .util import DEFAULT_COLOR, DEFAULT_LOGO
 from urllib.error import HTTPError
+from .Galaxyuibuilder import GalaxyUIBuilder
 
 
 GALAXY_SERVERS = {
@@ -83,6 +84,7 @@ class GalaxyAuthWidget(UIBuilder):
     def login(self, server, email, password):
         """Login to the Galaxy server"""
 
+        t = {'id':'galaxylab_data_upload_tool', 'description':'Upload data files to galaxy server', 'name':'Upload Data'}
         try:
             self.session = GalaxyInstance(server, email=email, password=password)
             self.session._notebook_url = server
@@ -91,7 +93,9 @@ class GalaxyAuthWidget(UIBuilder):
             # Validate the provided credentials
             if self.validate_credentials(self.session):
                 self.replace_widget()
-                ToolManager.instance().register(UploadData())
+                t['gi']=self.session.tools.gi
+                tool1 = TaskTool('+', t)
+                ToolManager.instance().register(tool1)
         except HTTPError:
             self.error = 'Invalid username or password. Please try again.'
         except BaseException as e:
@@ -135,9 +139,9 @@ class GalaxyAuthWidget(UIBuilder):
         """Get the list available modules (currently only tools) and register widgets for them with the tool manager"""
         url = self.session._notebook_url
 
-        # print(dir(self.session.tools.gi.tools.get_tool_panel()))
-
         for section in self.session.tools.gi.tools.get_tool_panel():
+
+
             if section['model_class'] == 'ToolSection':
                 for tool in section['elems']:
                     try:
@@ -154,7 +158,7 @@ class GalaxyAuthWidget(UIBuilder):
         """Dispatch a login event after authentication"""
         # Trigger login callbacks of job and task widgets
         return
-        print("trigger_login")
+    
         EventManager.instance().dispatch("galaxy.login", self.session)
 
 def server_name(search_url):
@@ -177,7 +181,8 @@ class UploadData(NBTool):
     id = 'Galaxylab_Upload_Data'
     name = 'Upload Data'
     description = 'Upload Datafilis to galaxy history'
-    load = lambda x: GalaxyUIBuilder()
+
+    load = lambda x:  UploadData()
 
 
 # Register the authentication widget
