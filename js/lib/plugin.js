@@ -36,8 +36,6 @@ function activateWidgetExtension(app, registry, mainmenu, restorer, shell, noteb
     init_context(app, notebook_tracker)
     const tool_registry = new ToolRegistry();
     
-    console.log(notebook_tracker)
-
     registry.registerWidget({
         name: 'galaxylab',
         version: '0.1.0',

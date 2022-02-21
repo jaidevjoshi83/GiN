@@ -14,6 +14,10 @@
  import _ from "underscore";
  import {  KernelSideDataObjects } from './utils';
  import { Toolbox } from '@genepattern/nbtools';
+ import * as tus from "tus-js-client";
+
+ import jQuery from "jquery";
+ import axios from "axios";
 
 export class GalaxyUIBuilderModel extends BaseWidgetModel{
      
@@ -67,6 +71,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         super.render();
         const inputs = this.model.get('inputs')
+
         //########################
         this.CreateForm()
         this.Main_Form(inputs['inputs'])
@@ -98,7 +103,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         // }
         var self = this
         _.each(inputs, (input) => {
-        //  console.log(selected_value)
             self.add(input, FormParent, '', call_back_data);
         });
     }
@@ -170,7 +174,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                     var Select = tableChild.querySelector('.selectbox-scrollable')
                     Object.assign(InputPerameters, this.ReturnDataFiles(Select)['Inputs_data_files'])
                 }
-
             } 
 
             else if (FormEelements[i].className == 'drill-down ui-form-element section-row'){
@@ -224,8 +227,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         if (input_def.id == 'undefined') {
             input_def.id = this.uid()
         }
-
-        // console.log(input_def.type)
 
         switch (input_def.type) {
             
@@ -443,7 +444,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                             <!-- Tab content -->
                             <div id="upload" class="tabcontent">
                                 <p><b>Upload file to the Galaxy server.</b></p>
-                                <input class="input_upload" type="file" style="display: block" >
+                                <input id="inputupload" class="input_upload" type="file" style="display: block" >
                             </div>
                           
                             <div id="from_url" class="tabcontent">
@@ -461,15 +462,15 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                         </div>`
 
 
+
+        // ${JSON.stringify('http://192.168.1.113:8000/data')}
+
         const utm = new DOMParser().parseFromString(data_upload, 'text/html').querySelector('.upload_tab')
-        var List = utm.querySelectorAll('.tablinks')
+        var List = utm.querySelectorAll('.tablinks')        
 
         utm.querySelector('#upload').style.display  = 'block'
 
-
-
         List.forEach((button) => button.addEventListener('click', () => {
-
 
             if (button.innerText  == 'From URL') {
                 utm.querySelector('#upload').style.display  = 'none'
@@ -489,8 +490,11 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         }));
 
-
         var datatypes_genomes = await KernelSideDataObjects(`from galaxylab import GalaxyTaskWidget\nGalaxyTaskWidget.get_data_type_and_genomes(GalInstance=${JSON.stringify(this.model.get('GalInstance'))})`)
+
+        var Input = utm.querySelector('#inputupload')
+
+        this.Upload_callback(Input)
 
         var datatypeSelect = document.createElement('select')
         datatypeSelect.className = 'datatypes_options'
@@ -529,37 +533,146 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
     }
 
+    submitPayload(payload, cnf) {
+
+        console.log('ok1')
+        axios.post(`http://127.0.0.1:8080/api/tools/fetch?key=58646975107719e231d230d1e292ace8`, payload)
+            .then((response) => {
+                // cnf.success(response.data);
+                console.log(response);
+            })
+            .catch((error) => {
+                // cnf.error(error.response.data.err_msg);
+                console.log(error);
+            });
+    }
+
+    tusUpload(data, index, tusEndpoint, cnf) {
+
+        var self = this
+        const startTime = performance.now();
+        const chunkSize = cnf.chunkSize;
+
+        const file = data.files[index];
+    
+        if (!file) {
+            // We've uploaded all files, delete files from data and submit fetch payload
+            delete data["files"];
+            return this.submitPayload(data, cnf);
+        }
+        
+        console.debug(`Starting chunked upload for ${file.name} [chunkSize=${chunkSize}].`);
+
+        const upload = new tus.Upload(file, {
+            endpoint: tusEndpoint,
+            chunkSize: chunkSize,
+            metadata: data.payload,
+
+            onError: function (error) {
+                console.log("Failed because: " + error);
+                // cnf.error(error);
+            },
+            onProgress: function (bytesUploaded, bytesTotal) {
+
+                var percentage = ((bytesUploaded / bytesTotal) * 100).toFixed(2);
+                console.log(bytesUploaded, bytesTotal, percentage + "%");
+                console.log( upload.url);
+                // cnf.progress(percentage);
+            },
+            onSuccess: function () {
+                console.log(
+                    `Upload of ${upload.file.name} to ${upload.url} took ${(performance.now() - startTime) / 1000} seconds`
+                );
+
+                data[`files_${index}|file_data`] = {
+                    // session_id: upload.url.split("/").at(-1),
+                    session_id: upload.url.split("/").at(-1),
+                    name: upload.file.name,
+                };
+
+                // self.tusUpload(data, index + 1, tusEndpoint, cnf);
+            },
+        });
+        // Check if there are any previous uploads to continue.
+        upload.findPreviousUploads().then(function (previousUploads) {
+            // Found previous uploads so we select the first one.
+            if (previousUploads.length) {
+                console.log("previous Upload", previousUploads);
+                upload.resumeFromPreviousUpload(previousUploads[0]);
+            }
+            // Start the upload
+            upload.start();
+        });
+    }
+
+    Upload_callback(input){
+
+        var self  = this
+
+        var children = this.element.querySelector('.Galaxy-form')
+
+        input.addEventListener("change", function(e) {
+
+            console.log(input.files[0]['name'])
+
+            var cnf = {};
+
+            var data = {
+                "history_id": self.element.querySelector('#History_IDs').value,
+                "targets": [
+                    {
+                        "destination": {
+                            "type": "hdas"
+                        },
+                        "elements": [
+                            {
+                                "src": "files",
+                                "url": "",
+                                "paste_content": null,
+                                "name":  input.files[0]['name'],
+                                "dbkey": children.querySelector('.genomes_options').value,
+                                "ext": children.querySelector('.datatypes_options').value,
+                            }
+                        ]
+                    }
+                ],
+                "auto_decompress": true, 
+                'files': '',
+                "files_0|file_data": {
+                    "session_id": "97c92802f04d4e48b1bf0b3a8ad27793",
+                    "name": input.files[0]['name']
+                },
+                // 'files':input.files,
+            }
+            // Get the selected file from the input element
+
+            const tusEndpoint = `http://127.0.0.1:8080/api/upload/resumable_upload/`;
+            self.tusUpload(data, 0, tusEndpoint, cnf);
+            // self.NewtusUpload(e)
+            
+        })
+    }
+
    async dataupload_job() {
 
-        var children = this.element.querySelector('.Galaxy-form');
+        // this.hide_run_buttons(true)
 
-        console.log(children)
-
-
+        var children = this.element.querySelector('.Galaxy-form')
         var upload_link 
         var  upload_method
-
 
         for (var i = 0; i < children.querySelectorAll('.tabcontent').length; i++ ) {
             if (children.querySelectorAll('.tabcontent')[i].style.display == 'block') {
                 upload_link = children.querySelectorAll('.tabcontent')[i].querySelector('.input_upload').value
                 upload_method = children.querySelectorAll('.tabcontent')[i].querySelector('.input_upload').type
-
-                console.log(upload_method, upload_link) 
             }
         }
-
 
         var datatype = children.querySelector('.datatypes_options').value
         var genome = children.querySelector('.genomes_options').value
         var history_id = children.querySelector('#History_IDs').value
 
-            
-
         var InitialData = await KernelSideDataObjects(`from galaxylab import GalaxyTaskWidget\nGalaxyTaskWidget.upload_dataset(file_path=${JSON.stringify(upload_link)}, upload_method=${JSON.stringify(upload_method)}, datatype=${JSON.stringify(datatype)}, genome=${JSON.stringify(genome)}, GalInstance=${JSON.stringify(this.model.get('GalInstance'))}, HistoryID=${JSON.stringify(history_id)} )`);
-
-        console.log('ok1')
-
 
     }
 
@@ -730,7 +843,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
                 self.Main_Form(refine_inputs['inputs'],  SelectedIndex)
             }
-            console.log(HistoryID)
+
         });
 
         return HistoryList
@@ -967,7 +1080,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 for(var k = 0; k < input_def.value.values.length; k++ ) {                    
                 if (Select.options[i].value == input_def.value.values[k]['id']){
                     Select.options[i].selected = true
-                    console.log('True')
                 }
             }
         }
@@ -1485,7 +1597,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
     async dataset_collection_row_state (dataset, history_id){
 
-        console.log(dataset)
 
         var self = this
 
@@ -1869,7 +1980,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         chain_button.addEventListener('click', (e) => {
             console.log(ok_details_html.querySelector('.download-btn.icon-btn')['href'])
-            // console.log(document.execCommand("copy"))
         });
 
     }
@@ -2251,9 +2361,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         var Inputs = self.ReturnData(children)
 
         if (this.model.get('inputs')['id'] == 'galaxylab_data_upload_tool') {
-
-            console.log('ok')
-
             this.dataupload_job()
            
         } else {

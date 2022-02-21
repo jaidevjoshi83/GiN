@@ -25,6 +25,7 @@ from urllib.request import urlopen
 
 
 
+
 class GalaxyTaskWidget(GalaxyUIBuilder):
     """A widget for representing the status of a Galaxy job"""
     #default_color = 'rgba(10, 45, 105, 0.80)'
@@ -87,10 +88,10 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
         history = gi.gi.histories.show_history(history_id=HistoryID)
         a = hi.History(history, gi=gi)
 
-        if (upload_method  ==  'file'):
-            a.upload_dataset(path='/Users/joshij/Desktop/combined.fasta')
+        # if (upload_method  ==  'file'):
+        #     a.upload_dataset(path='/Users/joshij/Desktop/combined.fasta')
 
-        elif (upload_method  ==  'text'):
+        if (upload_method  ==  'text'):
            gi.gi.tools.put_url(content=file_path, history_id=HistoryID)
 
         elif (upload_method  ==  'textarea'):
@@ -200,6 +201,27 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
             response = urlopen(data_url)
             fasta = response.read().decode("utf-8", "ignore")
             return fasta
+
+    def TestFastAPI(url):
+
+        # store the URL in url as 
+        # parameter for urlopen
+        # url = "http://192.168.1.113:8000/data"
+        
+        # store the response of URL
+        response = urlopen(url)
+        
+        # storing the JSON response 
+        # from url in data
+        data_json = json.loads(response.read())
+        
+        # print the json response
+     
+
+        return IPython.display.JSON(data_json)
+
+
+
 
     def download_file_to_jupyter_server(file_name, GalInstance=None, data_type='dataset', data_url=None, collection_id=None, ext='zip'):
 
