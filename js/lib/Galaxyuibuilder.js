@@ -16,7 +16,7 @@
  import { Toolbox } from '@genepattern/nbtools';
  import * as tus from "tus-js-client";
 
- import jQuery from "jquery";
+ import jQuery, { error } from "jquery";
  import axios from "axios";
 
 export class GalaxyUIBuilderModel extends BaseWidgetModel{
@@ -533,76 +533,73 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
     }
 
-    submitPayload(payload, cnf) {
+    submitPayload(payload, credentials) {
 
-        console.log('ok1')
-        axios.post(`http://127.0.0.1:8080/api/tools/fetch?key=58646975107719e231d230d1e292ace8`, payload)
+        console.log('ok-2')
+
+        axios.post(`${credentials['URL']}/api/tools/fetch?key=${credentials['API_key']}`, payload)
             .then((response) => {
-                // cnf.success(response.data);
                 console.log(response);
             })
             .catch((error) => {
-                // cnf.error(error.response.data.err_msg);
                 console.log(error);
             });
     }
 
-    tusUpload(data, index, tusEndpoint, cnf) {
+    NewTusUpload( data){
 
         var self = this
-        const startTime = performance.now();
-        const chunkSize = cnf.chunkSize;
+        var chunkSize = 10485760;
+        var file = data.files[0];
+        var credentials = this.model.get('GalInstance')
+        data['key'] =  credentials['API_key']
 
-        const file = data.files[index];
-    
-        if (!file) {
-            // We've uploaded all files, delete files from data and submit fetch payload
-            delete data["files"];
-            return this.submitPayload(data, cnf);
-        }
-        
-        console.debug(`Starting chunked upload for ${file.name} [chunkSize=${chunkSize}].`);
-
-        const upload = new tus.Upload(file, {
-            endpoint: tusEndpoint,
+        // Create a new tus upload
+        var upload = new tus.Upload(file, {
+            endpoint: `${credentials['URL']}/api/upload/resumable_upload/`,
+            retryDelays: [0, 3000, 5000, 10000, 20000],
             chunkSize: chunkSize,
-            metadata: data.payload,
 
-            onError: function (error) {
-                console.log("Failed because: " + error);
-                // cnf.error(error);
+            metadata: {
+                filename: file.name,
+                filetype: file.type,
             },
-            onProgress: function (bytesUploaded, bytesTotal) {
-
-                var percentage = ((bytesUploaded / bytesTotal) * 100).toFixed(2);
-                console.log(bytesUploaded, bytesTotal, percentage + "%");
-                console.log( upload.url);
-                // cnf.progress(percentage);
+            headers: {
+                x_api_key: credentials['API_key'],
             },
-            onSuccess: function () {
-                console.log(
-                    `Upload of ${upload.file.name} to ${upload.url} took ${(performance.now() - startTime) / 1000} seconds`
-                );
+            
+            onError: function(error) {
+                console.log("Failed because: " + error)
+            },
+            onProgress: function(bytesUploaded, bytesTotal) {
+                
+                var percentage = (bytesUploaded / bytesTotal * 100).toFixed(2)
+                console.log(bytesUploaded, bytesTotal, percentage + "%")
+            },
+            onSuccess: function() {
+                console.log("Download %s from %s", upload.file.name, upload.url)
 
-                data[`files_${index}|file_data`] = {
-                    // session_id: upload.url.split("/").at(-1),
+                data[`files_${0}|file_data`] = {
                     session_id: upload.url.split("/").at(-1),
                     name: upload.file.name,
                 };
-
-                // self.tusUpload(data, index + 1, tusEndpoint, cnf);
-            },
-        });
+                self.submitPayload(data, credentials)
+            }
+            
+        })
+    
         // Check if there are any previous uploads to continue.
         upload.findPreviousUploads().then(function (previousUploads) {
-            // Found previous uploads so we select the first one.
+            // Found previous uploads so we select the first one. 
             if (previousUploads.length) {
-                console.log("previous Upload", previousUploads);
-                upload.resumeFromPreviousUpload(previousUploads[0]);
+                upload.resumeFromPreviousUpload(previousUploads[0])
             }
+    
             // Start the upload
-            upload.start();
-        });
+            upload.start()
+        })
+
+        console.log(upload)
     }
 
     Upload_callback(input){
@@ -612,8 +609,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         var children = this.element.querySelector('.Galaxy-form')
 
         input.addEventListener("change", function(e) {
-
-            console.log(input.files[0]['name'])
 
             var cnf = {};
 
@@ -637,18 +632,18 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                     }
                 ],
                 "auto_decompress": true, 
-                'files': '',
-                "files_0|file_data": {
-                    "session_id": "97c92802f04d4e48b1bf0b3a8ad27793",
-                    "name": input.files[0]['name']
-                },
+                'files': input.files,
+                // "files_0|file_data": {
+                //     "session_id": "97c92802f04d4e48b1bf0b3a8ad27793",
+                //     "name": input.files[0]['name']
+                // },
                 // 'files':input.files,
             }
             // Get the selected file from the input element
 
-            const tusEndpoint = `http://127.0.0.1:8080/api/upload/resumable_upload/`;
-            self.tusUpload(data, 0, tusEndpoint, cnf);
-            // self.NewtusUpload(e)
+            // const tusEndpoint = `http://192.168.1.109:8080/api/upload/resumable_upload/`;
+            // self.tusUpload(data, 0, tusEndpoint, cnf);
+            self.NewTusUpload(data)
             
         })
     }
@@ -2368,14 +2363,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             this.AddJobStatusWidget(Inputs, HistoryID)
 
         }
-
-       
-        
-        //else if (this.model.get('inputs')['id'] == 'galaxylab_data_upload_tool') {
-        //    console.log('ok')
-        // }
-        //  if (this.model.get('collapse'))
-        //      this.el.querySelector('.nbtools-collapse').click();
 
          }));
     }
