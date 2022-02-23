@@ -9,6 +9,7 @@ from .shim import  get_kinds
 from .util import DEFAULT_COLOR, DEFAULT_LOGO
 import bioblend
 from bioblend.galaxy.objects import *
+import bioblend.galaxy.objects as hi
 import json5
 import logging
 import pickle
@@ -21,6 +22,7 @@ from ipywidgets import interactive
 import io
 import requests
 from urllib.request import urlopen
+
 
 
 
@@ -65,12 +67,38 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
         NewInputs = GalaxyTaskWidget.RefinedInputs(tool_inputs, gi)
         job = gi.tools.gi.tools.run_tool(history_id=HistoryID, tool_id=GalInstance['tool_ID'], tool_inputs=NewInputs)
         showJob = gi.jobs.gi.jobs.show_job(job['jobs'][0]['id'],full_details=True)
-        print('#################showJob################')
-        # print(showJob)
-        print('#################showJob################')
-
 
         return IPython.display.JSON(showJob)
+
+    def get_data_type_and_genomes(GalInstance=None):
+
+        gi = GalaxyInstance(GalInstance['URL'], email=GalInstance['email_ID'], api_key=GalInstance['API_key'], verify=True)
+
+        data_types = gi.gi.datatypes.get_datatypes()
+        genomes = gi.gi.genomes.get_genomes()
+
+        datatypes_genomes = {'datatypes': data_types, 'genomes': genomes}
+
+        return IPython.display.JSON(datatypes_genomes)
+
+
+    def upload_dataset(file_path, upload_method, datatype, genome, GalInstance=None,  HistoryID=None):
+
+        gi = GalaxyInstance(GalInstance['URL'], email=GalInstance['email_ID'], api_key=GalInstance['API_key'], verify=True)
+        history = gi.gi.histories.show_history(history_id=HistoryID)
+        a = hi.History(history, gi=gi)
+
+        # if (upload_method  ==  'file'):
+        #     a.upload_dataset(path='/Users/joshij/Desktop/combined.fasta')
+
+        if (upload_method  ==  'text'):
+           gi.gi.tools.put_url(content=file_path, history_id=HistoryID)
+
+        elif (upload_method  ==  'textarea'):
+            gi.gi.tools.put_url(content=file_path, history_id=HistoryID)
+
+        # return IPython.display.JSON(uploaded_data)
+
 
     def TestOut(GalInstance=None, JobID=None):
         gi = GalaxyInstance(GalInstance['URL'], email=GalInstance['email_ID'], api_key=GalInstance['API_key'], verify=True)
@@ -85,7 +113,6 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
         DataList = []
 
         for i in showJob['outputs'].keys():
-            print('#############')
             DataList.append(gi.gi.datasets.gi.datasets.show_dataset(dataset_id=showJob['outputs'][i]['id'],hda_ldda=showJob['outputs'][i]['src']))
 
         return IPython.display.JSON(DataList)
@@ -175,6 +202,27 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
             fasta = response.read().decode("utf-8", "ignore")
             return fasta
 
+    def TestFastAPI(url):
+
+        # store the URL in url as 
+        # parameter for urlopen
+        # url = "http://192.168.1.113:8000/data"
+        
+        # store the response of URL
+        response = urlopen(url)
+        
+        # storing the JSON response 
+        # from url in data
+        data_json = json.loads(response.read())
+        
+        # print the json response
+     
+
+        return IPython.display.JSON(data_json)
+
+
+
+
     def download_file_to_jupyter_server(file_name, GalInstance=None, data_type='dataset', data_url=None, collection_id=None, ext='zip'):
 
         galaxy_data = os.path.join(os.getcwd(), 'galaxy_data')
@@ -187,8 +235,6 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
             gi = GalaxyInstance(GalInstance['URL'], email=GalInstance['email_ID'], api_key=GalInstance['API_key'], verify=True)
             gi.gi.dataset_collections.download_dataset_collection(dataset_collection_id=collection_id, file_path=file_path)
         else:
-
-            print('dataset')
             response = urlopen(data_url)
             data = response.read()
             f = open(os.path.join(galaxy_data, file_name)+'.'+ext, 'wb')
@@ -205,6 +251,9 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
 
     def __init__(self, tool=None, **kwargs):
 
+
+        upload_tool_spec = {}
+
         """Initialize the task widget"""
 
         if (tool == None):
@@ -214,19 +263,24 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
             self.tool = tool
 
             self.GalInstance= { 
-                                "API_key":  self.tool.gi.gi._key,
-                                "email_ID": self.tool.gi.gi.users.get_current_user()['email'],
-                                "URL":      self.tool.gi.gi.base_url,
-                                "tool_ID": self.tool.wrapped['id'],
-                                "tool_name": self.tool.wrapped['name'],
-                                "tool_description": self.tool.wrapped['description'],
+                                "API_key":  self.tool['gi']._key,
+                                "email_ID": self.tool['gi'].users.get_current_user()['email'],
+                                "URL":      self.tool['gi'].base_url,
+                                "tool_ID": self.tool['id'],
+                                "tool_name": self.tool['name'],
+                                "tool_description": self.tool['description'],
                             }
 
-            History_IDs = self.tool.gi.histories.gi.histories.get_histories()
-            inputs = self.tool.gi.tools.gi.tools.build(tool_id=tool.wrapped['id'], history_id=History_IDs[0]['id'] )
+            History_IDs = self.tool['gi'].histories.gi.histories.get_histories()
+
+            if self.tool['id'] == 'galaxylab_data_upload_tool':
+                inputs = {'id':'galaxylab_data_upload_tool', 'inputs': [{'model_class': 'DataToolParameter', 'name': 'input1',  'type': 'data_upload'}], 'help': '<p>Upload data tool</p>\n<p>This tool uploads data to the selected history of the Galaxy server. User can select file from the local machine, data can be fetch directly from the URL or can be generated by available UI and uploaded to the server.</p>\n'}  
+            else:
+                inputs = self.tool['gi'].tools.gi.tools.build(tool_id=tool['id'], history_id=History_IDs[0]['id'] )
+
             HistoryData = GalaxyTaskWidget.UpdateForm(GalInstance=self.GalInstance, HistoryID=History_IDs[0]['id'], Python_side=True)    
 
-            GalaxyUIBuilder.__init__(self, inputs=inputs,ToolID=self.tool.wrapped['id'], History_IDs=History_IDs, HistoryData=HistoryData, GalInstance=self.GalInstance,
+            GalaxyUIBuilder.__init__(self, inputs=inputs,ToolID=self.tool['id'], History_IDs=History_IDs, HistoryData=HistoryData, GalInstance=self.GalInstance,
                             color=self.default_color,
                             logo=self.default_logo,
                         **kwargs)
@@ -244,7 +298,7 @@ class TaskTool(NBTool):
     def __init__(self, server_name, tool):
         NBTool.__init__(self)
         self.origin = server_name
-        self.id = tool.wrapped['id']
-        self.name = tool.wrapped['name']
-        self.description = tool.wrapped['description']
+        self.id = tool['id']
+        self.name = tool['name']
+        self.description = tool['description']
         self.load = lambda: GalaxyTaskWidget(tool)

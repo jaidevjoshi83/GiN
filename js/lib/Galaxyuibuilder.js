@@ -14,6 +14,10 @@
  import _ from "underscore";
  import {  KernelSideDataObjects } from './utils';
  import { Toolbox } from '@genepattern/nbtools';
+ import * as tus from "tus-js-client";
+
+ import jQuery, { error } from "jquery";
+ import axios from "axios";
 
 export class GalaxyUIBuilderModel extends BaseWidgetModel{
      
@@ -67,6 +71,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         super.render();
         const inputs = this.model.get('inputs')
+
         //########################
         this.CreateForm()
         this.Main_Form(inputs['inputs'])
@@ -90,15 +95,14 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
  
     Main_Form(inputs, call_back_data={}) {
 
-        console.log(inputs)
-
         var FormParent = this.el.querySelector('.Galaxy-form');
+
+        // if (this.model.get('inputs')['id'] != 'galaxylab_data_upload_tool') {
         var HistList = this.AddHistoryList(call_back_data['HID'])
         FormParent.append(HistList)
-
+        // }
         var self = this
         _.each(inputs, (input) => {
-        //  console.log(selected_value)
             self.add(input, FormParent, '', call_back_data);
         });
     }
@@ -170,7 +174,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                     var Select = tableChild.querySelector('.selectbox-scrollable')
                     Object.assign(InputPerameters, this.ReturnDataFiles(Select)['Inputs_data_files'])
                 }
-
             } 
 
             else if (FormEelements[i].className == 'drill-down ui-form-element section-row'){
@@ -225,8 +228,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             input_def.id = this.uid()
         }
 
-        // console.log(input_def.type)
-
         switch (input_def.type) {
             
             case "conditional":
@@ -258,6 +259,9 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 break
             case "drill_down":
                 this.AddDrill_Down(input_def, FormParent, NamePrefix)
+                break
+            case "data_upload":
+                this.DataUpload(FormParent)
                 break
         }
     }
@@ -427,6 +431,246 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         return row
     }
 
+    async DataUpload(FormParent) {
+
+        var data_upload = `
+                        <div class="upload_tab">
+                           <div class="tab">
+                                <button type="button" class="tablinks" >Upload</button>
+                                <button type="button" class="tablinks">From URL</button>
+                                <button type="button" class="tablinks">Create data</button>
+                           </div>
+
+                            <!-- Tab content -->
+                            <div id="upload" class="tabcontent">
+                                <p><b>Upload file to the Galaxy server.</b></p>
+                                <input id="inputupload" class="input_upload" type="file" style="display: block" >
+                            </div>
+                          
+                            <div id="from_url" class="tabcontent">
+                                <p><b>Upload file from a URL to the Galaxy server.</b></p> 
+                                <input class="input_upload" style="display: block" >
+                            </div>
+                            
+                            <div id="create_data" class="tabcontent">
+                                <p><b>Create a data file and upload to the Galaxy server.</b></p>
+                                <textarea class="input_upload" style="height: 30vh; width: 45vw;" >
+                                Example test for testing
+                                </textarea>
+                            </div>
+
+                        </div>`
+
+
+
+        // ${JSON.stringify('http://192.168.1.113:8000/data')}
+
+        const utm = new DOMParser().parseFromString(data_upload, 'text/html').querySelector('.upload_tab')
+        var List = utm.querySelectorAll('.tablinks')        
+
+        utm.querySelector('#upload').style.display  = 'block'
+
+        List.forEach((button) => button.addEventListener('click', () => {
+
+            if (button.innerText  == 'From URL') {
+                utm.querySelector('#upload').style.display  = 'none'
+                utm.querySelector('#from_url').style.display  = 'block'
+                utm.querySelector('#create_data').style.display  = 'none'
+
+            } else if (button.innerText  == 'Create data') {
+                utm.querySelector('#upload').style.display  = 'none'
+                utm.querySelector('#from_url').style.display  = 'none'
+                utm.querySelector('#create_data').style.display  = 'block'                
+            } else if (button.innerText  == 'Upload') {
+
+                utm.querySelector('#upload').style.display  = 'block'
+                utm.querySelector('#from_url').style.display  = 'none'
+                utm.querySelector('#create_data').style.display  = 'none'
+            }
+
+        }));
+
+        var datatypes_genomes = await KernelSideDataObjects(`from galaxylab import GalaxyTaskWidget\nGalaxyTaskWidget.get_data_type_and_genomes(GalInstance=${JSON.stringify(this.model.get('GalInstance'))})`)
+
+        var Input = utm.querySelector('#inputupload')
+
+        this.Upload_callback(Input)
+
+        var datatypeSelect = document.createElement('select')
+        datatypeSelect.className = 'datatypes_options'
+
+        for(var i = 0; i < datatypes_genomes['datatypes'].length; i++) {
+            const opt = datatypes_genomes['datatypes'][i];
+            const el = document.createElement("option");
+            el.textContent = opt;
+            el.value =  datatypes_genomes['datatypes'][i];;
+            datatypeSelect.appendChild(el);
+        }
+
+        var genomeSelect = document.createElement('select')
+        genomeSelect.className = 'genomes_options'
+
+        for(var i = 0; i < datatypes_genomes['genomes'].length; i++) {
+            const opt = datatypes_genomes['genomes'][i][0];
+            const el = document.createElement("option");
+            el.textContent = opt;
+            el.value =  datatypes_genomes['genomes'][i][1];;
+            genomeSelect.appendChild(el);
+        }
+
+        var datatype_title = document.createElement('p')
+        datatype_title.innerText = 'Datatypes'
+
+        var genomes_title = document.createElement('p')
+        genomes_title.innerText = 'Genomes'
+
+        utm.append(datatype_title)
+        utm.append(datatypeSelect)
+        utm.append(genomes_title)
+        utm.append(genomeSelect)
+
+        FormParent.append(utm)
+
+    }
+
+    submitPayload(payload, credentials) {
+
+        console.log('ok-2')
+
+        axios.post(`${credentials['URL']}/api/tools/fetch?key=${credentials['API_key']}`, payload)
+            .then((response) => {
+                console.log(response);
+            })
+            .catch((error) => {
+                console.log(error);
+            });
+    }
+
+    NewTusUpload( data){
+
+        var self = this
+        var chunkSize = 10485760;
+        var file = data.files[0];
+        var credentials = this.model.get('GalInstance')
+        data['key'] =  credentials['API_key']
+
+        // Create a new tus upload
+        var upload = new tus.Upload(file, {
+            endpoint: `${credentials['URL']}/api/upload/resumable_upload/`,
+            retryDelays: [0, 3000, 5000, 10000, 20000],
+            chunkSize: chunkSize,
+
+            metadata: {
+                filename: file.name,
+                filetype: file.type,
+            },
+            headers: {
+                x_api_key: credentials['API_key'],
+            },
+            
+            onError: function(error) {
+                console.log("Failed because: " + error)
+            },
+            onProgress: function(bytesUploaded, bytesTotal) {
+                
+                var percentage = (bytesUploaded / bytesTotal * 100).toFixed(2)
+                console.log(bytesUploaded, bytesTotal, percentage + "%")
+            },
+            onSuccess: function() {
+                console.log("Download %s from %s", upload.file.name, upload.url)
+
+                data[`files_${0}|file_data`] = {
+                    session_id: upload.url.split("/").at(-1),
+                    name: upload.file.name,
+                };
+                self.submitPayload(data, credentials)
+            }
+            
+        })
+    
+        // Check if there are any previous uploads to continue.
+        upload.findPreviousUploads().then(function (previousUploads) {
+            // Found previous uploads so we select the first one. 
+            if (previousUploads.length) {
+                upload.resumeFromPreviousUpload(previousUploads[0])
+            }
+    
+            // Start the upload
+            upload.start()
+        })
+
+        console.log(upload)
+    }
+
+    Upload_callback(input){
+
+        var self  = this
+
+        var children = this.element.querySelector('.Galaxy-form')
+
+        input.addEventListener("change", function(e) {
+
+            var cnf = {};
+
+            var data = {
+                "history_id": self.element.querySelector('#History_IDs').value,
+                "targets": [
+                    {
+                        "destination": {
+                            "type": "hdas"
+                        },
+                        "elements": [
+                            {
+                                "src": "files",
+                                "url": "",
+                                "paste_content": null,
+                                "name":  input.files[0]['name'],
+                                "dbkey": children.querySelector('.genomes_options').value,
+                                "ext": children.querySelector('.datatypes_options').value,
+                            }
+                        ]
+                    }
+                ],
+                "auto_decompress": true, 
+                'files': input.files,
+                // "files_0|file_data": {
+                //     "session_id": "97c92802f04d4e48b1bf0b3a8ad27793",
+                //     "name": input.files[0]['name']
+                // },
+                // 'files':input.files,
+            }
+            // Get the selected file from the input element
+
+            // const tusEndpoint = `http://192.168.1.109:8080/api/upload/resumable_upload/`;
+            // self.tusUpload(data, 0, tusEndpoint, cnf);
+            self.NewTusUpload(data)
+            
+        })
+    }
+
+   async dataupload_job() {
+
+        // this.hide_run_buttons(true)
+
+        var children = this.element.querySelector('.Galaxy-form')
+        var upload_link 
+        var  upload_method
+
+        for (var i = 0; i < children.querySelectorAll('.tabcontent').length; i++ ) {
+            if (children.querySelectorAll('.tabcontent')[i].style.display == 'block') {
+                upload_link = children.querySelectorAll('.tabcontent')[i].querySelector('.input_upload').value
+                upload_method = children.querySelectorAll('.tabcontent')[i].querySelector('.input_upload').type
+            }
+        }
+
+        var datatype = children.querySelector('.datatypes_options').value
+        var genome = children.querySelector('.genomes_options').value
+        var history_id = children.querySelector('#History_IDs').value
+
+        var InitialData = await KernelSideDataObjects(`from galaxylab import GalaxyTaskWidget\nGalaxyTaskWidget.upload_dataset(file_path=${JSON.stringify(upload_link)}, upload_method=${JSON.stringify(upload_method)}, datatype=${JSON.stringify(datatype)}, genome=${JSON.stringify(genome)}, GalInstance=${JSON.stringify(this.model.get('GalInstance'))}, HistoryID=${JSON.stringify(history_id)} )`);
+
+    }
+
     async AddOutPutDataTable( JobID){
 
         var InitialData = await KernelSideDataObjects(`from galaxylab import GalaxyTaskWidget\nGalaxyTaskWidget.OutPutData(GalInstance=${JSON.stringify(this.model.get('GalInstance'))}, JobID=${JSON.stringify(JobID)} )`);
@@ -468,18 +712,15 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             }, false)
 
             DataTableElement.addEventListener("dragstart", function(event) {
-                // store a ref. on the dragged elem
+
                 self.dragged = event.target;
-                // make it half transparent
-                // event.target.style.opacity = .5;
+
                 }, false);
 
             DataTable.append(DataTableElement)
         }
 
         var OutPutDataSection =  this.el.querySelector('.output-file-names')
-
-
         OutPutDataSection.append(DataTable)
 
         return Dt
@@ -527,15 +768,10 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             select.addEventListener("change", async (event)=> {
 
                 var ListItem = DataHistoryList.querySelector('.list-item')
-
-                // self.removeAllChildNodes(FormParent)
-               
                 ListItem.parentNode.removeChild(ListItem)
-
                 DataHistoryList.append(await self.data_row_list(self.model.get('GalInstance'), options[select.selectedIndex]['id']))
         
-        
-                    }, false);
+                }, false);
     
             return DataHistoryList
     }
@@ -579,26 +815,29 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
  
             var HistoryID = select.value
 
-            var children = self.element.querySelector('.Galaxy-form').children;
-            var Inputs = self.ReturnData(children)
+            if (this.model.get('inputs')['id'] != 'galaxylab_data_upload_tool') {
 
-            var refine_inputs  = await KernelSideDataObjects(`from galaxylab import GalaxyTaskWidget\nGalaxyTaskWidget.UpdateForm(${JSON.stringify(self.model.get('GalInstance'))}, ${JSON.stringify(Inputs)}, ${JSON.stringify(self.model.get('ToolID'))}, ${JSON.stringify(HistoryID)})`)
+                var children = self.element.querySelector('.Galaxy-form').children;
+                var Inputs = self.ReturnData(children)
 
-            var FormParent = self.el.querySelector('.Galaxy-form')                        
-            self.removeAllChildNodes(FormParent)
+                var refine_inputs  = await KernelSideDataObjects(`from galaxylab import GalaxyTaskWidget\nGalaxyTaskWidget.UpdateForm(${JSON.stringify(self.model.get('GalInstance'))}, ${JSON.stringify(Inputs)}, ${JSON.stringify(self.model.get('ToolID'))}, ${JSON.stringify(HistoryID)})`)
 
-            const Button = document.createElement('button')
-            Button.style.display = 'none'
-            Button.type = 'button'
-            Button.id = 'submit'
-            Button.className  = 'Galaxy-form-button'
-    
-            FormParent.append(Button)
+                var FormParent = self.el.querySelector('.Galaxy-form')                        
+                self.removeAllChildNodes(FormParent)
 
-            var SelectedIndex = {}
-            SelectedIndex['HID'] = select.selectedIndex
+                const Button = document.createElement('button')
+                Button.style.display = 'none'
+                Button.type = 'button'
+                Button.id = 'submit'
+                Button.className  = 'Galaxy-form-button'
+        
+                FormParent.append(Button)
 
-            self.Main_Form(refine_inputs['inputs'],  SelectedIndex)
+                var SelectedIndex = {}
+                SelectedIndex['HID'] = select.selectedIndex
+
+                self.Main_Form(refine_inputs['inputs'],  SelectedIndex)
+            }
 
         });
 
@@ -836,7 +1075,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 for(var k = 0; k < input_def.value.values.length; k++ ) {                    
                 if (Select.options[i].value == input_def.value.values[k]['id']){
                     Select.options[i].selected = true
-                    console.log('True')
                 }
             }
         }
@@ -1354,7 +1592,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
     async dataset_collection_row_state (dataset, history_id){
 
-        console.log(dataset)
 
         var self = this
 
@@ -1738,7 +1975,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         chain_button.addEventListener('click', (e) => {
             console.log(ok_details_html.querySelector('.download-btn.icon-btn')['href'])
-            // console.log(document.execCommand("copy"))
         });
 
     }
@@ -1771,10 +2007,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         var states = ['ok', 'error']
 
-
         for (let i = 0; i < Infinity; ++i) {
-
-            // var os = await KernelSideDataObjects(`from galaxylab import GalaxyTaskWidget\nGalaxyTaskWidget.TestOut(GalInstance=${JSON.stringify(this.model.get('GalInstance'))}, JobID=${JSON.stringify(job['id'])} )`);
 
             var data = await KernelSideDataObjects(`from galaxylab import GalaxyTaskWidget\nGalaxyTaskWidget.OutPutData(GalInstance=${JSON.stringify(this.model.get('GalInstance'))}, JobID=${JSON.stringify(job['id'])} )`);
 
@@ -2122,10 +2355,15 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         var children = self.element.querySelector('.Galaxy-form').children;
         var Inputs = self.ReturnData(children)
 
-        this.AddJobStatusWidget(Inputs, HistoryID)
+        if (this.model.get('inputs')['id'] == 'galaxylab_data_upload_tool') {
+            this.dataupload_job()
+           
+        } else {
 
-        //  if (this.model.get('collapse'))
-        //      this.el.querySelector('.nbtools-collapse').click();
+            this.AddJobStatusWidget(Inputs, HistoryID)
+
+        }
+
          }));
     }
 
@@ -2179,8 +2417,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                         </div>`
 
         const ok_details_html = new DOMParser().parseFromString(details, 'text/html').querySelector('.data-load-status')
-
-        console.log(LoadButton)
 
         LoadButton.addEventListener('click', ()=>{
             // var  NbtoolsForm =  self.el.querySelector('.nbtools-form')

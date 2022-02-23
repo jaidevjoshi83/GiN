@@ -39,13 +39,16 @@
     "@genepattern/nbtools": "file:.yalc/@genepattern/nbtools",
     "@jupyter-widgets/base": "^4.0.0",
     "@jupyterlab/notebook": "^3.0.4",
+    "axios": "^0.21.1",
     "blueimp-file-upload": "^10.31.0",
     "css-loader": "^6.2.0",
     "file-loader": "^6.2.0",
+    "jquery": "^2.2.4",
     "lodash": "^4.17.4",
     "raw-loader": "^4.0.2",
     "source-map-loader": "^2.0.1",
-    "style-loader": "^3.2.1"
+    "style-loader": "^3.2.1",
+    "tus-js-client": "^2.3.0"
   },
   "jupyterlab": {
     "extension": "lib/plugin",

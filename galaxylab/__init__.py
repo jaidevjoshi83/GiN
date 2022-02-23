@@ -15,7 +15,7 @@ from .sessions import session, get_session
 #from .galaxyoutput import GalaxyOutputWidget
 from .uioutput import GalaxyUIOutput
 from .Galaxyuibuilder import GalaxyUIBuilder
-from .JobSubmit import Job
+# from .JobSubmit import Job
 from ._version import __version__
 
 

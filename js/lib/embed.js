@@ -8,5 +8,5 @@
 module.exports = require('./galaxyoutput.js');
 module.exports = require('./Galaxyuibuilder')
 module.exports = require('./utils');
-module.exports = require('./historydata.js');
+module.exports = require('./FileUpload.js');
 module.exports['version'] = require('../package.json').version;
