@@ -633,16 +633,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 ],
                 "auto_decompress": true, 
                 'files': input.files,
-                // "files_0|file_data": {
-                //     "session_id": "97c92802f04d4e48b1bf0b3a8ad27793",
-                //     "name": input.files[0]['name']
-                // },
-                // 'files':input.files,
             }
-            // Get the selected file from the input element
-
-            // const tusEndpoint = `http://192.168.1.109:8080/api/upload/resumable_upload/`;
-            // self.tusUpload(data, 0, tusEndpoint, cnf);
             self.NewTusUpload(data)
             
         })
