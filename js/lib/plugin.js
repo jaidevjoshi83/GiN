@@ -8,7 +8,6 @@ import { ContextManager } from '@genepattern/nbtools/lib/context';
 import * as galaxyuioutput_exports from './galaxyoutput';
 import * as galaxyuibuilder_exports from './Galaxyuibuilder';
 import * as utils_exports from './utils'
-import * as fileupload from './FileUpload'
 import { MODULE_NAME, MODULE_VERSION } from './version';
 
 const module_exports = Object.assign(Object.assign(Object.assign(Object.assign({},   galaxyuioutput_exports), galaxyuibuilder_exports), utils_exports));
