@@ -202,26 +202,6 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
             fasta = response.read().decode("utf-8", "ignore")
             return fasta
 
-    def TestFastAPI(url):
-
-        # store the URL in url as 
-        # parameter for urlopen
-        # url = "http://192.168.1.113:8000/data"
-        
-        # store the response of URL
-        response = urlopen(url)
-        
-        # storing the JSON response 
-        # from url in data
-        data_json = json.loads(response.read())
-        
-        # print the json response
-     
-
-        return IPython.display.JSON(data_json)
-
-
-
 
     def download_file_to_jupyter_server(file_name, GalInstance=None, data_type='dataset', data_url=None, collection_id=None, ext='zip'):
 

@@ -304,23 +304,21 @@
 
   }
 
-  .galaxy-history-list {
+  /* .galaxy-history-list {
+    width: 70%;
     font-weight: bold;
     background-color: #f1f1f1;
     padding: 5px; 
     border-color: rgb(143, 145, 145);
     border-width: 1px;
 
-    /* margin: 5px; */
-    /* width: 40%; */
+  } */
 
-  }
-
-  .dataset-list{
+  /* .dataset-list{
     margin-bottom: 20px;
-  }
+  } */
 
-  .galaxy-history-list select{
+  /* .galaxy-history-list select{
     width: 100%;
     padding: 12px 20px;
     margin: 8px 0;
@@ -329,28 +327,27 @@
     border-radius: 4px;
     box-sizing: border-box;
     font-weight: bold;
-  }
+  }  */
 
-
-  .dataset-list {
+  /* .dataset-list {
       background: rgb(182, 179, 179);
       float: right;
       width: 300px;
-  }
+  } */
 
   .galaxy-data-panel {
-    height: 400px; 
-    overflow-y: scroll;
+    height: 200px; 
+    /* overflow-y: scroll; */
   }
 
-  .data-set-row {
+  /* .data-set-row {
     list-style-type: none;
     height: 30px;
     margin: 2px;
     background: rgb(163, 167, 167);
     padding: 10px;
     width: 350px;
-  }
+  } */
 
   .help-button {
     background-color: rgb(143, 145, 145);
@@ -716,20 +713,20 @@
   font-size: 12px;
 }
 
-.Galaxy-form {
+/* .Galaxy-form {
   border-left: 2px solid rgb(221, 218, 196);
   border-radius: 5px;
   background-color: #f2f2f2;
   padding: 20px;
   width: 70%;
   height: 100%;
-}
+} */
 
-.Data-History_IDs{
+/* .Data-History_IDs{
   background: hsl(240, 4%, 22%);
   color: #ffffff;
 
-}
+} */
 
 .data-load-status{
   width: 100%; 
@@ -780,3 +777,26 @@
   border-top: none;
 }
 
+.Galaxy-form-div {
+  margin:0;
+  width:100%;
+  height:100%;
+  /* padding: 0 0 30px 0; */
+  overflow:hidden;
+}
+.tool-forms { /* sidebar inside #mainContent */
+  float:left;
+  width:70%;
+  height:100%;
+  margin:10px 10px 40px 10px;
+  padding:10px 5px 10px 5px;
+  background-color:#CCCCCC;
+}
+.dataset-list {
+  height:100%;
+  width: 25%;
+  /* margin:10px 10px 40px 260px; */
+  /* padding:10px 5px 10px 5px; */
+  background-color:#CCCCCC;
+  overflow:auto;
+}

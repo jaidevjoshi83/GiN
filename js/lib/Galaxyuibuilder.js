@@ -7,6 +7,7 @@
  */
  import '../style/Galaxyuibuilder.css';
  import '../style/historydata.css';
+import '../style/galaxy-form.css';
 
  import { MODULE_NAME, MODULE_VERSION } from './version';
  import { unpack_models } from "@jupyter-widgets/base";
@@ -56,12 +57,29 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
     </div>
     <div class="nbtools-error" data-traitlet="error"></div>
     <div class="nbtools-info" data-traitlet="info"></div>
-    <div class="dataset-list"></div> 
-    <div class="nbtools-form"></div>
+    
+    <div class="nbtools-form"> 
+    
+        <div class="Galaxy-form-div">
+            <div class="tool-forms"> 
+                <div class="galaxy-history-list">
+                </div>
+                <form class="Galaxy-form">
+                </form>
+            </div>
+
+            <div class="dataset-list">
+            </div> 
+
+        </div>
+    </div>
+    
+    
     <div class="nbtools-footer"></div>
     <div class="nbtools-buttons">
         <button class="nbtools-run" type="button" data-traitlet="run_label"></button>
     </div>`;
+
     this.dragged = ''
     this.KernelOutPut = ''
     this.JOBID = {}
@@ -73,10 +91,11 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         const inputs = this.model.get('inputs')
 
         //########################
-        this.CreateForm()
+
+        this.AddHistoryList()
         this.Main_Form(inputs['inputs'])
-        this.Data_Tool()
-        this.AddHelpSection(inputs['help'])
+        this.AddDataSetTable()
+        // this.AddHelpSection(inputs['help'])
         //########################
         // // Hide the header or footer, if necessary
         this.display_header_changed();
@@ -95,40 +114,24 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
  
     Main_Form(inputs, call_back_data={}) {
 
-        var FormParent = this.el.querySelector('.Galaxy-form');
+       var Toolform = this.el.querySelector('.tool-forms')
+    //    Toolform.append(this.AddHistoryList())
 
-        // if (this.model.get('inputs')['id'] != 'galaxylab_data_upload_tool') {
-        var HistList = this.AddHistoryList(call_back_data['HID'])
-        FormParent.append(HistList)
-        // }
+       var FormParent = this.el.querySelector('.Galaxy-form');
+
+       if (FormParent == null){
+            var FormParent = document.createElement('form')
+            FormParent.className = 'Galaxy-form'
+       }
+
         var self = this
         _.each(inputs, (input) => {
             self.add(input, FormParent, '', call_back_data);
         });
+
+        Toolform.append(FormParent)
     }
 
-    async Data_Tool(selected_value='default', Dt=[], state=''){
-    
-        var DataList = this.el.querySelector('.dataset-list');
-        if (DataList){
-            this.removeAllChildNodes(DataList)
-        }
-        DataList.append(await this.AddDataSetTable(selected_value, Dt, state))
-    }
- 
-    CreateForm(){  
-
-        var self = this
-        const GalaxyForm = document.createElement('form')
-        GalaxyForm.className = 'Galaxy-form'
-        this.el.querySelector('div.nbtools-form').append(GalaxyForm)
-        const Button = document.createElement('button')
-        Button.style.display = 'none'
-        Button.type = 'button'
-        Button.id = 'submit'
-        Button.className  = 'Galaxy-form-button'
-        GalaxyForm.append(Button)
-    }
     
     ReturnDataFiles(Select){
 
@@ -155,6 +158,17 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         return  Data 
     }
+
+    ReturnData2(els){
+
+        for (var i = 0; i < els.length; i ++) {
+
+            if (els[i].style.display == '' || els[i].style.display == 'block' ) {
+                console.log(els[i])
+            }
+            
+        }  
+    }
  
     ReturnData(FormEelements){
  
@@ -170,7 +184,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                     InputPerameters[tableChild.querySelector('.InputData').name] = tableChild.querySelector('.InputData').value
                 } 
                 else {
-
                     var Select = tableChild.querySelector('.selectbox-scrollable')
                     Object.assign(InputPerameters, this.ReturnDataFiles(Select)['Inputs_data_files'])
                 }
@@ -721,50 +734,13 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         var self = this
 
-            const options =  this.model.get('History_IDs')
-            const select = document.createElement('select')
-            select.id = `Data-History_IDs`  
-            select.className = 'InputData'   
+        var DataList = this.el.querySelector('.dataset-list');
+        if (DataList){
+            this.removeAllChildNodes(DataList)
+        }
 
-            for(var i = 0; i < options.length; i++) {
-                    const opt = `${i+1}: ${options[i]['name']}`;
-                    const el = document.createElement("option");
-                    el.textContent = opt;
-                    el.value =  `${options[i]['id']}`;
-                    select.appendChild(el);
-            }
+        DataList.append(await this.data_row_list(this.model.get('GalInstance'), ''))
 
-            const DataHistoryList = document.createElement('div')
-
-            const title = document.createElement('div')
-            title.className = 'history-title'
-            const TitleSpan = document.createElement('span')
-            TitleSpan.className = "galaxy-history-title"
-            TitleSpan.textContent = 'Select the hiostory for available datasets'
-            TitleSpan.style.display = 'inline'
-            title.append(TitleSpan)
-            DataHistoryList.append(title)
-
-            DataHistoryList.className = "galaxy-history-list"
-            DataHistoryList.append(select)
-
-            var DataTable = document.createElement('ul')
-            DataTable.className = 'galaxy-data-panel'
-
-            DataTable.style.height = this.element.querySelector('.Galaxy-form').style.offsetHeight
-
-            DataHistoryList.append(select)
-            DataHistoryList.append(await this.data_row_list(this.model.get('GalInstance'), options[select.selectedIndex]['id']))
-
-            select.addEventListener("change", async (event)=> {
-
-                var ListItem = DataHistoryList.querySelector('.list-item')
-                ListItem.parentNode.removeChild(ListItem)
-                DataHistoryList.append(await self.data_row_list(self.model.get('GalInstance'), options[select.selectedIndex]['id']))
-        
-                }, false);
-    
-            return DataHistoryList
     }
 
     AddHistoryList(selected_value='default'){
@@ -775,6 +751,14 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         const select = document.createElement('select')
         select.id = `History_IDs`  
         select.className = 'InputData'   
+
+        const InputTitle = document.createElement('div')
+        InputTitle.className = 'input-title'
+        const InputTitleSpan = document.createElement('span')
+        InputTitleSpan.className = "ui-form-title-text"
+        InputTitleSpan.textContent = "Select History"
+        InputTitleSpan.style.display = 'inline'
+        InputTitle.append(InputTitleSpan)
      
         for(var i = 0; i < options.length; i++) {
               const opt = `${i+1}: ${options[i]['name']}`;
@@ -788,19 +772,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             select.selectedIndex = selected_value
         }
 
-        const HistoryList = document.createElement('div')
-
-        const title = document.createElement('div')
-        title.className = 'history-title'
-        const TitleSpan = document.createElement('span')
-        TitleSpan.className = "galaxy-history-title"
-        TitleSpan.textContent = 'Select history'
-        TitleSpan.style.display = 'inline'
-        title.append(TitleSpan)
-        HistoryList.append(title)
-
-        HistoryList.className = "galaxy-history-list"
-        HistoryList.append(select)
 
         select.addEventListener("change", async () => {
  
@@ -808,21 +779,19 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
             if (this.model.get('inputs')['id'] != 'galaxylab_data_upload_tool') {
 
+                console.log(HistoryID)
+
                 var children = self.element.querySelector('.Galaxy-form').children;
                 var Inputs = self.ReturnData(children)
 
                 var refine_inputs  = await KernelSideDataObjects(`from galaxylab import GalaxyTaskWidget\nGalaxyTaskWidget.UpdateForm(${JSON.stringify(self.model.get('GalInstance'))}, ${JSON.stringify(Inputs)}, ${JSON.stringify(self.model.get('ToolID'))}, ${JSON.stringify(HistoryID)})`)
-
-                var FormParent = self.el.querySelector('.Galaxy-form')                        
+ 
+                console.log(refine_inputs)
+                var FormParent = self.el.querySelector('.Galaxy-form')    
+                
+                console.log(FormParent)
                 self.removeAllChildNodes(FormParent)
 
-                const Button = document.createElement('button')
-                Button.style.display = 'none'
-                Button.type = 'button'
-                Button.id = 'submit'
-                Button.className  = 'Galaxy-form-button'
-        
-                FormParent.append(Button)
 
                 var SelectedIndex = {}
                 SelectedIndex['HID'] = select.selectedIndex
@@ -832,16 +801,20 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         });
 
-        return HistoryList
+        var HistoryList = this.el.querySelector('.galaxy-history-list')
+        HistoryList.append(InputTitle)
+        console.log(HistoryList)
+        HistoryList.append(select)
+
+
     }
 
     AddHelpSection(help){
 
         var self = this
 
-        var NbtoolsForm = this.element.querySelector('.nbtools-form')
-        var Help = document.createElement('div')
-        Help.className = 'help-section'
+        var helpSection = this.element.querySelector('.help-section')
+
         var HelpContent = document.createElement('div')
         HelpContent.className = 'help-content'
         HelpContent.innerHTML = help
@@ -852,9 +825,9 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         HelpButton.className = 'help-button'
         HelpButton.textContent = 'Help Section'
 
-        Help.append(HelpButton)
-        Help.append(HelpContent)
-        NbtoolsForm.append(Help)
+        helpSection.append(HelpButton)
+        helpSection.append(HelpContent)
+        // NbtoolsForm.append(Help)
 
         HelpButton.addEventListener("click", function() {
 
@@ -1059,7 +1032,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
           `)
         }
 
-
         // if (call_back_data['RecCall'] == true) {
 
         for(var i =0; i < Select.options.length; i++) {
@@ -1135,24 +1107,14 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         
         Select.addEventListener("change", async () => {
 
-
             var self  = this;
-
             var children = self.el.querySelector('.Galaxy-form').children;
-        
             var Inputs = self.ReturnData(children)
 
             var HistoryID = self.element.querySelector('#History_IDs').value
             var refine_inputs  = await KernelSideDataObjects(`from galaxylab import GalaxyTaskWidget\nGalaxyTaskWidget.UpdateForm(${JSON.stringify(self.model.get('GalInstance'))}, ${JSON.stringify(Inputs)}, ${JSON.stringify(self.model.get('ToolID'))}, ${JSON.stringify(HistoryID)})`)
-    
-            const Button = document.createElement('button')
-            Button.style.display = 'none'
-            Button.type = 'button'
-            Button.id = 'submit'
-            Button.className  = 'Galaxy-form-button'
 
             var FormParent = self.el.querySelector('.Galaxy-form')
-            FormParent.append(Button)
 
             var HID = self.element.querySelector('#History_IDs')
             self.removeAllChildNodes(FormParent)
@@ -1280,57 +1242,64 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         var refine_inputs   = await KernelSideDataObjects(`from galaxylab import GalaxyTaskWidget\nGalaxyTaskWidget.UpdateForm(${JSON.stringify(self.model.get('GalInstance'))}, ${JSON.stringify(Inputs)}, ${JSON.stringify(self.model.get('ToolID'))}, ${JSON.stringify(HistoryID)})`)
      
         var FormParent = self.el.querySelector('.Galaxy-form')
+
         self.removeAllChildNodes(FormParent)
-
-        const Button = document.createElement('button')
-        Button.style.display = 'none'
-        Button.type = 'button'
-        Button.id = 'submit'
-        Button.className  = 'Galaxy-form-button'
-
-        FormParent.append(Button)
         self.Main_Form(refine_inputs['inputs'], call_back_data);
     
         });
 
         return row
     }
+
+
  
     AddSelectField (input_def, FormParent, NamePrefix){
 
         input_def.id = this.uid()
         var self = this
 
-        const Div = document.createElement('div')
         const row = document.createElement('div')
+        row.className =  'ui-form-element section-row'
+        row.id =  this.uid()
 
         if (input_def.display== 'checkboxes') {
 
-            const title = document.createElement('div')
-            title.className = 'ui-from-title'
             const TitleSpan = document.createElement('span')
             TitleSpan.className = "ui-form-title-text"
-            TitleSpan.textContent = input_def['label']
+            TitleSpan.textContent = input_def.label
+    
+            const OuterDiv = document.createElement('div')
+            OuterDiv.className =  'outer-checkbox-div'
+            
+            row.append(TitleSpan)
+            row.append(OuterDiv)
 
-            title.append(TitleSpan)
-            Div.append(title)
 
             for(var i = 0; i < input_def.options.length; i++) {
-                const CheckBox = document.createElement('input')
-                CheckBox.className = 'ui-checkbox'
-                CheckBox.id = `select-${input_def.id}-${i}`
-                const Label = document.createElement('label')
-                Label.htmlFor = `select-${input_def.id}-${i}`
-                Label.innerText = input_def.options[i][0]
-                
-                CheckBox.type = 'checkbox'
-                Div.append(CheckBox)
-                Div.append(Label)
+
+                console.log(input_def)
+                const CheckBoxDiv = document.createElement('div')
+                CheckBoxDiv.className = 'ui-checkbox-div'
+
+                const CheckboxLabel = document.createElement('label')
+                CheckboxLabel.className = 'ui-checkbox-label'
+                CheckboxLabel.htmlFor = `select-${input_def.id}-${i}`
+                CheckboxLabel.innerText = input_def.options[i][0]
+
+                const CheckBoxInput = document.createElement('input')
+                CheckBoxInput.className = 'InputData'
+
+                CheckBoxInput.id = `select-${input_def.id}-${i}`
+                CheckBoxInput.value = input_def.options[i][1]
+                CheckBoxInput.type = 'checkbox'
+
+                CheckBoxDiv.append(CheckBoxInput)
+                CheckBoxDiv.append(CheckboxLabel)
+                OuterDiv.append(CheckBoxDiv)
             }
 
-            row.append(Div)
-        
-        } else {
+        } 
+        else {
 
             const options =  input_def['options']
             const select = document.createElement('select')
@@ -1370,42 +1339,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         return row
     }
 
-    TestAddSelectField (input_def, FormParent, NamePrefix){
-
-        input_def.id = this.uid()
-        var self = this
-
-        const options =  input_def['options']['hda']
-        const select = document.createElement('select')
-        select.id = `select-${input_def.id}`  
-        select.className = 'InputData'   
-        select.name = NamePrefix
-
-    
-        for(var i = 0; i < options.length; i++) {
-            const opt = options[i]['name'];
-            const el = document.createElement("option");
-            el.textContent = opt;
-            el.value =  options[i]['id'];
-            select.appendChild(el);
-        }
-
-        const title = document.createElement('div')
-        title.className = 'ui-from-title'
-        const TitleSpan = document.createElement('span')
-        TitleSpan.className = "ui-form-title-text"
-        TitleSpan.textContent = input_def['label']
-
-        TitleSpan.style.display = 'inline'
-        title.append(TitleSpan)
-
-        select.addEventListener("change", () => {
-
-            var queryID = select.value
-        });
-   
-        return select
-    }
  
     AddBooleanField (input_def, FormParent, NamePrefix ){
 
@@ -1550,7 +1483,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
     })
     }
 
-    async data_row_list (GalInstance, HistoryID){
+    async data_row_list (GalInstance, HistoryID=''){
 
         var DataList = document.createElement('ul')
         DataList.className = 'list-item'
@@ -2170,11 +2103,11 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             const Job = new DOMParser().parseFromString(JobStatus, 'text/html').querySelector('.job-status-widget')
 
             var GBody = this.el.querySelector('.nbtools-form')
-            var toolForm = this.el.querySelector('.Galaxy-form')
-            var Help = this.el.querySelector('.help-section')
+            var toolForm = this.el.querySelector('.Galaxy-form-div')
+            // var Help = this.el.querySelector('.help-section')
 
             GBody.removeChild(toolForm)
-            GBody.removeChild(Help)
+            // GBody.removeChild(Help)
 
             toolForm.style.backgroundColor = 'white'
             this.removeAllChildNodes(toolForm)
@@ -2346,14 +2279,16 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         var children = self.element.querySelector('.Galaxy-form').children;
         var Inputs = self.ReturnData(children)
 
+        self.ReturnData2(children)
+
         if (this.model.get('inputs')['id'] == 'galaxylab_data_upload_tool') {
             this.dataupload_job()
-           
         } else {
-
             this.AddJobStatusWidget(Inputs, HistoryID)
-
         }
+
+        console.log('ok1')
+        console.log(children )
 
          }));
     }

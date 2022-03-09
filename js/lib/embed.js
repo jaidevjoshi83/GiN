@@ -5,7 +5,6 @@
 // already be loaded by the notebook otherwise.
 
 // Export widget models and views, and the npm package version number.
-module.exports = require('./galaxyoutput.js');
 module.exports = require('./Galaxyuibuilder')
 module.exports = require('./utils');
 module.exports['version'] = require('../package.json').version;
