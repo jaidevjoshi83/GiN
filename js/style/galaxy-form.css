@@ -11,12 +11,7 @@
 
 }
 
-<<<<<<< HEAD:js/style/galaxy-form.css
-
 .Galaxy-form input:not(.fileid, .buttonid, [type='checkbox']){
-=======
-.Galaxy-form input:not(.fileid, .buttonid){
->>>>>>> master:js/style/galaxyoutput.css
   width: 100%;
   padding: 12px 20px;
   margin: 8px 0;
