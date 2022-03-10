@@ -61,14 +61,20 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
     <div class="nbtools-form"> 
     
         <div class="Galaxy-form-div">
+
             <div class="tool-forms"> 
                 <div class="galaxy-history-list">
+                <label id="dataset-history-label" for="history-list-title">Select History</label><br>
                 </div>
+
                 <form class="Galaxy-form">
                 </form>
             </div>
 
             <div class="dataset-list">
+                <label id="dataset-history-label" for="history-list-title">Select History</label><br>
+                <div id='history-list-title' class="history-list-title">
+                </div>
             </div> 
 
         </div>
@@ -91,8 +97,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         const inputs = this.model.get('inputs')
 
         //########################
-
         this.AddHistoryList()
+        //########################
         this.Main_Form(inputs['inputs'])
         this.AddDataSetTable()
         // this.AddHelpSection(inputs['help'])
@@ -474,10 +480,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
                         </div>`
 
-
-
-        // ${JSON.stringify('http://192.168.1.113:8000/data')}
-
         const utm = new DOMParser().parseFromString(data_upload, 'text/html').querySelector('.upload_tab')
         var List = utm.querySelectorAll('.tablinks')        
 
@@ -734,16 +736,43 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         var self = this
 
-        var DataList = this.el.querySelector('.dataset-list');
-        if (DataList){
-            this.removeAllChildNodes(DataList)
+        const options =  this.model.get('History_IDs')
+        const select = document.createElement('select')
+        select.id = `dataset-history-list`  
+        select.className = 'InputData'   
+     
+        for(var i = 0; i < options.length; i++) {
+              const opt = `${i+1}: ${options[i]['name']}`;
+              const el = document.createElement("option");
+              el.textContent = opt;
+              el.value =  `${options[i]['id']}`;
+              select.appendChild(el);
         }
 
-        DataList.append(await this.data_row_list(this.model.get('GalInstance'), ''))
+        if (selected_value !== 'default') {
+            select.selectedIndex = selected_value
+        }
 
+        select.addEventListener("change", async () => {
+ 
+            var HistoryID = select.value
+
+            console.log(HistoryID)
+
+            var e = self.el.querySelector('.list-item')
+            e.parentElement.removeChild(e)
+            DataList.append(await this.data_row_list(this.model.get('GalInstance'), HistoryID))
+
+        });
+
+        var DataList = this.el.querySelector('.dataset-list');
+
+        DataList.append(select)
+        DataList.append(await this.data_row_list(this.model.get('GalInstance'), ''))
     }
 
     AddHistoryList(selected_value='default'){
+
 
         var self = this
 
@@ -752,13 +781,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         select.id = `History_IDs`  
         select.className = 'InputData'   
 
-        const InputTitle = document.createElement('div')
-        InputTitle.className = 'input-title'
-        const InputTitleSpan = document.createElement('span')
-        InputTitleSpan.className = "ui-form-title-text"
-        InputTitleSpan.textContent = "Select History"
-        InputTitleSpan.style.display = 'inline'
-        InputTitle.append(InputTitleSpan)
+
      
         for(var i = 0; i < options.length; i++) {
               const opt = `${i+1}: ${options[i]['name']}`;
@@ -779,19 +802,13 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
             if (this.model.get('inputs')['id'] != 'galaxylab_data_upload_tool') {
 
-                console.log(HistoryID)
-
                 var children = self.element.querySelector('.Galaxy-form').children;
                 var Inputs = self.ReturnData(children)
-
                 var refine_inputs  = await KernelSideDataObjects(`from galaxylab import GalaxyTaskWidget\nGalaxyTaskWidget.UpdateForm(${JSON.stringify(self.model.get('GalInstance'))}, ${JSON.stringify(Inputs)}, ${JSON.stringify(self.model.get('ToolID'))}, ${JSON.stringify(HistoryID)})`)
  
-                console.log(refine_inputs)
                 var FormParent = self.el.querySelector('.Galaxy-form')    
                 
-                console.log(FormParent)
                 self.removeAllChildNodes(FormParent)
-
 
                 var SelectedIndex = {}
                 SelectedIndex['HID'] = select.selectedIndex
@@ -802,11 +819,9 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         });
 
         var HistoryList = this.el.querySelector('.galaxy-history-list')
-        HistoryList.append(InputTitle)
-        console.log(HistoryList)
+        // HistoryList.append(InputTitle)
         HistoryList.append(select)
-
-
+   
     }
 
     AddHelpSection(help){
@@ -1488,9 +1503,9 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         var DataList = document.createElement('ul')
         DataList.className = 'list-item'
         DataList.style.overflow = 'auto'
-        DataList.style.height = '400px'
+        DataList.style.height = '600px'
         DataList.style.overflowX = 'scroll'
-        DataList.style.overflowY = 'scroll'
+         DataList.style.overflowY = 'scroll'
     
         var datasets = await KernelSideDataObjects(`from galaxylab  import GalaxyTaskWidget\nGalaxyTaskWidget.history_data_list(GalInstance=${JSON.stringify(GalInstance)}, HistoryID=${JSON.stringify(HistoryID)} )`) 
 
@@ -1516,11 +1531,9 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
     async dataset_collection_row_state (dataset, history_id){
 
-
         var self = this
 
         var URL = this.model.get('GalInstance')['URL']
-
         var show_dataset = await KernelSideDataObjects(`from galaxylab  import GalaxyTaskWidget\nGalaxyTaskWidget.show_dataset_collection(GalInstance=${JSON.stringify(this.model.get('GalInstance'))}, dataset_id=${JSON.stringify(dataset['id'])} )`) 
 
         var row = `<div id="${dataset['type_id']}"   class="list-item ${show_dataset['history_content_type']} history-content state-${show_dataset['populated_state']}" >
@@ -1771,9 +1784,9 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                             </div>
 
                             <div class="annotation-display"></div>
-                            <div class="display-applications"></div>
+                            
 
-                            <pre class="dataset-peek"> ${dataset['peek']}</pre> 
+                            <pre class="dataset-peek">${dataset['peek']}</pre> 
                         </div>
                        `
 

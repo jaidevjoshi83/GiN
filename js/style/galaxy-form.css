@@ -1,0 +1,80 @@
+.ui-form-element.section-row.pl-2 {
+  padding: 0px 2px;
+  margin-left: 10px;
+  border-left: 2px solid rgb(221, 218, 196);
+  border-radius: 5px;
+}
+
+.ui-form-element.section-row {
+  padding: 0px 2px;
+  margin-bottom: 10px;
+
+}
+
+
+.Galaxy-form input:not(.fileid, .buttonid, [type='checkbox']){
+  width: 100%;
+  padding: 12px 20px;
+  margin: 8px 0;
+  display: inline-block;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+.Galaxy-form select{
+  width: 100%;
+  padding: 12px 20px;
+  margin: 8px 0;
+  display: inline-block;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+.ui-form-element.section-row span {
+  font-weight: bold;
+}
+
+.upload_data {
+  display: inline-block;
+  border: 1px solid rgb(212, 41, 41);
+  box-sizing: border-box;
+}
+
+.Galaxy-form input[type="file"] {
+  display: none;
+}
+
+
+.custom-file-upload {
+  border: 1px solid rgb(212, 41, 41);
+  display: inline-block;
+  padding: 6px 12px;
+  cursor: pointer;
+}
+
+.ui-form-element.section-row label :not(.ui-checkbox-label){
+  width: 100%;
+  display: inline-block;
+  padding: 6px 12px;
+  cursor: pointer;
+}
+
+.ui-checkbox-label {
+  width: 95%;
+  padding-bottom: 2px;
+  margin-left: 5px;
+}
+
+.outer-checkbox-div {
+  width: 95%;
+  margin-left: 20px;
+  margin-top: 10px;
+  padding-left: 5px;
+  padding-top: 5px;
+  border: solid;
+  border-color: rgb(168,150,150);
+  border-radius: 5px;
+}
+
