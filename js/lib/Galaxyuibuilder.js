@@ -863,16 +863,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         var self = this
         input_def.id = this.uid()
-
-        const InputTitle = document.createElement('div')
-        InputTitle.className = 'input-title'
-
-        const InputTitleSpan = document.createElement('span')
-        InputTitleSpan.className = "ui-form-title-text"
-        InputTitleSpan.textContent = input_def['title']
-        InputTitleSpan.style.display = 'inline'
-        InputTitle.append(InputTitleSpan)
-
+        
         var Button = document.createElement('button')
         Button.innerText = `Insert ${input_def['title']}`
         Button.className = 'RepeatButton'
@@ -906,7 +897,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         }
         row.append(row2)
 
-        FormParent.append(InputTitle)
+        // FormParent.append(InputTitle)
         FormParent.append(row)
         FormParent.append(Button)
 
