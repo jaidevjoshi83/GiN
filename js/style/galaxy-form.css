@@ -112,5 +112,11 @@
   border-bottom-right-radius: 5px;
 }
 
+.galaxy-uibuilder button.RepeatButton { 
+  margin: 5px;
+  background-color: rgb(91,87,84);
+  color: white;
+}
+
 
 

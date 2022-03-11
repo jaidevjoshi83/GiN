@@ -1,4 +1,4 @@
-.RepeatButton {
+.galaxy-uibuilder .RepeatButton {
 
     z-index: 1;
     background-color: var(--jp-layout-color2);
@@ -6,15 +6,16 @@
     padding: 6px 12px;
     font-size: 0.9em;
     cursor: pointer;
+    margin: 5px;
 }
 
-.ui-repeat .section-row {
+.galaxy-uibuilder .ui-repeat .section-row {
 
     border-radius: 20px;
 
 }
 
-.collapsible {
+.galaxy-uibuilder .collapsible {
     background-color: #777;
     color: white;
     cursor: pointer;
@@ -28,18 +29,18 @@
     margin: 5px;
   }
   
-  .active, .collapsible:hover {
+  .galaxy-uibuilder .active, .collapsible:hover {
     background-color: #555;
   }
   
-  .content {
+  .galaxy-uibuilder .content {
     padding: 0 18px;
     display: none;
     overflow: hidden;
     background-color: #f1f1f1;
   }
 
-  .UPD {
+.galaxy-uibuilder .UPD {
     border: solid;
     border-color: rgb(170, 161, 161);
     border-width: 5px;
@@ -51,12 +52,12 @@
     border-bottom-left-radius: 5px;
 }
 
-.internal-ui-repeat .section-row {
+.galaxy-uibuilder .internal-ui-repeat .section-row {
     border-color: rgb(32, 156, 156);
     border-width: 5px;
 }
 
-.delete-button {
+.galaxy-uibuilder .delete-button {
   
   background: none;
   border: none;
@@ -64,15 +65,17 @@
   float: right;
 }
 
-.input-title {
+.galaxy-uibuilder .input-title {
     padding: 10px;
 }
 
-.dataset-list {
+.galaxy-uibuilder .dataset-list {
   background: rgb(182, 179, 179);
   float: left;
   width: 23%;
   margin-bottom: 0px;
+  border-radius: 3px;
+
 }
 
 .galaxy-data-panel {
@@ -246,10 +249,9 @@ width: 350px;
   
   .job-status-widget{
     background: hsl(0, 4%, 66%);
-    width: 70%;
+    width: 100%;
     height: 290px;
-    margin-bottom: 200px;
-  
+
   }
   
   .job-header{
@@ -439,7 +441,8 @@ width: 350px;
   height:100%;
   margin-right: 10px;
   padding:10px 5px 10px 5px; 
-  background-color: rgb(246,246,246)
+  background-color: rgb(246,246,246);
+  border-radius: 5px;
 } 
 
 #dataset-history-label{
