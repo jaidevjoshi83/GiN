@@ -64,7 +64,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
             <div class="tool-forms"> 
                 <div class="galaxy-history-list">
-                <label id="dataset-history-label" for="history-list-title">Select History</label><br>
+                <label id="dataset-history-label" for="history-list">Select History</label><br>
                 </div>
 
                 <form class="Galaxy-form">
@@ -73,9 +73,11 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             </div>
 
             <div class="dataset-list">
-                <label id="dataset-history-label" for="history-list-title">Select History</label><br>
-                <div id='history-list-title' class="history-list-title">
+                <label id="dataset-history-label" for="history-list">Select History</label><br>
+
+                <div id='history-list' class="history-list">
                 </div>
+
                 <div  class="history-dataset-list">
                 </div>
             </div> 
@@ -123,17 +125,16 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
  
     Main_Form(inputs, call_back_data={}) {
 
-       var Toolform = this.el.querySelector('.tool-forms')
-    //    Toolform.append(this.AddHistoryList())
+        var self = this
 
-       var FormParent = this.el.querySelector('.Galaxy-form');
+        var Toolform = this.el.querySelector('.tool-forms')
+        var FormParent = this.el.querySelector('.Galaxy-form');
 
-       if (FormParent == null){
+        if (FormParent == null){
             var FormParent = document.createElement('form')
             FormParent.className = 'Galaxy-form'
-       }
+        }
 
-        var self = this
         _.each(inputs, (input) => {
             self.add(input, FormParent, '', call_back_data);
         });
@@ -172,9 +173,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         for (var i = 0; i < els.length; i ++) {
             if (els[i].style.display == '' || els[i].style.display == 'block' ) {
-
             }
-            
         }  
     }
  
@@ -313,10 +312,9 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         if (Name.length !== 0 ) {
             values[Name[0]] = Key
-            
         } 
+
         return values
-        
     }
 
     Drill_down(options, param_name='default'){
@@ -358,7 +356,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             if (options[i]['options'].length !== 0 ) {
                 OuterDrillDown.append(this.Drill_down(options[i]['options'], param_name))
             }
-
         }
 
         return OuterDrillDown
@@ -390,7 +387,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         const Icon = document.createElement('span')
         Icon.className = 'icon fa mr-1 fa-check-square-o'
-
 
         Icon.addEventListener("click", () => {
 
@@ -548,7 +544,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         utm.append(genomeSelect)
 
         FormParent.append(utm)
-
     }
 
     submitPayload(payload, credentials) {
@@ -685,6 +680,9 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         const select = document.createElement('select')
         select.id = `dataset-history-list`  
         select.className = 'InputData'   
+
+        var DataListdiv = this.el.querySelector('.history-dataset-list');
+        DataListdiv.append(await this.data_row_list(this.model.get('GalInstance'), ''))
      
         for(var i = 0; i < options.length; i++) {
               const opt = `${i+1}: ${options[i]['name']}`;
@@ -704,18 +702,15 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             var e = self.el.querySelector('.list-item')
 
             e.parentElement.removeChild(e)
-            DataList.append(await this.data_row_list(this.model.get('GalInstance'), HistoryID))
+            DataListdiv.append(await this.data_row_list(this.model.get('GalInstance'), HistoryID))
 
         });
 
-        var DataList = this.el.querySelector('#history-list-title')
+        var DataList = this.el.querySelector('#history-list')
         DataList.append(select)
-        var DataListdiv = this.el.querySelector('.history-dataset-list');
-        DataListdiv.append(await this.data_row_list(this.model.get('GalInstance'), ''))
     }
 
     AddHistoryList(selected_value='default'){
-
 
         var self = this
 
@@ -724,8 +719,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         select.id = `History_IDs`  
         select.className = 'InputData'   
 
-
-     
         for(var i = 0; i < options.length; i++) {
               const opt = `${i+1}: ${options[i]['name']}`;
               const el = document.createElement("option");
@@ -737,7 +730,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         if (selected_value !== 'default') {
             select.selectedIndex = selected_value
         }
-
 
         select.addEventListener("change", async () => {
  
@@ -764,7 +756,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         var HistoryList = this.el.querySelector('.galaxy-history-list')
         // HistoryList.append(InputTitle)
         HistoryList.append(select)
-   
     }
 
     AddHelpSection(help){
@@ -790,7 +781,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         HelpButton.addEventListener("click", function() {
 
             let nextSibling = HelpButton.nextElementSibling;   
-
 
             if (nextSibling.style.display == 'none'){
                 nextSibling.style.display = 'block'
@@ -983,7 +973,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         // if (call_back_data['RecCall'] == true) {
 
-
         if (input_def.value !== null) {
             for(var i =0; i < Select.options.length; i++) {
                 for(var k = 0; k < input_def.value.values.length; k++ ) {                    
@@ -994,7 +983,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         }
 
         }
-
 
         // } 
 
@@ -1206,8 +1194,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         return row
     }
 
-
- 
     AddSelectField (input_def, FormParent, NamePrefix){
 
         input_def.id = this.uid()
@@ -1228,7 +1214,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             
             row.append(TitleSpan)
             row.append(OuterDiv)
-
 
             for(var i = 0; i < input_def.options.length; i++) {
 
@@ -1251,7 +1236,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 CheckBoxDiv.append(CheckboxLabel)
                 OuterDiv.append(CheckBoxDiv)
             }
-
         } 
         else {
 
@@ -1723,8 +1707,9 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                             </div>
 
                             <div class="annotation-display"></div>
-                            
 
+                            <div class="display-applications"></div>
+                            
                             <pre class="dataset-peek">${dataset['peek']}</pre> 
                         </div>
                        `
@@ -1732,6 +1717,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         const ok_details_html = new DOMParser().parseFromString(details, 'text/html').querySelector('.details')
 
         var display_apps = ok_details_html.querySelector('.display-applications')
+
+
 
         this.add_display_application(display_apps, dataset)
 
@@ -1871,17 +1858,25 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         this.el.querySelector('.job-detail-text-name').innerText = 'Submitted by : '+ job['user_email']+' on '+ job['update_time']
 
         var DHL = this.el.querySelector('#dataset-history-list')
-        var ListItem =  this.el.querySelector('.list-item')
+        var DataListdiv = this.el.querySelector('.history-dataset-list');
 
         // DHL.removeChild(ListItem)
 
+       console.log(DHL)
+
        for (var i = 0; i <  DHL.options.length; i++ ){
+
+            console.log(DHL[i].value )
+
             if (DHL[i].value == HistoryID) {
+                console.log(HistoryID)
                 DHL.selectedIndex = i
             }
         }
 
-        DHL.append(await this.data_row_list(this.model.get('GalInstance'), HistoryID))
+        var e = this.el.querySelector('.list-item')
+        e.parentElement.removeChild(e)
+        DataListdiv.append(await this.data_row_list(this.model.get('GalInstance'), HistoryID))
 
         var states = ['ok', 'error']
 
@@ -1891,7 +1886,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
             var JobState = data[0]['state']
             var ListItem =  this.el.querySelector('.list-item')
-
 
             if (JobState=='running'  ){
 
@@ -1906,24 +1900,19 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 var StdError  = this.el.querySelector('.donemessagelarge')
                 StdError.style.background = '#ffe6cd'
 
-
                 for (var j =0; j < data.length; j++){
 
                     var id=`dataset-${data[j]['id']}`
                     console.log(ListItem)
 
                     if(ListItem.querySelector(`#${id}`) !== null){
-
-
                         var e = ListItem.querySelector(`#${id}`)
                         e.parentElement.removeChild(e)
                     }
-
                     if (ListItem.querySelector(`#dataset-${data[j]['id']}`) == null ) {
                         ListItem.prepend(await this.dataset_row_running_state(data[j]))
                     }
                 }
-
             } 
             else if (['queued', 'new'].includes(JobState)) {
 
@@ -1940,7 +1929,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                         ListItem.prepend(await this.dataset_row_queued_state(data[j]))
                     }
                 }
-
             } 
             else if (JobState == 'ok'){
 
@@ -1966,7 +1954,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
                 var gearrotate = this.el.querySelector('.job-done-icon')
                 gearrotate.style.display = 'block'
-
             } 
 
             else if (JobState == 'error'){
@@ -2343,13 +2330,9 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             var DisAppsSpanLink = document.createElement('span')
             DisAppsSpanLink.className = 'display-application-links'
 
-            console.log(display_app)
-
             display_app.append(DisAppsSpan)
             display_app.append(DisAppsSpanLink)
             display_apps.append(display_app)
-
-
 
             for (var j = 0; j < data[i]['links'].length; j++) {
 
