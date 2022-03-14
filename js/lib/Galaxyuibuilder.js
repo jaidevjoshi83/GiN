@@ -101,6 +101,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         super.render();
         const inputs = this.model.get('inputs')
 
+        console.log(this.model.get('GalInstance'))
         //########################
         this.AddHistoryList()
         //########################
@@ -129,7 +130,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         var Toolform = this.el.querySelector('.tool-forms')
         var FormParent = this.el.querySelector('.Galaxy-form');
-
+    
         if (FormParent == null){
             var FormParent = document.createElement('form')
             FormParent.className = 'Galaxy-form'
@@ -1022,7 +1023,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         row.append(FileManu)
 
         if (input_def.multiple === true ){
-
             Label_files.style.display = 'block'
             Label_collection.style.display = 'block'
             Select.multiple = true
@@ -1277,7 +1277,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         return row
     }
 
- 
     AddBooleanField (input_def, FormParent, NamePrefix ){
 
         input_def.id = this.uid()
@@ -1416,9 +1415,9 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
     }
 
     waitforme (milisec){
-    return new Promise(resolve => {
-        setTimeout(() => { resolve('') }, milisec);
-    })
+        return new Promise(resolve => {
+            setTimeout(() => { resolve('') }, milisec);
+        })
     }
 
     async data_row_list (GalInstance, HistoryID=''){
@@ -1519,6 +1518,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         var URL = this.model.get('GalInstance')['URL']
 
+        console.log(URL)
+
         var row = `<div id="${dataset['type_id']}"   class="list-item ${dataset['history_content_type']} history-content state-ok" >
                     <div class="warnings"></div>
                     <div class="selector"><span class="fa fa-2x fa-square-o"></span></div>
@@ -1567,9 +1568,13 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         }, false);
 
+        var DownloadButton = Tbl.querySelector('.fa.fa-download')
+
+        DownloadButton.addEventListener('click', async (event) => {
+            KernelSideDataObjects(`from galaxylab import GalaxyTaskWidget\nGalaxyTaskWidget.download_file_to_jupyter_server(collection_id=${JSON.stringify(dataset['id'])}, GalInstance=${JSON.stringify(this.model.get('GalInstance'))} )`);
+        })
+
         this.delete_dataset(Tbl, dataset['id'],  history_id)
-        // this.attach_data_load_event(Tbl, dataset, `${URL}/datasets/${dataset['id']}/display/?preview=True`)
-        this.attach_data_load_event(Tbl, dataset,  `${URL}/datasets/${dataset['id']}/display?to_ext=${dataset['extension']}`, `${dataset['extension']}`)
 
         return Tbl
     } 
@@ -2062,17 +2067,14 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
             BTN.addEventListener('click', async (e) => {
 
+                console.log('ok')
+
                 var refine_inputs  = await KernelSideDataObjects(`from galaxylab import GalaxyTaskWidget\nGalaxyTaskWidget.UpdateForm(GalInstance=${JSON.stringify(self.model.get('GalInstance'))}, toolID=${JSON.stringify(self.model.get('ToolID'))}, HistoryID=${JSON.stringify(HistoryID)})`)
                 var JobStatus = self.el.querySelector('.job-status-widget')
-
-                var GbForm = document.createElement('div')
-                GbForm.className = 'tool-forms'
-                GBody.prepend(GbForm)
-
-                console.log(GBody)
-
                 JobStatus.parentNode.removeChild(JobStatus)
 
+                console.log(GBody)
+ 
                 self.Main_Form(refine_inputs['inputs'])
                 self.AddHelpSection(refine_inputs['help'])
                 self.hide_run_buttons()
@@ -2126,6 +2128,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
     async dataset_collection_list_item (elements){
 
+        var self = this
         var URL = this.model.get('GalInstance')['URL']
 
         var ListItem = `<div id="dataset-${elements['object']['id']}" class="list-item dataset state-${elements['object']['state']}" >
@@ -2172,10 +2175,12 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         var Download = row.querySelector('.fa.fa-download')
 
         Download.addEventListener('click', () => {
-            KernelSideDataObjects(`from galaxylab import GalaxyTaskWidget\nGalaxyTaskWidget.download_file_to_jupyter_server(data_url=${JSON.stringify(`${URL}/datasets/${elements['object']['id']}/display?to_ext=${elements['object']['file_ext']}`)}, file_name=${JSON.stringify(`${elements['object']['name']}`)}, ext=${JSON.stringify(`${elements['object']['file_ext']}`)})`);
+
+            console.log(JSON.stringify(elements['object']['id']))
+
+            KernelSideDataObjects(`from galaxylab import GalaxyTaskWidget\nGalaxyTaskWidget.download_file_to_jupyter_server( GalInstance=${JSON.stringify(self.model.get('GalInstance'))}, collection_id=${JSON.stringify(elements['object']['id'])}) `);
         })
 
-      
         return row
     }
 
@@ -2263,52 +2268,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         });
     }
 
-    load_tabular_files (hid, data_url, ext){
-
-        KernelSideDataObjects(`from galaxylab import GalaxyTaskWidget\ndata_${hid} = GalaxyTaskWidget.download_file_to_jupyter_server(${JSON.stringify(data_url)}, ${JSON.stringify(ext)})`);
-        KernelSideDataObjects(`print('data_${hid}')`);
-    }
-
-    download_datafiles_to_server (data_url, file_name, ext){
-
-        KernelSideDataObjects(`from galaxylab import GalaxyTaskWidget\nGalaxyTaskWidget.download_file_to_jupyter_server(${JSON.stringify(data_url)}, ${JSON.stringify(file_name)}, ${JSON.stringify(ext)})`);
-    }
-
-    attach_data_load_event (headnode, dataset, url, ext){
-
-        var self = this
-
-        var LoadButton = headnode.querySelector('.fa.fa-download')
-
-        var details =  `<div class="data-load-status" >
-                            <div class="title" style="float: left; margin-top: 5px; margin-left: 5px; overflow-x: auto;" > 
-                                 <span class="hid"><b>${dataset['hid']}</b>: </span> <span class="name" >Data <b>${dataset['name']}</b> loaded successfully, can be accessed inside the current notebook cell via <a href="javascript:void(0);" ><b style="color: white;"> data_${dataset['hid']}</b></a> variable. </span>
-                            </div>
-                            <div class="primary-actions" style="float: right; margin-top: 2px;"><a class="icon-btn delete-btn" title="" href="javascript:void(0);" data-original-title="Delete"><span class="fa fa-plus" style=""></span></a><a class="icon-btn delete-btn" title="" href="javascript:void(0);" data-original-title="Delete"><span class="fa fa-times" style=""></span></a></div>
-                        </div>`
-
-        const ok_details_html = new DOMParser().parseFromString(details, 'text/html').querySelector('.data-load-status')
-
-        LoadButton.addEventListener('click', ()=>{
-            // var  NbtoolsForm =  self.el.querySelector('.nbtools-form')
-            // NbtoolsForm.append(ok_details_html)
-            // this.load_tabular_files (dataset['hid'], url, dataset['name'])
-            this.download_datafiles_to_server(url, dataset['name'], ext)
-        });
-
-        var DeleteButton = ok_details_html.querySelector('.fa.fa-times')
-
-        DeleteButton.addEventListener('click', () => {
-            ok_details_html.parentNode.removeChild(ok_details_html)
-            KernelSideDataObjects(`del data_${dataset['hid']}`);
-        })
-
-        var AddCellButton = ok_details_html.querySelector('.fa.fa-plus')
-
-        AddCellButton.addEventListener('click', () => {
-            Toolbox.add_code_cell(`data_${dataset['hid']}`);
-        })        
-    }
 
     add_display_application (display_apps, data) {
 

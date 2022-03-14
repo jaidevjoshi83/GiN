@@ -203,7 +203,9 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
             return fasta
 
 
-    def download_file_to_jupyter_server(file_name, GalInstance=None, data_type='dataset', data_url=None, collection_id=None, ext='zip'):
+    def download_file_to_jupyter_server( GalInstance=None, data_type='dataset', collection_id=None, ext='zip', file_name=None):
+
+        gi = GalaxyInstance(GalInstance['URL'], email=GalInstance['email_ID'], api_key=GalInstance['API_key'], verify=True)
 
         galaxy_data = os.path.join(os.getcwd(), 'galaxy_data')
 
@@ -211,14 +213,10 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
             os.mkdir(galaxy_data)
 
         if data_type == 'collection':
-            file_path = os.path.join(galaxy_data, file_name)+'.'+ext
-            gi = GalaxyInstance(GalInstance['URL'], email=GalInstance['email_ID'], api_key=GalInstance['API_key'], verify=True)
+            file_path = os.path.join(galaxy_data, file_name)+'.'+ext            
             gi.gi.dataset_collections.download_dataset_collection(dataset_collection_id=collection_id, file_path=file_path)
         else:
-            response = urlopen(data_url)
-            data = response.read()
-            f = open(os.path.join(galaxy_data, file_name)+'.'+ext, 'wb')
-            f.write(data)
+            gi.gi.datasets.download_dataset(dataset_id=collection_id, file_path=galaxy_data)
 
     def handle_error_task(self, error_message, name='Galaxy Module', **kwargs):
         """Display an error message if the task is None"""
