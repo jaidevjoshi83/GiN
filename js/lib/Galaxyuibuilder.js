@@ -577,7 +577,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 filetype: file.type,
             },
             headers: {
-                x_api_key: credentials['API_key'],
+                'x-api-key': credentials['API_key'],
             },
             
             onError: function(error) {
@@ -736,7 +736,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
  
             var HistoryID = select.value
 
-            if (this.model.get('inputs')['id'] != 'galaxylab_data_upload_tool') {
+            if (this.model.get('inputs')['id'] != 'galaxylab_data_upload_tool' | 'cross_upload_tool') {
 
                 var children = self.element.querySelector('.Galaxy-form').children;
                 var Inputs = self.ReturnData(children)
@@ -2306,6 +2306,5 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         }
 
         return display_apps
-    }
-    
+    }   
 }
