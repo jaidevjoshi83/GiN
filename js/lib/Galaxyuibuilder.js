@@ -13,7 +13,7 @@ import '../style/galaxy-form.css';
  import { unpack_models } from "@jupyter-widgets/base";
  import { BaseWidgetModel, BaseWidgetView } from "@genepattern/nbtools";
  import _ from "underscore";
- import {  KernelSideDataObjects } from './utils';
+ import {  extract_file_name, KernelSideDataObjects } from './utils';
  import { Toolbox } from '@genepattern/nbtools';
  import * as tus from "tus-js-client";
 
@@ -452,7 +452,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         var data_upload = `
                         <div class="upload_tab">
                            <div class="tab">
-                                <button type="button" class="tablinks" >Upload</button>
+                                <button type="button" id="resumable_upload_button" class="tablinks" >Upload</button>
                                 <button type="button" class="tablinks">From URL</button>
                                 <button type="button" class="tablinks">Create data</button>
                            </div>
@@ -558,6 +558,16 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
     NewTusUpload( data){
 
         var self = this
+
+        var elm = this.el.querySelector('#inputupload')
+        var title = document.createElement('p')
+        title.className = 'upload-title'
+
+        var Parent = elm.parentElement
+        self.removeAllChildNodes(Parent)
+
+        Parent.prepend(title)
+      
         var chunkSize = 10485760;
         var file = data.files[0];
         var credentials = this.model.get('GalInstance')
@@ -580,18 +590,51 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             onError: function(error) {
                 console.log("Failed because: " + error)
             },
+
             onProgress: function(bytesUploaded, bytesTotal) {
-                
                 var percentage = (bytesUploaded / bytesTotal * 100).toFixed(2)
                 console.log(bytesUploaded, bytesTotal, percentage + "%")
+
+                title.innerText = `Uploading file ${upload.file.name,  percentage + "%"}` 
+
+                var btn = self.el.querySelector('#resumable_upload_button')
+                btn.innerHTML = 'Uploading '
+
+                var i = document.createElement('i')
+                i.className = 'fa fa-spinner fa-spin'
+                btn.append(i)
+
             },
+
             onSuccess: function() {
                 console.log("Download %s from %s", upload.file.name, upload.url)
+
+                title.innerText = `File Uploaded Successfully..  ${ upload.file.name}` 
+
+                var btn = self.el.querySelector('#resumable_upload_button')
+                self.removeAllChildNodes(btn)
+                btn.innerHTML = "Upload"
 
                 data[`files_${0}|file_data`] = {
                     session_id: upload.url.split("/").at(-1),
                     name: upload.file.name,
                 };
+
+                self.removeAllChildNodes(Parent)
+
+                var p = document.createElement('p')
+                var b = document.createElement('b')
+
+                p.append(b)
+                Parent.append(p)
+
+                var Input = document.createElement('input')
+                Input.id = 'inputupload'
+                Input.className = 'input_upload'
+                Input.type = 'file'
+                Input.style.display = 'block'
+                Parent.append(Input)
+
                 self.submitPayload(data, credentials)
             }
             
@@ -646,7 +689,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         })
     }
 
-   async dataupload_job() {
+   async dataupload_job( uplood_status='', HistoryID='' ) {
         // this.hide_run_buttons(true)
         var children = this.element.querySelector('.Galaxy-form')
         var upload_link 
@@ -658,6 +701,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 upload_method = children.querySelectorAll('.tabcontent')[i].querySelector('.input_upload').type
             }
         }
+
+        console.log(upload_method)
 
         var datatype = children.querySelector('.datatypes_options').value
         var genome = children.querySelector('.genomes_options').value
@@ -685,7 +730,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             var jobstate = await KernelSideDataObjects(`from galaxylab import GalaxyTaskWidget\nGalaxyTaskWidget.return_job_status(GalInstance=${JSON.stringify(this.model.get('GalInstance'))}, job_id=${JSON.stringify(InitialData['jobs'][0]['id'])} )`);
             var data = await KernelSideDataObjects(`from galaxylab import GalaxyTaskWidget\nGalaxyTaskWidget.OutPutData(GalInstance=${JSON.stringify(this.model.get('GalInstance'))}, JobID=${JSON.stringify(InitialData['jobs'][0]['id'])} )`);
 
-            if (jobstate['state'] == 'queued' || 'new' || 'running') {
+            if (jobstate['state'] == 'queued' || 'new' || 'running' ) {
 
                 console.log('New Ok',jobstate['state'] )
                 var id=`dataset-${jobstate['outputs']['output0']['id']}`

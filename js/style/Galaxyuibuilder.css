@@ -456,3 +456,8 @@ select#History_IDs.InputData{
   background-color: white
 }
 
+.upload-title{
+  margin: 10px;
+  font-weight: bold;
+}
+
