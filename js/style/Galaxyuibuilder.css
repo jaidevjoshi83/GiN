@@ -461,3 +461,14 @@ select#History_IDs.InputData{
   font-weight: bold;
 }
 
+.tablinks{ 
+  width: 100px;
+  height: 25px;
+  border: 0px;
+  background-color: rgb(207,210,219)  
+}
+
+.tablinks:hover{
+  background-color: rgb(54,52,71);
+  color: white;
+}
