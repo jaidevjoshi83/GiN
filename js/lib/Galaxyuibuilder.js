@@ -255,14 +255,10 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             case "data":
                 this.AddInputData(input_def, FormParent, NamePrefix, data)
                 break
+            case "integer" :
+            case  "float" :
             case "text":
-                this.AddText(input_def, FormParent, NamePrefix);
-                break
-            case "integer":
-                this.AddInteger(input_def, FormParent, NamePrefix)
-                break
-            case "float":
-                this.AddFloat(input_def, FormParent, NamePrefix)
+                this.AddText(input_def, FormParent, NamePrefix)
                 break
             case "boolean":
                 this.AddBooleanField(input_def, FormParent, NamePrefix)
@@ -635,6 +631,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 Input.style.display = 'block'
                 Parent.append(Input)
 
+                self.Upload_callback(Input)
                 self.submitPayload(data, credentials)
             }
             
@@ -1170,56 +1167,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             FormParent.append(row)
             return row
     }
-
-    AddInteger (input_def, FormParent, NamePrefix){
-
-        input_def.id = this.uid()
-        const input = document.createElement('input')
-        input.value = input_def['value']
-        input.className = 'InputData'
-        input.name = NamePrefix+input_def['name']
-        input.id = input_def.id
-        const row = document.createElement('div')
-        const title = document.createElement('div')
-        title.className = 'ui-from-title'
-        const TitleSpan = document.createElement('span')
-        TitleSpan.className = "ui-form-title-text"
-        TitleSpan.textContent = input_def.label
-        TitleSpan.style.display = 'inline'
-        title.append(TitleSpan)
-        row.className = 'ui-form-element section-row'
-        row.id = input_def.id
-        row.append(title)
-        row.append(input)
-        FormParent.append(row)
-        
-        return row
-    }
- 
-    AddFloat (input_def, FormParent, NamePrefix){
-
-        input_def.id = this.uid()
-        const input = document.createElement('input')
-        input.value = input_def['value']
-        input.name = NamePrefix+input_def.name
-        input.id = `input-${input_def.id}`
-        input.className = 'InputData'
-        const row = document.createElement('div')
-        const title = document.createElement('div')
-        title.className = 'ui-from-title'
-        const TitleSpan = document.createElement('span')
-        TitleSpan.className = "ui-form-title-text"
-        TitleSpan.textContent = input_def.label
-        TitleSpan.style.display = 'inline'
-        title.append(TitleSpan)
-        row.className = 'ui-form-element section-row'
-        row.id = input_def.id
-        row.append(title)
-        row.append(input)
-        FormParent.append(row)
-        return row
-    }
- 
+  
     AddConditionalSelectField (input_def, ElID, NamePrefix, call_back_data={}){
 
         input_def.id = this.uid()
@@ -2022,7 +1970,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                         e.parentElement.removeChild(e)
                     }
 
-                    ListItem.prepend(await this.dataset_row_ok_state(data[j], HistoryI))
+                    ListItem.prepend(await this.dataset_row_ok_state(data[j], HistoryID))
                 }
 
                 var StdError  = this.el.querySelector('.donemessagelarge')
