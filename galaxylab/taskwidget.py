@@ -219,6 +219,11 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
 
        return IPython.display.JSON(job_state)
 
+    def return_job_state( GalInstance=None, job_id=None):
+        gi = GalaxyInstance(GalInstance['URL'], email=GalInstance['email_ID'], api_key=GalInstance['API_key'], verify=True)
+        job_state = gi.gi.jobs.get_state(job_id=job_id)
+        return IPython.display.JSON({'job_state':job_state})
+
     def handle_error_task(self, error_message, name='Galaxy Module', **kwargs):
         """Display an error message if the task is None"""
         UIBuilder.__init__(self, lambda: None, color=self.default_color, **kwargs)

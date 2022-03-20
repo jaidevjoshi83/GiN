@@ -17,7 +17,7 @@ import '../style/galaxy-form.css';
  import { Toolbox } from '@genepattern/nbtools';
  import * as tus from "tus-js-client";
 
- import jQuery, { error } from "jquery";
+ import jQuery, { data, error } from "jquery";
  import axios from "axios";
 
 export class GalaxyUIBuilderModel extends BaseWidgetModel{
@@ -542,14 +542,75 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
     submitPayload(payload, credentials) {
 
+        var self = this
+
         axios.post(`${credentials['URL']}/api/tools/fetch?key=${credentials['API_key']}`, payload)
+
             .then((response) => {
-                console.log(response);
+                console.log(response)
+                console.log(response['data']['outputs'][0]);
+                self.resumable(response['data']['outputs'][0])
             })
+        
             .catch((error) => {
                 console.log(error);
             });
+
     }
+
+    async resumable (data){
+
+        var HistoryID = this.el.querySelector('#History_IDs')
+        var ListItem =  this.el.querySelector('.list-item')
+        var state
+
+        for (let i = 0; i < Infinity; ++i) {
+
+           state = await KernelSideDataObjects(`from galaxylab import GalaxyTaskWidget\nGalaxyTaskWidget.return_job_state(GalInstance=${JSON.stringify(this.model.get('GalInstance'))}, job_id=${JSON.stringify(data['id'])} )`);
+
+           console.log(state)
+
+           var id  = `dataset-${data['id']}`
+
+           console.log(id)
+
+           if (state['job_state'] == 'queued' || 'new' || 'running' ) {
+
+                if (ListItem.querySelector(id) == null ) {
+
+                    console.log(data)
+                    ListItem.prepend(await this.dataset_row_running_state(data ))
+                }
+            }
+
+
+            else if (state['job_state'] == "ok") {
+                if ( ListItem.querySelector(id) !== null) {
+                    var e = ListItem.querySelector(id)
+                    e.parentElement.removeChild(e)
+                }
+                ListItem.prepend(await this.dataset_row_ok_state(data, HistoryID))
+            } else if (state['job_state'] == "error")  {
+                if ( ListItem.querySelector(id) !== null) {
+                    var e = ListItem.querySelector(id)
+                    e.parentElement.removeChild(e)
+                }
+                ListItem.prepend(await this.dataset_row_error_state(data, HistoryID))
+            }
+
+            await this.waitforme(5000);
+
+            console.log(state['job_state'])
+
+            if (state['job_state'] == 'ok' ) {
+                break;
+            }    
+
+        }
+
+
+    }
+
 
     NewTusUpload( data){
 
@@ -631,7 +692,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 Input.style.display = 'block'
                 Parent.append(Input)
 
-                self.Upload_callback(Input)
+                // self.Upload_callback(Input)
                 self.submitPayload(data, credentials)
             }
             
@@ -698,8 +759,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 upload_method = children.querySelectorAll('.tabcontent')[i].querySelector('.input_upload').type
             }
         }
-
-        console.log(upload_method)
 
         var datatype = children.querySelector('.datatypes_options').value
         var genome = children.querySelector('.genomes_options').value
@@ -1578,6 +1637,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             if (Tbl.querySelector('.details') == null ){
                 var show_dataset = await KernelSideDataObjects(`from galaxylab  import GalaxyTaskWidget\nGalaxyTaskWidget.show_data_set(GalInstance=${JSON.stringify(this.model.get('GalInstance'))}, dataset_id=${JSON.stringify(dataset['id'])} )`) 
 
+                console.log(show_dataset)
+
                 if (dataset['state'] == 'ok') {
                     var error_details = await this.dataset_ok_details(show_dataset)
                     Tbl.append(error_details)
@@ -1770,10 +1831,14 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
     }
 
     async dataset_row_running_state (dataset){
+
+        console.log(dataset)
+
+        var id = dataset['type_id'] || dataset['id']
         
         var URL = this.model.get('GalInstance')['URL']
         
-            var row = `<div id="${dataset['type_id']}" class="list-item dataset history-content state-running" >
+            var row = `<div id="${id}" class="list-item dataset history-content state-running" >
                             <div class="warnings"></div>
                             <div class="selector"><span class="fa fa-2x fa-square-o"></span></div>
                             <div class="primary-actions"><a class="icon-btn display-btn" title="" target="galaxy_main" href="${URL}/datasets/${dataset['dataset_id']}/display/?preview=True" data-original-title="View data"><span class="fa fa-eye" style=""></span></a><a class="icon-btn edit-btn" title="" href="${URL}/datasets/edit?dataset_id=${dataset['dataset_id']}" data-original-title="Edit attributes"><span class="fa fa-pencil" style=""></span></a><a class="icon-btn delete-btn" title="" href="javascript:void(0);" data-original-title="Delete"><span class="fa fa-times" style=""></span></a></div>
