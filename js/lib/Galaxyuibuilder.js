@@ -125,7 +125,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
     Main_Form(inputs, call_back_data={}) {
 
         var self = this
-
         var Toolform = this.el.querySelector('.tool-forms')
         var FormParent = this.el.querySelector('.Galaxy-form');
     
@@ -455,10 +454,10 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
                             <!-- Tab content -->
                             <div id="upload" class="tabcontent">
-                                <p><b>Upload file to the Galaxy server.</b></p>
+                                <p class="resumable-upload-title"><b>Upload file to the Galaxy server.</b></p>
                                 <input id="inputupload" class="input_upload" type="file" style="display: block" >
                             </div>
-                          
+                    
                             <div id="from_url" class="tabcontent" style="display: none;">
                                 <p><b>Upload file from a URL to the Galaxy server.</b></p> 
                                 <input class="input_upload" >
@@ -628,11 +627,15 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         var self = this
 
         var elm = this.el.querySelector('#inputupload')
+        var rp = this.el.querySelector('.resumable-upload-title')
+
+        elm.style.display = 'none'
+        rp.style.display = 'none'
+
         var title = document.createElement('p')
         title.className = 'upload-title'
-
         var Parent = elm.parentElement
-        self.removeAllChildNodes(Parent)
+        title.style.marginTop  = '20px'
 
         Parent.prepend(title)
       
@@ -677,8 +680,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             onSuccess: function() {
                 console.log("Download %s from %s", upload.file.name, upload.url)
 
-                title.innerText = `File Uploaded Successfully..  ${ upload.file.name}` 
-
                 var btn = self.el.querySelector('#resumable_upload_button')
                 self.removeAllChildNodes(btn)
                 btn.innerHTML = "Upload"
@@ -688,22 +689,9 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                     name: upload.file.name,
                 };
 
-                self.removeAllChildNodes(Parent)
+                title.parentElement.removeChild(title)
 
-                var p = document.createElement('p')
-                var b = document.createElement('b')
-
-                p.append(b)
-                Parent.append(p)
-
-                var Input = document.createElement('input')
-                Input.id = 'inputupload'
-                Input.className = 'input_upload'
-                Input.type = 'file'
-                Input.style.display = 'block'
-                Parent.append(Input)
-
-                // self.Upload_callback(Input)
+                elm.style.display = 'block'
                 self.submitPayload(data, credentials)
             }
             
@@ -715,8 +703,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             if (previousUploads.length) {
                 upload.resumeFromPreviousUpload(previousUploads[0])
             }
-    
-            // Start the upload
+
             upload.start()
         })
 
@@ -916,7 +903,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         });
 
         var HistoryList = this.el.querySelector('.galaxy-history-list')
-        // HistoryList.append(InputTitle)
         HistoryList.append(select)
     }
 
@@ -992,7 +978,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         }
         row.append(row2)
 
-        // FormParent.append(InputTitle)
         FormParent.append(row)
         FormParent.append(Button)
 
@@ -1829,7 +1814,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
     async dataset_row_running_state (dataset){
 
-        
         var URL = this.model.get('GalInstance')['URL']
         
             var row = `<div id="${dataset['type_id']}" class="list-item dataset history-content state-running" >
@@ -1905,7 +1889,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
     async attach_event (Node, className){ 
 
         var DataSets = Node.querySelectorAll(className)
-    
+
         DataSets.forEach((button) => button.querySelector('.title').addEventListener('click', (e) => {
     
             if (button.querySelector('.details').style.display == 'block') {
