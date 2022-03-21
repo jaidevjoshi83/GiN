@@ -64,7 +64,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
             <div class="tool-forms"> 
                 <div class="galaxy-history-list">
-                <label id="dataset-history-label" for="history-list">Select History</label><br>
+                    <label id="dataset-history-label" for="history-list">Select History</label><br>
                 </div>
 
                 <form class="Galaxy-form">
@@ -1156,8 +1156,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             }
         }, false);
 
-        var children = self.element.querySelector('.Galaxy-form').children;
-        var Inputs = self.ReturnData(children)
+        // var children = self.element.querySelector('.Galaxy-form').children;
+        // var Inputs = self.ReturnData(children)
 
         row.append(title)
         FileManu.append(Select)
@@ -1924,10 +1924,9 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         chain_button.addEventListener('click', (e) => {
             console.log(ok_details_html.querySelector('.download-btn.icon-btn')['href'])
         });
-
     }
     
-    async AddJobStatusWidget (Inputs, HistoryID){
+    async AddJobStatusWidget(Inputs, HistoryID){
 
         this.JobStatusTemplate(HistoryID)
         this.hide_run_buttons(true)
@@ -2122,25 +2121,24 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
             const Job = new DOMParser().parseFromString(JobStatus, 'text/html').querySelector('.job-status-widget')
 
-            var GBody = this.el.querySelector('.nbtools-form')
             var toolForm = this.el.querySelector('.tool-forms')
-            // var Help = this.el.querySelector('.help-section')
-            // GBody.removeChild(toolForm)
-            // GBody.removeChild(Help)
+
+            this.el.querySelector('.Galaxy-form').style.display = 'none'
+            this.el.querySelector('.galaxy-history-list').style.display = 'none'
 
             toolForm.style.backgroundColor = 'white'
-            this.removeAllChildNodes(toolForm)
             toolForm.prepend(Job)
+
             var BTN = this.el.querySelector('.rbtn')
 
             BTN.addEventListener('click', async (e) => {
 
-                var refine_inputs  = await KernelSideDataObjects(`from galaxylab import GalaxyTaskWidget\nGalaxyTaskWidget.UpdateForm(GalInstance=${JSON.stringify(self.model.get('GalInstance'))}, toolID=${JSON.stringify(self.model.get('ToolID'))}, HistoryID=${JSON.stringify(HistoryID)})`)
-                var JobStatus = self.el.querySelector('.job-status-widget')
-                JobStatus.parentNode.removeChild(JobStatus)
- 
-                self.Main_Form(refine_inputs['inputs'])
-                self.AddHelpSection(refine_inputs['help'])
+                toolForm.style.backgroundColor = 'rgb(246,246,246)'
+
+                self.el.querySelector('.Galaxy-form').style.display = 'block'
+                self.el.querySelector('.galaxy-history-list').style.display = 'block'
+    
+                Job.parentElement.removeChild(Job)
                 self.hide_run_buttons()
             } );
     }
