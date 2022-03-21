@@ -558,9 +558,29 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
     async resumable (data){
 
-        var HistoryID = this.el.querySelector('#History_IDs')
-        var ListItem =  this.el.querySelector('.list-item')
+        var HistoryID = this.el.querySelector('#History_IDs').value
+        
         var state
+
+        var e = this.el.querySelector('.list-item')
+        e.parentElement.removeChild(e)
+        var DHL = this.el.querySelector('#dataset-history-list')
+        var DataListdiv = this.el.querySelector('.history-dataset-list');
+
+        console.log(DataListdiv)
+
+        for (var i = 0; i < DHL.options.length; i++ ){
+            if (DHL[i].value == HistoryID) {
+                DHL.selectedIndex = i
+            }
+        }
+        
+        DataListdiv.append(await this.data_row_list(this.model.get('GalInstance'), HistoryID ))
+        console.log(HistoryID)
+        console.log(await this.data_row_list(this.model.get('GalInstance'), HistoryID ))
+
+        var ListItem =  this.el.querySelector('.list-item')
+
 
         data['type_id'] =`dataset-${data['id']}` 
 
