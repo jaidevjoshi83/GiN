@@ -69,7 +69,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
                 <form class="Galaxy-form">
                 </form>
-
             </div>
 
             <div class="dataset-list">
@@ -82,6 +81,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 </div>
             </div> 
 
+            <div class="help-section">
+            </div>
         </div>
     </div>
     
@@ -105,7 +106,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         //########################
         this.Main_Form(inputs['inputs'])
         this.AddDataSetTable()
-        // this.AddHelpSection(inputs['help'])
         //########################
         // // Hide the header or footer, if necessary
         this.display_header_changed();
@@ -120,6 +120,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         this.activate_run_buttons();
         // Attach custom buttons
         this.activate_custom_buttons();
+
+        this.AddHelpSection(inputs['help'])
     }
  
     Main_Form(inputs, call_back_data={}) {
@@ -167,12 +169,73 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         return  Data 
     }
 
-    ReturnData2(els){
+    ReturnData2(FormEelements){
+ 
+        var self = this
+        var InputPerameters = {}
+        var Values = {}
+ 
+        for (var i = 0; i < FormEelements.length; i++) {
 
-        for (var i = 0; i < els.length; i ++) {
-            if (els[i].style.display == '' || els[i].style.display == 'block' ) {
+            if (FormEelements[i].className.includes('section-row') && (FormEelements[i].style.display == 'block' || FormEelements[i].style.display  == '') ){
+
+                if (FormEelements[i].className !== 'ui-form-element section-row') {
+                    self.ReturnData2(FormEelements[i].children)
+
+                } else if ((FormEelements[i].style.display == 'block' || FormEelements[i].className.includes('section-row'))) {
+                    console.log(FormEelements[i])
+                }
             }
-        }  
+
+            // if (FormEelements[i].className == 'ui-form-element section-row'){
+            //     var tableChild = FormEelements[i];
+
+            //     if (tableChild.querySelector('.InputData') !== null){
+            //         InputPerameters[tableChild.querySelector('.InputData').name] = tableChild.querySelector('.InputData').value
+            //     } 
+            //     else {
+            //         var Select = tableChild.querySelector('.selectbox-scrollable')
+            //         Object.assign(InputPerameters, this.ReturnDataFiles(Select)['Inputs_data_files'])
+            //     }
+            // } 
+
+            // else if (FormEelements[i].className == 'drill-down ui-form-element section-row'){
+
+            //     var tableChild = FormEelements[i];
+            //     Object.assign(InputPerameters, this.Dirll_Down_Output(tableChild.querySelector('.outer-drill').children))
+            // } 
+
+            // else if (FormEelements[i].className == 'ui-form-element section-row conditional'){
+            //         var tableChild = FormEelements[i];
+            //         InputPerameters[tableChild.querySelector('.InputData').name] = tableChild.querySelector('.InputData').value
+            // } 
+                
+            // else if (FormEelements[i].className == 'ui-form-element section-row pl-2' && FormEelements[i].style.display == 'block'){
+            //         var tableChild1 = FormEelements[i].children;
+            //         Object.assign(InputPerameters, this.ReturnData(tableChild1))
+            // }
+
+            // else if (FormEelements[i].className == 'ui-portlet-section section-row') {
+            //         var tableChild1 = FormEelements[i].children;
+            //         Object.assign(InputPerameters, this.ReturnData(tableChild1))
+            // }
+
+            // else if (FormEelements[i].className == 'ui-form-element section-row sections')  {
+            //         var tableChild1 = FormEelements[i].children;
+            //         Object.assign(InputPerameters, this.ReturnData(tableChild1))
+            // }
+
+            // else if (FormEelements[i].className == 'ui-repeat section-row'){
+            //     var tableChild1 = FormEelements[i].children;
+            //     Object.assign(InputPerameters, this.ReturnData(tableChild1))
+            // }
+
+            // else if (FormEelements[i].className == 'internal-ui-repeat section-row'){
+            //     var tableChild1 = FormEelements[i].children;
+            //     Object.assign(InputPerameters, this.ReturnData(tableChild1))
+            // }
+        }
+        // return InputPerameters
     }
  
     ReturnData(FormEelements){
@@ -911,7 +974,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         var self = this
 
         var helpSection = this.element.querySelector('.help-section')
-
         var HelpContent = document.createElement('div')
         HelpContent.className = 'help-content'
         HelpContent.innerHTML = help
@@ -924,7 +986,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         helpSection.append(HelpButton)
         helpSection.append(HelpContent)
-        // NbtoolsForm.append(Help)
 
         HelpButton.addEventListener("click", function() {
 
@@ -936,8 +997,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 nextSibling.style.display = 'none'
             }
           });
-
-        return Help
     }
  
     AddRepeat(input_def, FormParent, NamePrefix){
@@ -2291,7 +2350,9 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         var children = self.element.querySelector('.Galaxy-form').children;
         var Inputs = self.ReturnData(children)
 
-        self.ReturnData2(children)
+        var children2 = self.element.querySelector('.Galaxy-form').children;
+
+        self.ReturnData2(children2)
 
         if (this.model.get('inputs')['id'] == 'galaxylab_data_upload_tool') {
             this.dataupload_job()
