@@ -120,8 +120,10 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
                 if list(inputs[i].keys())[0] == 'values':
                     new_values = []
                     for j in inputs[i]['values']:
-                        Dataset = gi.gi.datasets.gi.datasets.show_dataset(dataset_id=j)
-                        new_values.append({'src':Dataset['hda_ldda'],'id':Dataset['id']})
+                        print(j)
+                        # Dataset = gi.gi.datasets.gi.datasets.show_dataset(dataset_id=j)
+                        # new_values.append({'src':Dataset['hda_ldda'],'id':Dataset['id']})
+                        new_values.append(j)
                     inputs[i]['values'] = new_values
         return inputs
 
@@ -133,7 +135,7 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
         if (Tool_inputs != None) and (toolID != None):
 
             NewInputs = GalaxyTaskWidget.RefinedInputs(Tool_inputs, gi)
-            inputs = gi.gi.tools.gi.tools.build(tool_id=toolID, inputs=NewInputs, history_id=HistoryID)
+            inputs = gi.gi.tools.gi.tools.build(tool_id=toolID, inputs=Tool_inputs, history_id=HistoryID)
 
             if InputDataParam == False:
                 return IPython.display.JSON(data=inputs)
