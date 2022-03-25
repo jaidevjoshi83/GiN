@@ -102,10 +102,10 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         super.render();
         const inputs = this.model.get('inputs')
         //########################
-        this.AddHistoryList()
+        this.add_history_list()
         //########################
-        this.Main_Form(inputs['inputs'])
-        this.AddDataSetTable()
+        this.form_builder(inputs['inputs'])
+        this.add_dataset_table()
         //########################
         // // Hide the header or footer, if necessary
         this.display_header_changed();
@@ -124,7 +124,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         this.AddHelpSection(inputs['help'])
     }
  
-    Main_Form(inputs, call_back_data={}) {
+    form_builder(inputs, call_back_data={}) {
 
         var self = this
         var Toolform = this.el.querySelector('.tool-forms')
@@ -143,7 +143,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
     }
 
     
-    ReturnData2(FormEelements){
+    collect_form_data(FormEelements){
  
         var self = this
         var InputPerameters = {}
@@ -152,7 +152,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         for (var i = 0; i < FormEelements.length; i++) {
             if (FormEelements[i].className.includes('section-row' ) && (FormEelements[i].style.display == 'block' || FormEelements[i].style.display  == '') ){
                 if (FormEelements[i].className !== 'ui-form-element section-row') {
-                    Object.assign(InputPerameters,  self.ReturnData2(FormEelements[i].children))
+                    Object.assign(InputPerameters,  self.collect_form_data(FormEelements[i].children))
                 } else if ((FormEelements[i].style.display == 'block' || FormEelements[i].className.includes('section-row'))) {
                     if(FormEelements[i].querySelector('.InputData')){
                         if (FormEelements[i].querySelector('.InputData').value == ''){
@@ -203,33 +203,33 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         switch (input_def.type) {
             
             case "conditional":
-                this.AddConditoinalSection2(input_def, FormParent, NamePrefix, data);
+                this.add_conditoinal_section(input_def, FormParent, NamePrefix, data);
                 break;
             case "data":
-                this.AddInputData(input_def, FormParent, NamePrefix, data)
+                this.add_input_data(input_def, FormParent, NamePrefix, data)
                 break
             case "integer" :
             case  "float" :
             case "text":
-                this.AddText(input_def, FormParent, NamePrefix)
+                this.add_text(input_def, FormParent, NamePrefix)
                 break
             case "boolean":
-                this.AddBooleanField(input_def, FormParent, NamePrefix)
+                this.add_boolean_field(input_def, FormParent, NamePrefix)
                 break
             case "select":
-                this.AddSelectField(input_def, FormParent, NamePrefix)
+                this.add_select_field(input_def, FormParent, NamePrefix)
                 break
             case "repeat":
-                this.AddRepeat(input_def, FormParent, NamePrefix) 
+                this.add_repeat_section(input_def, FormParent, NamePrefix) 
                 break
             case "section":
-                this.AddSection(input_def, FormParent, NamePrefix) 
+                this.add_section(input_def, FormParent, NamePrefix) 
                 break
             case "drill_down":
-                this.AddDrill_Down(input_def, FormParent, NamePrefix)
+                this.add_drill_down_section(input_def, FormParent, NamePrefix)
                 break
             case "data_upload":
-                this.DataUpload(FormParent)
+                this.data_upload_tool(FormParent)
                 break
         }
     }
@@ -308,7 +308,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         return OuterDrillDown
     }
 
-    AddDrill_Down(input_def, FormParent, NamePrefix){
+    add_drill_down_section(input_def, FormParent, NamePrefix){
         input_def.id = this.uid()
 
         const title = document.createElement('div')
@@ -369,7 +369,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         return row
     }
 
-    AddText (input_def, FormParent, NamePrefix){
+    add_text (input_def, FormParent, NamePrefix){
 
          input_def.id = this.uid()
  
@@ -396,7 +396,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         return row
     }
 
-    async DataUpload(FormParent) {
+    async data_upload_tool(FormParent) {
 
         var data_upload = `
                         <div class="upload_tab">
@@ -771,7 +771,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         }
     }
 
-    async AddDataSetTable(selected_value='default'){
+    async add_dataset_table(selected_value='default'){
 
         var self = this
 
@@ -811,7 +811,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
     }
 
-    AddHistoryList(selected_value='default'){
+    add_history_list(selected_value='default'){
 
         var self = this
 
@@ -839,7 +839,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             if (this.model.get('inputs')['id'] != 'galaxylab_data_upload_tool' | 'cross_upload_tool') {
 
                 var children = self.element.querySelector('.Galaxy-form').children;
-                var Inputs = self.ReturnData(children)
+                var Inputs = self.collect_form_data(children)
                 var refine_inputs  = await KernelSideDataObjects(`from galaxylab import GalaxyTaskWidget\nGalaxyTaskWidget.UpdateForm(${JSON.stringify(self.model.get('GalInstance'))}, ${JSON.stringify(Inputs)}, ${JSON.stringify(self.model.get('ToolID'))}, ${JSON.stringify(HistoryID)})`)
  
                 var FormParent = self.el.querySelector('.Galaxy-form')    
@@ -847,7 +847,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 var SelectedIndex = {}
                 SelectedIndex['HID'] = select.selectedIndex
 
-                self.Main_Form(refine_inputs['inputs'],  SelectedIndex)
+                self.form_builder(refine_inputs['inputs'],  SelectedIndex)
             }
         });
 
@@ -885,7 +885,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
           });
     }
  
-    AddRepeat(input_def, FormParent, NamePrefix){
+    add_repeat_section(input_def, FormParent, NamePrefix){
 
         var self = this
         input_def.id = this.uid()
@@ -976,7 +976,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
          }
     }
 
-    AddInputData (input_def, FormParent, NamePrefix, call_back_data={}){ 
+    add_input_data(input_def, FormParent, NamePrefix, call_back_data={}){ 
 
         console.log(input_def.value)
                 
@@ -1075,7 +1075,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
             var self  = this;
             var children = self.el.querySelector('.Galaxy-form').children;
-            var Inputs = self.ReturnData2(children)
+            var Inputs = self.collect_form_data(children)
 
             var HistoryID = self.element.querySelector('#History_IDs').value
             var refine_inputs  = await KernelSideDataObjects(`from galaxylab import GalaxyTaskWidget\nGalaxyTaskWidget.UpdateForm(${JSON.stringify(self.model.get('GalInstance'))}, ${JSON.stringify(Inputs)}, ${JSON.stringify(self.model.get('ToolID'))}, ${JSON.stringify(HistoryID)})`)
@@ -1085,7 +1085,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             var HID = self.element.querySelector('#History_IDs')
             self.removeAllChildNodes(FormParent)
 
-            self.Main_Form(refine_inputs['inputs'])
+            self.form_builder(refine_inputs['inputs'])
 
             }, false);
 
@@ -1093,7 +1093,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             return row
     }
   
-    AddConditionalSelectField (input_def, ElID, NamePrefix, call_back_data={}){
+    add_conditional_select_field (input_def, ElID, NamePrefix, call_back_data={}){
 
         input_def.id = this.uid()
         var self = this
@@ -1163,7 +1163,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         return row
     }
 
-    AddSelectField (input_def, FormParent, NamePrefix){
+    add_select_field(input_def, FormParent, NamePrefix){
 
         input_def.id = this.uid()
         var self = this
@@ -1180,6 +1180,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
     
             const OuterDiv = document.createElement('div')
             OuterDiv.className =  'outer-checkbox-div'
+            OuterDiv.nam
             
             row.append(TitleSpan)
             row.append(OuterDiv)
@@ -1200,6 +1201,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 CheckBoxInput.id = `select-${input_def.id}-${i}`
                 CheckBoxInput.value = input_def.options[i][1]
                 CheckBoxInput.type = 'checkbox'
+                CheckBoxInput.name = NamePrefix+input_def['name']
 
                 CheckBoxDiv.append(CheckBoxInput)
                 CheckBoxDiv.append(CheckboxLabel)
@@ -1246,7 +1248,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         return row
     }
 
-    AddBooleanField (input_def, FormParent, NamePrefix ){
+    add_boolean_field (input_def, FormParent, NamePrefix ){
 
         input_def.id = this.uid()
 
@@ -1289,7 +1291,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         const Childrens  = this.el.querySelector('.nbtools-form').children;
     }
  
-    AddConditoinalSection2 (input_def, parent, NamePrefix, call_back_data={}){
+    add_conditoinal_section(input_def, parent, NamePrefix, call_back_data={}){
 
         var NewNamePrefix = NamePrefix+input_def['name']+"|"
         input_def.id = this.uid()
@@ -1300,7 +1302,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             ElementIDs.push(`${input_def.id}-section-${e}`)
         }
 
-        const Selectfiled = this.AddConditionalSelectField(input_def, ElementIDs, NamePrefix, call_back_data)
+        const Selectfiled = this.add_conditional_select_field(input_def, ElementIDs, NamePrefix, call_back_data)
 
         parent.append(Selectfiled)
 
@@ -1332,7 +1334,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         }
     }
 
-    AddSection (input_def, parent, NamePrefix){
+    add_section (input_def, parent, NamePrefix){
 
         var self = this
         var NewNamePrefix = NamePrefix+input_def['name']+"|"
@@ -2167,7 +2169,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         // var Inputs = self.ReturnData(children)
 
         var children2 = self.element.querySelector('.Galaxy-form').children;
-        var Inputs =  self.ReturnData2(children2)
+        var Inputs =  self.collect_form_data(children2)
 
         console.log(Inputs)
 
@@ -2201,7 +2203,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             var refine_inputs  = await KernelSideDataObjects(`from galaxylab import GalaxyTaskWidget\nGalaxyTaskWidget.UpdateForm(GalInstance=${JSON.stringify(self.model.get('GalInstance'))}, toolID=${JSON.stringify(self.model.get('ToolID'))}, HistoryID='df7a1f0c02a5b08e')`)
             var FormParent = self.el.querySelector('.Galaxy-form')
             self.removeAllChildNodes(FormParent)
-            self.Main_Form(refine_inputs['inputs'])
+            self.form_builder(refine_inputs['inputs'])
         });
     }
 
