@@ -9,6 +9,7 @@
 -- run `sh Easy_install.sh`
 
 **NOTE:** Change this line according to your conda type (anaconda or miniconda),  `source ~/anaconda3/etc/profile.d/conda.sh` in the `Easy_install.sh` file.
+
 #################################
 
 
