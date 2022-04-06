@@ -1,4 +1,20 @@
-############################## Full installation method ########################
+############################## Installation ########################
+
+####### Easy installation (Mac/Linux) #######
+
+-- create an easy_installation directory 
+
+-- copy `Easy_install.sh` to the easy_installation dir
+
+-- run `sh Easy_install.sh`
+
+**NOTE:** Change this line according to your conda type (anaconda or miniconda),  `source ~/anaconda3/etc/profile.d/conda.sh` in the `Easy_install.sh` file.
+
+#################################
+
+
+####### Manual Installation (Mac/Linux) #######
+
 
 # galaxylab
 
@@ -26,6 +42,8 @@ conda create -n galaxy-lab JupyterLab=3.0.7 ipywidgets=7.5.1 nodejs=14.15.1 yarn
      npm install -g yalc 
      
      cd nbtools/
+
+     npm install 
      
      yalc publish
      
