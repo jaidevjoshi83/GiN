@@ -1,8 +1,11 @@
 ############################## Installation ########################
 
 ####### Easy installation (Mac/Linux) #######
+
 -- create an easy_installation directory 
+
 -- copy `Easy_install.sh` to the easy_installation dir
+
 -- run `sh Easy_install.sh`
 
 **NOTE:** Change this line according to your conda type (anaconda or miniconda),  `source ~/anaconda3/etc/profile.d/conda.sh` in the `Easy_install.sh` file.
