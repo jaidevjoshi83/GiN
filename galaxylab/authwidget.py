@@ -12,7 +12,6 @@ from .Galaxyuibuilder import GalaxyUIBuilder
 GALAXY_SERVERS = {
     'Galaxy Main': 'https://usegalaxy.org',
     'Galaxy Local': 'http://localhost:8080',
-    'Galaxy Jay Local': 'http://192.168.1.139:8080',
 }
 
 REGISTER_EVENT = """
@@ -84,18 +83,21 @@ class GalaxyAuthWidget(UIBuilder):
     def login(self, server, email, password):
         """Login to the Galaxy server"""
 
-        t = {'id':'galaxylab_data_upload_tool', 'description':'Upload data files to galaxy server', 'name':'Upload Data'}
+        t = [{'id':'galaxylab_data_upload_tool', 'description':'Upload data files to galaxy server', 'name':'Upload Data'}, {'id':'cross_upload_tool', 'description':'Cross upload tool', 'name':'Cross upload_toola'}]
+
         try:
             self.session = GalaxyInstance(server, email=email, password=password)
             self.session._notebook_url = server
             self.session._notebook_email = email
             self.session._notebook_password = password
             # Validate the provided credentials
-            if self.validate_credentials(self.session):
-                self.replace_widget()
-                t['gi']=self.session.tools.gi
-                tool1 = TaskTool('+', t)
-                ToolManager.instance().register(tool1)
+            self.replace_widget()
+
+            for i in t:
+                if self.validate_credentials(self.session):
+                    i['gi']=self.session.tools.gi
+                    tool1 = TaskTool('+', i)
+                    ToolManager.instance().register(tool1)
         except HTTPError:
             self.error = 'Invalid username or password. Please try again.'
         except BaseException as e:
@@ -140,8 +142,6 @@ class GalaxyAuthWidget(UIBuilder):
         url = self.session._notebook_url
 
         for section in self.session.tools.gi.tools.get_tool_panel():
-
-
             if section['model_class'] == 'ToolSection':
                 for tool in section['elems']:
                     try:

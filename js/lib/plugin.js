@@ -2,7 +2,10 @@ import { IJupyterWidgetRegistry} from '@jupyter-widgets/base';
 import { ILabShell, ILayoutRestorer } from "@jupyterlab/application";
 import { INotebookTracker } from '@jupyterlab/notebook';
 import { IMainMenu } from '@jupyterlab/mainmenu';
-import { ToolRegistry}  from '@genepattern/nbtools'
+
+import { ToolRegistry}  from '@genepattern/nbtools';
+import {DataRegistry} from "@genepattern/nbtools";
+
 // import { ContextManager } from '@genepattern/nbtools';
 import { ContextManager } from '@genepattern/nbtools/lib/context';
 import * as galaxyuibuilder_exports from './Galaxyuibuilder';
@@ -31,14 +34,18 @@ export default galaxy_plugin;
 function activateWidgetExtension(app, registry, mainmenu, restorer, shell, notebook_tracker) {
 
     init_context(app, notebook_tracker)
+
+    // const data_registry = new DataRegistry();
     const tool_registry = new ToolRegistry();
+    const data_registry = new DataRegistry();
+    
     
     registry.registerWidget({
         name: 'galaxylab',
         version: '0.1.0',
         exports: module_exports,
     });
-    return tool_registry
+    return [tool_registry, data_registry]
 }
 
 function init_context(app, notebook_tracker) {

@@ -12,13 +12,13 @@ import '../style/galaxy-form.css';
  import { MODULE_NAME, MODULE_VERSION } from './version';
  import { unpack_models } from "@jupyter-widgets/base";
  import { BaseWidgetModel, BaseWidgetView } from "@genepattern/nbtools";
- import _ from "underscore";
- import {  extract_file_name, KernelSideDataObjects } from './utils';
- import { Toolbox } from '@genepattern/nbtools';
- import * as tus from "tus-js-client";
 
- import jQuery, { data, error } from "jquery";
+ import _ from "underscore";
+ import {  KernelSideDataObjects } from './utils';
+ import * as tus from "tus-js-client";
  import axios from "axios";
+
+//  import { Data } from '@genepattern/nbtools/lib/dataregistry';
 
 export class GalaxyUIBuilderModel extends BaseWidgetModel{
      
@@ -92,9 +92,10 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         <button class="nbtools-run" type="button" data-traitlet="run_label"></button>
     </div>`;
 
-    this.dragged = ''
-    this.KernelOutPut = ''
-    this.JOBID = {}
+    this.dragged = '';
+    this.KernelOutPut = '';
+    this.JOBID = {};
+    this.file_cache = [];
     }
  
     render() {
@@ -164,8 +165,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                         }
                     } else if (FormEelements[i].querySelector('.InputDataFile')) {
 
-                        console.log(FormEelements[i].querySelector('.InputDataFile').options[0].selected)
-
                         var FileList = []
 
                         for (var j = 0; j < FormEelements[i].querySelector('.InputDataFile').options.length; j++) {
@@ -174,6 +173,21 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                             }
                         }
                         InputPerameters[FormEelements[i].querySelector('.InputDataFile').name] = {'values': FileList}
+
+                    } else if (FormEelements[i].querySelector('.outer-checkbox-div')){
+
+                        var values = []
+                        var key_name = FormEelements[i].querySelector('.outer-checkbox-div').children[0].querySelector('.InputDataCheckbox').name
+                        var DataObj = {}
+
+                        for (var j = 0; j < FormEelements[i].querySelector('.outer-checkbox-div').children.length; j++) {
+                            if (FormEelements[i].querySelector('.outer-checkbox-div').children[j].querySelector('.InputDataCheckbox').checked) {
+                                values.push( FormEelements[i].querySelector('.outer-checkbox-div').children[j].querySelector('.InputDataCheckbox').value)
+                            }             
+                        }
+                        DataObj[FormEelements[i].querySelector('.outer-checkbox-div').children[0].name] =  values 
+
+                        InputPerameters[key_name ] = values
                     }
                 }
             }
@@ -232,6 +246,28 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 this.data_upload_tool(FormParent)
                 break
         }
+    }
+    remove() {
+        super.remove();
+        // Clean up data files from the cache
+        for (let f of this.file_cache)
+            ContextManager.data_registry.unregister({ data: f });
+    }
+    sync_file_cache(datasets) {
+
+        console.log(datasets)
+        // Unregister old files associated with this widget
+        for (let f of this.file_cache)
+            ContextManager.data_registry.unregister({ data: f });
+        // Create the data objects and add them to the file cache
+        this.file_cache = [];
+        const origin = this.model.get('GalInstance')['URL'];
+
+        for (let f of datasets)
+            this.file_cache.push(new dataregistry.Data(origin, f['id'], f['name'], f['type']));
+        // Register the files currently associated with this widget
+        for (let f of this.file_cache)
+            ContextManager.data_registry.register({ data: f });
     }
 
     Dirll_Down_Output(drill_down){
@@ -1196,7 +1232,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 CheckboxLabel.innerText = input_def.options[i][0]
 
                 const CheckBoxInput = document.createElement('input')
-                CheckBoxInput.className = 'InputData'
+                CheckBoxInput.className = 'InputDataCheckbox'
 
                 CheckBoxInput.id = `select-${input_def.id}-${i}`
                 CheckBoxInput.value = input_def.options[i][1]
@@ -1397,6 +1433,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
     
         var datasets = await KernelSideDataObjects(`from galaxylab  import GalaxyTaskWidget\nGalaxyTaskWidget.history_data_list(GalInstance=${JSON.stringify(GalInstance)}, HistoryID=${JSON.stringify(HistoryID)} )`) 
 
+        // this.sync_file_cache(datasets)
+        
         for (var i = 0; i < datasets.length; i++){
 
             if ('ok' == datasets[i]['state'] || datasets[i]['populated_state']) {
@@ -1404,7 +1442,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 if (datasets[i]['history_content_type'] == 'dataset') {
                     DataList.append( await this.dataset_row_ok_state(datasets[i], HistoryID))
                 } 
-
                 else if (datasets[i]['history_content_type'] == 'dataset_collection') {
                     DataList.append( await this.dataset_collection_row_state (datasets[i], HistoryID))
                 }

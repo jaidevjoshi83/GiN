@@ -49,6 +49,7 @@
     "source-map-loader": "^2.0.1",
     "style-loader": "^3.2.1",
     "tus-js-client": "^2.3.0",
+    "yalc": "^1.0.0-pre.53",
     "yarn": "^1.22.17"
   },
   "jupyterlab": {
