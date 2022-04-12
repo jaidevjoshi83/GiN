@@ -36,7 +36,6 @@
     "webpack-cli": "^4.5.0"
   },
   "dependencies": {
-    "@genepattern/nbtools": "file:.yalc/@genepattern/nbtools",
     "@jupyter-widgets/base": "^4.0.0",
     "@jupyterlab/notebook": "^3.0.4",
     "axios": "^0.21.1",
