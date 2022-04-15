@@ -257,10 +257,70 @@ border-radius: 3px;
   margin: 5px;
 }
 
-.galaxy-uibuilder #add_data_share_menu{
-  border:1px solid rgb(180,172,172);
-  margin-top:  5px;
+.send-data-genepattern-tools{
+  padding-top: 10px;
+  width: 100%;
+  
+  margin-bottom: 0px;
+  padding-bottom: 0px;
 }
+
+.gpt{
+  border-top: solid rgb(173,166,166) 1px;
+  font-weight: bold;
+  padding-bottom: 10px;
+  margin-top: 5px;
+  
+
+}
+
+.tool_name{
+  
+  padding-bottom: 5px;
+  
+}
+
+.tool-param-ul{
+  padding-left: 0px;
+  
+}
+
+.input-data-param{
+  margin-left: 5px;
+}
+
+
+.genepattern-tool-list{
+  margin-top: 0px;
+  padding: 0px;
+  width: 95%;
+  border-bottom: solid rgb(152,146,146) 1px;
+  border-top: solid rgb(152,146,146) 1px;
+}
+
+.gp_tool{
+  font-weight: bold;
+  padding-left: 5px;
+  padding-bottom: 5px;
+}
+
+.tool-input-params{
+  
+  margin-left:  10px;
+/*     border-top:  solid rgb(189,183,183) 1px;
+  border-bottom: solid rgb(189,183,183) 1px; */
+
+}
+.input-data-param-label{
+  margin-bottom: 0px;
+  padding-bottom: 0px;
+}
+
+.input-data-param{
+  padding-bottom: 5px;    
+}
+
+
 
 
 

@@ -322,9 +322,13 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         var Nodes1 =  document.querySelector('body').querySelectorAll('.nbtools.nbtools-uibuilder.lm-Widget.p-Widget')
 
+        console.log(Nodes1)
+
 
         for (var i = 0; i < Nodes1.length; i++){
-                if (Nodes1[i].querySelector('.nbtools-title').innerHTML != 'Login'){
+                if ( Nodes1[i].querySelectorAll('.nbtools-fileinput').length > 0){
+
+                    console.log('ok', i)
 
                     var tool  = document.createElement('div')
 
@@ -332,9 +336,12 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
                     var tool_name  = document.createElement('div')
                     tool_name.className = 'tool_name'
-                    var tool_label  = document.createElement('p')
+                    var tool_label  = document.createElement('div')
                     tool_label.className = 'tool_label_text'
                     tool_label.innerHTML = Nodes1[i].querySelector('.nbtools-title').innerHTML
+
+                    console.log( Nodes1[i].querySelector('.nbtools-title').innerHTML)
+
                     tool_name.append(tool_label)
                     tool.append(tool_name)
 
@@ -344,6 +351,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                     tool_input_params.className = 'tool-input-params'
 
                     var param_list = document.createElement('ul')
+                    param_list.className = 'tool-param-ul'
 
                     tool_input_params.append(param_list)
 
@@ -356,32 +364,30 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
 
                    for (var j = 0; j < InputFiles.length; j++){
+                        
+                            var input_file_param = document.createElement('div')
+                            input_file_param.className = 'input-data-param'
 
-                        var input_file_param = document.createElement('div')
-                        input_file_param.className = 'input-data-param'
-
-                        var input_file_param_label = document.createElement('p')
-                        input_file_param_label.className = 'input-data-param-label'
-
-                        input_file_param_label.addEventListener("click", async (e)=> {
-
-                            if (!this.file_exist(dataset)){
-
-                                console.log(dataset)
-
-                                uri = await KernelSideDataObjects(`from galaxylab import GalaxyTaskWidget\nGalaxyTaskWidget.send_data_to_gp_server(file_name=${JSON.stringify(dataset['name'])}, tool_id=${JSON.stringify(tool_id)}, dataset_id=${JSON.stringify(dataset['id'])}, GInstance=${JSON.stringify(this.model.get('GalInstance'))})`)
-                                console.log(uri['uri'])
-                                dataset['uri'] = uri
+                            var input_file_param_label = document.createElement('div')
+                            input_file_param_label.className = 'input-data-param-label'
 
 
-                                console.log(InputFiles[j])
-                                console.log(j)
+                            var target_id =  InputFiles[j].querySelector('input').id
 
-                                // InputFiles[j].querySelector('input').value = uri['uri']
 
-                                // this.sync_file_cache(dataset)
-                            }
-                            
+                            input_file_param_label.addEventListener("click", async (e)=> {
+
+                                // if (!this.file_exist(dataset)){
+                            uri = await KernelSideDataObjects(`from galaxylab import GalaxyTaskWidget\nGalaxyTaskWidget.send_data_to_gp_server(file_name=${JSON.stringify(dataset['name'])}, tool_id=${JSON.stringify(tool_id)}, dataset_id=${JSON.stringify(dataset['id'])}, GInstance=${JSON.stringify(this.model.get('GalInstance'))})`)
+
+                            var map = {'m':0,'n':0}
+
+                            dataset['uri'] = uri
+
+                            document.getElementById(`${target_id}`).value =  uri['uri']
+
+                            console.log(target_id)
+
                         })
 
                         input_file_param_label.innerHTML =  InputFiles[j].querySelector('.lm-Widget.p-Widget.jupyter-widgets.widget-label').innerHTML
@@ -389,11 +395,14 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                         input_file_param.append(input_file_param_label)
                         param_list.append(input_file_param)
 
+               
+
 
 
                    }
-                }
+
                 gp_tool_list.append(tool)
+                }
         }
 
     }
@@ -1650,7 +1659,9 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                         <div id="add_data_share_menu" style="display: none;"  class="add_data_share_menu" >
             
                             <div class="send-data-genepattern-tools"> 
-                                <p class="gpt"> <b> Genepattern Tools</b> </p>
+                                 
+                                <div class=gpt> Send data to Genepattern </div>
+                                 
                                 <div class="genepattern-tool-list" style="display: none"> 
 
                                 </div>

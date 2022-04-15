@@ -233,11 +233,19 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
 
         file_name = glob.glob(os.path.join(temp_dir, '*.*' ))
 
+        print(file_name[0])
+
+        a  = file_name[0]
+        new_file = os.path.join("/".join(a.split('/')[:len(a.split('/'))-1]), 'data.'+a.split('.')[1])
+
+        os.rename(file_name[0], new_file) 
+
         ####################
 
         print(file_name[0].split('/')[len(file_name[0].split('/'))-1])
+
         task = GPTask(authwidget.session.sessions[0], tool_id)  
-        uri = task.server_data.upload_file( file_name[0].split('/')[len(file_name[0].split('/'))-1] , file_name[0])
+        uri = task.server_data.upload_file( new_file.split('/')[len(new_file.split('/'))-1] , new_file)
 
         #####################
 
