@@ -98,6 +98,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
     this.KernelOutPut = '';
     this.JOBID = {};
     this.file_cache = [];
+    this.target_id = []
     }
  
     render() {
@@ -310,101 +311,78 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         return values
     }
 
-
-    send_data_to_gp_server(){
-
-
-    }
-
     async data_upload(gp_tool_list, dataset) {
 
-       this.removeAllChildNodes(gp_tool_list)
-
+        this.removeAllChildNodes(gp_tool_list)
         var Nodes1 =  document.querySelector('body').querySelectorAll('.nbtools.nbtools-uibuilder.lm-Widget.p-Widget')
 
-        console.log(Nodes1)
-
-
         for (var i = 0; i < Nodes1.length; i++){
-                if ( Nodes1[i].querySelectorAll('.nbtools-fileinput').length > 0){
+            if ( Nodes1[i].querySelectorAll('.nbtools-fileinput').length > 0){
 
-                    console.log('ok', i)
+                var tool  = document.createElement('div')
 
-                    var tool  = document.createElement('div')
+                tool.className = 'gp_tool'
 
-                    tool.className = 'gp_tool'
+                var tool_name  = document.createElement('div')
+                tool_name.className = 'tool_name'
+                var tool_label  = document.createElement('div')
+                tool_label.className = 'tool_label_text'
+                tool_label.innerHTML = Nodes1[i].querySelector('.nbtools-title').innerHTML
 
-                    var tool_name  = document.createElement('div')
-                    tool_name.className = 'tool_name'
-                    var tool_label  = document.createElement('div')
-                    tool_label.className = 'tool_label_text'
-                    tool_label.innerHTML = Nodes1[i].querySelector('.nbtools-title').innerHTML
+                tool_name.append(tool_label)
+                tool.append(tool_name)
 
-                    console.log( Nodes1[i].querySelector('.nbtools-title').innerHTML)
+                var tool_id =  Nodes1[i].querySelector('.nbtools-title').innerText
 
-                    tool_name.append(tool_label)
-                    tool.append(tool_name)
+                var tool_input_params  = document.createElement('div')
+                tool_input_params.className = 'tool-input-params'
 
-                    var tool_id =  Nodes1[i].querySelector('.nbtools-title').innerText
+                var param_list = document.createElement('ul')
+                param_list.className = 'tool-param-ul'
 
-                    var tool_input_params  = document.createElement('div')
-                    tool_input_params.className = 'tool-input-params'
+                tool_input_params.append(param_list)
+                tool.append(tool_input_params)
 
-                    var param_list = document.createElement('ul')
-                    param_list.className = 'tool-param-ul'
+                var InputFiles =  Nodes1[i].querySelectorAll('.nbtools-fileinput') 
+                var uri = {}
 
-                    tool_input_params.append(param_list)
-
-                    tool.append(tool_input_params)
-
-                   var InputFiles =  Nodes1[i].querySelectorAll('.nbtools-fileinput') 
-
-
-                   var uri = {}
-
-
-                   for (var j = 0; j < InputFiles.length; j++){
+                for (var j = 0; j < InputFiles.length; j++){
                         
-                            var input_file_param = document.createElement('div')
-                            input_file_param.className = 'input-data-param'
+                    var input_file_param = document.createElement('div')
+                    input_file_param.className = 'input-data-param'
 
-                            var input_file_param_label = document.createElement('div')
-                            input_file_param_label.className = 'input-data-param-label'
+                    var input_file_param_label = document.createElement('div')
+                    input_file_param_label.className = 'input-data-param-label'
+                    
 
+                    var targetid =  InputFiles[j].querySelector('input').id
 
-                            var target_id =  InputFiles[j].querySelector('input').id
+                    input_file_param_label.id = targetid+'-label'
 
+                    input_file_param_label.addEventListener("click", async (e)=> {
 
-                            input_file_param_label.addEventListener("click", async (e)=> {
+                        uri = await KernelSideDataObjects(`from galaxylab import GalaxyTaskWidget\nGalaxyTaskWidget.send_data_to_gp_server(file_name=${JSON.stringify(dataset['name'])}, tool_id=${JSON.stringify(tool_id)}, dataset_id=${JSON.stringify(dataset['id'])}, GInstance=${JSON.stringify(this.model.get('GalInstance'))})`)
+                       
+                       
+                        dataset['uri'] = uri
+                        document.getElementById(`${e.target.id.replace('-label', '')}`).value =  uri['uri']
 
-                                // if (!this.file_exist(dataset)){
-                            uri = await KernelSideDataObjects(`from galaxylab import GalaxyTaskWidget\nGalaxyTaskWidget.send_data_to_gp_server(file_name=${JSON.stringify(dataset['name'])}, tool_id=${JSON.stringify(tool_id)}, dataset_id=${JSON.stringify(dataset['id'])}, GInstance=${JSON.stringify(this.model.get('GalInstance'))})`)
-
-                            var map = {'m':0,'n':0}
-
-                            dataset['uri'] = uri
-
-                            document.getElementById(`${target_id}`).value =  uri['uri']
-
-                            console.log(target_id)
-
-                        })
-
-                        input_file_param_label.innerHTML =  InputFiles[j].querySelector('.lm-Widget.p-Widget.jupyter-widgets.widget-label').innerHTML
-
-                        input_file_param.append(input_file_param_label)
-                        param_list.append(input_file_param)
-
-               
+                        console.log(e.target.id.replace('-label', ''))
 
 
 
-                   }
+
+                    })
+
+                input_file_param_label.innerHTML =  InputFiles[j].querySelector('.lm-Widget.p-Widget.jupyter-widgets.widget-label').innerHTML
+                input_file_param.append(input_file_param_label)
+                param_list.append(input_file_param)
+
+                }
 
                 gp_tool_list.append(tool)
-                }
+            }
         }
-
     }
 
     file_exist(dataset){
