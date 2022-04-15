@@ -118,5 +118,29 @@
   color: white;
 }
 
+.send-data-genepattern-tools{ 
+  width: 80%;
+  height: 20%;
+  border: solid rgb(144,132,132) 1px;
+  margin: 5px;
+}
+
+.send-data-galaxy-tools{
+  
+  width: 80%;
+  height: 20%;
+  border: solid rgb(158,151,151) 1px;
+  margin: 5px;
+}
+
+.genepattern-tool-list{
+
+  width: 80%;
+  height: 100%;
+  border: solid rgb(158,151,151) 1px;
+  margin: 5px;
+
+}
+
 
 

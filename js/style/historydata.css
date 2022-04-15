@@ -257,6 +257,10 @@ border-radius: 3px;
   margin: 5px;
 }
 
+.galaxy-uibuilder #add_data_share_menu{
+  border:1px solid rgb(180,172,172);
+  margin-top:  5px;
+}
 
 
 

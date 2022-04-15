@@ -3,8 +3,11 @@ import { ILabShell, ILayoutRestorer } from "@jupyterlab/application";
 import { INotebookTracker } from '@jupyterlab/notebook';
 import { IMainMenu } from '@jupyterlab/mainmenu';
 
-import { ToolRegistry}  from '@genepattern/nbtools';
-import {DataRegistry} from "@genepattern/nbtools";
+
+import {DataRegistry} from "@genepattern/nbtools/lib/dataregistry";
+import { ToolRegistry } from '@genepattern/nbtools';
+
+
 
 // import { ContextManager } from '@genepattern/nbtools';
 import { ContextManager } from '@genepattern/nbtools/lib/context';
