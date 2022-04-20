@@ -147,7 +147,7 @@ class GalaxyAuthWidget(UIBuilder):
         """Get the list available modules (currently only tools) and register widgets for them with the tool manager"""
         url = self.session._notebook_url
 
-        def register_modules_callback
+        def register_modules_callback():
             for section in self.session.tools.gi.tools.get_tool_panel():
                 if section['model_class'] == 'ToolSection':
                     for tool in section['elems']:
