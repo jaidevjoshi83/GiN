@@ -365,24 +365,17 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                     input_file_param_label.addEventListener("click", async (e)=> {
 
 
-                        this.file_exist(dataset)
-
-
-
-
-                    // if(self.file_exist(dataset)){
-                        // document.getElementById(`${e.target.id.replace('-label', '')}`).value = this.file_exist()
-                    // } else{
-                        console.log('new')
-                        console.log(dataset)
-
+                   if (self.file_exist(dataset)){
+                        document.getElementById(`${e.target.id.replace('-label', '')}`).value =  self.file_exist(dataset)
+                        document.getElementById(`${e.target.id.replace('-label', '')}`).dispatchEvent(new Event('change', { bubbles: true }));
+                   } else{
                         uri = await KernelSideDataObjects(`from galaxylab import GalaxyTaskWidget\nGalaxyTaskWidget.send_data_to_gp_server(file_name=${JSON.stringify(dataset['name'])}, tool_id=${JSON.stringify(tool_id)}, dataset_id=${JSON.stringify(dataset['id'])}, GInstance=${JSON.stringify(this.model.get('GalInstance'))}, ext=${JSON.stringify(dataset['extension'])})`)
                         dataset['uri'] = uri['uri']
                         this.file_cache.push(new Data(origin, dataset['uri'], dataset['id'], dataset['file_ext']));
                         ContextManager.data_registry.register({ data: this.file_cache[ this.file_cache.length-1] })
                         document.getElementById(`${e.target.id.replace('-label', '')}`).value =  uri['uri']
                         document.getElementById(`${e.target.id.replace('-label', '')}`).dispatchEvent(new Event('change', { bubbles: true }));
-                    // }
+                    }
 
                     })
 
@@ -398,17 +391,13 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
     }
 
     file_exist(dataset){
-
-        // // console.log(this.file_cache[k]['label'], dataset['id'])
         for (var k = 0; k < this.file_cache.length; k++){
-
-            console.log(this.file_cache[k]['label'])
-            // if (this.file_cache[k]['label'] == dataset['id']) {
-            // console.log(this.file_cache[k]['label'], dataset['id'])
-            //     return this.file_cache[k]['uri']
-            // }else{
-            //     return false
-            // }
+            if (this.file_cache[k]['label'] == dataset['id']) {
+            console.log(this.file_cache[k]['label'], dataset['id'])
+                return this.file_cache[k]['uri']
+            }else{
+                return false
+            }
         }
     }
     
