@@ -1,6 +1,7 @@
 from bioblend.galaxy.objects import GalaxyInstance
 from .display import display
 from nbtools import UIBuilder, ToolManager, NBTool, EventManager
+from threading import Thread
 from .sessions import session
 #from .shim import login, system_message
 from .taskwidget import TaskTool
@@ -92,12 +93,17 @@ class GalaxyAuthWidget(UIBuilder):
             self.session._notebook_password = password
             # Validate the provided credentials
             self.replace_widget()
+            
+            def register_modules_callback():
+                for i in t:
+                    if self.validate_credentials(self.session):
+                        i['gi']=self.session.tools.gi
+                        tool1 = TaskTool('+', i)
+                        ToolManager.instance().register(tool1)
+            # Register tools in their own thread so as not to block the kernel
+            registration_thread = Thread(target=register_modules_callback)
+            registration_thread.start()
 
-            for i in t:
-                if self.validate_credentials(self.session):
-                    i['gi']=self.session.tools.gi
-                    tool1 = TaskTool('+', i)
-                    ToolManager.instance().register(tool1)
         except HTTPError:
             self.error = 'Invalid username or password. Please try again.'
         except BaseException as e:
@@ -141,15 +147,20 @@ class GalaxyAuthWidget(UIBuilder):
         """Get the list available modules (currently only tools) and register widgets for them with the tool manager"""
         url = self.session._notebook_url
 
-        for section in self.session.tools.gi.tools.get_tool_panel():
-            if section['model_class'] == 'ToolSection':
-                for tool in section['elems']:
-                    try:
-                        tool['gi']=self.session.tools.gi
-                        tool = TaskTool(server_name(url), tool)
-                        ToolManager.instance().register(tool)
-                    except:
-                        pass
+        def register_modules_callback
+            for section in self.session.tools.gi.tools.get_tool_panel():
+                if section['model_class'] == 'ToolSection':
+                    for tool in section['elems']:
+                        try:
+                            tool['gi']=self.session.tools.gi
+                            tool = TaskTool(server_name(url), tool)
+                            ToolManager.instance().register(tool)
+                        except:
+                            pass
+                        
+        # Register tools in their own thread so as not to block the kernel
+        registration_thread = Thread(target=register_modules_callback)
+        registration_thread.start()
 
     def system_message(self):
         self.info = "Successfully logged into Galaxy"
