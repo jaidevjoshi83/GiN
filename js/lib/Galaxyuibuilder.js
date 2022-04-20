@@ -315,7 +315,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         var self = this
 
-        console.log(this.file_cache)
+        
 
         this.removeAllChildNodes(gp_tool_list)
 
@@ -364,6 +364,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
                     input_file_param_label.addEventListener("click", async (e)=> {
 
+                        console.log(self.file_exist(dataset))
 
                    if (self.file_exist(dataset)){
                         document.getElementById(`${e.target.id.replace('-label', '')}`).value =  self.file_exist(dataset)
@@ -391,14 +392,17 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
     }
 
     file_exist(dataset){
-        for (var k = 0; k < this.file_cache.length; k++){
-            if (this.file_cache[k]['label'] == dataset['id']) {
-            console.log(this.file_cache[k]['label'], dataset['id'])
-                return this.file_cache[k]['uri']
-            }else{
-                return false
+        if (this.file_cache.length  > 0) {
+            for (var k = 0; k < this.file_cache.length; k++){
+                if (this.file_cache[k]['label'] == dataset['id']) {
+                    return this.file_cache[k]['uri']
+                }
             }
-        }
+         }
+         else{
+             return false
+         }
+         return false
     }
     
     Drill_down(options, param_name='default'){
