@@ -260,27 +260,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
     //         ContextManager.data_registry.unregister({ data: f });
     // }
 
-    sync_file_cache(dataset) {
-
-        console.log(dataset)
-
-        // Unregister old files associated with this widget
-        for (let f of this.file_cache)
-            ContextManager.data_registry.unregister({ data: f });
-
-        // Create the data objects and add them to the file cache
-        this.file_cache = [];
-        const origin = this.model.get('GalInstance')['URL'];
-
-        this.file_cache.push(new Data(origin, dataset['uri'], dataset['id'], dataset['file_ext']));
-        // Register the files currently associated with this widget
-        for (let f of this.file_cache)
-            ContextManager.data_registry.register({ data: f });
-
-        // const compatible_outputs = ContextManager.data_registry.get_data({ kinds: kinds, origins: origins });
-
-    }
-
     Dirll_Down_Output(drill_down){
 
         var Name = []
@@ -314,12 +293,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
     async data_upload(gp_tool_list, dataset) {
 
         var self = this
-
         
-
         this.removeAllChildNodes(gp_tool_list)
-
-
         var Nodes1 =  document.querySelector('body').querySelectorAll('.nbtools.nbtools-uibuilder.lm-Widget.p-Widget')
 
         for (var i = 0; i < Nodes1.length; i++){
@@ -1664,7 +1639,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         GpTools.addEventListener("click", (e) => {
 
-            
             var GpToolsDiv = Tbl.querySelector('.genepattern-tool-list')
 
             this.data_upload(GpToolsDiv, dataset)
@@ -1679,7 +1653,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         Exch.addEventListener("click", async (event) =>{ 
             var show_dataset = await KernelSideDataObjects(`from galaxylab  import GalaxyTaskWidget\nGalaxyTaskWidget.show_data_set(GalInstance=${JSON.stringify(this.model.get('GalInstance'))}, dataset_id=${JSON.stringify(dataset['id'])} )`)
-            // this.sync_file_cache(show_dataset)
 
             if (Tbl.querySelector('#add_data_share_menu').style.display == 'block') {
                 Tbl.querySelector('#add_data_share_menu').style.display = 'none'
