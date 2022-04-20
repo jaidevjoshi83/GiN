@@ -1,0 +1,122 @@
+.galaxy-uibuilder .ui-form-element.section-row.pl-2 {
+  padding: 0px 2px;
+  margin-left: 10px;
+  border-left: 2px solid rgb(221, 218, 196);
+  border-radius: 5px;
+}
+
+.galaxy-uibuilder .ui-form-element.section-row {
+  padding: 0px 2px;
+  margin-bottom: 10px;
+
+}
+
+.galaxy-uibuilder .Galaxy-form input:not(.fileid, .buttonid, [type='checkbox']){
+  width: 100%;
+  padding: 12px 20px;
+  margin: 8px 0;
+  display: inline-block;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+.galaxy-uibuilder .Galaxy-form select{
+  width: 100%;
+  padding: 12px 20px;
+  margin: 8px 0;
+  display: inline-block;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+.galaxy-uibuilder .ui-form-element.section-row span {
+  font-weight: bold;
+}
+
+.galaxy-uibuilder .upload_data {
+  display: inline-block;
+  border: 1px solid rgb(212, 41, 41);
+  box-sizing: border-box;
+}
+
+.galaxy-uibuilder .Galaxy-form input[type="file"] {
+  display: none;
+}
+
+.galaxy-uibuilder .custom-file-upload {
+  border: 1px solid rgb(212, 41, 41);
+  display: inline-block;
+  padding: 6px 12px;
+  cursor: pointer;
+}
+
+.galaxy-uibuilder .ui-form-element.section-row label :not(.ui-checkbox-label){
+  width: 100%;
+  display: inline-block;
+  padding: 6px 12px;
+  cursor: pointer;
+}
+
+.galaxy-uibuilder .ui-checkbox-label {
+  width: 95%;
+  padding-bottom: 2px;
+  margin-left: 5px;
+}
+
+.galaxy-uibuilder .outer-checkbox-div {
+  width: 95%;
+  margin-left: 20px;
+  margin-top: 10px;
+  padding-left: 5px;
+  padding-top: 5px;
+  border: solid 1px rgb(168,150,150);
+  border-radius: 5px;
+}
+
+.galaxy-uibuilder button.delete-button{
+  margin-top: 10px
+}
+
+/* .galaxy-uibuilder .ui-repeat.section-row {
+  margin-top: 10px;
+} */
+
+.galaxy-uibuilder .collapsible{
+  border-radius: 1px;
+  margin-bottom: 0px;
+}
+
+.galaxy-uibuilder .internal-ui-repeat.section-row{
+  
+  border-radius: 0px;
+  border-left:  solid 2px rgb(211,207,207);
+  margin-left: 5px;
+  border-bottom-left-radius: 5px;
+}
+
+.galaxy-uibuilder .repeat-ui-from-title{
+  margin-top: 10px;
+  background-color: rgb(211,207,207);
+  height: 40px;
+  border-radius: 0px;
+}
+
+.galaxy-uibuilder  .ui-form-element.section-row.sections{
+  margin-left: 5px;
+  border-left:  solid 2px rgb(211,207,207);   
+  border-bottom: solid 2px rgb(211,207,207);
+  border-right: solid 2px rgb(211,207,207);
+  border-bottom-left-radius: 5px;
+  border-bottom-right-radius: 5px;
+}
+
+.galaxy-uibuilder button.RepeatButton { 
+  margin: 5px;
+  background-color: rgb(91,87,84);
+  color: white;
+}
+
+
+

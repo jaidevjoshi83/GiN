@@ -23,7 +23,11 @@ import io
 import requests
 from urllib.request import urlopen
 
+from genepattern import authwidget
+from gp import GPTask
 
+from os.path import exists
+import glob
 
 
 class GalaxyTaskWidget(GalaxyUIBuilder):
@@ -76,7 +80,6 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
 
         data_types = gi.gi.datatypes.get_datatypes()
         genomes = gi.gi.genomes.get_genomes()
-
         datatypes_genomes = {'datatypes': data_types, 'genomes': genomes}
 
         return IPython.display.JSON(datatypes_genomes)
@@ -88,21 +91,18 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
         history = gi.gi.histories.show_history(history_id=HistoryID)
         a = hi.History(history, gi=gi)
 
-        # if (upload_method  ==  'file'):
-        #     a.upload_dataset(path='/Users/joshij/Desktop/combined.fasta')
-
         if (upload_method  ==  'text'):
-           gi.gi.tools.put_url(content=file_path, history_id=HistoryID)
+           job = gi.gi.tools.put_url(content=file_path, history_id=HistoryID)
 
         elif (upload_method  ==  'textarea'):
-            gi.gi.tools.put_url(content=file_path, history_id=HistoryID)
+            job = gi.gi.tools.put_url(content=file_path, history_id=HistoryID)
 
-        # return IPython.display.JSON(uploaded_data)
+        return IPython.display.JSON(job)
 
+        
 
     def TestOut(GalInstance=None, JobID=None):
         gi = GalaxyInstance(GalInstance['URL'], email=GalInstance['email_ID'], api_key=GalInstance['API_key'], verify=True)
-        # status = gi.jobs.gi.jobs.get_state(JobID)
         status = gi.jobs.gi.jobs.show_job(JobID,full_details=True)
         return IPython.display.JSON(status)
 
@@ -124,8 +124,10 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
                 if list(inputs[i].keys())[0] == 'values':
                     new_values = []
                     for j in inputs[i]['values']:
-                        Dataset = gi.gi.datasets.gi.datasets.show_dataset(dataset_id=j)
-                        new_values.append({'src':Dataset['hda_ldda'],'id':Dataset['id']})
+                        print(j)
+                        # Dataset = gi.gi.datasets.gi.datasets.show_dataset(dataset_id=j)
+                        # new_values.append({'src':Dataset['hda_ldda'],'id':Dataset['id']})
+                        new_values.append(j)
                     inputs[i]['values'] = new_values
         return inputs
 
@@ -137,7 +139,7 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
         if (Tool_inputs != None) and (toolID != None):
 
             NewInputs = GalaxyTaskWidget.RefinedInputs(Tool_inputs, gi)
-            inputs = gi.gi.tools.gi.tools.build(tool_id=toolID, inputs=NewInputs, history_id=HistoryID)
+            inputs = gi.gi.tools.gi.tools.build(tool_id=toolID, inputs=Tool_inputs, history_id=HistoryID)
 
             if InputDataParam == False:
                 return IPython.display.JSON(data=inputs)
@@ -202,43 +204,52 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
             fasta = response.read().decode("utf-8", "ignore")
             return fasta
 
-    def TestFastAPI(url):
+    def download_file_to_jupyter_server( GalInstance=None, data_type='dataset', collection_id=None, ext='zip', file_name=None, dir='galaxy_data'):
 
-        # store the URL in url as 
-        # parameter for urlopen
-        # url = "http://192.168.1.113:8000/data"
-        
-        # store the response of URL
-        response = urlopen(url)
-        
-        # storing the JSON response 
-        # from url in data
-        data_json = json.loads(response.read())
-        
-        # print the json response
-     
-
-        return IPython.display.JSON(data_json)
-
-
-
-
-    def download_file_to_jupyter_server(file_name, GalInstance=None, data_type='dataset', data_url=None, collection_id=None, ext='zip'):
-
-        galaxy_data = os.path.join(os.getcwd(), 'galaxy_data')
+        gi = GalaxyInstance(GalInstance['URL'], email=GalInstance['email_ID'], api_key=GalInstance['API_key'], verify=True)
+        galaxy_data = os.path.join(os.getcwd(), dir)
 
         if not os.path.exists(galaxy_data):
             os.mkdir(galaxy_data)
 
         if data_type == 'collection':
-            file_path = os.path.join(galaxy_data, file_name)+'.'+ext
-            gi = GalaxyInstance(GalInstance['URL'], email=GalInstance['email_ID'], api_key=GalInstance['API_key'], verify=True)
+            file_path = os.path.join(galaxy_data, file_name)+'.'+ext            
             gi.gi.dataset_collections.download_dataset_collection(dataset_collection_id=collection_id, file_path=file_path)
         else:
-            response = urlopen(data_url)
-            data = response.read()
-            f = open(os.path.join(galaxy_data, file_name)+'.'+ext, 'wb')
-            f.write(data)
+            gi.gi.datasets.download_dataset(dataset_id=collection_id, file_path=galaxy_data)
+
+
+    def send_data_to_gp_server( file_name, tool_id, dataset_id,  GInstance, ext):
+
+        temp_dir = os.path.join(os.getcwd(), 'temp')
+
+        if not os.path.exists(temp_dir):
+            os.mkdir(temp_dir)
+
+        for f in os.listdir(temp_dir):
+            os.remove(os.path.join(temp_dir, f))
+
+        GalaxyTaskWidget.download_file_to_jupyter_server(GalInstance= GInstance,  collection_id=dataset_id, dir='temp')
+        file_name = glob.glob(os.path.join(temp_dir, '*.*' ))
+        new_file = os.path.join("/".join(file_name[0].split('/')[:len(file_name[0].split('/'))-1]), 'data.'+ext)
+        os.rename(file_name[0], new_file)
+        ####################
+        task = GPTask(authwidget.session.sessions[0], tool_id)  
+        uri = task.server_data.upload_file( new_file.split('/')[len(new_file.split('/'))-1], new_file)
+        #####################
+        return IPython.display.JSON({'uri':uri.uri})
+
+    def return_job_status( GalInstance=None, job_id=None):
+
+       gi = GalaxyInstance(GalInstance['URL'], email=GalInstance['email_ID'], api_key=GalInstance['API_key'], verify=True)
+       job_state = gi.gi.jobs.show_job(job_id=job_id, full_details=True)
+
+       return IPython.display.JSON(job_state)
+
+    def return_job_state( GalInstance=None, job_id=None):
+        gi = GalaxyInstance(GalInstance['URL'], email=GalInstance['email_ID'], api_key=GalInstance['API_key'], verify=True)
+        job_state = gi.gi.jobs.get_state(job_id=job_id)
+        return IPython.display.JSON({'job_state':job_state})
 
     def handle_error_task(self, error_message, name='Galaxy Module', **kwargs):
         """Display an error message if the task is None"""
@@ -274,7 +285,9 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
             History_IDs = self.tool['gi'].histories.gi.histories.get_histories()
 
             if self.tool['id'] == 'galaxylab_data_upload_tool':
-                inputs = {'id':'galaxylab_data_upload_tool', 'inputs': [{'model_class': 'DataToolParameter', 'name': 'input1',  'type': 'data_upload'}], 'help': '<p>Upload data tool</p>\n<p>This tool uploads data to the selected history of the Galaxy server. User can select file from the local machine, data can be fetch directly from the URL or can be generated by available UI and uploaded to the server.</p>\n'}  
+                inputs = {'id':'galaxylab_data_upload_tool', 'inputs': [{'model_class': 'DataToolParameter', 'name': 'input1',  'type': 'data_upload'}], 'help': '<p>Upload data tool</p>\n<p>This tool uploads data to the selected history of the Galaxy server. User can select file from the local machine, data can be fetch directly from the URL or can be generated by available UI and uploaded to the server.</p>\n'} 
+            elif  self.tool['id'] == 'cross_upload_tool':
+                inputs = {'id':'cross_upload_tool', 'inputs': [{'model_class': 'DataToolParameter', 'name': 'input1',  'type': 'cross_upload'}], 'help': '<p>Cross Upload Tool</p>\n<p>This tool uploads data to the selected history of the Galaxy server. User can select file from the local machine, data can be fetch directly from the URL or can be generated by available UI and uploaded to the server.</p>\n'} 
             else:
                 inputs = self.tool['gi'].tools.gi.tools.build(tool_id=tool['id'], history_id=History_IDs[0]['id'] )
 

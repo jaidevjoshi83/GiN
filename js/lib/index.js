@@ -4,6 +4,5 @@
 // module.exports['version'] = require('../package.json').version;
 
 export * from './version';
-export * from './galaxyoutput';
 export * from './Galaxyuibuilder';
 export * from './utils';

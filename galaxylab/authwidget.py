@@ -1,6 +1,7 @@
 from bioblend.galaxy.objects import GalaxyInstance
 from .display import display
 from nbtools import UIBuilder, ToolManager, NBTool, EventManager
+from threading import Thread
 from .sessions import session
 #from .shim import login, system_message
 from .taskwidget import TaskTool
@@ -12,7 +13,6 @@ from .Galaxyuibuilder import GalaxyUIBuilder
 GALAXY_SERVERS = {
     'Galaxy Main': 'https://usegalaxy.org',
     'Galaxy Local': 'http://localhost:8080',
-    'Galaxy Jay Local': 'http://192.168.1.139:8080',
 }
 
 REGISTER_EVENT = """
@@ -84,18 +84,26 @@ class GalaxyAuthWidget(UIBuilder):
     def login(self, server, email, password):
         """Login to the Galaxy server"""
 
-        t = {'id':'galaxylab_data_upload_tool', 'description':'Upload data files to galaxy server', 'name':'Upload Data'}
+        t = [{'id':'galaxylab_data_upload_tool', 'description':'Upload data files to galaxy server', 'name':'Upload Data'}, {'id':'cross_upload_tool', 'description':'Cross upload tool', 'name':'Cross upload_toola'}]
+
         try:
             self.session = GalaxyInstance(server, email=email, password=password)
             self.session._notebook_url = server
             self.session._notebook_email = email
             self.session._notebook_password = password
             # Validate the provided credentials
-            if self.validate_credentials(self.session):
-                self.replace_widget()
-                t['gi']=self.session.tools.gi
-                tool1 = TaskTool('+', t)
-                ToolManager.instance().register(tool1)
+            self.replace_widget()
+            
+            def register_modules_callback():
+                for i in t:
+                    if self.validate_credentials(self.session):
+                        i['gi']=self.session.tools.gi
+                        tool1 = TaskTool('+', i)
+                        ToolManager.instance().register(tool1)
+            # Register tools in their own thread so as not to block the kernel
+            registration_thread = Thread(target=register_modules_callback)
+            registration_thread.start()
+
         except HTTPError:
             self.error = 'Invalid username or password. Please try again.'
         except BaseException as e:
@@ -139,17 +147,20 @@ class GalaxyAuthWidget(UIBuilder):
         """Get the list available modules (currently only tools) and register widgets for them with the tool manager"""
         url = self.session._notebook_url
 
-        for section in self.session.tools.gi.tools.get_tool_panel():
-
-
-            if section['model_class'] == 'ToolSection':
-                for tool in section['elems']:
-                    try:
-                        tool['gi']=self.session.tools.gi
-                        tool = TaskTool(server_name(url), tool)
-                        ToolManager.instance().register(tool)
-                    except:
-                        pass
+        def register_modules_callback():
+            for section in self.session.tools.gi.tools.get_tool_panel():
+                if section['model_class'] == 'ToolSection':
+                    for tool in section['elems']:
+                        try:
+                            tool['gi']=self.session.tools.gi
+                            tool = TaskTool(server_name(url), tool)
+                            ToolManager.instance().register(tool)
+                        except:
+                            pass
+                        
+        # Register tools in their own thread so as not to block the kernel
+        registration_thread = Thread(target=register_modules_callback)
+        registration_thread.start()
 
     def system_message(self):
         self.info = "Successfully logged into Galaxy"
