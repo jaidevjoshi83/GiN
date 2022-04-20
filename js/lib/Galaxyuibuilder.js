@@ -364,8 +364,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
                     input_file_param_label.addEventListener("click", async (e)=> {
 
-                        console.log(self.file_exist(dataset))
-
                    if (self.file_exist(dataset)){
                         document.getElementById(`${e.target.id.replace('-label', '')}`).value =  self.file_exist(dataset)
                         document.getElementById(`${e.target.id.replace('-label', '')}`).dispatchEvent(new Event('change', { bubbles: true }));
@@ -385,7 +383,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 param_list.append(input_file_param)
 
                 }
-
                 gp_tool_list.append(tool)
             }
         }

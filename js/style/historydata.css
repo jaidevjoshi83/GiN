@@ -325,4 +325,8 @@ border-radius: 3px;
   padding-bottom: 5px;    
 }
 
+.gp_tool{
+  border: solid rgb(191,182,182) 0.5px;
+}
+
 
