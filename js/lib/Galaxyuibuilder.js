@@ -12,7 +12,7 @@ import '../style/galaxy-form.css';
  import { MODULE_NAME, MODULE_VERSION } from './version';
  import { unpack_models } from "@jupyter-widgets/base";
  import { BaseWidgetModel, BaseWidgetView } from "@genepattern/nbtools";
- import { UIBuilderView } from '@genepattern/nbtools';
+
 
  import _ from "underscore";
  import {  KernelSideDataObjects } from './utils';
@@ -98,7 +98,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
     this.KernelOutPut = '';
     this.JOBID = {};
     this.file_cache = [];
-    this.target_id = []
+    this.test = []
     }
  
     render() {
@@ -253,14 +253,16 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 break
         }
     }
-    remove() {
-        super.remove();
-        // Clean up data files from the cache
-        for (let f of this.file_cache)
-            ContextManager.data_registry.unregister({ data: f });
-    }
+    // remove() {
+    //     super.remove();
+    //     // Clean up data files from the cache
+    //     for (let f of this.file_cache)
+    //         ContextManager.data_registry.unregister({ data: f });
+    // }
 
     sync_file_cache(dataset) {
+
+        console.log(dataset)
 
         // Unregister old files associated with this widget
         for (let f of this.file_cache)
@@ -276,8 +278,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             ContextManager.data_registry.register({ data: f });
 
         // const compatible_outputs = ContextManager.data_registry.get_data({ kinds: kinds, origins: origins });
-
-        console.log(this.file_cache)
 
     }
 
@@ -313,10 +313,17 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
     async data_upload(gp_tool_list, dataset) {
 
+        var self = this
+
+        console.log(this.file_cache)
+
         this.removeAllChildNodes(gp_tool_list)
+
+
         var Nodes1 =  document.querySelector('body').querySelectorAll('.nbtools.nbtools-uibuilder.lm-Widget.p-Widget')
 
         for (var i = 0; i < Nodes1.length; i++){
+
             if ( Nodes1[i].querySelectorAll('.nbtools-fileinput').length > 0){
 
                 var tool  = document.createElement('div')
@@ -350,27 +357,32 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                         
                     var input_file_param = document.createElement('div')
                     input_file_param.className = 'input-data-param'
-
                     var input_file_param_label = document.createElement('div')
                     input_file_param_label.className = 'input-data-param-label'
-                    
-
                     var targetid =  InputFiles[j].querySelector('input').id
-
                     input_file_param_label.id = targetid+'-label'
 
                     input_file_param_label.addEventListener("click", async (e)=> {
 
-                        uri = await KernelSideDataObjects(`from galaxylab import GalaxyTaskWidget\nGalaxyTaskWidget.send_data_to_gp_server(file_name=${JSON.stringify(dataset['name'])}, tool_id=${JSON.stringify(tool_id)}, dataset_id=${JSON.stringify(dataset['id'])}, GInstance=${JSON.stringify(this.model.get('GalInstance'))})`)
-                       
-                       
-                        dataset['uri'] = uri
+
+                        this.file_exist(dataset)
+
+
+
+
+                    // if(self.file_exist(dataset)){
+                        // document.getElementById(`${e.target.id.replace('-label', '')}`).value = this.file_exist()
+                    // } else{
+                        console.log('new')
+                        console.log(dataset)
+
+                        uri = await KernelSideDataObjects(`from galaxylab import GalaxyTaskWidget\nGalaxyTaskWidget.send_data_to_gp_server(file_name=${JSON.stringify(dataset['name'])}, tool_id=${JSON.stringify(tool_id)}, dataset_id=${JSON.stringify(dataset['id'])}, GInstance=${JSON.stringify(this.model.get('GalInstance'))}, ext=${JSON.stringify(dataset['extension'])})`)
+                        dataset['uri'] = uri['uri']
+                        this.file_cache.push(new Data(origin, dataset['uri'], dataset['id'], dataset['file_ext']));
+                        ContextManager.data_registry.register({ data: this.file_cache[ this.file_cache.length-1] })
                         document.getElementById(`${e.target.id.replace('-label', '')}`).value =  uri['uri']
-
-                        console.log(e.target.id.replace('-label', ''))
-
-
-
+                        document.getElementById(`${e.target.id.replace('-label', '')}`).dispatchEvent(new Event('change', { bubbles: true }));
+                    // }
 
                     })
 
@@ -386,13 +398,17 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
     }
 
     file_exist(dataset){
-        for (var k =0; k < this.file_cache; k++){
-            if (this.file_cache[k]['label'] == dataset['id']) {
-                return true
-            }else{
-                return false
-            }
-            
+
+        // // console.log(this.file_cache[k]['label'], dataset['id'])
+        for (var k = 0; k < this.file_cache.length; k++){
+
+            console.log(this.file_cache[k]['label'])
+            // if (this.file_cache[k]['label'] == dataset['id']) {
+            // console.log(this.file_cache[k]['label'], dataset['id'])
+            //     return this.file_cache[k]['uri']
+            // }else{
+            //     return false
+            // }
         }
     }
     
@@ -1673,7 +1689,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         Exch.addEventListener("click", async (event) =>{ 
             var show_dataset = await KernelSideDataObjects(`from galaxylab  import GalaxyTaskWidget\nGalaxyTaskWidget.show_data_set(GalInstance=${JSON.stringify(this.model.get('GalInstance'))}, dataset_id=${JSON.stringify(dataset['id'])} )`)
-            this.sync_file_cache(show_dataset)
+            // this.sync_file_cache(show_dataset)
 
             if (Tbl.querySelector('#add_data_share_menu').style.display == 'block') {
                 Tbl.querySelector('#add_data_share_menu').style.display = 'none'
