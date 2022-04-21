@@ -239,6 +239,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 this.add_select_field(input_def, FormParent, NamePrefix)
                 break
             case "repeat":
+                console.log(input_def)
                 this.add_repeat_section(input_def, FormParent, NamePrefix) 
                 break
             case "section":
@@ -995,6 +996,107 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             }
           });
     }
+
+
+    add_ui_internal_repeat(){
+
+        const row2 = document.createElement('div')
+        row2.className = 'internal-ui-repeat section-row'
+
+        console.log(row2)
+
+    }
+     
+    // Improvised version of add_repeat_section(), it will replace the current implementation.
+
+    add_repeat_section1(input_def, FormParent, NamePrefix){
+
+        var self = this
+        input_def.id = this.uid()
+        
+        var Button = document.createElement('button')
+        Button.innerText = `Insert ${input_def['title']}`
+        Button.className = 'RepeatButton'
+        Button.type = "button"
+        
+        const row2 = document.createElement('div')
+        row2.className = 'internal-ui-repeat section-row'
+
+        var DeleteButton = document.createElement('button')
+        DeleteButton.innerHTML = ('<i class="fa fa-trash-o" aria-hidden="true"></i>')
+        DeleteButton.className = 'delete-button'
+        DeleteButton.type = "button"
+
+        const row = document.createElement('div')
+        const title = document.createElement('div')
+        title.append(DeleteButton)
+        title.className = 'repeat-ui-from-title'
+        const TitleSpan = document.createElement('span')
+        TitleSpan.className = "ui-form-title-text"
+        TitleSpan.textContent = '1: '+input_def['title']
+        TitleSpan.style.display = 'inline'
+        title.append(TitleSpan)
+        row.className = 'ui-repeat section-row'
+        row.id = input_def.id
+        row2.append(title)
+        
+        var SuffixName = input_def['name']
+
+       for (var j in input_def['inputs']){
+           this.add(input_def['inputs'][j], row2, NamePrefix+SuffixName+`_0|`)
+        }
+        row.append(row2)
+
+        row.append(Button)
+        FormParent.append(row)
+
+        var click = 0;
+
+        Button.addEventListener("click", function(e){ 
+
+            const row1 = document.createElement('div')
+            row1.className = 'internal-ui-repeat section-row'
+
+            var DeleteButton = document.createElement('button')
+            DeleteButton.innerHTML = ('<i class="fa fa-trash-o" aria-hidden="true"></i>')
+            DeleteButton.className = 'delete-button'
+            DeleteButton.type = "button"
+
+            const InnerTitle = document.createElement('div')
+            InnerTitle.className = 'repeat-ui-from-title'
+            InnerTitle.append(DeleteButton)
+
+            var Count = ++click
+
+            const InnerTitleSpan = document.createElement('span')
+            InnerTitleSpan.className = "ui-form-title-text"
+            InnerTitleSpan.textContent = `${Count+1}: `+input_def['title']
+            InnerTitleSpan.style.display = 'inline'
+            InnerTitle.append(InnerTitleSpan)
+
+            row1.append(InnerTitle)
+
+            row1.style.width = '200px;'
+
+            DeleteButton.addEventListener("click", function(e){ 
+                self.el.querySelector('.delete-button').closest('.internal-ui-repeat.section-row').remove()
+            });
+
+             e.preventDefault(); //self.AddRepeat(input_def, FormParent, NamePrefix)
+             for (var j in input_def['inputs']){
+                self.add(input_def['inputs'][j], row1, NamePrefix+SuffixName+`_${Count}|`)
+             } 
+
+             row.prepend(row1)
+        });
+
+        DeleteButton.addEventListener("click", function(e){ 
+            self.el.querySelector('.delete-button').closest('.internal-ui-repeat.section-row').remove()
+        });
+
+        return row
+    }
+
  
     add_repeat_section(input_def, FormParent, NamePrefix){
 
@@ -1038,6 +1140,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         FormParent.append(Button)
 
         var click = 0;
+
         Button.addEventListener("click", function(e){ 
 
             const row1 = document.createElement('div')
@@ -1100,7 +1203,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         FileManu.className = 'multi-selectbox'
 
         FileManu.style.width = '100%'
-        FileManu.style.float = 'left'
 
         var Select = document.createElement('select')
         Select.className = 'InputDataFile'
