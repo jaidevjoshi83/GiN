@@ -217,6 +217,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             input_def.id = this.uid()
         }
 
+        
+
         switch (input_def.type) {
 
             case "conditional":
@@ -945,7 +947,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
  
             var HistoryID = select.value
 
-            if (this.model.get('inputs')['id'] != 'galaxylab_data_upload_tool' | 'cross_upload_tool') {
+            if (this.model.get('inputs')['id'] != 'galaxylab_data_upload_tool') {
 
                 var children = self.element.querySelector('.Galaxy-form').children;
                 var Inputs = self.collect_form_data(children)
