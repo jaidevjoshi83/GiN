@@ -84,7 +84,7 @@ class GalaxyAuthWidget(UIBuilder):
     def login(self, server, email, password):
         """Login to the Galaxy server"""
 
-        t = [{'id':'galaxylab_data_upload_tool', 'description':'Upload data files to galaxy server', 'name':'Upload Data'}, {'id':'cross_upload_tool', 'description':'Cross upload tool', 'name':'Cross upload_toola'}]
+        t = [{'id':'galaxylab_data_upload_tool', 'description':'Upload data files to galaxy server', 'name':'Upload Data'}]
 
         try:
             self.session = GalaxyInstance(server, email=email, password=password)
