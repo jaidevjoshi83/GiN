@@ -958,7 +958,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 var SelectedIndex = {}
                 SelectedIndex['HID'] = select.selectedIndex
 
-                self.form_builder(refine_inputs['inputs'],  SelectedIndex)
+                self.form_builder(refine_inputs['inputs'],  SelectedIndex)  
             }
         });
 
@@ -995,6 +995,97 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             }
           });
     }
+     
+    // Improvised version of add_repeat_section(), it will replace the current implementation.
+
+    add_repeat_section1(input_def, FormParent, NamePrefix){
+
+        var self = this
+        input_def.id = this.uid()
+        
+        var Button = document.createElement('button')
+        Button.innerText = `Insert ${input_def['title']}`
+        Button.className = 'RepeatButton'
+        Button.type = "button"
+        
+        const row2 = document.createElement('div')
+        row2.className = 'internal-ui-repeat section-row'
+
+        var DeleteButton = document.createElement('button')
+        DeleteButton.innerHTML = ('<i class="fa fa-trash-o" aria-hidden="true"></i>')
+        DeleteButton.className = 'delete-button'
+        DeleteButton.type = "button"
+
+        const row = document.createElement('div')
+        const title = document.createElement('div')
+        title.append(DeleteButton)
+        title.className = 'repeat-ui-from-title'
+        const TitleSpan = document.createElement('span')
+        TitleSpan.className = "ui-form-title-text"
+        TitleSpan.textContent = '1: '+input_def['title']
+        TitleSpan.style.display = 'inline'
+        title.append(TitleSpan)
+        row.className = 'ui-repeat section-row'
+        row.id = input_def.id
+        row2.append(title)
+        
+        var SuffixName = input_def['name']
+
+       for (var j in input_def['inputs']){
+           this.add(input_def['inputs'][j], row2, NamePrefix+SuffixName+`_0|`)
+        }
+        row.append(row2)
+
+        row.append(Button)
+        FormParent.append(row)
+
+        var click = 0;
+
+        Button.addEventListener("click", function(e){ 
+
+            const row1 = document.createElement('div')
+            row1.className = 'internal-ui-repeat section-row'
+
+            var DeleteButton = document.createElement('button')
+            DeleteButton.innerHTML = ('<i class="fa fa-trash-o" aria-hidden="true"></i>')
+            DeleteButton.className = 'delete-button'
+            DeleteButton.type = "button"
+
+            const InnerTitle = document.createElement('div')
+            InnerTitle.className = 'repeat-ui-from-title'
+            InnerTitle.append(DeleteButton)
+
+            var Count = ++click
+
+            const InnerTitleSpan = document.createElement('span')
+            InnerTitleSpan.className = "ui-form-title-text"
+            InnerTitleSpan.textContent = `${Count+1}: `+input_def['title']
+            InnerTitleSpan.style.display = 'inline'
+            InnerTitle.append(InnerTitleSpan)
+
+            row1.append(InnerTitle)
+
+            row1.style.width = '200px;'
+
+            DeleteButton.addEventListener("click", function(e){ 
+                self.el.querySelector('.delete-button').closest('.internal-ui-repeat.section-row').remove()
+            });
+
+             e.preventDefault(); //self.AddRepeat(input_def, FormParent, NamePrefix)
+             for (var j in input_def['inputs']){
+                self.add(input_def['inputs'][j], row1, NamePrefix+SuffixName+`_${Count}|`)
+             } 
+
+             row.prepend(row1)
+        });
+
+        DeleteButton.addEventListener("click", function(e){ 
+            self.el.querySelector('.delete-button').closest('.internal-ui-repeat.section-row').remove()
+        });
+
+        return row
+    }
+
  
     add_repeat_section(input_def, FormParent, NamePrefix){
 
@@ -1038,6 +1129,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         FormParent.append(Button)
 
         var click = 0;
+
         Button.addEventListener("click", function(e){ 
 
             const row1 = document.createElement('div')
@@ -1100,7 +1192,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         FileManu.className = 'multi-selectbox'
 
         FileManu.style.width = '100%'
-        FileManu.style.float = 'left'
 
         var Select = document.createElement('select')
         Select.className = 'InputDataFile'
@@ -1137,13 +1228,23 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             Select.appendChild(el);
         }
 
-            for(var i =0; i < Select.options.length; i++) {
-                for(var k = 0; k < input_def.value.values.length; k++ ) {                    
-                    if (JSON.parse(Select.options[i].value)['id'] == input_def.value.values[k]['id']){
-                        Select.options[i].selected = true
+        console.log('error_place', input_def.value)
+
+        // need to be fixed: manage empty data list during API:build() call. 
+
+        if (input_def.value != null)  {
+            if(input_def.value.values != null) {
+                for(var i =0; i < Select.options.length; i++) {
+                    for(var k = 0; k < input_def.value.values.length; k++ ) {   
+                        if(input_def.value.values[k] != null) { 
+                            if (JSON.parse(Select.options[i].value)['id'] == input_def.value.values[k]['id']){
+                                Select.options[i].selected = true
+                            }
+                        }
                     }
                 }
             }
+        } 
 
         Select.addEventListener("dragover", function(event) {
             event.preventDefault();
@@ -1531,61 +1632,74 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         var self = this
 
-        var URL = this.model.get('GalInstance')['URL']
-        var show_dataset = await KernelSideDataObjects(`from galaxylab  import GalaxyTaskWidget\nGalaxyTaskWidget.show_dataset_collection(GalInstance=${JSON.stringify(this.model.get('GalInstance'))}, dataset_id=${JSON.stringify(dataset['id'])} )`) 
-
-        var row = `<div id="${dataset['type_id']}"   class="list-item ${show_dataset['history_content_type']} history-content state-${show_dataset['populated_state']}" >
-                    <div class="warnings"></div>
-                    <div class="selector"><span class="fa fa-2x fa-square-o"></span></div>
-                    <div class="primary-actions">
-                        <a class="download-btn icon-btn" href="${URL}/api/dataset_collections/${dataset['id']}/download" title="" data-original-title="Download"> <span class="fa fa-floppy-o"></span> </a><a class="icon-btn delete-btn" title="" href="javascript:void(0);" data-original-title="Delete"><span class="fa fa-times" style=""></span></a><a class="icon-btn display-btn" title="" target="" href="javascript:void(0);" data-original-title="View data"><span class="fa fa-download" style=""></span></a>
-                    </div>
-                    <div class="title-bar clear"  tabindex="0" draggable="true" ondragstart="event.dataTransfer.setData('text/plain',null) > 
-                        <span class="state-icon"></span>
-                        <div class="title" data-value=${show_dataset['id']} > 
-                            <span class="hid">${show_dataset['hid']}: </span> <span class="name">${show_dataset['name']}</span>
+        if (dataset['populated_state'] == 'ok'){
+            var pop_state = dataset['populated_state']
+ 
+            var row = `<div id="${dataset['type_id']}"   class="list-item ${dataset['history_content_type']} history-content state-${pop_state}" >
+                        <div class="warnings"></div>
+                        <div class="selector"><span class="fa fa-2x fa-square-o"></span></div>
+                        <div class="primary-actions">
+                            <a class="download-btn icon-btn" href="${URL}/api/dataset_collections/${dataset['id']}/download" title="" data-original-title="Download"> <span class="fa fa-floppy-o"></span> </a><a class="icon-btn delete-btn" title="" href="javascript:void(0);" data-original-title="Delete"><span class="fa fa-times" style=""></span></a><a class="icon-btn display-btn" title="" target="" href="javascript:void(0);" data-original-title="View data"><span class="fa fa-download" style=""></span></a>
                         </div>
-                        <br>
-                        <div>a list with ${show_dataset['element_count']} items</div>
-                    </div>
-                    
-                    <div class="list-items"  style="display: none; border: solid white 2px; margine; margin: 20px; "></div>
-                </div>`
+                        <div class="title-bar clear"  tabindex="0" draggable="true" ondragstart="event.dataTransfer.setData('text/plain',null) > 
+                            <span class="state-icon"></span>
+                            <div class="title" data-value=${dataset['id']} > 
+                                <span class="hid">${dataset['hid']}: </span> <span class="name">${dataset['name']}</span>
+                            </div>
+                            <br>
+                            <div>a list with ${dataset['element_count']} items</div>
+                        </div>
+                        
+                        <div class="list-items"  style="display: none; border: solid white 2px; margine; margin: 20px; "></div>
+                    </div>`
+            
+            const Tbl = new DOMParser().parseFromString(row, 'text/html').querySelector(`.list-item.${dataset['history_content_type']}.history-content.state-${pop_state}`)
+
+
+
+            Tbl.querySelector('.name').addEventListener('click', async (e) => {
+
+                var URL = this.model.get('GalInstance')['URL']
+                var show_dataset = await KernelSideDataObjects(`from galaxylab  import GalaxyTaskWidget\nGalaxyTaskWidget.show_dataset_collection(GalInstance=${JSON.stringify(this.model.get('GalInstance'))}, dataset_id=${JSON.stringify(dataset['id'])} )`) 
         
-        const Tbl = new DOMParser().parseFromString(row, 'text/html').querySelector(`.list-item.${dataset['history_content_type']}.history-content.state-${show_dataset['populated_state']}`)
 
-        for (var i = 0; i < show_dataset['elements'].length; i++){
-            Tbl.querySelector('.list-items').append(await self.dataset_collection_list_item(show_dataset['elements'][i]))
+                for (var i = 0; i < show_dataset['elements'].length; i++){
+                    Tbl.querySelector('.list-items').append(await self.dataset_collection_list_item(show_dataset['elements'][i]))
+                }
+
+                if (Tbl.querySelector('.list-items').style.display == 'block') {
+                    Tbl.querySelector('.list-items').style.display = 'none'
+                } else{
+                    Tbl.querySelector('.list-items').style.display = 'block'
+                }
+            });
+
+        var Title = Tbl.querySelector('.title-bar.clear')
+
+        var dragged
+
+            Title.addEventListener("dragstart", (event) => {
+                this.dragged = event.target;
+            }, false);
+
+
+            var Download = Tbl.querySelector('.fa.fa-download')
+
+            Download.addEventListener('click', () => {
+
+                KernelSideDataObjects(`from galaxylab import GalaxyTaskWidget\nGalaxyTaskWidget.download_file_to_jupyter_server(collection_id=${JSON.stringify(show_dataset['id'])}, GalInstance=${JSON.stringify(this.model.get('GalInstance'))}, file_name=${JSON.stringify(dataset['name'])}, data_type='collection')`);
+            })
+
+            self.delete_dataset(Tbl, dataset['id'],  history_id, 'collection')
+
+            return Tbl
+
+        } else{
+            //Need to be fixed: a separate dataaset_collection error widget  
+            dataset['populated_state'] = 'error'
+            dataset['history_content_type'] = 'dataset'
+            return this.dataset_row_error_state(dataset, history_id)
         }
-
-        Tbl.querySelector('.name').addEventListener('click', async (e) => {
-
-            if (Tbl.querySelector('.list-items').style.display == 'block') {
-                Tbl.querySelector('.list-items').style.display = 'none'
-            } else{
-                Tbl.querySelector('.list-items').style.display = 'block'
-            }
-        });
-
-       var Title = Tbl.querySelector('.title-bar.clear')
-
-       var dragged
-
-        Title.addEventListener("dragstart", (event) => {
-            this.dragged = event.target;
-        }, false);
-
-
-        var Download = Tbl.querySelector('.fa.fa-download')
-
-        Download.addEventListener('click', () => {
-
-            KernelSideDataObjects(`from galaxylab import GalaxyTaskWidget\nGalaxyTaskWidget.download_file_to_jupyter_server(collection_id=${JSON.stringify(show_dataset['id'])}, GalInstance=${JSON.stringify(this.model.get('GalInstance'))}, file_name=${JSON.stringify(dataset['name'])}, data_type='collection')`);
-        })
-
-        self.delete_dataset(Tbl, dataset['id'],  history_id, 'collection')
-
-        return Tbl
     } 
 
     add_data_share_menu ( ){
