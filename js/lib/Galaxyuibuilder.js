@@ -1228,8 +1228,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             Select.appendChild(el);
         }
 
-        console.log('error_place', input_def.value)
-
         // need to be fixed: manage empty data list during API:build() call. 
 
         if (input_def.value != null)  {
@@ -1357,16 +1355,16 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 }
             }
 
-        // var children = self.element.querySelector('.Galaxy-form').children;
-        // var Inputs = self.ReturnData(children)
+        var children = self.element.querySelector('.Galaxy-form').children;
+        var Inputs = self.collect_form_data(children)
 
-        // var HistoryID = self.element.querySelector('#History_IDs').value 
-        // var refine_inputs   = await KernelSideDataObjects(`from galaxylab import GalaxyTaskWidget\nGalaxyTaskWidget.UpdateForm(${JSON.stringify(self.model.get('GalInstance'))}, ${JSON.stringify(Inputs)}, ${JSON.stringify(self.model.get('ToolID'))}, ${JSON.stringify(HistoryID)})`)
+        var HistoryID = self.element.querySelector('#History_IDs').value 
+        var refine_inputs   = await KernelSideDataObjects(`from galaxylab import GalaxyTaskWidget\nGalaxyTaskWidget.UpdateForm(${JSON.stringify(self.model.get('GalInstance'))}, ${JSON.stringify(Inputs)}, ${JSON.stringify(self.model.get('ToolID'))}, ${JSON.stringify(HistoryID)})`)
      
-        // var FormParent = self.el.querySelector('.Galaxy-form')
+        var FormParent = self.el.querySelector('.Galaxy-form')
 
-        // self.removeAllChildNodes(FormParent)
-        // self.Main_Form(refine_inputs['inputs'], call_back_data);
+        self.removeAllChildNodes(FormParent)
+        self.form_builder(refine_inputs['inputs']);
     
         });
 
