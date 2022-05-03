@@ -24,6 +24,7 @@ import requests
 from urllib.request import urlopen
 
 from genepattern import authwidget
+
 from gp import GPTask
 
 from os.path import exists
@@ -139,7 +140,11 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
         if (Tool_inputs != None) and (toolID != None):
 
             NewInputs = GalaxyTaskWidget.RefinedInputs(Tool_inputs, gi)
-            inputs = gi.gi.tools.gi.tools.build(tool_id=toolID, inputs=Tool_inputs, history_id=HistoryID)
+
+            try:
+                inputs = gi.gi.tools.gi.tools.build(tool_id=toolID, inputs=Tool_inputs, history_id=HistoryID)
+            except:
+                pass
 
             if InputDataParam == False:
                 return IPython.display.JSON(data=inputs)
