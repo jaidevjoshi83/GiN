@@ -11,7 +11,7 @@ import '../style/galaxy-form.css';
 
  import { MODULE_NAME, MODULE_VERSION } from './version';
  import { unpack_models } from "@jupyter-widgets/base";
- import { BaseWidgetModel, BaseWidgetView } from "@genepattern/nbtools";
+ import { BaseWidgetModel, BaseWidgetView } from "@g2nb/nbtools";
 
 
  import _ from "underscore";
@@ -19,7 +19,7 @@ import '../style/galaxy-form.css';
  import * as tus from "tus-js-client";
  import axios from "axios";
 
- import { Data } from '@genepattern/nbtools/lib/dataregistry';
+ import { Data } from '@g2nb/nbtools/lib/dataregistry';
 
 
 export class GalaxyUIBuilderModel extends BaseWidgetModel{
