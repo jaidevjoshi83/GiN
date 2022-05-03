@@ -23,7 +23,10 @@ import io
 import requests
 from urllib.request import urlopen
 
-from genepattern import authwidget
+try:
+    from genepattern import authwidget
+except:
+    pass
 
 from gp import GPTask
 
