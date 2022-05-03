@@ -27,6 +27,7 @@ try:
     from genepattern import authwidget
 except:
     print('need to be fixed...!')
+    pass
 
 from gp import GPTask
 
