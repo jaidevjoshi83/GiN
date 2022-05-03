@@ -26,7 +26,7 @@ from urllib.request import urlopen
 try:
     from genepattern import authwidget
 except:
-    pass
+    print('need to be fixed...!')
 
 from gp import GPTask
 
