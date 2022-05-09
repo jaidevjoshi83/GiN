@@ -1,11 +1,11 @@
-graft galaxylab/nbextension
-graft galaxylab/labextension
+graft GiN/nbextension
+graft GiN/labextension
 
 graft js
 graft tests
 prune **/node_modules
 
-include galaxylab.json
+include GiN.json
 
 include LICENSE
 include setup.py

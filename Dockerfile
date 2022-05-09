@@ -34,15 +34,15 @@ RUN git clone -b lab https://github.com/genepattern/genepattern-notebook.git && 
 	cd genepattern-notebook && \
 	pip install .
 
-RUN rm  -rf galaxylab && \
-	git clone -b CSS https://github.com/jaidevjoshi83/galaxylab.git
+RUN rm  -rf GiN && \
+	git clone -b CSS https://github.com/jaidevjoshi83/GiN.git
 
-RUN cd galaxylab/js && yalc add @g2nb/nbtools && npm install 
+RUN cd GiN/js && yalc add @g2nb/nbtools && npm install 
 
-RUN	cd galaxylab && \
+RUN	cd GiN && \
     pip install . && \
-    jupyter nbextension install --py --symlink --overwrite --sys-prefix galaxylab && \
-    jupyter nbextension enable --py --sys-prefix galaxylab && cd .. 
+    jupyter nbextension install --py --symlink --overwrite --sys-prefix GiN && \
+    jupyter nbextension enable --py --sys-prefix GiN && cd .. 
    
 ENV JUPYTER_ENABLE_LAB="true"
 ENV TERM xterm

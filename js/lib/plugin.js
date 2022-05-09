@@ -17,7 +17,7 @@ import { MODULE_NAME, MODULE_VERSION } from './version';
 
 const module_exports = Object.assign(Object.assign(Object.assign({},  galaxyuibuilder_exports), utils_exports));
 
-const EXTENSION_ID = 'galaxylab:plugin';
+const EXTENSION_ID = 'GiN:plugin';
 /**
  * The example plugin.
  */
@@ -44,7 +44,7 @@ function activateWidgetExtension(app, registry, mainmenu, restorer, shell, noteb
     
     
     registry.registerWidget({
-        name: 'galaxylab',
+        name: 'GiN',
         version: '0.1.0',
         exports: module_exports,
     });

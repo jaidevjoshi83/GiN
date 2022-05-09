@@ -119,9 +119,9 @@ class GalaxyJobWidget(GalaxyUIOutput):
 
     def handle_notification(self):
         if self.status == 'error':
-            ToolManager.instance().send('notification', {'message': f'Job #{self.name} has an error!', 'sender': 'Galaxy/GalaxyLab Notebook'})
+            ToolManager.instance().send('notification', {'message': f'Job #{self.name} has an error!', 'sender': 'Galaxy/GiN Notebook'})
         elif self.status == 'ok':
-            ToolManager.instance().send('notification', {'message': f'Job #{self.name} is complete!', 'sender': 'Galaxy/GalaxyLab Notebook'})
+            ToolManager.instance().send('notification', {'message': f'Job #{self.name} is complete!', 'sender': 'Galaxy/GiN Notebook'})
 
     def status_text(self): #ToDo
         """Return concise status text"""

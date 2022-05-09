@@ -19,10 +19,10 @@ log.set_verbosity(log.DEBUG)
 log.info('setup.py entered')
 log.info('$PATH=%s' % os.environ['PATH'])
 
-name = 'galaxylab'
+name = 'GiN'
 LONG_DESCRIPTION = 'A Custom Jupyter Widget Library'
 
-# Get galaxylab version
+# Get GiN version
 version = get_version(pjoin(name, '_version.py'))
 
 js_dir = pjoin(here, 'js')
@@ -33,10 +33,10 @@ jstargets = [
 ]
 
 data_files_spec = [
-    ('share/jupyter/nbextensions/galaxylab', 'galaxylab/nbextension', '*.*'),
-    ('share/jupyter/labextensions/galaxylab', 'galaxylab/labextension', '**'),
-    ('share/jupyter/labextensions/galaxylab', '.', 'install.json'),
-    ('etc/jupyter/nbconfig/notebook.d', '.', 'galaxylab.json'),
+    ('share/jupyter/nbextensions/GiN', 'GiN/nbextension', '*.*'),
+    ('share/jupyter/labextensions/GiN', 'GiN/labextension', '**'),
+    ('share/jupyter/labextensions/GiN', '.', 'install.json'),
+    ('etc/jupyter/nbconfig/notebook.d', '.', 'GiN.json'),
 ]
 
 cmdclass = create_cmdclass('jsdeps', data_files_spec=data_files_spec)
@@ -54,13 +54,13 @@ setup_args = dict(
         "ipywidgets>=7.6.0",
         "jupyterlab~=3.0",
     ],
-    data_files=[("share/jupyter/nbtools", ["nbtools/galaxylab.json"])],
+    data_files=[("share/jupyter/nbtools", ["nbtools/GiN.json"])],
     packages=find_packages(),
     zip_safe=False,
     cmdclass=cmdclass,
     author='jayadev joshi',
     author_email='jayadev.joshi12@gmail.com',
-    url='https://github.com/galaxy/galaxylab',
+    url='https://github.com/galaxy/GiN',
     keywords=[
         'ipython',
         'jupyter',

@@ -16,7 +16,7 @@
 ####### Manual Installation (Mac/Linux) #######
 
 
-# galaxylab
+# GiN
 
 
 ## Installation nbtools
@@ -69,7 +69,7 @@ conda create -n galaxy-lab JupyterLab=3.0.7 ipywidgets=7.5.1 nodejs=14.15.1 yarn
     ```
       
 
-galaxylab installation
+GiN installation
 ===============================
 
 A Custom Jupyter Widget Library
@@ -85,17 +85,17 @@ Install bioblend API,
 
 For a development installation (requires [Node.js](https://nodejs.org) and [Yarn version 1](https://classic.yarnpkg.com/)),
 
-    $ git clone https://github.com/jaidevjoshi83/galaxylab.git 
-    $ cd galaxylab/js
+    $ git clone https://github.com/jaidevjoshi83/GiN.git 
+    $ cd GiN/js
     $ yalc add @genepattern/nbtools
     $ cd ..
     $ pip install -e .
-    $ jupyter nbextension install --py --symlink --overwrite --sys-prefix galaxylab
-    $ jupyter nbextension enable --py --sys-prefix galaxylab
+    $ jupyter nbextension install --py --symlink --overwrite --sys-prefix GiN
+    $ jupyter nbextension enable --py --sys-prefix GiN
     
 When actively developing your extension for JupyterLab, run the command:
 
-    $ jupyter labextension develop --overwrite galaxylab
+    $ jupyter labextension develop --overwrite GiN
     
 Then you need to rebuild the JS when you make a code change:
 
