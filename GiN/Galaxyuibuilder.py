@@ -54,7 +54,7 @@ class GalaxyUIBuilder(BaseWidget, NBTool):
 
         if self.GalInstance == {}:
             self.name = 'Data Upload Tool' #function_or_method.__qualname__
-            self.id = 'Galaxylab_Upload_Data'
+            self.id = 'GiN_Upload_Data'
             self.description = 'data upload tool'
         else:
             self.name = self.GalInstance['tool_name']

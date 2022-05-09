@@ -84,7 +84,7 @@ class GalaxyAuthWidget(UIBuilder):
     def login(self, server, email, password):
         """Login to the Galaxy server"""
 
-        t = [{'id':'galaxylab_data_upload_tool', 'description':'Upload data files to galaxy server', 'name':'Upload Data'}]
+        t = [{'id':'GiN_data_upload_tool', 'description':'Upload data files to galaxy server', 'name':'Upload Data'}]
 
         try:
             self.session = GalaxyInstance(server, email=email, password=password)
@@ -189,7 +189,7 @@ class AuthenticationTool(NBTool):
 class UploadData(NBTool):
     """Tool wrapper for the authentication widget"""
     origin = '+'
-    id = 'Galaxylab_Upload_Data'
+    id = 'GiN_Upload_Data'
     name = 'Upload Data'
     description = 'Upload Datafilis to galaxy history'
 

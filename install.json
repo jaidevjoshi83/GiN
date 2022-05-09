@@ -1,5 +1,5 @@
 {
   "packageManager": "python",
-  "packageName": "galaxylab",
-  "uninstallInstructions": "Use your Python package manager (pip, conda, etc.) to uninstall the package galaxylab"
+  "packageName": "GiN",
+  "uninstallInstructions": "Use your Python package manager (pip, conda, etc.) to uninstall the package GiN"
 }

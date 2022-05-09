@@ -45,7 +45,7 @@ def _jupyter_labextension_paths():
     """
     return [{
         'src': 'labextension',
-        'dest': 'galaxylab',
+        'dest': 'GiN',
     }]
 
 
@@ -68,8 +68,8 @@ def _jupyter_nbextension_paths():
     return [{
         'section': 'notebook',
         'src': 'nbextension',
-        'dest': 'galaxylab',
-        'require': 'galaxylab/extension'
+        'dest': 'GiN',
+        'require': 'GiN/extension'
     }]
 
 #from .display import display
