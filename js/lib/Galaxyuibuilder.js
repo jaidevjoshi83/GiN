@@ -166,16 +166,16 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
                 } else if ((FormEelements[i].style.display == 'block' || FormEelements[i].className.includes('section-row'))) {
                     if(FormEelements[i].querySelector('.InputData')){
-                        if (FormEelements[i].querySelector('.InputData').value == ''){
-                            FormEelements[i].querySelector('.InputData').style.border="3px solid red"
+                        // if (FormEelements[i].querySelector('.InputData').value == ''){
+                        //     FormEelements[i].querySelector('.InputData').style.border="3px solid red"
 
-                            return false
+                        //     return false
 
-                        }
-                        else{
-                            FormEelements[i].querySelector('.InputData').style.border=""
-                            InputPerameters[FormEelements[i].querySelector('.InputData').name] = FormEelements[i].querySelector('.InputData').value
-                        }
+                        // }
+                        // else{
+                        FormEelements[i].querySelector('.InputData').style.border=""
+                        InputPerameters[FormEelements[i].querySelector('.InputData').name] = FormEelements[i].querySelector('.InputData').value
+                        // }
                     } else if (FormEelements[i].querySelector('.InputDataFile')) {
 
                         var FileList = []
@@ -681,7 +681,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
     submitPayload(payload, credentials) {
 
         var self = this
-        axios.post(`${credentials['URL']}/api/tools/fetch?key=${credentials['API_key']}`, payload)
+        axios.post(`${credentials['URL']}api/tools/fetch?key=${credentials['API_key']}`, payload)
 
             .then((response) => {
                 console.log(response)
@@ -808,7 +808,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 var i = document.createElement('i')
                 i.className = 'fa fa-spinner fa-spin'
                 btn.append(i)
-
             },
 
             onSuccess: function() {
@@ -824,6 +823,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 };
 
                 title.parentElement.removeChild(title)
+
+                delete data["files"]
 
                 elm.style.display = 'block'
                 self.submitPayload(data, credentials)
@@ -1483,14 +1484,9 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             var HistoryID = self.element.querySelector('#History_IDs').value 
             var refine_inputs   = await KernelSideDataObjects(`from galaxylab import GalaxyTaskWidget\nGalaxyTaskWidget.UpdateForm(${JSON.stringify(self.model.get('GalInstance'))}, ${JSON.stringify(Inputs)}, ${JSON.stringify(self.model.get('ToolID'))}, ${JSON.stringify(HistoryID)})`)
           
-
             this.conditional_name = input_def['name']
 
-            // var updated_input = self.un_wrapp(refine_inputs['inputs'], this.conditional_name)
-
-            self.form_builder( input_def, call_back_data={}, parent=ConditionalDiv)
-
-           var input = refine_inputs['inputs']
+            var input = refine_inputs['inputs']
 
             for (var l in input_def.cases){
                 if  (input_def.cases[l].value == queryID) {
