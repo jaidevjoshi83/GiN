@@ -9,7 +9,7 @@ echo 'downloading requirments'
 
 git clone -b lab https://github.com/genepattern/nbtools.git
 git clone -b  build_function https://github.com/jaidevjoshi83/bioblend.git
-git clone https://github.com/jaidevjoshi83/galaxylab.git 
+git clone https://github.com/jaidevjoshi83/GiN.git 
 
 #Installation of nbtools for build
 echo 'essential node packages'
@@ -44,7 +44,7 @@ echo "Exit nbtools directory..."
 
 cd ..
 
-# galaxylab installation
+# GiN installation
 # A Custom Jupyter Widget Library
 
 # Installation
@@ -60,18 +60,18 @@ echo "Exiting bioblen directory..."
 
 cd ..
 
-echo "Installing galaxylab ..."
+echo "Installing GiN ..."
 
-cd galaxylab/js
+cd GiN/js
 yalc add @genepattern/nbtools
 
 cd ..
 
 pip install -e .
 
-jupyter nbextension install --py --symlink --overwrite --sys-prefix galaxylab
-jupyter nbextension enable --py --sys-prefix galaxylab
-jupyter labextension develop --overwrite galaxylab
+jupyter nbextension install --py --symlink --overwrite --sys-prefix GiN
+jupyter nbextension enable --py --sys-prefix GiN
+jupyter labextension develop --overwrite GiN
 
 
 echo "Install successfully"
