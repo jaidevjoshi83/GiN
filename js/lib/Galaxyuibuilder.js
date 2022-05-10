@@ -246,9 +246,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                         }
                         console.log(FileList)
                     }
-
-                    // console.log( FormEelements[i])
-
                 }
             }
         }
@@ -259,29 +256,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         return `uid-${top.__utils__uid__++}`;
     }
 
-
-    // un_wrapp(input, name){
-
-    //     var output = []
-
-    //     var self = this
-
-    //     for (var i = 0; i < input.length ; i++){
-    //         if (input[i]['type'] == 'conditional' ){
-    //             if (input[i]['name'] ==  name){
-    //                 console.log(input[i])
-    //             }
-    //             for (var  j = 0; j < input[i]['cases'].length; j++){                    
-    //                 self.un_wrapp(input[i]['cases'][j]['inputs'])
-    //             }
-    //         } else  if (input[i]['type'] == 'repeat' ) {
-    //             self.un_wrapp(input[i]['inputs'])
-    //         } else if (input[i]['type'] == 'section'){
-    //             self.un_wrapp(input[i]['inputs'])
-    //         }
-    //     }
-        
-    // }
  
     add(input, FormParent, NamePrefix, data={}){
 
@@ -1142,6 +1116,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             });
 
              e.preventDefault(); //self.AddRepeat(input_def, FormParent, NamePrefix)
+
              for (var j in input_def['inputs']){
                 self.add(input_def['inputs'][j], row1, NamePrefix+SuffixName+`_${Count}`)
              } 
@@ -1235,9 +1210,10 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         Select.addEventListener("drop", async function(event) {
             // prevent default action (open as link for some elements)
+
             event.preventDefault();
             // move dragged elem to the selected drop targe
-            if (event.target.className == "InputData") {
+            if (event.target.className == "InputDataFile") {
                 event.target.style.background = "";
                 var draged_item = self.dragged.firstElementChild
                 self.removeAllChildNodes(Select)
