@@ -128,6 +128,46 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         this.AddHelpSection(inputs['help'])
     }
+
+
+    un_wrap(input, name){
+
+        var self = this
+
+        var out  
+
+        for (var i = 0; i < input.length ; i++){
+            if (input[i]['type'] == 'conditional' ){
+                if (input[i]['name'] ==  name){
+                   out = input[i]
+                } else {
+                    for (var  j = 0; j < input[i]['cases'].length; j++){      
+                        if (self.un_wrap(input[i]['cases'][j]['inputs'], name) != undefined){
+                            out = self.un_wrap(input[i]['cases'][j]['inputs'], name)
+                        } 
+                    }
+                }
+                
+            } else  if (input[i]['type'] == 'repeat' ) {
+
+                if (self.un_wrap(input[i]['inputs'], name) != undefined){
+                    out = self.un_wrap(input[i]['inputs'], name)
+                } 
+
+
+            } else if (input[i]['type'] == 'section'){
+
+                 if (self.un_wrap(input[i]['inputs'], name) != undefined){
+                    out = self.un_wrap(input[i]['inputs'], name)
+                 } 
+            }
+        }
+
+        if (out != null){
+            return out 
+        }
+
+    }
  
     form_builder(inputs, call_back_data={}, parent='', el_name='') {
 
@@ -1461,8 +1501,9 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             var refine_inputs   = await KernelSideDataObjects(`from GiN import GalaxyTaskWidget\nGalaxyTaskWidget.UpdateForm(${JSON.stringify(self.model.get('GalInstance'))}, ${JSON.stringify(Inputs)}, ${JSON.stringify(self.model.get('ToolID'))}, ${JSON.stringify(HistoryID)})`)
           
             this.conditional_name = input_def['name']
-
             var input = refine_inputs['inputs']
+
+            input_def = this.un_wrap(input, this.conditional_name)
 
             for (var l in input_def.cases){
                 if  (input_def.cases[l].value == queryID) {
@@ -1476,7 +1517,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         parent.append(ConditionalDiv)
     }
-
 
     add_section (input_def, parent, NamePrefix){
 
