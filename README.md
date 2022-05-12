@@ -89,3 +89,14 @@ Then you need to rebuild the JS when you make a code change:
     $ yarn run build
 
 You then need to refresh the JupyterLab page when your javascript changes.
+
+
+Docker
+===============================
+
+A Docker image with GiN and the full JupyterLab stack is available through DockerHub.
+
+```
+docker pull jayadevjoshi12/gin:latest
+docker run --rm -p 8888:8888 jayadevjoshi12/gin:latest
+```
