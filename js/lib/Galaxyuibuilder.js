@@ -129,11 +129,9 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         this.AddHelpSection(inputs['help'])
     }
 
-
     un_wrap(input, name){
 
         var self = this
-
         var out  
 
         for (var i = 0; i < input.length ; i++){
@@ -149,24 +147,20 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 }
                 
             } else  if (input[i]['type'] == 'repeat' ) {
-
                 if (self.un_wrap(input[i]['inputs'], name) != undefined){
                     out = self.un_wrap(input[i]['inputs'], name)
                 } 
 
-
             } else if (input[i]['type'] == 'section'){
-
-                 if (self.un_wrap(input[i]['inputs'], name) != undefined){
+                if (self.un_wrap(input[i]['inputs'], name) != undefined){
                     out = self.un_wrap(input[i]['inputs'], name)
-                 } 
+                } 
             }
         }
 
         if (out != null){
             return out 
         }
-
     }
  
     form_builder(inputs, call_back_data={}, parent='', el_name='') {
@@ -187,7 +181,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         Toolform.append(FormParent)
     }
 
-    
     collect_form_data(FormEelements){
  
         var self = this
@@ -1709,8 +1702,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             
                             <div class="send-data-genepattern-tools"> 
                                  
-                                <div class=gpt> Send data to Genepattern </div>
-                                 
+                                <div class="gpt" > <div style="float: left; hight: 30px;"> Send data to Genepattern </div> <div style="float: left;"> <i id="gpticon" class="fas fa-spinner fa-2xl fa-spin"></i> </div> </div>
+                       
                                 <div class="genepattern-tool-list" style="display: none"> 
 
                                 </div>
