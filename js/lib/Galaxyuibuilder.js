@@ -380,6 +380,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
             if ( Nodes1[i].querySelectorAll('.nbtools-fileinput').length > 0){
 
+                
+               
                 var tool  = document.createElement('div')
 
                 tool.className = 'gp_tool'
@@ -398,17 +400,22 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 var tool_input_params  = document.createElement('div')
                 tool_input_params.className = 'tool-input-params'
 
-                var param_list = document.createElement('ul')
-                param_list.className = 'tool-param-ul'
 
-                tool_input_params.append(param_list)
-                tool.append(tool_input_params)
 
                 var InputFiles =  Nodes1[i].querySelectorAll('.nbtools-fileinput') 
+
                 var uri = {}
 
                 for (var j = 0; j < InputFiles.length; j++){
-                        
+
+                    var param_list = document.createElement('ul')
+                    param_list.className = 'tool-param-ul'
+    
+                    tool_input_params.append(param_list)
+                    tool.append(tool_input_params)
+
+                    var UID = this.uid()
+
                     var input_file_param = document.createElement('div')
                     input_file_param.className = 'input-data-param'
                     var input_file_param_label = document.createElement('div')
@@ -418,11 +425,26 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
                     input_file_param_label.addEventListener("click", async (e)=> {
 
+                    console.log(UID)
+                    e.target.parentNode.parentNode.querySelector('.fas.fa-spinner.fa-spin').style.display = 'block'
+
                    if (self.file_exist(dataset)){
+                        console.log('Present')
                         document.getElementById(`${e.target.id.replace('-label', '')}`).value =  self.file_exist(dataset)
-                        document.getElementById(`${e.target.id.replace('-label', '')}`).dispatchEvent(new Event('change', { bubbles: true }));
+                        document.getElementById(`${e.target.id.replace('-label', '')}`).dispatchEvent(new Event('change', { bubbles: true }));  
+
+                        e.target.parentNode.parentNode.querySelector('.fas.fa-spinner.fa-spin').style.display = 'none'
+                        e.target.parentNode.parentNode.querySelector('.fas.fa-solid.fa-check').style.display = 'block'
+
                    } else{
+
+                        e.target.parentNode.parentNode.querySelector('.fas.fa-spinner.fa-spin').style.display = 'block'
+
                         uri = await KernelSideDataObjects(`from GiN import GalaxyTaskWidget\nGalaxyTaskWidget.send_data_to_gp_server(file_name=${JSON.stringify(dataset['name'])}, tool_id=${JSON.stringify(tool_id)}, dataset_id=${JSON.stringify(dataset['id'])}, GInstance=${JSON.stringify(this.model.get('GalInstance'))}, ext=${JSON.stringify(dataset['extension'])})`)
+
+                        e.target.parentNode.parentNode.querySelector('.fas.fa-spinner.fa-spin').style.display = 'none'
+                        e.target.parentNode.parentNode.querySelector('.fas.fa-solid.fa-check').style.display = 'block'
+
                         dataset['uri'] = uri['uri']
                         this.file_cache.push(new Data(origin, dataset['uri'], dataset['id'], dataset['file_ext']));
                         ContextManager.data_registry.register({ data: this.file_cache[ this.file_cache.length-1] })
@@ -432,9 +454,30 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
                     })
 
-                input_file_param_label.innerHTML =  InputFiles[j].querySelector('.lm-Widget.p-Widget.jupyter-widgets.widget-label').innerHTML
-                input_file_param.append(input_file_param_label)
-                param_list.append(input_file_param)
+                    input_file_param_label.innerHTML =  InputFiles[j].querySelector('.lm-Widget.p-Widget.jupyter-widgets.widget-label').innerHTML
+                    input_file_param.append(input_file_param_label)
+
+                    var status_icon_div = document.createElement('div')
+                    status_icon_div.className = 'gpticon'
+                    status_icon_div.style.float  = 'left'
+                    status_icon_div.style.margin = '5px'
+                    status_icon_div.style.marginTop = '0px'
+
+                    var status_icon = document.createElement('i')
+                    status_icon.className = "fas fa-spinner fa-spin"
+                    status_icon.id = `status-icon-${UID}-${j}`
+                    status_icon.style.display = 'none'
+
+                    var status_icon_1 = document.createElement('i')
+                    status_icon_1.className = "fas fa-solid fa-check"
+                    status_icon_1.style.display = 'none'
+                    status_icon_1.id = `status-icon-check-${UID}-${j}`
+
+                    status_icon_div.append(status_icon)
+                    status_icon_div.append(status_icon_1)
+
+                    param_list.append(status_icon_div)
+                    param_list.append(input_file_param)
 
                 }
                 gp_tool_list.append(tool)
@@ -1702,7 +1745,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             
                             <div class="send-data-genepattern-tools"> 
                                  
-                                <div class="gpt" > <div style="float: left; hight: 30px;"> Send data to Genepattern </div> <div style="float: left;"> <i id="gpticon" class="fas fa-spinner fa-2xl fa-spin"></i> </div> </div>
+                                <div class="gpt" >  Send data to Genepattern  <div class="gpticon" style=" display: none; float: left;"> <i  class="fas fa-spinner fa-spin"></i> </div> </div>
                        
                                 <div class="genepattern-tool-list" style="display: none"> 
 
@@ -1714,6 +1757,9 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                         <div title="0 nametags" class="nametags"></div>
                     </div>
                 </div>`
+
+               
+                
             
         const Tbl = new DOMParser().parseFromString(row, 'text/html').querySelector(`.list-item.${dataset['history_content_type']}.history-content.state-ok`)
         var Exch  = Tbl.querySelector('.fa.fa-exchange')
