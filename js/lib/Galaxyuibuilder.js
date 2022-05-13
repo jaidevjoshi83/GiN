@@ -1757,9 +1757,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                         <div title="0 nametags" class="nametags"></div>
                     </div>
                 </div>`
-
-               
-                
             
         const Tbl = new DOMParser().parseFromString(row, 'text/html').querySelector(`.list-item.${dataset['history_content_type']}.history-content.state-ok`)
         var Exch  = Tbl.querySelector('.fa.fa-exchange')
@@ -1841,7 +1838,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                             <br>
                             <div title="0 nametags" class="nametags"></div>
                         </div>
-
                     </div>`
 
         const Tbl = new DOMParser().parseFromString(row, 'text/html').querySelector(`.list-item.${dataset['history_content_type']}.history-content.state-error`)
@@ -1973,10 +1969,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         var display_apps = ok_details_html.querySelector('.display-applications')
 
-
-
         this.add_display_application(display_apps, dataset)
-
         this.copy_download_link(ok_details_html)
 
         return ok_details_html
@@ -2021,7 +2014,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 }
             })
         
-            return Tbl
+        return Tbl
     }
     
     async dataset_row_new_state (dataset){
