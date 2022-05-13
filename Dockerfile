@@ -13,12 +13,17 @@ USER $NB_USER
 RUN conda install -c conda-forge JupyterLab=3.1 ipywidgets nodejs yarn -y 
 
 RUN git clone -b lab https://github.com/g2nb/nbtools.git 
-RUN	git clone -b  build_function https://github.com/jaidevjoshi83/bioblend.git 
+RUN git clone -b  build_function https://github.com/jaidevjoshi83/bioblend.git 
+RUN git clone https://github.com/jaidevjoshi83/GiN.git
+RUN git clone -b lab https://github.com/genepattern/genepattern-notebook.git && \
+	cd genepattern-notebook && \
+	pip install .
 
 RUN npm install -g yalc
  
 RUN cd nbtools &&  \
     npm install rimraf && \
+    git checkout b6e90bd00accd43e0091aafdb0fe13e1d4d702fa && \
     pip install . && \
 	jupyter nbextension enable --py widgetsnbextension && \
 	jupyter labextension install @jupyter-widgets/jupyterlab-manager && \
@@ -30,16 +35,9 @@ RUN cd nbtools &&  \
 RUN cd bioblend/ && \
 	pip install .
 
-RUN git clone -b lab https://github.com/genepattern/genepattern-notebook.git && \
-	cd genepattern-notebook && \
-	pip install .
-
-RUN rm  -rf GiN && \
-	git clone -b CSS https://github.com/jaidevjoshi83/GiN.git
-
 RUN cd GiN/js && yalc add @g2nb/nbtools && npm install 
 
-RUN	cd GiN && \
+RUN cd GiN && \
     pip install . && \
     jupyter nbextension install --py --symlink --overwrite --sys-prefix GiN && \
     jupyter nbextension enable --py --sys-prefix GiN && cd .. 

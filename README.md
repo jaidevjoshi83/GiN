@@ -1,19 +1,5 @@
 ############################## Installation ########################
 
-####### Easy installation (Mac/Linux) #######
-
--- create an easy_installation directory 
-
--- copy `Easy_install.sh` to the easy_installation dir
-
--- run `sh Easy_install.sh`
-
-**NOTE:** Change this line according to your conda type (anaconda or miniconda),  `source ~/anaconda3/etc/profile.d/conda.sh` in the `Easy_install.sh` file.
-
-#################################
-
-
-####### Manual Installation (Mac/Linux) #######
 
 
 # GiN
@@ -24,7 +10,7 @@
 Conda env:
 
 ```
-conda create -n galaxy-lab JupyterLab=3.0.7 ipywidgets=7.5.1 nodejs=14.15.1 yarn -y
+conda create -n GiN JupyterLab=3.0.7 ipywidgets=7.5.1 nodejs=14.15.1 yarn -y
 
 ```
 
@@ -33,7 +19,7 @@ conda create -n galaxy-lab JupyterLab=3.0.7 ipywidgets=7.5.1 nodejs=14.15.1 yarn
 -- Download the Brancch
 
     ```
-    git clone -b lab https://github.com/genepattern/nbtools.git
+    git clone -b lab https://github.com/g2nb/nbtools.git
     ```
 
 -- Installation of nbtools for build 
@@ -87,7 +73,7 @@ For a development installation (requires [Node.js](https://nodejs.org) and [Yarn
 
     $ git clone https://github.com/jaidevjoshi83/GiN.git 
     $ cd GiN/js
-    $ yalc add @genepattern/nbtools
+    $ yalc add @g2nb/nbtools
     $ cd ..
     $ pip install -e .
     $ jupyter nbextension install --py --symlink --overwrite --sys-prefix GiN
@@ -103,3 +89,14 @@ Then you need to rebuild the JS when you make a code change:
     $ yarn run build
 
 You then need to refresh the JupyterLab page when your javascript changes.
+
+
+Docker
+===============================
+
+A Docker image with GiN and the full JupyterLab stack is available through DockerHub.
+
+```
+docker pull jayadevjoshi12/gin:latest
+docker run --rm -p 8888:8888 jayadevjoshi12/gin:latest
+```
