@@ -316,6 +316,10 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 this.add_select_field(input_def, FormParent, NamePrefix)
                 break
             case "repeat":
+
+                console.log(input_def)
+
+            
                 this.add_repeat_section(input_def, FormParent, NamePrefix) 
                 break
             case "section":
@@ -380,8 +384,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
             if ( Nodes1[i].querySelectorAll('.nbtools-fileinput').length > 0){
 
-                
-               
                 var tool  = document.createElement('div')
 
                 tool.className = 'gp_tool'
@@ -399,8 +401,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
                 var tool_input_params  = document.createElement('div')
                 tool_input_params.className = 'tool-input-params'
-
-
 
                 var InputFiles =  Nodes1[i].querySelectorAll('.nbtools-fileinput') 
 
@@ -544,6 +544,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
     }
 
     add_drill_down_section(input_def, FormParent, NamePrefix){
+
         input_def.id = this.uid()
 
         const title = document.createElement('div')
@@ -1131,9 +1132,9 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         Button.className = 'RepeatButton'
         Button.type = "button"
         
-        const row2 = document.createElement('div')
-        row2.className = 'internal-ui-repeat section-row'
-        row2.id = NamePrefix+SuffixName+`_0`
+        // const row2 = document.createElement('div')
+        // row2.className = 'internal-ui-repeat section-row'
+        // row2.id = NamePrefix+SuffixName+`_0`
 
         var DeleteButton = document.createElement('button')
         DeleteButton.innerHTML = ('<i class="fa fa-trash-o" aria-hidden="true"></i>')
@@ -1142,33 +1143,35 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         const row = document.createElement('div')
         const title = document.createElement('div')
+
         title.append(DeleteButton)
+
         title.className = 'repeat-ui-from-title'
         const TitleSpan = document.createElement('span')
         TitleSpan.className = "ui-form-title-text"
         TitleSpan.textContent = '1: '+input_def['title']
         TitleSpan.style.display = 'inline'
         title.append(TitleSpan)
+
         row.className = 'ui-repeat section-row'
         row.id = input_def.id
-        row2.append(title)
+        // row2.append(title)
 
-       for (var j in input_def['inputs']){
-           this.add(input_def['inputs'][j], row2, NamePrefix+SuffixName+`_0|`)
-        }
-        row.append(row2)
+        // for (var j in input_def['inputs']){
+        //    this.add(input_def['inputs'][j], row2, NamePrefix+SuffixName+`_0|`)
+        // }
+        // row.append(row2)
 
         FormParent.append(row)
         FormParent.append(Button)
 
-        var click = 0;
+        var click = input_def['min'];
 
-        Button.addEventListener("click", function(e){ 
-            var Count = ++click
+        function add_internal_repeat( count){
 
             const row1 = document.createElement('div')
             row1.className = 'internal-ui-repeat section-row'
-            row1.id = NamePrefix+SuffixName+`_${Count}|`
+            row1.id = NamePrefix+SuffixName+`_${count}|`
 
             var DeleteButton = document.createElement('button')
             DeleteButton.innerHTML = ('<i class="fa fa-trash-o" aria-hidden="true"></i>')
@@ -1181,7 +1184,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
             const InnerTitleSpan = document.createElement('span')
             InnerTitleSpan.className = "ui-form-title-text"
-            InnerTitleSpan.textContent = `${Count+1}: `+input_def['title']
+            InnerTitleSpan.textContent = `${count}: `+input_def['title']
             InnerTitleSpan.style.display = 'inline'
             InnerTitle.append(InnerTitleSpan)
 
@@ -1191,13 +1194,30 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 self.el.querySelector('.delete-button').closest('.internal-ui-repeat.section-row').remove()
             });
 
-             e.preventDefault(); //self.AddRepeat(input_def, FormParent, NamePrefix)
+            //  e.preventDefault(); //self.AddRepeat(input_def, FormParent, NamePrefix)
 
              for (var j in input_def['inputs']){
-                self.add(input_def['inputs'][j], row1, NamePrefix+SuffixName+`_${Count}`)
+                self.add(input_def['inputs'][j], row1, NamePrefix+SuffixName+`_${count}`)
              } 
 
              row.append(row1)
+        }
+
+      
+
+        for (const x of Array(input_def['min']).keys()) {
+            var cnt = x + 1
+            add_internal_repeat( cnt)
+           
+        }
+
+        Button.addEventListener("click", function(e){ 
+
+            var Count = ++click
+
+            add_internal_repeat( Count)
+
+
         });
 
         DeleteButton.addEventListener("click", function(e){ 
@@ -1304,7 +1324,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             }
         }, false);
 
-
         row.append(title)
         FileManu.append(Select)
 
@@ -1316,21 +1335,23 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         
         Select.addEventListener("change", async (e) => {
 
-           console.log(e.target.parentNode.parentNode.parentNode)
+            if (input_def['is_dynamic'] == true){
 
-            var self  = this;
-            var children = self.el.querySelector('.Galaxy-form').children;
-            var Inputs = self.collect_form_data(children)
+                var self  = this;
+                var children = self.el.querySelector('.Galaxy-form').children;
+                var Inputs = self.collect_form_data(children)
+    
+                var HistoryID = self.element.querySelector('#History_IDs').value
+                var refine_inputs  = await KernelSideDataObjects(`from GiN import GalaxyTaskWidget\nGalaxyTaskWidget.UpdateForm(${JSON.stringify(self.model.get('GalInstance'))}, ${JSON.stringify(Inputs)}, ${JSON.stringify(self.model.get('ToolID'))}, ${JSON.stringify(HistoryID)})`)
 
-            var HistoryID = self.element.querySelector('#History_IDs').value
-            var refine_inputs  = await KernelSideDataObjects(`from GiN import GalaxyTaskWidget\nGalaxyTaskWidget.UpdateForm(${JSON.stringify(self.model.get('GalInstance'))}, ${JSON.stringify(Inputs)}, ${JSON.stringify(self.model.get('ToolID'))}, ${JSON.stringify(HistoryID)})`)
+                var FormParent = self.el.querySelector('.Galaxy-form')
+    
+                var HID = self.element.querySelector('#History_IDs')
+                self.removeAllChildNodes(FormParent)
+    
+                self.form_builder(refine_inputs['inputs'])
 
-            var FormParent = self.el.querySelector('.Galaxy-form')
-
-            var HID = self.element.querySelector('#History_IDs')
-            self.removeAllChildNodes(FormParent)
-
-            self.form_builder(refine_inputs['inputs'])
+            }
 
             }, false);
 
@@ -1581,6 +1602,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         }
 
         if (input_def.expanded == true) {
+            
             ConditionalDiv.style.display = 'block';  
         } else  {
             ConditionalDiv.style.display = 'none'; 
@@ -1589,6 +1611,9 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         parent.append(UpperDiv)
 
         Button.addEventListener("click", function(e) {
+
+            var self = this
+
             e.preventDefault();
             let nextSibling = Button.nextElementSibling;   
 
