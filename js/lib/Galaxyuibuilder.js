@@ -1171,7 +1171,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
             const row1 = document.createElement('div')
             row1.className = 'internal-ui-repeat section-row'
-            row1.id = NamePrefix+SuffixName+`_${count}|`
+            row1.id = NamePrefix+SuffixName+`_${count}`
 
             var DeleteButton = document.createElement('button')
             DeleteButton.innerHTML = ('<i class="fa fa-trash-o" aria-hidden="true"></i>')
@@ -1197,7 +1197,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             //  e.preventDefault(); //self.AddRepeat(input_def, FormParent, NamePrefix)
 
              for (var j in input_def['inputs']){
-                self.add(input_def['inputs'][j], row1, NamePrefix+SuffixName+`_${count}`)
+                self.add(input_def['inputs'][j], row1, NamePrefix+SuffixName+`_${count}|`)
              } 
 
              row.append(row1)
