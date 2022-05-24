@@ -283,7 +283,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         return `uid-${top.__utils__uid__++}`;
     }
 
- 
     add(input, FormParent, NamePrefix, data={}){
 
         var input_def = input;
@@ -508,77 +507,84 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         var Nodes1 =  document.querySelector('body').querySelectorAll('.Galaxy-form')
 
+        console.log(Nodes1.length)
+
         for (var i = 0; i < Nodes1.length; i++){
-            if (Nodes1[i].data && self.extract_input_dom(Nodes1[i]).length > 0 ) {
-               var title =  Nodes1[i].parentNode.parentNode.parentNode.parentNode.parentNode.querySelector('.nbtools-title').innerText
+
+            var title =  Nodes1[i].parentNode.parentNode.parentNode.parentNode.parentNode.querySelector('.nbtools-title').innerText
+
+            var HistoryID = Nodes1[i].parentNode.querySelector('#History_IDs').value
+            var ServerID = Nodes1[i].data
+
+            var extracted_dom = self.extract_input_dom(Nodes1[i])
 
 
-               var HistoryID = Nodes1[i].parentNode.querySelector('#History_IDs').value
-               var ServerID = Nodes1[i].data
+            if (extracted_dom != undefined) {
+                if (extracted_dom.length > 0) {
 
-                var tool  = document.createElement('div')
-                tool.className = 'g_tool'
+                    var tool  = document.createElement('div')
+                    tool.className = 'g_tool'
+    
+                    var tool_input_params  = document.createElement('div')
+                    tool_input_params.className = 'tool-input-params'
+    
+                    var tool_name  = document.createElement('div')
+                    tool_name.className = 'tool_name'
+    
+                    var tool_label  = document.createElement('div')
+                    tool_label.className = 'tool_label_text'
+    
+                    tool_label.innerHTML =  `<b>${title}</b> (${Nodes1[i].data})`
+    
+                    tool_name.append(tool_label)
+                    tool.append(tool_name)
+                    tool.append(tool_input_params)
+                    gp_tool_list.append(tool)
 
-                var tool_input_params  = document.createElement('div')
-                tool_input_params.className = 'tool-input-params'
+                    for (var j = 0; j < extracted_dom.length; j++) {
 
-                var tool_name  = document.createElement('div')
-                tool_name.className = 'tool_name'
+                        var UID = this.uid()
 
-                var tool_label  = document.createElement('div')
-                tool_label.className = 'tool_label_text'
+                        var param_list = document.createElement('ul')
+                        param_list.className = 'tool-param-ul'
 
-                tool_label.innerHTML = title
+                        var input_file_param = document.createElement('div')
+                        input_file_param.className = 'input-data-param'
 
-                tool_name.append(tool_label)
-                tool.append(tool_name)
-                tool.append(tool_input_params)
-                gp_tool_list.append(tool)
+                        var input_file_param_label = document.createElement('div')
+                        input_file_param_label.className = 'input-data-param-label'
+
+                        input_file_param_label.innerText = self.extract_input_dom(Nodes1[i])[j]['element_name']
+                        input_file_param.append(input_file_param_label)
+
+                        var g_icon = document.createElement('div')
+                        g_icon.className  = 'gpicon'
+                        g_icon.style.float = 'left'
+                        g_icon.style.margin = '0px 5px 5px'
+
+                        var g_icon_spin = document.createElement('i')
+                        g_icon_spin.className = 'fas fa-spinner fa-spin'
+                        g_icon_spin.id = `status-icon-uid-${UID}-${j}` 
+
+                        var g_icon_check = document.createElement('i')
+                        g_icon_check.className = 'fas fa-solid fa-check'
+                        g_icon_check.id = `status-icon-check-${UID}-${j}` 
+
+                        g_icon.append(g_icon_spin)
+                        g_icon.append(g_icon_check)
+                        param_list.append(g_icon)
+                        param_list.append(input_file_param)
+                        tool_input_params.append(param_list)
+
+                        input_file_param_label.addEventListener("click", async (e) => {
+
+                            uri = await KernelSideDataObjects(`from GiN import GalaxyTaskWidget\nGalaxyTaskWidget.send_data_to_galaxy_tool(server_d=${JSON.stringify(this.model.get('GalInstance')['URL'])}, server_u=${JSON.stringify(ServerID)}, dataset_id=${JSON.stringify(dataset['dataset_id'])}, ext=${JSON.stringify(dataset['extension'])}, history_id=${JSON.stringify(HistoryID)})`)
+                        })
+                    }
 
 
-                for (var j = 0; j < self.extract_input_dom(Nodes1[i]).length; j++) {
-
-                    var UID = this.uid()
-
-                    var param_list = document.createElement('ul')
-                    param_list.className = 'tool-param-ul'
-
-                    var input_file_param = document.createElement('div')
-                    input_file_param.className = 'input-data-param'
-
-                    var input_file_param_label = document.createElement('div')
-                    input_file_param_label.className = 'input-data-param-label'
-
-                    input_file_param_label.innerText = self.extract_input_dom(Nodes1[i])[j]['element_name']
-                    input_file_param.append(input_file_param_label)
-
-                    var g_icon = document.createElement('div')
-                    g_icon.className  = 'gpicon'
-                    g_icon.style.float = 'left'
-                    g_icon.style.margin = '0px 5px 5px'
-
-                    var g_icon_spin = document.createElement('i')
-                    g_icon_spin.className = 'fas fa-spinner fa-spin'
-                    g_icon_spin.id = `status-icon-uid-${UID}-${j}` 
-
-                    var g_icon_check = document.createElement('i')
-                    g_icon_check.className = 'fas fa-solid fa-check'
-                    g_icon_check.id = `status-icon-check-${UID}-${j}` 
-
-                    g_icon.append(g_icon_spin)
-                    g_icon.append(g_icon_check)
-                    param_list.append(g_icon)
-                    param_list.append(input_file_param)
-                    tool_input_params.append(param_list)
-
-                    input_file_param_label.addEventListener("click", async (e) => {
-                        console.log('ok')
-
-                        console.log(dataset)
-                        uri = await KernelSideDataObjects(`from GiN import GalaxyTaskWidget\nGalaxyTaskWidget.send_data_to_galaxy_tool( server_d=${JSON.stringify(this.model.get('GalInstance')['URL'])}, server_u=${JSON.stringify(ServerID)}, dataset_id=${JSON.stringify(dataset['dataset_id'])}, ext=${JSON.stringify(dataset['extension'])}, history_id=${JSON.stringify(HistoryID)})`)
-                    })
                 }
-
+            }
 
 
 
@@ -661,8 +667,10 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             //     gp_tool_list.append(tool)
             // }
 
-            }
+        
         }
+
+
     }
 
     file_exist(dataset){
@@ -1979,7 +1987,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                             <div class="send-data-genepattern-tools"> 
 
                                 <div class="gt" >  Send data to Galaxy  </div>
-                                <div class="galaxy-tool-list" style="display: block"> 
+                                <div class="galaxy-tool-list" style="display: none"> 
                                 </div>
                                  
                                 <div class="gpt" >  Send data to Genepattern  </div>
@@ -2710,8 +2718,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         var Inputs =  self.collect_form_data(children2)
 
         // self.Form_validation(children2)
-
-        console.log(Inputs)
 
         if (Inputs != false){
             if (this.model.get('inputs')['id'] == 'GiN_data_upload_tool') {

@@ -309,10 +309,11 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
 
         print(file_name[0])
 
-        g2.tools.gi.tools.upload_file(
+        out = g2.tools.gi.tools.upload_file(
                                     path=file_name[0],
                                     history_id=history_id
                                     )
+        print (out)
 
         # if not os.path.exists(galaxy_data):
         #     os.mkdir(galaxy_data)
