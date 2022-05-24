@@ -507,8 +507,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         var Nodes1 =  document.querySelector('body').querySelectorAll('.Galaxy-form')
 
-        console.log(Nodes1.length)
-
         for (var i = 0; i < Nodes1.length; i++){
 
             var title =  Nodes1[i].parentNode.parentNode.parentNode.parentNode.parentNode.querySelector('.nbtools-title').innerText
@@ -565,10 +563,12 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                         var g_icon_spin = document.createElement('i')
                         g_icon_spin.className = 'fas fa-spinner fa-spin'
                         g_icon_spin.id = `status-icon-uid-${UID}-${j}` 
+                        g_icon_spin.style.display = 'none'
 
                         var g_icon_check = document.createElement('i')
                         g_icon_check.className = 'fas fa-solid fa-check'
                         g_icon_check.id = `status-icon-check-${UID}-${j}` 
+                        g_icon_check.style.display = 'none'
 
                         g_icon.append(g_icon_spin)
                         g_icon.append(g_icon_check)
@@ -578,15 +578,19 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
                         input_file_param_label.addEventListener("click", async (e) => {
 
-                            uri = await KernelSideDataObjects(`from GiN import GalaxyTaskWidget\nGalaxyTaskWidget.send_data_to_galaxy_tool(server_d=${JSON.stringify(this.model.get('GalInstance')['URL'])}, server_u=${JSON.stringify(ServerID)}, dataset_id=${JSON.stringify(dataset['dataset_id'])}, ext=${JSON.stringify(dataset['extension'])}, history_id=${JSON.stringify(HistoryID)})`)
+                            g_icon_spin.style.display = 'block'
+
+                            var uri = await KernelSideDataObjects(`from GiN import GalaxyTaskWidget\nGalaxyTaskWidget.send_data_to_galaxy_tool(server_d=${JSON.stringify(this.model.get('GalInstance')['URL'])}, server_u=${JSON.stringify(ServerID)}, dataset_id=${JSON.stringify(dataset['dataset_id'])}, ext=${JSON.stringify(dataset['extension'])}, history_id=${JSON.stringify(HistoryID)})`)
+                            var  out = await KernelSideDataObjects(`from GiN import GalaxyTaskWidget\nGalaxyTaskWidget.show_data_set(server=${JSON.stringify(this.model.get('GalInstance')['URL'])},  dataset_id=${JSON.stringify(uri['outputs'][0]['id'])})`)
+                            
+                            g_icon_spin.style.display = 'none'
+                            g_icon_check.style.display = 'block'
+
+
                         })
                     }
-
-
                 }
             }
-
-
 
                 // var uri = {}
 

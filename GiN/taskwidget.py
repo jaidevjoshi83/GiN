@@ -307,13 +307,13 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
 
         file_name = glob.glob(temp_dir+'/*.*')
 
-        print(file_name[0])
 
         out = g2.tools.gi.tools.upload_file(
                                     path=file_name[0],
                                     history_id=history_id
                                     )
-        print (out)
+
+        return IPython.display.JSON(out)
 
         # if not os.path.exists(galaxy_data):
         #     os.mkdir(galaxy_data)
