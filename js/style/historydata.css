@@ -330,8 +330,30 @@ border-radius: 3px;
 }
 
 #gpticon{
-    
   margin-right: 5px;
-  
 }
 
+.gt{ 
+  border-top: solid rgb(173,166,166) 1px;
+  font-weight: bold;
+  padding-bottom: 10px;
+  margin-top: 5px;
+  color: white;
+  padding-left: 5px;
+  padding-top: 5px;
+  background: rgb(81,75,65)
+}
+
+.galaxy-tool-list{
+  margin-top: 0px;
+  padding: 0px;
+  width: 99%;
+  border-bottom: solid rgb(71,71,159) 1px;
+  border-left: solid rgb(71,71,159) 1px;
+  border-right: solid rgb(71,71,159) 1px;
+
+}
+
+.g_tool{
+  margin-left: 10px
+}
