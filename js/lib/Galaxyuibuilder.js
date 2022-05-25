@@ -12,13 +12,10 @@ import '../style/galaxy-form.css';
  import { MODULE_NAME, MODULE_VERSION } from './version';
  import { unpack_models } from "@jupyter-widgets/base";
  import { BaseWidgetModel, BaseWidgetView } from "@g2nb/nbtools";
-
-
  import _ from "underscore";
  import {  KernelSideDataObjects } from './utils';
  import * as tus from "tus-js-client";
  import axios from "axios";
-
  import { Data } from '@g2nb/nbtools/lib/dataregistry';
 
 
@@ -499,23 +496,30 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         }
     }
 
+    galaxy_data_verify(file_cache, id) {
+
+        for (var i = 0; i < file_cache.length; i++){
+            if (file_cache[i]['label'][0]  == id) {
+                return true
+            } 
+        } 
+        return false
+    }
+
     async galaxy_data_upload(gp_tool_list, dataset, server) {
 
-        var self = this
-        
-        this.removeAllChildNodes(gp_tool_list)
+        console.log(dataset)
 
+        var self = this
+        this.removeAllChildNodes(gp_tool_list)
         var Nodes1 =  document.querySelector('body').querySelectorAll('.Galaxy-form')
 
         for (var i = 0; i < Nodes1.length; i++){
 
             var title =  Nodes1[i].parentNode.parentNode.parentNode.parentNode.parentNode.querySelector('.nbtools-title').innerText
-
             var HistoryID = Nodes1[i].parentNode.querySelector('#History_IDs').value
             var ServerID = Nodes1[i].data
-
             var extracted_dom = self.extract_input_dom(Nodes1[i])
-
 
             if (extracted_dom != undefined) {
                 if (extracted_dom.length > 0) {
@@ -532,7 +536,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                     var tool_label  = document.createElement('div')
                     tool_label.className = 'tool_label_text'
     
-                    tool_label.innerHTML =  `<b>${title}</b> (${Nodes1[i].data})`
+                    tool_label.innerHTML =  `<b>${title}</b>`
     
                     tool_name.append(tool_label)
                     tool.append(tool_name)
@@ -551,6 +555,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
                         var input_file_param_label = document.createElement('div')
                         input_file_param_label.className = 'input-data-param-label'
+                        input_file_param_label.id = `${extracted_dom[j]['id']}-label`
 
                         input_file_param_label.innerText = self.extract_input_dom(Nodes1[i])[j]['element_name']
                         input_file_param.append(input_file_param_label)
@@ -577,21 +582,54 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                         tool_input_params.append(param_list)
 
                         input_file_param_label.addEventListener("click", async (e) => {
+                
+                            e.target.parentNode.parentNode.querySelector('.fas.fa-spinner.fa-spin').style.display = 'block'
+                            e.target.parentNode.parentNode.querySelector('.fas.fa-solid.fa-check').style.display = 'none'
 
-                            g_icon_spin.style.display = 'block'
+                            if (self.galaxy_data_verify(self.file_cache, dataset['id']) == false) {
 
-                            var uri = await KernelSideDataObjects(`from GiN import GalaxyTaskWidget\nGalaxyTaskWidget.send_data_to_galaxy_tool(server_d=${JSON.stringify(this.model.get('GalInstance')['URL'])}, server_u=${JSON.stringify(ServerID)}, dataset_id=${JSON.stringify(dataset['dataset_id'])}, ext=${JSON.stringify(dataset['extension'])}, history_id=${JSON.stringify(HistoryID)})`)
-                            var  out = await KernelSideDataObjects(`from GiN import GalaxyTaskWidget\nGalaxyTaskWidget.show_data_set(server=${JSON.stringify(this.model.get('GalInstance')['URL'])},  dataset_id=${JSON.stringify(uri['outputs'][0]['id'])})`)
-                            
-                            g_icon_spin.style.display = 'none'
-                            g_icon_check.style.display = 'block'
+                                var uri = await KernelSideDataObjects(`from GiN import GalaxyTaskWidget\nGalaxyTaskWidget.send_data_to_galaxy_tool(server_d=${JSON.stringify(server)}, server_u=${JSON.stringify(ServerID)}, dataset_id=${JSON.stringify(dataset['dataset_id'])}, ext=${JSON.stringify(dataset['extension'])}, history_id=${JSON.stringify(HistoryID)})`)
 
+                                for (let i = 0; i < Infinity; ++i) {
 
+                                    var out = await KernelSideDataObjects(`from GiN import GalaxyTaskWidget\nGalaxyTaskWidget.show_data_set(server=${JSON.stringify(this.model.get('GalInstance')['URL'])},  dataset_id=${JSON.stringify(uri['outputs'][0]['id'])})`)
+
+                                    await this.waitforme(5000);
+    
+                                    if (out['state'] === 'ok') {
+                                        e.target.parentNode.parentNode.querySelector('.fas.fa-spinner.fa-spin').style.display = 'none'
+                                        e.target.parentNode.parentNode.querySelector('.fas.fa-solid.fa-check').style.display = 'block'
+                                        self.file_cache.push(new Data(ServerID, [dataset['name'], out['name']], [dataset['id'], out['id']], dataset['extension']));
+
+                                        const el = document.createElement("option");
+                                        el.textContent = out['name'];
+                                        el.value = out['id']
+
+                                        document.querySelector(`#${e.target.id.replace('-label', '')}`).append(el)
+
+                                        break;
+                                    }  
+                                }
+                            } else {
+
+                                for (var k = 0; k < self.file_cache.length; k++){
+                                    if (self.file_cache[k]['label'][0] == dataset['id']) {
+
+                                        const el = document.createElement("option");
+                                        el.textContent = self.file_cache[k]['uri'][0];
+                                        el.value = self.file_cache[k]['label'][1]
+
+                                        document.querySelector(`#${e.target.id.replace('-label', '')}`).append(el)
+                                    }
+                                }
+
+                                e.target.parentNode.parentNode.querySelector('.fas.fa-spinner.fa-spin').style.display = 'none'
+                                e.target.parentNode.parentNode.querySelector('.fas.fa-solid.fa-check').style.display = 'block'
+                            }
                         })
                     }
                 }
             }
-
                 // var uri = {}
 
             //     for (var j = 0; j < InputFiles.length; j++){
@@ -670,11 +708,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             //     }
             //     gp_tool_list.append(tool)
             // }
-
-        
         }
-
-
     }
 
     file_exist(dataset){
@@ -2013,7 +2047,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         GTools.addEventListener("click", (e) => {
 
-            var server =  Tbl.parentNode.parentNode.parentNode.parentNode.querySelector('.Galaxy-form')
+            var server =  Tbl.parentNode.parentNode.parentNode.parentNode.querySelector('.Galaxy-form').data
             var GpToolsDiv = Tbl.querySelector('.galaxy-tool-list')
 
             this.galaxy_data_upload(GpToolsDiv, dataset, server)
