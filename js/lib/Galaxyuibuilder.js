@@ -165,6 +165,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         var self = this
         var Toolform = this.el.querySelector('.tool-forms')
         var FormParent = this.el.querySelector('.Galaxy-form');
+        FormParent.id = `galaxy-form-${this.uid()}`
 
         FormParent.data = this.model.get('GalInstance')['URL']
     
@@ -485,6 +486,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
             if ( form.querySelector('.InputDataFile') != null) {
                 var el_id = {}
+                el_id['name'] = form.querySelector('.InputDataFile').name
                 el_id['id'] = form.querySelector('.InputDataFile').id
                 el_id['element_name'] = form.querySelector('.InputDataFile').parentNode.parentNode.querySelector('.ui-form-title-text').innerText
                 input_list.push(el_id)
@@ -506,9 +508,19 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         return false
     }
 
-    async galaxy_data_upload(gp_tool_list, dataset, server) {
+    return_element(form, identifier){
 
-        console.log(dataset)
+        var input_list = this.extract_input_dom(form)
+
+        for(var i = 0; i < input_list.length; i++) {
+
+            if (identifier == input_list[i]['element_name']) {
+                return input_list[i]
+            }
+        }
+    }
+
+    async galaxy_data_upload(gp_tool_list, dataset, server) {
 
         var self = this
         this.removeAllChildNodes(gp_tool_list)
@@ -529,12 +541,14 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
     
                     var tool_input_params  = document.createElement('div')
                     tool_input_params.className = 'tool-input-params'
+                    tool_input_params.id = `g-tool-${Nodes1[i].id}`
     
                     var tool_name  = document.createElement('div')
                     tool_name.className = 'tool_name'
     
                     var tool_label  = document.createElement('div')
                     tool_label.className = 'tool_label_text'
+                    
     
                     tool_label.innerHTML =  `<b>${title}</b>`
     
@@ -582,21 +596,25 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                         tool_input_params.append(param_list)
 
                         input_file_param_label.addEventListener("click", async (e) => {
-                
+
                             e.target.parentNode.parentNode.querySelector('.fas.fa-spinner.fa-spin').style.display = 'block'
                             e.target.parentNode.parentNode.querySelector('.fas.fa-solid.fa-check').style.display = 'none'
 
                             if (self.galaxy_data_verify(self.file_cache, dataset['id']) == false) {
 
-                                var uri = await KernelSideDataObjects(`from GiN import GalaxyTaskWidget\nGalaxyTaskWidget.send_data_to_galaxy_tool(server_d=${JSON.stringify(server)}, server_u=${JSON.stringify(ServerID)}, dataset_id=${JSON.stringify(dataset['dataset_id'])}, ext=${JSON.stringify(dataset['extension'])}, history_id=${JSON.stringify(HistoryID)})`)
+                                console.log(server)
+                                console.log(ServerID)
 
+                                var uri = await KernelSideDataObjects(`from GiN import GalaxyTaskWidget\nGalaxyTaskWidget.send_data_to_galaxy_tool(server_d=${JSON.stringify(server)}, server_u=${JSON.stringify(ServerID)}, dataset_id=${JSON.stringify(dataset['dataset_id'])}, ext=${JSON.stringify(dataset['extension'])}, history_id=${JSON.stringify(HistoryID)})`)
+                                
                                 for (let i = 0; i < Infinity; ++i) {
 
-                                    var out = await KernelSideDataObjects(`from GiN import GalaxyTaskWidget\nGalaxyTaskWidget.show_data_set(server=${JSON.stringify(this.model.get('GalInstance')['URL'])},  dataset_id=${JSON.stringify(uri['outputs'][0]['id'])})`)
+                                    var out = await KernelSideDataObjects(`from GiN import GalaxyTaskWidget\nGalaxyTaskWidget.show_data_set(server=${JSON.stringify(ServerID)},  dataset_id=${JSON.stringify(uri['outputs'][0]['id'])})`)
 
                                     await this.waitforme(5000);
     
                                     if (out['state'] === 'ok') {
+
                                         e.target.parentNode.parentNode.querySelector('.fas.fa-spinner.fa-spin').style.display = 'none'
                                         e.target.parentNode.parentNode.querySelector('.fas.fa-solid.fa-check').style.display = 'block'
                                         self.file_cache.push(new Data(ServerID, [dataset['name'], out['name']], [dataset['id'], out['id']], dataset['extension']));
@@ -604,22 +622,41 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                                         const el = document.createElement("option");
                                         el.textContent = out['name'];
                                         el.value = out['id']
+                                        el.data = {'id': out['id'], 'src':out['hda_ldda']}
+                                        el.selected = true
+                                        el.dispatchEvent(new Event('change', { bubbles: true }))
 
-                                        document.querySelector(`#${e.target.id.replace('-label', '')}`).append(el)
+                                        var form = document.querySelector(`#${e.target.parentNode.parentNode.parentNode.id.replace('g-tool-','')}`)
+                                     
+                                        for (var l = 0; l < self.extract_input_dom(form).length; l++) {
+                                            if ( self.extract_input_dom(form)[l]['id'] == e.target.id.replace('-label', '') ) {
+                                                document.querySelector(`#${ e.target.id.replace('-label', '')}`).append(el)
+                                            }
+                                        }
 
                                         break;
                                     }  
                                 }
+
                             } else {
 
                                 for (var k = 0; k < self.file_cache.length; k++){
                                     if (self.file_cache[k]['label'][0] == dataset['id']) {
 
                                         const el = document.createElement("option");
-                                        el.textContent = self.file_cache[k]['uri'][0];
-                                        el.value = self.file_cache[k]['label'][1]
-
-                                        document.querySelector(`#${e.target.id.replace('-label', '')}`).append(el)
+                                        el.textContent = out['name'];
+                                        el.value = out['id']
+                                        el.data = {'id': out['id'], 'src':out['hda_ldda']}
+                                        el.selected = true
+                                        el.dispatchEvent(new Event('change', { bubbles: true }))
+                          
+                                        var form = document.querySelector(`#${e.target.parentNode.parentNode.parentNode.id.replace('g-tool-','')}`)
+                         
+                                        for (var l = 0; l < self.extract_input_dom(form).length; l++) {
+                                            if ( self.extract_input_dom(form)[l]['id'] == e.target.id.replace('-label', '') ) {
+                                                document.querySelector(`#${ e.target.id.replace('-label', '')}`).append(el)
+                                            }
+                                        }
                                     }
                                 }
 
@@ -630,84 +667,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                     }
                 }
             }
-                // var uri = {}
-
-            //     for (var j = 0; j < InputFiles.length; j++){
-
-            //         var param_list = document.createElement('ul')
-            //         param_list.className = 'tool-param-ul'
-    
-            //         tool_input_params.append(param_list)
-            //         tool.append(tool_input_params)
-
-            //         var UID = this.uid()
-
-            //         var input_file_param = document.createElement('div')
-            //         input_file_param.className = 'input-data-param'
-            //         var input_file_param_label = document.createElement('div')
-            //         input_file_param_label.className = 'input-data-param-label'
-            //         var targetid =  InputFiles[j].querySelector('input').id
-            //         input_file_param_label.id = targetid+'-label'
-
-            //         input_file_param_label.addEventListener("click", async (e)=> {
-
-            //         console.log(UID)
-            //         e.target.parentNode.parentNode.querySelector('.fas.fa-spinner.fa-spin').style.display = 'block'
-
-            //        if (self.file_exist(dataset)){
-            //             console.log('Present')
-            //             document.getElementById(`${e.target.id.replace('-label', '')}`).value =  self.file_exist(dataset)
-            //             document.getElementById(`${e.target.id.replace('-label', '')}`).dispatchEvent(new Event('change', { bubbles: true }));  
-
-            //             e.target.parentNode.parentNode.querySelector('.fas.fa-spinner.fa-spin').style.display = 'none'
-            //             e.target.parentNode.parentNode.querySelector('.fas.fa-solid.fa-check').style.display = 'block'
-
-            //        } else{
-
-            //             e.target.parentNode.parentNode.querySelector('.fas.fa-spinner.fa-spin').style.display = 'block'
-
-            //             uri = await KernelSideDataObjects(`from GiN import GalaxyTaskWidget\nGalaxyTaskWidget.send_data_to_gp_server(file_name=${JSON.stringify(dataset['name'])}, tool_id=${JSON.stringify(tool_id)}, dataset_id=${JSON.stringify(dataset['id'])}, GInstance=${JSON.stringify(this.model.get('GalInstance'))}, ext=${JSON.stringify(dataset['extension'])})`)
-
-            //             e.target.parentNode.parentNode.querySelector('.fas.fa-spinner.fa-spin').style.display = 'none'
-            //             e.target.parentNode.parentNode.querySelector('.fas.fa-solid.fa-check').style.display = 'block'
-
-            //             dataset['uri'] = uri['uri']
-            //             this.file_cache.push(new Data(origin, dataset['uri'], dataset['id'], dataset['file_ext']));
-            //             ContextManager.data_registry.register({ data: this.file_cache[ this.file_cache.length-1] })
-            //             document.getElementById(`${e.target.id.replace('-label', '')}`).value =  uri['uri']
-            //             document.getElementById(`${e.target.id.replace('-label', '')}`).dispatchEvent(new Event('change', { bubbles: true }));
-            //         }
-
-            //         })
-
-            //         input_file_param_label.innerHTML =  InputFiles[j].querySelector('.lm-Widget.p-Widget.jupyter-widgets.widget-label').innerHTML
-            //         input_file_param.append(input_file_param_label)
-
-            //         var status_icon_div = document.createElement('div')
-            //         status_icon_div.className = 'gpticon'
-            //         status_icon_div.style.float  = 'left'
-            //         status_icon_div.style.margin = '5px'
-            //         status_icon_div.style.marginTop = '0px'
-
-            //         var status_icon = document.createElement('i')
-            //         status_icon.className = "fas fa-spinner fa-spin"
-            //         status_icon.id = `status-icon-${UID}-${j}`
-            //         status_icon.style.display = 'none'
-
-            //         var status_icon_1 = document.createElement('i')
-            //         status_icon_1.className = "fas fa-solid fa-check"
-            //         status_icon_1.style.display = 'none'
-            //         status_icon_1.id = `status-icon-check-${UID}-${j}`
-
-            //         status_icon_div.append(status_icon)
-            //         status_icon_div.append(status_icon_1)
-
-            //         param_list.append(status_icon_div)
-            //         param_list.append(input_file_param)
-
-            //     }
-            //     gp_tool_list.append(tool)
-            // }
         }
     }
 
