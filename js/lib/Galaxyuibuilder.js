@@ -95,6 +95,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
     this.KernelOutPut = '';
     this.JOBID = {};
     this.file_cache = [];
+    this.galaxy_file_cache = []
     this.test = []
     this.conditional_name = []
     }
@@ -549,7 +550,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                     var tool_label  = document.createElement('div')
                     tool_label.className = 'tool_label_text'
                     
-    
                     tool_label.innerHTML =  `<b>${title}</b>`
     
                     tool_name.append(tool_label)
@@ -570,6 +570,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                         var input_file_param_label = document.createElement('div')
                         input_file_param_label.className = 'input-data-param-label'
                         input_file_param_label.id = `${extracted_dom[j]['id']}-label`
+                        input_file_param_label.data = ServerID
 
                         input_file_param_label.innerText = self.extract_input_dom(Nodes1[i])[j]['element_name']
                         input_file_param.append(input_file_param_label)
@@ -600,68 +601,99 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                             e.target.parentNode.parentNode.querySelector('.fas.fa-spinner.fa-spin').style.display = 'block'
                             e.target.parentNode.parentNode.querySelector('.fas.fa-solid.fa-check').style.display = 'none'
 
-                            if (self.galaxy_data_verify(self.file_cache, dataset['id']) == false) {
+                            if (server == e.target.data){
 
-                                console.log(server)
-                                console.log(ServerID)
+                                console.log('same_server', e.target.data)
 
-                                var uri = await KernelSideDataObjects(`from GiN import GalaxyTaskWidget\nGalaxyTaskWidget.send_data_to_galaxy_tool(server_d=${JSON.stringify(server)}, server_u=${JSON.stringify(ServerID)}, dataset_id=${JSON.stringify(dataset['dataset_id'])}, ext=${JSON.stringify(dataset['extension'])}, history_id=${JSON.stringify(HistoryID)})`)
-                                
-                                for (let i = 0; i < Infinity; ++i) {
 
-                                    var out = await KernelSideDataObjects(`from GiN import GalaxyTaskWidget\nGalaxyTaskWidget.show_data_set(server=${JSON.stringify(ServerID)},  dataset_id=${JSON.stringify(uri['outputs'][0]['id'])})`)
+                                e.target.parentNode.parentNode.querySelector('.fas.fa-spinner.fa-spin').style.display = 'none'
+                                e.target.parentNode.parentNode.querySelector('.fas.fa-solid.fa-check').style.display = 'block'
+                                self.galaxy_file_cache.push(new Data(e.target.data, [dataset['name'], 'NA'], [dataset['id'], 'NA'], dataset['extension']));
 
-                                    await this.waitforme(5000);
-    
-                                    if (out['state'] === 'ok') {
+                                const el = document.createElement("option");
+                                el.textContent = dataset['name'];
+                                el.value = dataset['id']
+                                el.data = {'id': dataset['id'], 'src':dataset['hda_ldda']}
+                                el.selected = true
+                                el.dispatchEvent(new Event('change', { bubbles: true }))
 
-                                        e.target.parentNode.parentNode.querySelector('.fas.fa-spinner.fa-spin').style.display = 'none'
-                                        e.target.parentNode.parentNode.querySelector('.fas.fa-solid.fa-check').style.display = 'block'
-                                        self.file_cache.push(new Data(ServerID, [dataset['name'], out['name']], [dataset['id'], out['id']], dataset['extension']));
-
-                                        const el = document.createElement("option");
-                                        el.textContent = out['name'];
-                                        el.value = out['id']
-                                        el.data = {'id': out['id'], 'src':out['hda_ldda']}
-                                        el.selected = true
-                                        el.dispatchEvent(new Event('change', { bubbles: true }))
-
-                                        var form = document.querySelector(`#${e.target.parentNode.parentNode.parentNode.id.replace('g-tool-','')}`)
-                                     
-                                        for (var l = 0; l < self.extract_input_dom(form).length; l++) {
-                                            if ( self.extract_input_dom(form)[l]['id'] == e.target.id.replace('-label', '') ) {
-                                                document.querySelector(`#${ e.target.id.replace('-label', '')}`).append(el)
-                                            }
-                                        }
-
-                                        break;
-                                    }  
+                                var form = document.querySelector(`#${e.target.parentNode.parentNode.parentNode.id.replace('g-tool-','')}`)
+                             
+                                for (var l = 0; l < self.extract_input_dom(form).length; l++) {
+                                    if ( self.extract_input_dom(form)[l]['id'] == e.target.id.replace('-label', '') ) {
+                                        document.querySelector(`#${ e.target.id.replace('-label', '')}`).append(el)
+                                    }
                                 }
 
                             } else {
 
-                                for (var k = 0; k < self.file_cache.length; k++){
-                                    if (self.file_cache[k]['label'][0] == dataset['id']) {
+                                if (self.galaxy_data_verify(self.galaxy_file_cache, dataset['id']) == false) {
 
-                                        const el = document.createElement("option");
-                                        el.textContent = out['name'];
-                                        el.value = out['id']
-                                        el.data = {'id': out['id'], 'src':out['hda_ldda']}
-                                        el.selected = true
-                                        el.dispatchEvent(new Event('change', { bubbles: true }))
-                          
-                                        var form = document.querySelector(`#${e.target.parentNode.parentNode.parentNode.id.replace('g-tool-','')}`)
-                         
-                                        for (var l = 0; l < self.extract_input_dom(form).length; l++) {
-                                            if ( self.extract_input_dom(form)[l]['id'] == e.target.id.replace('-label', '') ) {
-                                                document.querySelector(`#${ e.target.id.replace('-label', '')}`).append(el)
+                                    var form = document.querySelector(`#${e.target.parentNode.parentNode.parentNode.id.replace('g-tool-','')}`)
+                                    var hi = form.parentNode.querySelector('#History_IDs').value
+
+                                    console.log('downloading from', server)
+                                    console.log('uploading to', e.target.data)
+
+                                    var uri = await KernelSideDataObjects(`from GiN import GalaxyTaskWidget\nGalaxyTaskWidget.send_data_to_galaxy_tool(server_d=${JSON.stringify(server)}, server_u=${JSON.stringify(e.target.data)}, dataset_id=${JSON.stringify(dataset['dataset_id'])}, ext=${JSON.stringify(dataset['extension'])}, history_id=${JSON.stringify(hi)})`)
+                                    
+                                    for (let i = 0; i < Infinity; ++i) {
+
+                                        var out = await KernelSideDataObjects(`from GiN import GalaxyTaskWidget\nGalaxyTaskWidget.show_data_set(server=${JSON.stringify(e.target.data)},  dataset_id=${JSON.stringify(uri['outputs'][0]['id'])})`)
+
+                                        await this.waitforme(5000);
+        
+                                        if (out['state'] === 'ok') {
+
+                                            e.target.parentNode.parentNode.querySelector('.fas.fa-spinner.fa-spin').style.display = 'none'
+                                            e.target.parentNode.parentNode.querySelector('.fas.fa-solid.fa-check').style.display = 'block'
+                                            self.galaxy_file_cache.push(new Data(e.target.data, [dataset['name'], out['name']], [dataset['id'], out['id']], dataset['extension']));
+
+                                            const el = document.createElement("option");
+                                            el.textContent = out['name'];
+                                            el.value = out['id']
+                                            el.data = {'id': out['id'], 'src':out['hda_ldda']}
+                                            el.selected = true
+                                            el.dispatchEvent(new Event('change', { bubbles: true }))
+
+                                            var form = document.querySelector(`#${e.target.parentNode.parentNode.parentNode.id.replace('g-tool-','')}`)
+                                        
+                                            for (var l = 0; l < self.extract_input_dom(form).length; l++) {
+                                                if ( self.extract_input_dom(form)[l]['id'] == e.target.id.replace('-label', '') ) {
+                                                    document.querySelector(`#${ e.target.id.replace('-label', '')}`).append(el)
+                                                }
+                                            }
+
+                                            break;
+                                        }  
+                                    }
+
+                                } else {
+
+                                    for (var k = 0; k < self.galaxy_file_cache.length; k++){
+                                        if (self.galaxy_file_cache[k]['label'][0] == dataset['id']) {
+
+                                            const el = document.createElement("option");
+                                            el.textContent = out['name'];
+                                            el.value = out['id']
+                                            el.data = {'id': out['id'], 'src':out['hda_ldda']}
+                                            el.selected = true
+                                            el.dispatchEvent(new Event('change', { bubbles: true }))
+                            
+                                            var form = document.querySelector(`#${e.target.parentNode.parentNode.parentNode.id.replace('g-tool-','')}`)
+                            
+                                            for (var l = 0; l < self.extract_input_dom(form).length; l++) {
+                                                if ( self.extract_input_dom(form)[l]['id'] == e.target.id.replace('-label', '') ) {
+                                                    document.querySelector(`#${ e.target.id.replace('-label', '')}`).append(el)
+                                                }
                                             }
                                         }
                                     }
+
+                                    e.target.parentNode.parentNode.querySelector('.fas.fa-spinner.fa-spin').style.display = 'none'
+                                    e.target.parentNode.parentNode.querySelector('.fas.fa-solid.fa-check').style.display = 'block'
                                 }
 
-                                e.target.parentNode.parentNode.querySelector('.fas.fa-spinner.fa-spin').style.display = 'none'
-                                e.target.parentNode.parentNode.querySelector('.fas.fa-solid.fa-check').style.display = 'block'
                             }
                         })
                     }

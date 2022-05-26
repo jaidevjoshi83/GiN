@@ -304,7 +304,8 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
 
         gi13.gi.datasets.download_dataset(
                                     dataset_id=dataset_id,
-                                    file_path=temp_dir
+                                    file_path=temp_dir,
+                                    require_ok_state=False
                                     )
 
         file_name = glob.glob(temp_dir+'/*.*')
