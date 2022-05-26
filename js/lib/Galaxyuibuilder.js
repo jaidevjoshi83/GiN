@@ -291,7 +291,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         }
         switch (input_def.type) {
             case "conditional":
-                this.add_conditoinal_section(input_def, FormParent, NamePrefix, data);
+                this.add_conditional_section(input_def, FormParent, NamePrefix, data);
                 break;
             case "data":
                 this.add_input_data(input_def, FormParent, NamePrefix, data)
@@ -1716,7 +1716,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         const Childrens  = this.el.querySelector('.nbtools-form').children;
     }
 
-    async add_conditoinal_section(input_def, parent, NamePrefix, call_back_data={}){
+    async add_conditional_section(input_def, parent, NamePrefix, call_back_data={}){
 
        // ########################################################
        input_def.id = this.uid()

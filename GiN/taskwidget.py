@@ -59,12 +59,9 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
 
         a = GiN.sessions.SessionList()
         gi1 = a.get(server=GalInstance['URL'])
-
-        print(GalInstance['URL'])
-
         tool_inputs = json5.loads(Tool_inputs)
 
-        NewInputs = GalaxyTaskWidget.RefinedInputs(tool_inputs, gi)
+        NewInputs = GalaxyTaskWidget.RefinedInputs(tool_inputs, gi1)
 
         job = gi1.tools.gi.tools.run_tool(
             history_id=HistoryID,
