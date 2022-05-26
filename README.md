@@ -101,6 +101,8 @@ docker pull jayadevjoshi12/gin:latest
 docker run --rm -p 8888:8888 jayadevjoshi12/gin:latest
 ```
 
+---
+
 # Screenshots..
 
 ## Login
