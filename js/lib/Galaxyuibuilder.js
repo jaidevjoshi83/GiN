@@ -1768,9 +1768,13 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         ConditionalDiv.className = 'ui-form-element section-row pl-2'
         ConditionalDiv.id = this.uid()
 
-        for (var j in input_def.cases[0].inputs) {
-            this.add(input_def.cases[0].inputs[j], ConditionalDiv, NewNamePrefix, call_back_data)
-            input_def.cases[0].inputs[j].id = this.uid()
+        for( var i = 0; i < input_def['test_param']['options'].length; i++ ) {
+            if (input_def['test_param'].value == input_def['cases'][i]['value']) {
+                for (var j in input_def.cases[i].inputs) {
+                    this.add(input_def.cases[i].inputs[j], ConditionalDiv, NewNamePrefix, call_back_data)
+                    input_def.cases[i].inputs[j].id = this.uid()
+                }
+            }
         }
 
         select.addEventListener("change", async () => {
@@ -1789,13 +1793,13 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             this.conditional_name = input_def['name']
             var input = refine_inputs['inputs']
 
-            input_def = this.un_wrap(input, this.conditional_name)
+           var input_def1 = this.un_wrap(input, this.conditional_name)
 
-            for (var l in input_def.cases){
-                if  (input_def.cases[l].value == queryID) {
-                    for (var j in input_def.cases[l].inputs) {
-                        this.add(input_def.cases[l].inputs[j], ConditionalDiv, NewNamePrefix, call_back_data),  
-                        input_def.cases[l].inputs[j].id = this.uid()
+            for (var l in input_def1.cases){
+                if  (input_def1.cases[l].value == queryID) {
+                    for (var j in input_def1.cases[l].inputs) {
+                        this.add(input_def1.cases[l].inputs[j], ConditionalDiv, NewNamePrefix, call_back_data),  
+                        input_def1.cases[l].inputs[j].id = this.uid()
                     }
                 }
             }
