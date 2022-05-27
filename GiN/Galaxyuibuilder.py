@@ -57,7 +57,7 @@ class GalaxyUIBuilder(BaseWidget, NBTool):
             self.id = 'GiN_Upload_Data'
             self.description = 'data upload tool'
         else:
-            self.name = self.GalInstance['tool_name']
+            self.name = self.GalInstance['tool_name']+" ("+self.GalInstance['URL']+")" 
             self.id = self.GalInstance['tool_ID'] #function_or_method.__qualname__
 
             # Set the description based on the docstring

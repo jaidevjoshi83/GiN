@@ -100,3 +100,27 @@ A Docker image with GiN and the full JupyterLab stack is available through Docke
 docker pull jayadevjoshi12/gin:latest
 docker run --rm -p 8888:8888 jayadevjoshi12/gin:latest
 ```
+
+---
+
+# Screenshots..
+
+## Login
+
+![alt text](https://github.com/jaidevjoshi83/GiN/blob/repeat/GiN_Screenshot/login.png)
+
+## Galaxy tool form
+
+![alt text](https://github.com/jaidevjoshi83/GiN/blob/repeat/GiN_Screenshot/tool_form1.png)
+
+## Job status 
+
+![alt text](https://github.com/jaidevjoshi83/GiN/blob/repeat/GiN_Screenshot/Job_Status.png)
+
+## History Data
+
+![alt text](https://github.com/jaidevjoshi83/GiN/blob/repeat/GiN_Screenshot/History_Data.png)
+
+## Data sharing widget
+
+![alt text](https://github.com/jaidevjoshi83/GiN/blob/repeat/GiN_Screenshot/data_sharing_widget.png)
