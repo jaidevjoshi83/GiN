@@ -240,43 +240,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         }
     }
 
-
-    Form_validation(FormEelements){
-
-        var self = this
- 
-        for (var i = 0; i < FormEelements.length; i++) {
-            if (FormEelements[i].className.includes('section-row') && (FormEelements[i].style.display == 'block' || FormEelements[i].style.display  == '') ){
-                if (FormEelements[i].className.includes('ui-portlet-section section-row')){
-                    if (FormEelements[i].querySelector('.ui-form-element.section-row.sections').style.display == 'block'){
-                        self.Form_validation(FormEelements[i].querySelector('.ui-form-element.section-row.sections').children)
-                    }
-                } else if(FormEelements[i].className.includes("ui-repeat section-row")) {
-                    self.Form_validation(FormEelements[i].querySelector('.internal-ui-repeat.section-row').children)
-                } else if(FormEelements[i].className.includes("pl-2")) {
-                    self.Form_validation(FormEelements[i].children)
-                } else{
-
-                    if (FormEelements[i].querySelector('select') != null) {
-                       console.log( FormEelements[i].querySelector('select').value)
-                    } else if (FormEelements[i].querySelector('.InputData') != null){
-                        console.log(FormEelements[i].querySelector('.InputData').value)
-                    } else if (FormEelements[i].querySelector('.InputDataFile') != null) {
-
-                        var FileList = []
-
-                        for (var j = 0; j < FormEelements[i].querySelector('.InputDataFile').options.length; j++) {
-                            if (FormEelements[i].querySelector('.InputDataFile').options[j].selected == true) {
-                                FileList.push(JSON.parse( FormEelements[i].querySelector('.InputDataFile').options[j].value))
-                            }
-                        }
-                        console.log(FileList)
-                    }
-                }
-            }
-        }
-    }
-
     uid(){
         top.__utils__uid__ = top.__utils__uid__ || 0;
         return `uid-${top.__utils__uid__++}`;
@@ -496,6 +459,83 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
  
         if (input_list.length > 0 ) {
             return input_list
+        }
+    }
+
+
+    get_form_data(form, checking){
+
+        var self = this
+        var out = {}
+
+        if (form.className == 'Galaxy-form' || form.className.includes('ui-portlet-section') || form.className.includes('ui-repeat') || form.className.includes('pl-2') || form.className.includes('sections')) {
+            for (var j = 0; j < form.children.length; j++){
+                if (self.get_form_data(form.children[j], checking) == 'error') {
+                    return 'error'
+                }
+                Object.assign(out,  self.get_form_data(form.children[j], checking))
+            }
+
+        } else if (form.querySelector('.InputData')){
+           out[form.querySelector('.InputData').name] =  form.querySelector('.InputData').value
+          
+           if (checking == 'on'){
+               if (form.querySelector('.InputData').value == "") {
+                    form.querySelector('.InputData').style.backgroundColor = 'pink'
+                    return 'error'
+               }else{
+                form.querySelector('.InputData').style.backgroundColor = ''
+               }
+           }
+           
+        } else if (form.querySelector('.outer-checkbox-div')){
+            var select_list = []
+            for(var k = 0; k < form.querySelector('.outer-checkbox-div').children.length; k++ ) {
+                if(form.querySelector('.outer-checkbox-div').children[k].querySelector('.InputDataCheckbox').checked) {
+                    select_list.push(form.querySelector('.outer-checkbox-div').children[k].querySelector('.InputDataCheckbox').value)
+                }
+            }
+
+            out[form.querySelector('.outer-checkbox-div').querySelector('.InputDataCheckbox').name] = select_list
+
+            if(checking == 'on') {
+                if (select_list.length == 0){
+                    form.querySelector('.outer-checkbox-div').querySelector('.InputDataCheckbox').style.backgroundColor = 'pink'
+                    return 'error'
+                } else{
+                    form.querySelector('.outer-checkbox-div').querySelector('.InputDataCheckbox').style.backgroundColor = ''
+                }
+            }
+
+        } else if (form.querySelector('.InputDataFile')){
+            var input_files = []  
+
+            out[form.querySelector('.InputDataFile').name] = input_files  
+
+            for (var i = 0; i < form.querySelector('.InputDataFile').options.length; i++) {
+                if (form.querySelector('.InputDataFile').options[i].selected == true) {
+                    input_files.push(form.querySelector('.InputDataFile').options[i].data)
+                }
+            }
+
+            if(checking == 'on') {
+                if (out[form.querySelector('.InputDataFile').name].length < 1 ){
+                    form.querySelector('.InputDataFile').style.backgroundColor = 'pink'
+                    return 'error'
+                }
+                else{
+                    form.querySelector('.InputDataFile').style.backgroundColor = ''
+
+                    out[form.querySelector('.InputDataFile').name] = input_files
+                }
+            } else{
+
+                out[form.querySelector('.InputDataFile').name] = input_files
+            }
+        }
+
+        if (Object.keys(out).length > 0){
+            return out  
         }
     }
 
@@ -1812,7 +1852,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         var self = this
 
-        var self = this
         var NewNamePrefix = NamePrefix+input_def['name']+"|"
         input_def.id = this.uid()
 
@@ -1832,43 +1871,31 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         UpperDiv.append(ConditionalDiv)
 
-
-        if (input_def.expanded == true) {
-            
-            ConditionalDiv.style.display = 'block';  
-        } else  {
-            ConditionalDiv.style.display = 'none'; 
-        }
-
         parent.append(UpperDiv)
 
-        function section(){
+        console.log(ConditionalDiv.children)
 
+        function section(){
             for (var j in input_def['inputs']){
-                self.add(input_def['inputs'][j] ,ConditionalDiv , NewNamePrefix)
+                self.add(input_def['inputs'][j], ConditionalDiv, NewNamePrefix)
             }
         }
 
-        // if(input_def['expanded']){
-        section()
-        // }
+        if (input_def['expanded']){
+            section()
+        }
 
-        Button.addEventListener("click", function(e) {
+        Button.addEventListener("click", function (e) {
+
+            if (ConditionalDiv.childNodes.length == 0){
+                section()
+            } else{
+                self.removeAllChildNodes(ConditionalDiv)
+
+            }
 
             e.preventDefault();
 
-            // if (ConditionalDiv.hasChildNodes()){
-            //     self.removeAllChildNodes(ConditionalDiv)
-            // } else {
-            //     section()
-            // }
-            let nextSibling = Button.nextElementSibling;   
-
-            if (nextSibling.style.display == 'none'){
-                nextSibling.style.display = 'block'
-            } else {
-                nextSibling.style.display = 'none'
-            }
         });
     }
 
@@ -2740,24 +2767,23 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
     }
 
     activate_run_buttons (){
- 
+
         var self  = this;
         this.el.querySelectorAll('.nbtools-run').forEach((button) => button.addEventListener('click', () => {
 
         var HistoryID = self.element.querySelector('#History_IDs').value 
-        var children = self.element.querySelector('.Galaxy-form').children;
-        // var Inputs = self.ReturnData(children)
-        var children2 = self.element.querySelector('.Galaxy-form').children;
-        var Inputs =  self.collect_form_data(children2)
+        var children = self.element.querySelector('.Galaxy-form')
 
-        // self.Form_validation(children2)
+        var Inputs = this.get_form_data(children, 'on')
 
-        if (Inputs != false){
-            if (this.model.get('inputs')['id'] == 'GiN_data_upload_tool') {
-                this.dataupload_job()
-            } else {
-                this.AddJobStatusWidget(Inputs, HistoryID)
-            }
+        if (Inputs == 'error'){
+            return
+        }
+   
+        if (this.model.get('inputs')['id'] == 'GiN_data_upload_tool') {
+            this.dataupload_job()
+        } else {
+            this.AddJobStatusWidget(Inputs, HistoryID)
         }
 
         }));
