@@ -454,8 +454,9 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 }
             } else {
 
-                out[form.querySelector('.outer-checkbox-div').querySelector('.InputDataCheckbox').name] = select_list
-   
+                if (form.querySelector('.outer-checkbox-div').querySelector('.InputDataCheckbox')){
+                    out[form.querySelector('.outer-checkbox-div').querySelector('.InputDataCheckbox').name] = select_list
+                }
             }
 
         } else if (form.querySelector('.InputDataFile')){
@@ -1358,11 +1359,32 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         TitleSpan.style.display = 'inline'
         title.append(TitleSpan)
 
+        const outtitle = document.createElement('div')
+        outtitle.className = 'ui-from-title'
+        const outTitleSpan = document.createElement('span')
+        outTitleSpan.className = "ui-form-title-text"
+        outTitleSpan.textContent = input_def['title']
+        outTitleSpan.style.display = 'inline'
+        outtitle.append(outTitleSpan)
+
+
+        const help = document.createElement('div')
+        help.className = 'ui-from-help'
+        const helpSpan = document.createElement('span')
+        helpSpan.className = "ui-form-help-text"
+        helpSpan.textContent = input_def['help']
+        helpSpan.style.display = 'inline'
+        help.style.marginBottom = '10px'
+        help.append( helpSpan)
+
+
         row.className = 'ui-repeat section-row'
         row.id = input_def.id
 
+        FormParent.append(outtitle)
         FormParent.append(row)
         FormParent.append(Button)
+        FormParent.append(help)
 
         var click = input_def['min'];
 
@@ -1553,6 +1575,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
                 var children = self.el.querySelector('.Galaxy-form')
                 var Inputs = self.get_form_data(children)
+
+                console.log(Inputs)
                 var HistoryID = self.el.querySelector('.galaxy-history-list').querySelector('#History_IDs').value
                 var refine_inputs  = await KernelSideDataObjects(`from GiN import GalaxyTaskWidget\nGalaxyTaskWidget.UpdateForm(${JSON.stringify(self.model.get('GalInstance')['URL'])}, ${JSON.stringify(Inputs)}, ${JSON.stringify(self.model.get('ToolID'))}, ${JSON.stringify(HistoryID)})`)
                 var FormParent = self.el.querySelector('.Galaxy-form')
@@ -2716,6 +2740,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         var children = self.element.querySelector('.Galaxy-form')
 
         var Inputs = this.get_form_data(children, 'on')
+
 
         console.log(Inputs)
 
