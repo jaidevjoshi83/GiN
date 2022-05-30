@@ -182,63 +182,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         Toolform.append(FormParent)
     }
 
-    collect_form_data(FormEelements){
- 
-        var self = this
-        var InputPerameters = {}
-    
- 
-        for (var i = 0; i < FormEelements.length; i++) {
-            if (FormEelements[i].className.includes('section-row' ) && (FormEelements[i].style.display == 'block' || FormEelements[i].style.display  == '') ){
-                if (FormEelements[i].className !== 'ui-form-element section-row') {
 
-                    Object.assign(InputPerameters,  self.collect_form_data(FormEelements[i].children))                        
-   
-                } else if ((FormEelements[i].style.display == 'block' || FormEelements[i].className.includes('section-row'))) {
-                    if(FormEelements[i].querySelector('.InputData')){
-                        FormEelements[i].querySelector('.InputData').style.border=""
-                        InputPerameters[FormEelements[i].querySelector('.InputData').name] = FormEelements[i].querySelector('.InputData').value
-                        // }
-                    } else if (FormEelements[i].querySelector('.InputDataFile')) {
-
-                        var FileList = []
-
-                        for (var j = 0; j < FormEelements[i].querySelector('.InputDataFile').options.length; j++) {
-                            if (FormEelements[i].querySelector('.InputDataFile').options[j].selected == true) {
-                                FileList.push(FormEelements[i].querySelector('.InputDataFile').options[j].data)
-                            }
-                        }
-                        InputPerameters[FormEelements[i].querySelector('.InputDataFile').name] = {'values': FileList}
-
-                    } else if (FormEelements[i].querySelector('.outer-checkbox-div')){
-
-                        var values = []
-                        if (FormEelements[i].querySelector('.outer-checkbox-div').children[0] != undefined) {
-                            var key_name = FormEelements[i].querySelector('.outer-checkbox-div').children[0].querySelector('.InputDataCheckbox').name
-
-                            var DataObj = {}
-
-                            for (var j = 0; j < FormEelements[i].querySelector('.outer-checkbox-div').children.length; j++) {
-                                if (FormEelements[i].querySelector('.outer-checkbox-div').children[j].querySelector('.InputDataCheckbox').checked) {
-                                    values.push( FormEelements[i].querySelector('.outer-checkbox-div').children[j].querySelector('.InputDataCheckbox').value)
-                                }             
-                            }
-                            DataObj[FormEelements[i].querySelector('.outer-checkbox-div').children[0].name] =  values 
-
-                            InputPerameters[key_name ] = values
-                    }
-                    }
-                }
-            }
-           if (FormEelements[i].className.includes('conditional')) {
-                InputPerameters[FormEelements[i].querySelector('.InputData').name] = FormEelements[i].querySelector('.InputData').value
-            }
-        }
-
-        if (Object.keys(InputPerameters ).length !== 0) {
-            return InputPerameters 
-        }
-    }
 
     uid(){
         top.__utils__uid__ = top.__utils__uid__ || 0;
@@ -465,6 +409,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
     get_form_data(form, checking){
 
+
         var self = this
         var out = {}
 
@@ -472,39 +417,45 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             for (var j = 0; j < form.children.length; j++){
                 if (self.get_form_data(form.children[j], checking) == 'error') {
                     return 'error'
+                } else{
+                    Object.assign(out,  self.get_form_data(form.children[j], checking))
                 }
-                Object.assign(out,  self.get_form_data(form.children[j], checking))
             }
 
         } else if (form.querySelector('.InputData')){
-           out[form.querySelector('.InputData').name] =  form.querySelector('.InputData').value
           
            if (checking == 'on'){
                if (form.querySelector('.InputData').value == "") {
                     form.querySelector('.InputData').style.backgroundColor = 'pink'
                     return 'error'
-               }else{
+               } else {
                 form.querySelector('.InputData').style.backgroundColor = ''
+                out[form.querySelector('.InputData').name] =  form.querySelector('.InputData').value
                }
+           } else {
+                out[form.querySelector('.InputData').name] =  form.querySelector('.InputData').value
            }
            
         } else if (form.querySelector('.outer-checkbox-div')){
             var select_list = []
-            for(var k = 0; k < form.querySelector('.outer-checkbox-div').children.length; k++ ) {
-                if(form.querySelector('.outer-checkbox-div').children[k].querySelector('.InputDataCheckbox').checked) {
+            for (var k = 0; k < form.querySelector('.outer-checkbox-div').children.length; k++ ) {
+                if (form.querySelector('.outer-checkbox-div').children[k].querySelector('.InputDataCheckbox').checked) {
                     select_list.push(form.querySelector('.outer-checkbox-div').children[k].querySelector('.InputDataCheckbox').value)
                 }
             }
 
-            out[form.querySelector('.outer-checkbox-div').querySelector('.InputDataCheckbox').name] = select_list
-
-            if(checking == 'on') {
+            if (checking == 'on') {
                 if (select_list.length == 0){
                     form.querySelector('.outer-checkbox-div').querySelector('.InputDataCheckbox').style.backgroundColor = 'pink'
                     return 'error'
-                } else{
+                } else {
                     form.querySelector('.outer-checkbox-div').querySelector('.InputDataCheckbox').style.backgroundColor = ''
+                    out[form.querySelector('.outer-checkbox-div').querySelector('.InputDataCheckbox').name] = select_list
                 }
+            } else {
+
+                out[form.querySelector('.outer-checkbox-div').querySelector('.InputDataCheckbox').name] = select_list
+   
             }
 
         } else if (form.querySelector('.InputDataFile')){
@@ -518,18 +469,16 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 }
             }
 
-            if(checking == 'on') {
+            if (checking == 'on') {
                 if (out[form.querySelector('.InputDataFile').name].length < 1 ){
                     form.querySelector('.InputDataFile').style.backgroundColor = 'pink'
                     return 'error'
                 }
-                else{
+                else {
                     form.querySelector('.InputDataFile').style.backgroundColor = ''
-
                     out[form.querySelector('.InputDataFile').name] = input_files
                 }
-            } else{
-
+            } else {
                 out[form.querySelector('.InputDataFile').name] = input_files
             }
         }
@@ -538,6 +487,9 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             return out  
         }
     }
+
+
+
 
     galaxy_data_verify(file_cache, id) {
 
@@ -1328,12 +1280,10 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
             if (this.model.get('inputs')['id'] != 'GiN_data_upload_tool') {
 
-                var children = self.element.querySelector('.Galaxy-form').children;
-                var Inputs = self.collect_form_data(children)
+                var form = self.element.querySelector('.Galaxy-form')
+                var Inputs = self.get_form_data(form)
 
                 var refine_inputs  = await KernelSideDataObjects(`from GiN import GalaxyTaskWidget\nGalaxyTaskWidget.UpdateForm(${JSON.stringify(self.model.get('GalInstance')['URL'])}, ${JSON.stringify(Inputs)}, ${JSON.stringify(self.model.get('ToolID'))}, ${JSON.stringify(HistoryID)})`)
-                console.log(refine_inputs['inputs'])
-
                 var FormParent = self.el.querySelector('.Galaxy-form')    
                 self.removeAllChildNodes(FormParent)
                 var SelectedIndex = {}
@@ -1574,18 +1524,14 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
                 if (input_def['is_dynamic'] == true){
 
-                    var children = self.el.querySelector('.Galaxy-form').children;
-                    // self.Form_validation(children)
-                    var Inputs = self.collect_form_data(children)
-
+                    var children = self.el.querySelector('.Galaxy-form')
+                    var Inputs = self.get_form_data(children)
                     var HistoryID = self.el.querySelector('.galaxy-history-list').querySelector('#History_IDs').value
-
 
                     var refine_inputs  = await KernelSideDataObjects(`from GiN import GalaxyTaskWidget\nGalaxyTaskWidget.UpdateForm(${JSON.stringify(self.model.get('GalInstance')['URL'])}, ${JSON.stringify(Inputs)}, ${JSON.stringify(self.model.get('ToolID'))}, ${JSON.stringify(HistoryID)})`)
                     var FormParent = self.el.querySelector('.Galaxy-form')
 
                     self.removeAllChildNodes(FormParent)
-
                     self.form_builder(refine_inputs['inputs'])
 
                 }
@@ -1605,19 +1551,13 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
             if (input_def['is_dynamic'] == true){
 
-                var children = self.el.querySelector('.Galaxy-form').children;
-                // self.Form_validation(children)
-                var Inputs = self.collect_form_data(children)
-
+                var children = self.el.querySelector('.Galaxy-form')
+                var Inputs = self.get_form_data(children)
                 var HistoryID = self.el.querySelector('.galaxy-history-list').querySelector('#History_IDs').value
-
-                console.log(HistoryID)
-
                 var refine_inputs  = await KernelSideDataObjects(`from GiN import GalaxyTaskWidget\nGalaxyTaskWidget.UpdateForm(${JSON.stringify(self.model.get('GalInstance')['URL'])}, ${JSON.stringify(Inputs)}, ${JSON.stringify(self.model.get('ToolID'))}, ${JSON.stringify(HistoryID)})`)
                 var FormParent = self.el.querySelector('.Galaxy-form')
 
                 self.removeAllChildNodes(FormParent)
-
                 self.form_builder(refine_inputs['inputs'])
 
             }
@@ -1821,15 +1761,16 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
             var self = this
 
-            self.removeAllChildNodes(ConditionalDiv)
-
             var queryID = select.value
-            var children = self.element.querySelector('.Galaxy-form').children;
-            var Inputs = self.collect_form_data(children)
+            var form = self.element.querySelector('.Galaxy-form')
+       
+            var Inputs = self.get_form_data(form)
 
+            self.removeAllChildNodes(ConditionalDiv)
+       
             var HistoryID = self.element.querySelector('#History_IDs').value 
-            var refine_inputs   = await KernelSideDataObjects(`from GiN import GalaxyTaskWidget\nGalaxyTaskWidget.UpdateForm(${JSON.stringify(self.model.get('GalInstance')['URL'])}, ${JSON.stringify(Inputs)}, ${JSON.stringify(self.model.get('ToolID'))}, ${JSON.stringify(HistoryID)})`)
-          
+            var refine_inputs = await KernelSideDataObjects(`from GiN import GalaxyTaskWidget\nGalaxyTaskWidget.UpdateForm(${JSON.stringify(self.model.get('GalInstance')['URL'])}, ${JSON.stringify(Inputs)}, ${JSON.stringify(self.model.get('ToolID'))}, ${JSON.stringify(HistoryID)})`)
+
             this.conditional_name = input_def['name']
             var input = refine_inputs['inputs']
 
@@ -2775,6 +2716,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         var children = self.element.querySelector('.Galaxy-form')
 
         var Inputs = this.get_form_data(children, 'on')
+
+        console.log(Inputs)
 
         if (Inputs == 'error'){
             return
