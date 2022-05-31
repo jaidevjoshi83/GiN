@@ -191,6 +191,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
     add(input, FormParent, NamePrefix, data={}){
 
+        
+
         var input_def = input;
 
         if (input_def.id == 'undefined') {
@@ -370,7 +372,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
                     param_list.append(status_icon_div)
                     param_list.append(input_file_param)
-
                 }
                 gp_tool_list.append(tool)
             }
@@ -817,7 +818,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
     add_text (input_def, FormParent, NamePrefix){
 
-         input_def.id = this.uid()
+        input_def.id = this.uid()
  
         const input = document.createElement('input')
         input.id = `input-${input_def.id}`
@@ -832,12 +833,27 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         TitleSpan.textContent = input_def.label
         TitleSpan.style.display = 'inline'
 
+        const help = document.createElement('div')
+        help.className = 'ui-from-help'
+        const helpSpan = document.createElement('span')
+        helpSpan.style.fontWeight = 'normal'
+        helpSpan.className = "ui-form-help-text"
+        helpSpan.textContent = input_def['help']
+        helpSpan.style.display = 'inline'
+        help.style.marginLeft = '10px'
+        help.style.marginBottom = '10px'
+
+        help.append( helpSpan)
+       
         title.append(TitleSpan)
         row.className = 'ui-form-element section-row'
         row.id = input_def.id
         title.style.float = 'left'
+
         row.append(title)
         row.append(input)
+        row.append(help)
+
         FormParent.append(row)
         return row
     }
@@ -952,13 +968,11 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             .catch((error) => {
                 console.log(error);
             });
-
     }
 
     async resumable (data){
 
         var HistoryID = this.el.querySelector('#History_IDs').value
-        
         var state
 
         var e = this.el.querySelector('.list-item')
@@ -973,11 +987,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         }
         
         DataListdiv.append(await this.data_row_list(this.model.get('GalInstance'), HistoryID ))
-
         var ListItem =  this.el.querySelector('.list-item')
-
         data['type_id'] =`dataset-${data['id']}` 
-
         ListItem.prepend(await this.dataset_row_queued_state(data))
 
         for (let i = 0; i < Infinity; ++i) {
@@ -1365,6 +1376,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         outTitleSpan.className = "ui-form-title-text"
         outTitleSpan.textContent = input_def['title']
         outTitleSpan.style.display = 'inline'
+        outTitleSpan.style.marginLeft = '10px'
         outtitle.append(outTitleSpan)
 
 
@@ -1376,6 +1388,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         helpSpan.style.display = 'inline'
         help.style.marginBottom = '10px'
         help.append( helpSpan)
+        help.style.margin = '10px'
 
 
         row.className = 'ui-repeat section-row'
@@ -1488,6 +1501,16 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         TitleSpan.style.display = 'inline'
         title.append(TitleSpan)
 
+        const help = document.createElement('div')
+        help.className = 'ui-from-help'
+        const helpSpan = document.createElement('span')
+        helpSpan.className = "ui-form-help-text"
+        helpSpan.textContent = input_def['help']
+        helpSpan.style.fontWeight = 'normal'
+        helpSpan.style.display = 'inline'
+        help.style.marginBottom = '10px'
+        help.style.marginLeft = '10px'
+        help.append( helpSpan)
 
         for (var i = 0; i < options['hda'].length; i++) {
             const el = document.createElement("option");
@@ -1562,12 +1585,12 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         row.append(title)
         FileManu.append(Select)
-
         row.append(FileManu)
         
         FileManu.style.width = '100%'
 
         row.append(FileManu)
+        row.append(help)
         
         Select.addEventListener("change", async (e) => {
 
@@ -1661,16 +1684,33 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
     
             TitleSpan.style.display = 'inline'
             title.append(TitleSpan)
+
             row.className = 'ui-form-element section-row'
             row.id = input_def.id
+
             row.append(title)
             row.append(select)
+
+            const help = document.createElement('div')
+            help.className = 'ui-from-help'
+            const helpSpan = document.createElement('span')
+            helpSpan.className = "ui-form-help-text"
+            helpSpan.textContent = input_def['help']
+            helpSpan.style.fontWeight = 'normal'
+            helpSpan.style.display = 'inline'
+            help.style.marginBottom = '10px'
+            help.style.marginLeft = '10px'
+
+            help.append( helpSpan)
+            row.append(help)
 
             select.addEventListener("change", () => {
 
                 var queryID = select.value
             });
         }
+
+       
 
         FormParent.append(row)
 
@@ -1708,8 +1748,21 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         title.append(TitleSpan)
         row.className = 'ui-form-element section-row'
         row.id = input_def.id
+
+        const help = document.createElement('div')
+        help.className = 'ui-from-help'
+        const helpSpan = document.createElement('span')
+        helpSpan.className = "ui-form-help-text"
+        helpSpan.textContent = input_def['help']
+        helpSpan.style.fontWeight = 'normal'
+        helpSpan.style.display = 'inline'
+        help.style.marginBottom = '10px'
+        help.style.marginLeft = '10px'
+
+        help.append(helpSpan)
         row.append(title)
         row.append(select)
+        row.append(help)
         
         this.el.querySelector('.nbtools-form').append(row)
         FormParent.append(row)
@@ -1835,10 +1888,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         ConditionalDiv.id = `${input_def.id}-sections`
 
         UpperDiv.append(ConditionalDiv)
-
         parent.append(UpperDiv)
-
-        console.log(ConditionalDiv.children)
 
         function section(){
             for (var j in input_def['inputs']){
@@ -1856,11 +1906,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 section()
             } else{
                 self.removeAllChildNodes(ConditionalDiv)
-
             }
-
             e.preventDefault();
-
         });
     }
 
@@ -1881,8 +1928,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
     
         var datasets = await KernelSideDataObjects(`from GiN  import GalaxyTaskWidget\nGalaxyTaskWidget.history_data_list(server=${JSON.stringify(server)}, HistoryID=${JSON.stringify(HistoryID)} )`) 
 
- 
-        
         for (var i = 0; i < datasets.length; i++){
 
             if ('ok' == datasets[i]['state'] || datasets[i]['populated_state']) {
@@ -1929,14 +1974,11 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             
             const Tbl = new DOMParser().parseFromString(row, 'text/html').querySelector(`.list-item.${dataset['history_content_type']}.history-content.state-${pop_state}`)
 
-
-
             Tbl.querySelector('.name').addEventListener('click', async (e) => {
 
                 var URL = this.model.get('GalInstance')['URL']
                 var show_dataset = await KernelSideDataObjects(`from GiN  import GalaxyTaskWidget\nGalaxyTaskWidget.show_dataset_collection(server=${JSON.stringify(this.model.get('GalInstance')['URL'])}, dataset_id=${JSON.stringify(dataset['id'])} )`) 
         
-
                 for (var i = 0; i < show_dataset['elements'].length; i++){
                     Tbl.querySelector('.list-items').append(await self.dataset_collection_list_item(show_dataset['elements'][i]))
                 }
@@ -1956,16 +1998,13 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 this.dragged = event.target;
             }, false);
 
-
             var Download = Tbl.querySelector('.fa.fa-download')
 
             Download.addEventListener('click', () => {
-
                 KernelSideDataObjects(`from GiN import GalaxyTaskWidget\nGalaxyTaskWidget.download_file_to_jupyter_server(collection_id=${JSON.stringify(show_dataset['id'])}, server=${JSON.stringify(this.model.get('GalInstance')['URL'])}, file_name=${JSON.stringify(dataset['name'])}, data_type='collection')`);
             })
 
             self.delete_dataset(Tbl, dataset['id'],  history_id, 'collection')
-
             return Tbl
 
         } else{
@@ -1978,21 +2017,15 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
     add_data_share_menu ( ){
 
-
         var row = `<div id="add_data_share_menu" style="display: none;"  class="add_data_share_menu" >
-
                         <h1> Hi </h1>
-
                     </div>`
         
         const data_share_menu = new DOMParser().parseFromString(row, 'text/html')
-
         return data_share_menu.querySelector('#add_data_share_menu')
     }
     
     async dataset_row_ok_state (dataset, history_id){
-
-
 
         var URL = this.model.get('GalInstance')['URL']
 
@@ -2088,9 +2121,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         var Title = Tbl.querySelector('.title-bar.clear')
 
-
-
-
         var dragged
 
         Title.addEventListener("dragstart", (event) => {
@@ -2152,7 +2182,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         var URL = this.model.get('GalInstance')['URL']
 
-
         var details =  `<div class="details" style="display: none;">
                             <div class="summary">
                             <div class="detail-messages">${dataset['misc_blurb']}</div>
@@ -2175,7 +2204,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
     async dataset_row_queued_state (dataset){
 
     var URL = this.model.get('GalInstance')['URL']
-
 
     var row =   `<div id="${dataset['type_id']}" class="list-item dataset history-content state-queued" style="display: block;">
                     <div class="warnings"></div>
@@ -2346,9 +2374,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             } else{
                 button.querySelector('.details').style.display = 'block'
             }
-    
         }));
-        
     }
 
      delete_dataset (row, dataset_id,  HistoryID, datatype='dataset'){
@@ -2680,7 +2706,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         } else{
             row.querySelector('.details').style.display = 'block'
         }
-
         });
 
         var Download = row.querySelector('.fa.fa-download')
@@ -2738,11 +2763,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         var HistoryID = self.element.querySelector('#History_IDs').value 
         var children = self.element.querySelector('.Galaxy-form')
-
         var Inputs = this.get_form_data(children, 'on')
-
-
-        console.log(Inputs)
 
         if (Inputs == 'error'){
             return
@@ -2769,8 +2790,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
     }
 
     form_refresh_button (element){
-        var self  = this;
 
+        var self  = this;
         var button = element.querySelector('.icon-btn.rerun-btn')
 
         button.addEventListener('click', async (e) => {
@@ -2781,7 +2802,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             self.form_builder(refine_inputs['inputs'])
         });
     }
-
 
     add_display_application (display_apps, data) {
 
@@ -2817,7 +2837,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 DisAppsSpanLink.append(Link)
             }
         }
-
         return display_apps
     }   
 }
