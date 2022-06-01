@@ -490,9 +490,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         }
     }
 
-
-
-
     galaxy_data_verify(file_cache, id) {
 
         for (var i = 0; i < file_cache.length; i++){
@@ -838,7 +835,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         const helpSpan = document.createElement('span')
         helpSpan.style.fontWeight = 'normal'
         helpSpan.className = "ui-form-help-text"
-        helpSpan.textContent = input_def['help']
+        helpSpan.innerHTML = `<b> Help:</b> ${input_def['help']}`
         helpSpan.style.display = 'inline'
         help.style.marginLeft = '10px'
         help.style.marginBottom = '10px'
@@ -1505,7 +1502,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         help.className = 'ui-from-help'
         const helpSpan = document.createElement('span')
         helpSpan.className = "ui-form-help-text"
-        helpSpan.textContent = input_def['help']
+        helpSpan.innerHTML = `<b> Help:</b> ${input_def['help']}`
         helpSpan.style.fontWeight = 'normal'
         helpSpan.style.display = 'inline'
         help.style.marginBottom = '10px'
@@ -1563,7 +1560,13 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 const el = document.createElement("option");
 
                 el.textContent = opt;
-                el.data = {'id': draged_item.getAttribute('data-value'), 'src':'hda'} //Fix me 
+                // console.log(draged_item.data)
+
+                var dataID = draged_item.getAttribute('data-value')
+                var show_dataset = await KernelSideDataObjects(`from GiN  import GalaxyTaskWidget\nGalaxyTaskWidget.show_data_set(server=${JSON.stringify(self.model.get('GalInstance')['URL'])}, dataset_id=${JSON.stringify( dataID)} )`)
+                console.log(show_dataset)
+                console.log(draged_item.getAttribute('data-value'))
+                el.data = {'id': draged_item.getAttribute('data-value'), 'src':show_dataset['hda_ldda']} //Fix me 
 
                 Select.appendChild(el);
 
@@ -1695,7 +1698,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             help.className = 'ui-from-help'
             const helpSpan = document.createElement('span')
             helpSpan.className = "ui-form-help-text"
-            helpSpan.textContent = input_def['help']
+            helpSpan.innerHTML = `<b> Help:</b> ${input_def['help']}`
             helpSpan.style.fontWeight = 'normal'
             helpSpan.style.display = 'inline'
             help.style.marginBottom = '10px'
@@ -1753,7 +1756,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         help.className = 'ui-from-help'
         const helpSpan = document.createElement('span')
         helpSpan.className = "ui-form-help-text"
-        helpSpan.textContent = input_def['help']
+        helpSpan.innerHTML = `<b> Help:</b> ${input_def['help']}`
         helpSpan.style.fontWeight = 'normal'
         helpSpan.style.display = 'inline'
         help.style.marginBottom = '10px'
@@ -2064,6 +2067,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         var Title = Tbl.querySelector('.title')
         var GpTools = Tbl.querySelector('.gpt')
         var GTools = Tbl.querySelector('.gt')
+
+        Title.data = dataset
 
         GTools.addEventListener("click", (e) => {
 
@@ -2768,13 +2773,14 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         if (Inputs == 'error'){
             return
         }
+
+        console.log(Inputs)
    
         if (this.model.get('inputs')['id'] == 'GiN_data_upload_tool') {
             this.dataupload_job()
         } else {
             this.AddJobStatusWidget(Inputs, HistoryID)
         }
-
         }));
     }
 
