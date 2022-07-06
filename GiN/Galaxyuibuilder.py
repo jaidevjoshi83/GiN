@@ -57,7 +57,13 @@ class GalaxyUIBuilder(BaseWidget, NBTool):
             self.id = 'GiN_Upload_Data'
             self.description = 'data upload tool'
         else:
-            self.name = self.GalInstance['tool_name']+" ("+self.GalInstance['URL']+")" 
+            if 'localhost' in self.GalInstance['URL']:
+                self.name = self.GalInstance['tool_name']+" (Galaxy Local)" 
+            elif 'usegalaxy' in self.GalInstance['URL']:
+                self.name = self.GalInstance['tool_name']+" (Galaxy main)" 
+            else:
+                self.name = self.GalInstance['tool_name']+" ("+self.GalInstance['URL']+")" 
+
             self.id = self.GalInstance['tool_ID'] #function_or_method.__qualname__
 
             # Set the description based on the docstring
@@ -69,4 +75,3 @@ class GalaxyUIBuilder(BaseWidget, NBTool):
         # register_tool and collapse are True by default
         self.register_tool = True
         self.collapse = False
-

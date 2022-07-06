@@ -118,5 +118,39 @@
   color: white;
 }
 
+.sub-group{
+  padding-left: 30px;
+}
+
+.icon.fa.mr-1.fa-plus{
+  margin-top: 2px;
+  margin-left: 2px;
+  margin-right: 5px;
+  float: left;
+  color: rgb(255,255,255);
+  background: black;
+  padding: 1px;
+  font-size: 10px;
+}
+
+.icon.fa.mr-1.fa-minus{
+  margin-top: 2px;
+  margin-left: 2px;
+  margin-right: 5px;
+  float: left;
+  color: rgb(255,255,255);
+  background: black;
+  padding: 1px;
+  font-size: 10px;
+}
+
+.ui-options-list.drilldown-container {
+  width: 100%;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+
+
 
 

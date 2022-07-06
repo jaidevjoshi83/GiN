@@ -127,8 +127,6 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
                     hda_ldda=showJob['outputs'][i]['src'])
                 )
 
-        print(DataList)
-
         return IPython.display.JSON(DataList)
 
     def RefinedInputs(inputs, gi):
@@ -307,7 +305,6 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
 
         file_name = glob.glob(temp_dir+'/*.*')
 
-
         out = gi14.tools.gi.tools.upload_file(
                                     path=file_name[0],
                                     history_id=history_id
@@ -389,7 +386,7 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
             self.tool = tool
 
             self.GalInstance = {
-                                # "API_key":  self.tool['gi']._key,
+                                "API_key":  self.tool['gi']._key,
                                 # "email_ID": self.tool['gi'].users.get_current_user()['email'],
                                 "URL":      self.tool['gi'].base_url,
                                 "tool_ID": self.tool['id'],

@@ -5,19 +5,17 @@
  *
  * Copyright 2021 Regents of the Cleveland Clinic, Cleveland 
  */
- import '../style/Galaxyuibuilder.css';
- import '../style/historydata.css';
+import '../style/Galaxyuibuilder.css';
+import '../style/historydata.css';
 import '../style/galaxy-form.css';
-
- import { MODULE_NAME, MODULE_VERSION } from './version';
- import { unpack_models } from "@jupyter-widgets/base";
- import { BaseWidgetModel, BaseWidgetView } from "@g2nb/nbtools";
- import _ from "underscore";
- import {  KernelSideDataObjects } from './utils';
- import * as tus from "tus-js-client";
- import axios from "axios";
- import { Data } from '@g2nb/nbtools/lib/dataregistry';
-
+import { MODULE_NAME, MODULE_VERSION } from './version';
+import { unpack_models } from "@jupyter-widgets/base";
+import { BaseWidgetModel, BaseWidgetView } from "@g2nb/nbtools";
+import _ from "underscore";
+import {  KernelSideDataObjects } from './utils';
+import * as tus from "tus-js-client";
+import axios from "axios";
+import { Data } from '@g2nb/nbtools/lib/dataregistry';
 
 export class GalaxyUIBuilderModel extends BaseWidgetModel{
      
@@ -25,6 +23,7 @@ export class GalaxyUIBuilderModel extends BaseWidgetModel{
          return Object.assign(Object.assign(Object.assign({}, super.defaults()), { _model_name: GalaxyUIBuilderModel.model_name, _model_module: GalaxyUIBuilderModel.model_module, _model_module_version: GalaxyUIBuilderModel.model_module_version, _view_name: GalaxyUIBuilderModel.view_name, _view_module: GalaxyUIBuilderModel.view_module, _view_module_version: GalaxyUIBuilderModel.view_module_version, name: 'Python Function', description: '', origin: '', _parameters: [], parameter_groups: [], function_import: '', register_tool: true, collapse: true, events: {}, buttons: {}, display_header: true, display_footer: true, busy: false, run_label: 'Execute', GalInstance: {}, output: undefined, inputs:{}, form_output:{}, UI:{}, ToolID:'', HistoryData:[], History_IDs:[] }));
      }
  }
+
  GalaxyUIBuilderModel.model_name = 'GalaxyUIBuilderModel';
  GalaxyUIBuilderModel.model_module = MODULE_NAME;
  GalaxyUIBuilderModel.model_module_version = MODULE_VERSION;
@@ -182,16 +181,12 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         Toolform.append(FormParent)
     }
 
-
-
     uid(){
         top.__utils__uid__ = top.__utils__uid__ || 0;
         return `uid-${top.__utils__uid__++}`;
     }
 
     add(input, FormParent, NamePrefix, data={}){
-
-        
 
         var input_def = input;
 
@@ -706,26 +701,150 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
          }
          return false
     }
+
+    // Drill_down2(inputs, parent) {
+
+    //     console.log(parent)
+
+    //     var self = this
+
+    //     var Div = document.createElement('div')
+    //     var Div1 = document.createElement('div')
+
+    //     Div1.className = 'Label-div'
+
+    //     var option = document.createElement('div')
+    //     option.className = 'ui-options'
+
+    //     var label = document.createElement('label')
+    //     label.className = 'ui-options-label'
+
+    //     label.innerText = inputs['options'][0]['name']
+
+    //     option.append(label)
+
+    //     var SubGroup = document.createElement('div')
+    //     SubGroup.className = 'sub-group'
+    //     // SubGroup.style.display = 'none'
+
+    //     var Span = document.createElement('span')
+    //     Span.className = "icon fa mr-1 fa-plus"
+
+    //     // Span.addEventListener('click', (e) => {
+
+    //     //     if (e.target.className ==  "icon fa mr-1 fa-plus"){
+    //     //         Span.className = "icon fa mr-1 fa-minus"
+    //     //         SubGroup.style.display = 'block'
+    //     //     } else{
+    //     //         e.target.className =  "icon fa mr-1 fa-plus"
+    //     //         SubGroup.style.display = 'none'
+    //     //     }
+    //     // })
+
+    //     Div1.append(Span)
+    //     Div1.append(option)
+
+    //     Div.append(Div1)
+    //     Div.append(SubGroup)
+
+    //     for (var i = 0; i < inputs['options'].length; i++) {
+    //         if (inputs['options'][i]['options'].length > 0 ) {
+
+    //             var option1 = document.createElement('div')
+    //             var label1 = document.createElement('label')
+
+    //             option1.className = 'ui-options'
+    //             label1.className = 'ui-options-label'
+                
+    //             label1.innerText = inputs['options'][i]['name']
+
+    //             // console.log(label1)
+
+    //             option1.append(label1)
+    //             SubGroup.append(option1)
+
+    //             parent.append( self.Drill_down2(inputs['options'][i], SubGroup) )
+    //         }
+
+    //         else {
+    //             // var option1 = document.createElement('div')
+    //             // var label1 = document.createElement('label')
+
+    //             // option1.className = 'ui-options'
+    //             // label1.className = 'ui-options-label'
+
+    //             // label1.innerText = inputs['options'][i]['name']
+
+    //             // option1.append(label1)
+    //             // SubGroup.append(option1)
+
+    //         }
+    //     }
+
+    //     return Div
+    // }
     
+    Drill_down2(inputs) {
+        var self = this
+
+        for (var i = 0; i < inputs['options'].length; i++) {
+
+            var Div = document.createElement('div')
+            
+            if (inputs['options'][i]['options'].length > 0 ) {
+                console.log('------->',  inputs['options'][i]['name'])
+                var label1 = document.createElement('label')
+                label1.className = 'ui-options-label'
+                label1.innerText = inputs['options'][i]['name']
+
+                Div.append(label1)
+                Div.append(self.Drill_down2(inputs['options'][i]) )
+            }
+
+            else {
+
+                var Div1 = document.createElement('div')
+                var label = document.createElement('label')
+
+                label.className = 'ui-options-label'
+                label.innerText = inputs['options'][i]['name']
+
+                Div1.append(label)
+                Div.append(Div1)
+
+                console.log(inputs['options'][i]['name'])
+                // var option1 = document.createElement('div')
+                // var label1 = document.createElement('label')
+                // option1.className = 'ui-options'
+                // label1.className = 'ui-options-label'
+                // label1.innerText = inputs['options'][i]['name']
+                // option1.append(label1)
+                // SubGroup.append(option1)
+            }
+        }
+        return Div
+    }
+
     Drill_down(options, param_name='default'){
 
         var OuterDrillDown = document.createElement('div')
         OuterDrillDown.className = 'outer-drill'
 
         const Icon = document.createElement('span')
-        Icon.className = 'icon fa mr-1 fa-check-square-o'
+        Icon.className = 'icon fa mr-1 fa-plus'
 
-        OuterDrillDown.append(Icon)
+        // OuterDrillDown.append(Icon)
 
-        for(var i=0; i<options.length; i++){
-
+        for (var i = 0; i < options.length; i++){
             const Innerdiv  = document.createElement('div')
             Innerdiv.className = 'inner-div'
-            var InputID = `input-id-${this.uid()}`
 
+            var InputID = `input-id-${this.uid()}`
             var Input = document.createElement('input')
+
             Input.id = InputID
             Input.value = options[i]['value']
+
             Input.style.maxWidth = '20px'
             Input.style.float = 'left'
             Input.name = param_name
@@ -738,6 +857,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             Input.type = 'checkbox'
             OuterDrillDown.style.marginLeft = "20px"
 
+            Innerdiv.append(Icon)
             Innerdiv.append(Input)
             Innerdiv.append(Label)
             
@@ -747,8 +867,43 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 OuterDrillDown.append(this.Drill_down(options[i]['options'], param_name))
             }
         }
-
         return OuterDrillDown
+    }
+
+    add_drill_down_sectionNew(input_def, FormParent, NamePrefix) {
+
+        input_def.id = this.uid()
+        const row = document.createElement('div')
+        row.className = 'drill-down ui-form-element section-row'
+        row.id = `uid-${input_def.id}`
+
+        const title = document.createElement('div')
+        title.className = 'ui-from-title'
+
+        const TitleSpan = document.createElement('span')
+        TitleSpan.className = "ui-form-title-text"
+
+        TitleSpan.textContent = input_def.label
+        TitleSpan.style.display = 'inline'
+
+        const SelectAllDiv = document.createElement('div')
+        const Icon = document.createElement('span')
+        Icon.className = 'far fa-square'
+
+        const CheckBoxLabel = document.createElement('span')
+        CheckBoxLabel.textContent = 'Select/Unselect all'
+
+        SelectAllDiv.append(Icon)
+
+        // SelectAllDiv.append(CheckBox)
+
+        title.append(TitleSpan)
+        row.append(title)
+        row.append(SelectAllDiv)
+        FormParent.append(row)
+
+        return row
+
     }
 
     add_drill_down_section(input_def, FormParent, NamePrefix){
@@ -805,11 +960,20 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         row.className = 'drill-down ui-form-element section-row'
         row.id = `uid-${input_def.id}`
 
+        const DDContainer = document.createElement('div')
+        DDContainer.className =  'ui-options-list drilldown-container'
+
         row.append(title)
         row.append(UIFormField)
-        row.append(this.Drill_down(input_def['options'], input_def['name'] ))
 
+        var Div = document.createElement('div')
+
+        DDContainer.append( this.Drill_down2(input_def, Div))
+        row.append(DDContainer)
+
+        // row.append(this.Drill_down(input_def['options'], input_def['name'] ))
         FormParent.append(row)
+
         return row
     }
 
@@ -818,6 +982,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         input_def.id = this.uid()
  
         const input = document.createElement('input')
+
         input.id = `input-${input_def.id}`
         input.name = NamePrefix+input_def['name']
         input.value = input_def['value']
@@ -954,9 +1119,16 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
     submitPayload(payload, credentials) {
 
-        var self = this
-        axios.post(`${credentials['URL']}api/tools/fetch?key=${credentials['API_key']}`, payload)
 
+        console.log(`${credentials['URL']}/api/tools/fetch?key=${credentials['API_key']}`)
+
+        var self = this
+        axios.post(`${credentials['URL']}/api/tools/fetch`, payload, {
+
+            headers: {
+                'x-api-key': this.model.get('GalInstance')['API_key'],
+              }
+        })
             .then((response) => {
                 console.log(response)
                 self.resumable(response['data']['outputs'][0])
@@ -1110,7 +1282,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
             upload.start()
         })
-
     }
 
     Upload_callback(input){
@@ -1132,8 +1303,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                         "elements": [
                             {
                                 "src": "files",
-                                "url": "",
-                                "paste_content": null,
                                 "name":  input.files[0]['name'],
                                 "dbkey": children.querySelector('.genomes_options').value,
                                 "ext": children.querySelector('.datatypes_options').value,
@@ -1141,7 +1310,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                         ]
                     }
                 ],
-                "auto_decompress": true, 
                 'files': input.files,
             }
             self.NewTusUpload(data)
@@ -1259,7 +1427,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         var DataList = this.el.querySelector('#history-list')
         DataList.append(select)
-
     }
 
     add_history_list(selected_value='default'){
@@ -1564,8 +1731,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
                 var dataID = draged_item.getAttribute('data-value')
                 var show_dataset = await KernelSideDataObjects(`from GiN  import GalaxyTaskWidget\nGalaxyTaskWidget.show_data_set(server=${JSON.stringify(self.model.get('GalInstance')['URL'])}, dataset_id=${JSON.stringify( dataID)} )`)
-                console.log(show_dataset)
-                console.log(draged_item.getAttribute('data-value'))
                 el.data = {'id': draged_item.getAttribute('data-value'), 'src':show_dataset['hda_ldda']} //Fix me 
 
                 Select.appendChild(el);
@@ -1627,7 +1792,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         row.className =  'ui-form-element section-row'
         row.id =  this.uid()
 
-        if (input_def.display== 'checkboxes') {
+        if (input_def.display == 'checkboxes') {
 
             const TitleSpan = document.createElement('span')
             TitleSpan.className = "ui-form-title-text"
