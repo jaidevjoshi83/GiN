@@ -250,7 +250,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                     }
                 }
                 this.Dirll_Down_Output(drill_down[i].children)
-
                 Object.assign(values, this.Dirll_Down_Output(drill_down[i].children))
             }
         }
@@ -588,9 +587,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                             e.target.parentNode.parentNode.querySelector('.fas.fa-solid.fa-check').style.display = 'none'
 
                             if (server == e.target.data){
-
-                                console.log('same_server', e.target.data)
-
 
                                 e.target.parentNode.parentNode.querySelector('.fas.fa-spinner.fa-spin').style.display = 'none'
                                 e.target.parentNode.parentNode.querySelector('.fas.fa-solid.fa-check').style.display = 'block'
@@ -1119,9 +1115,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
     submitPayload(payload, credentials) {
 
-
-        console.log(`${credentials['URL']}/api/tools/fetch?key=${credentials['API_key']}`)
-
         var self = this
         axios.post(`${credentials['URL']}/api/tools/fetch`, payload, {
 
@@ -1130,8 +1123,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
               }
         })
             .then((response) => {
-                console.log(response)
                 self.resumable(response['data']['outputs'][0])
+                console.log('ok')
             })
         
             .catch((error) => {
@@ -1142,6 +1135,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
     async resumable (data){
 
         var HistoryID = this.el.querySelector('#History_IDs').value
+
+        console.log(HistoryID)
         var state
 
         var e = this.el.querySelector('.list-item')
@@ -1155,7 +1150,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             }
         }
         
-        DataListdiv.append(await this.data_row_list(this.model.get('GalInstance'), HistoryID ))
+        DataListdiv.append(await this.data_row_list(this.model.get('GalInstance')['URL'], HistoryID ))
         var ListItem =  this.el.querySelector('.list-item')
         data['type_id'] =`dataset-${data['id']}` 
         ListItem.prepend(await this.dataset_row_queued_state(data))
@@ -1289,7 +1284,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         var self  = this
         var children = this.element.querySelector('.Galaxy-form')
 
-        input.addEventListener("change", function(e) {
+        this.el.querySelectorAll('.nbtools-run').forEach((button) => button.addEventListener('click', () => {
 
             var cnf = {};
 
@@ -1313,8 +1308,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 'files': input.files,
             }
             self.NewTusUpload(data)
-            
-        })
+
+            }));
     }
 
    async dataupload_job( uplood_status='', HistoryID='' ) {
@@ -1354,6 +1349,9 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         for (let i = 0; i < Infinity; ++i) {
 
             var jobstate = await KernelSideDataObjects(`from GiN import GalaxyTaskWidget\nGalaxyTaskWidget.return_job_status(server=${JSON.stringify(this.model.get('GalInstance')['URL'])}, job_id=${JSON.stringify(InitialData['jobs'][0]['id'])} )`);
+
+            console.log(jobstate)
+            console.log(data)
             var data = await KernelSideDataObjects(`from GiN import GalaxyTaskWidget\nGalaxyTaskWidget.OutPutData(server=${JSON.stringify(this.model.get('GalInstance')['URL'])}, JobID=${JSON.stringify(InitialData['jobs'][0]['id'])} )`);
 
             if (jobstate['state'] == 'queued' || 'new' || 'running' ) {
@@ -2092,7 +2090,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         DataList.style.overflow = 'auto'
         DataList.style.height = '600px'
         DataList.style.overflowX = 'scroll'
-         DataList.style.overflowY = 'scroll'
+        DataList.style.overflowY = 'scroll'
     
         var datasets = await KernelSideDataObjects(`from GiN  import GalaxyTaskWidget\nGalaxyTaskWidget.history_data_list(server=${JSON.stringify(server)}, HistoryID=${JSON.stringify(HistoryID)} )`) 
 
@@ -2938,8 +2936,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         if (Inputs == 'error'){
             return
         }
-
-        console.log(Inputs)
    
         if (this.model.get('inputs')['id'] == 'GiN_data_upload_tool') {
             this.dataupload_job()

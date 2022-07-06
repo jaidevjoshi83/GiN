@@ -93,15 +93,17 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
         gi3 = a.get(server=server)
 
         history = gi3.gi.histories.show_history(history_id=HistoryID)
-        a = hi.History(history, gi=gi)
+        # a = hi.History(history, gi=gi3.gi)
 
         if (upload_method == 'text'):
             job = gi3.gi.tools.put_url(content=file_path, history_id=HistoryID)
+            return IPython.display.JSON(job)
 
         elif (upload_method == 'textarea'):
             job = gi3.gi.tools.put_url(content=file_path, history_id=HistoryID)
+            return IPython.display.JSON(job)
 
-        return IPython.display.JSON(job)
+        # return IPython.display.JSON(job)
 
     def TestOut(server=None, JobID=None):
 
@@ -187,8 +189,12 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
 
     def history_data_list(server=None, HistoryID=None):
 
+        print('okkk', server)
+
         a = GiN.sessions.SessionList()
         gi7 = a.get(server=server)
+
+        dir(gi7)
 
         HistoryData = gi7.gi.datasets.gi.datasets.get_datasets(
                         history_id=HistoryID,
