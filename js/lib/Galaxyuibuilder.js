@@ -1084,6 +1084,9 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         var datatypeSelect = document.createElement('select')
         datatypeSelect.className = 'datatypes_options'
 
+        var auto_opt = document.createElement("option");
+        auto_opt.textContent = auto_opt.value = 'auto';
+        datatypeSelect.appendChild(auto_opt);
         for(var i = 0; i < datatypes_genomes['datatypes'].length; i++) {
             const opt = datatypes_genomes['datatypes'][i];
             const el = document.createElement("option");
