@@ -5,9 +5,12 @@ from .Galaxyuibuilder import GalaxyUIBuilder
 from .util import DEFAULT_COLOR, DEFAULT_LOGO
 import bioblend.galaxy.objects as hi
 import json5
+import logging
 import IPython.display
 import glob
 from nbtools import UIBuilder
+
+log = logging.getLogger(__name__)
 
 try:
     from genepattern import authwidget
@@ -15,7 +18,11 @@ except:
     print('need to be fixed...!')
     pass
 
-from gp import GPTask
+try:
+    from gp import GPTask
+except ModuleNotFoundError:
+    log.warning('gp module is not available, will not be able to mix GiN with GenePattern')
+    GPTask = None
 import GiN
 
 
