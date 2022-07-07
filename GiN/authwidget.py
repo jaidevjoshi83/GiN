@@ -12,6 +12,8 @@ from .Galaxyuibuilder import GalaxyUIBuilder
 
 GALAXY_SERVERS = {
     'Galaxy Main': 'https://usegalaxy.org',
+    'Galaxy Europe': 'https://usegalaxy.eu',
+    'Galaxy Australia': 'https://usegalaxy.org.au',
     'Galaxy Local': 'http://localhost:8080',
 }
 
@@ -43,7 +45,7 @@ class GalaxyAuthWidget(UIBuilder):
                 'type': 'choice',
                 'combo': True,
                 'sendto': False,
-                'default': GALAXY_SERVERS['Galaxy Local'],
+                'default': GALAXY_SERVERS['Galaxy Main'],
                 'choices': GALAXY_SERVERS
             },
             'email': {
