@@ -1160,9 +1160,9 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         for (let i = 0; i < Infinity; ++i) {
 
-           state = await KernelSideDataObjects(`from GiN import GalaxyTaskWidget\nGalaxyTaskWidget.return_job_state(server=${JSON.stringify(this.model.get('GalInstance')['URL'])}, job_id=${JSON.stringify(data['id'])} )`);
+            state = await KernelSideDataObjects(`from GiN import GalaxyTaskWidget\nGalaxyTaskWidget.show_data_set(server=${JSON.stringify(this.model.get('GalInstance')['URL'])}, dataset_id=${JSON.stringify(data['id'])} )`);
            
-            if (state['job_state'] == "running") {
+            if (state['state'] == "running") {
                 if (ListItem.querySelector(`#${data['type_id']}`) !== null ) {
                     var e = ListItem.querySelector(`#${data['type_id']}`)
                     e.parentElement.removeChild(e)
@@ -1170,7 +1170,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 }
             } 
 
-            else if (state['job_state'] == "ok") {
+            else if (state['state'] == "ok") {
                 if ( ListItem.querySelector(`#${data['type_id']}`) !== null) {
                     var e = ListItem.querySelector(`#${data['type_id']}`)
                     e.parentElement.removeChild(e)
@@ -1178,7 +1178,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 }
             }
                
-            else if (state['job_state'] == "error")  {
+            else if (state['state'] == "error")  {
                 if ( ListItem.querySelector(`#${data['type_id']}`) !== null) {
                     var e = ListItem.querySelector(`#${data['type_id']}`)
                     e.parentElement.removeChild(e)
@@ -1188,7 +1188,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
             await this.waitforme(5000)
 
-            if (state['job_state'] == 'ok' ) {
+            if (state['state'] == 'ok' || state['state'] == 'error') {
                 break;
             }    
         }
