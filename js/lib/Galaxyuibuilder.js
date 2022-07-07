@@ -1492,6 +1492,16 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         helpSection.append(HelpButton)
         helpSection.append(HelpContent)
 
+        // Update relative img srcs to point to original server
+        var imgs = HelpContent.getElementsByTagName("img");
+        for (var i = 0; i < imgs.length; i++) {
+            const imgsrc = imgs[i].getAttribute("src");
+            const imgsrcL = imgsrc.toLowerCase();
+            if( !imgsrcL.startsWith("http:") &&  !imgsrcL.startsWith("https:") && !imgsrcL.startsWith("data")){
+                imgs[i].src = new URL(imgsrc, self.model.get('GalInstance')['URL']).href;
+            }
+        }
+
         HelpButton.addEventListener("click", function() {
 
             let nextSibling = HelpButton.nextElementSibling;   
