@@ -12,6 +12,7 @@ from nbtools.basewidget import BaseWidget
 from nbtools.tool_manager import ToolManager, NBTool
 from .jobwidget import GalaxyJobWidget
 from ipywidgets import interactive
+from .util import GALAXY_SERVER_NAME_BY_URL
 
 class GalaxyUIBuilder(BaseWidget, NBTool):
     """
@@ -57,12 +58,7 @@ class GalaxyUIBuilder(BaseWidget, NBTool):
             self.id = 'GiN_Upload_Data'
             self.description = 'data upload tool'
         else:
-            if 'localhost' in self.GalInstance['URL']:
-                self.name = self.GalInstance['tool_name']+" (Galaxy Local)" 
-            elif 'usegalaxy' in self.GalInstance['URL']:
-                self.name = self.GalInstance['tool_name']+" (Galaxy main)" 
-            else:
-                self.name = self.GalInstance['tool_name']+" ("+self.GalInstance['URL']+")" 
+            self.name = f"{self.GalInstance['tool_name']} ({GALAXY_SERVER_NAME_BY_URL.get(self.GalInstance['URL'], self.GalInstance['URL'])})"
 
             self.id = self.GalInstance['tool_ID'] #function_or_method.__qualname__
 

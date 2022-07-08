@@ -5,17 +5,10 @@ from threading import Thread
 from .sessions import session
 #from .shim import login, system_message
 from .taskwidget import TaskTool
-from .util import DEFAULT_COLOR, DEFAULT_LOGO
+from .util import DEFAULT_COLOR, DEFAULT_LOGO, GALAXY_SERVERS
 from urllib.error import HTTPError
 from .Galaxyuibuilder import GalaxyUIBuilder
 
-
-GALAXY_SERVERS = {
-    'Galaxy Main': 'https://usegalaxy.org',
-    'Galaxy Europe': 'https://usegalaxy.eu',
-    'Galaxy Australia': 'https://usegalaxy.org.au',
-    'Galaxy Local': 'http://localhost:8080',
-}
 
 REGISTER_EVENT = """
     const target = event.target;
