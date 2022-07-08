@@ -16,6 +16,7 @@ import {  KernelSideDataObjects } from './utils';
 import * as tus from "tus-js-client";
 import axios from "axios";
 import { Data } from '@g2nb/nbtools/lib/dataregistry';
+import { ContextManager } from '@g2nb/nbtools';
 
 export class GalaxyUIBuilderModel extends BaseWidgetModel{
      
@@ -189,6 +190,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
     add(input, FormParent, NamePrefix, data={}){
 
         var input_def = input;
+
+        console.log(input)
 
         if (input_def.id == 'undefined') {
             input_def.id = this.uid()
@@ -632,6 +635,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                                             self.galaxy_file_cache.push(new Data(e.target.data, [dataset['name'], out['name']], [dataset['id'], out['id']], dataset['extension']));
 
                                             const el = document.createElement("option");
+                                            console.log(out)
                                             el.textContent = out['name'];
                                             el.value = out['id']
                                             el.data = {'id': out['id'], 'src':out['hda_ldda']}
@@ -654,6 +658,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
                                     for (var k = 0; k < self.galaxy_file_cache.length; k++){
                                         if (self.galaxy_file_cache[k]['label'][0] == dataset['id']) {
+
+                                            console.log(out)
 
                                             const el = document.createElement("option");
                                             el.textContent = out['name'];
