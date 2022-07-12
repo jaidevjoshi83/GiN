@@ -314,11 +314,10 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
                     input_file_param_label.addEventListener("click", async (e)=> {
 
-                    console.log(UID)
                     e.target.parentNode.parentNode.querySelector('.fas.fa-spinner.fa-spin').style.display = 'block'
 
                    if (self.file_exist(dataset)){
-                        console.log('Present')
+                  
                         document.getElementById(`${e.target.id.replace('-label', '')}`).value =  self.file_exist(dataset)
                         document.getElementById(`${e.target.id.replace('-label', '')}`).dispatchEvent(new Event('change', { bubbles: true }));  
 
@@ -338,6 +337,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                         this.file_cache.push(new Data(origin, dataset['uri'], dataset['id'], dataset['file_ext']));
                         ContextManager.data_registry.register({ data: this.file_cache[ this.file_cache.length-1] })
                         document.getElementById(`${e.target.id.replace('-label', '')}`).value =  uri['uri']
+
                         document.getElementById(`${e.target.id.replace('-label', '')}`).dispatchEvent(new Event('change', { bubbles: true }));
                     }
 
@@ -402,10 +402,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         }
     }
 
-
     get_form_data(form, checking){
-
-
         var self = this
         var out = {}
 
@@ -509,6 +506,9 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
     async galaxy_data_upload(gp_tool_list, dataset, server) {
 
+        console.log(dataset)
+
+
         var self = this
         this.removeAllChildNodes(gp_tool_list)
         var Nodes1 =  document.querySelector('body').querySelectorAll('.Galaxy-form')
@@ -591,11 +591,13 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
                                 e.target.parentNode.parentNode.querySelector('.fas.fa-spinner.fa-spin').style.display = 'none'
                                 e.target.parentNode.parentNode.querySelector('.fas.fa-solid.fa-check').style.display = 'block'
+
                                 self.galaxy_file_cache.push(new Data(e.target.data, [dataset['name'], 'NA'], [dataset['id'], 'NA'], dataset['extension']));
 
                                 const el = document.createElement("option");
                                 el.textContent = dataset['name'];
                                 el.value = dataset['id']
+
                                 el.data = {'id': dataset['id'], 'src':dataset['hda_ldda']}
                                 el.selected = true
                                 el.dispatchEvent(new Event('change', { bubbles: true }))
@@ -633,8 +635,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                                             self.galaxy_file_cache.push(new Data(e.target.data, [dataset['name'], out['name']], [dataset['id'], out['id']], dataset['extension']));
 
                                             const el = document.createElement("option");
-                                            console.log(out)
-                                            el.textContent = out['name'];
+                                
+                                            el.textContent = dataset['name'];
                                             el.value = out['id']
                                             el.data = {'id': out['id'], 'src':out['hda_ldda']}
                                             el.selected = true
@@ -657,11 +659,11 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                                     for (var k = 0; k < self.galaxy_file_cache.length; k++){
                                         if (self.galaxy_file_cache[k]['label'][0] == dataset['id']) {
 
-                                            console.log(out)
-
                                             const el = document.createElement("option");
-                                            el.textContent = out['name'];
+                                            console.log(dataset['name'])
+                                            el.textContent = dataset['name'];
                                             el.value = out['id']
+
                                             el.data = {'id': out['id'], 'src':out['hda_ldda']}
                                             el.selected = true
                                             el.dispatchEvent(new Event('change', { bubbles: true }))
@@ -2160,8 +2162,13 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 var URL = this.model.get('GalInstance')['URL']
                 var show_dataset = await KernelSideDataObjects(`from GiN  import GalaxyTaskWidget\nGalaxyTaskWidget.show_dataset_collection(server=${JSON.stringify(this.model.get('GalInstance')['URL'])}, dataset_id=${JSON.stringify(dataset['id'])} )`) 
         
-                for (var i = 0; i < show_dataset['elements'].length; i++){
-                    Tbl.querySelector('.list-items').append(await self.dataset_collection_list_item(show_dataset['elements'][i]))
+                if (Tbl.querySelector('.list-items').childNodes.length > 0) {
+                    // self.removeAllChildNodes( Tbl.querySelector('.list-items'))
+                } else{
+                    for (var i = 0; i < show_dataset['elements'].length; i++){
+                
+                        Tbl.querySelector('.list-items').append(await self.dataset_collection_list_item(show_dataset['elements'][i]))
+                    }
                 }
 
                 if (Tbl.querySelector('.list-items').style.display == 'block') {
@@ -2213,7 +2220,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         var row = `<div id="${dataset['type_id']}"   class="list-item ${dataset['history_content_type']} history-content state-ok" >
                     <div class="warnings"></div>
                     <div class="selector"><span class="fa fa-2x fa-square-o"></span></div>
-                    <div class="primary-actions"><a class="icon-btn display-btn" title="" target="_blank" href="${URL}/datasets/${dataset['id']}/display/?preview=True" data-original-title="View data"><span class="fas fa-eye" style="" title="View Data" ></span></a><a class="icon-btn edit-btn" target="_blank"  href="${URL}/datasets/edit?dataset_id=${dataset['id']}" data-original-title="Edit attributes"><span class="fa fa-pencil" title="Edit data"></span></a><a class="icon-btn delete-btn" title="" href="javascript:void(0);" data-original-title="Delete"><span class="fa fa-times" style="" title="Delete" ></span></a><a class="icon-btn display-btn" title="" target="" href="javascript:void(0);" data-original-title="View data"><span class="fa fa-download" style="" title="Download data to JupyterLab Server" ></span></a><a class="icon-btn display-btn" title="Display" target="" href="javascript:void(0);" data-original-title="View data"><span class="fa fa-exchange" style="" title="Send data to available tools"></span></a></div>
+                    <div class="primary-actions"><a class="icon-btn display-btn" title="" target="_blank" href="${URL}/datasets/${dataset['id']}/display/?preview=True" data-original-title="View data"><span class="fas fa-eye" style="" title="View Data" ></span></a><a class="icon-btn edit-btn" target="_blank"  href="${URL}/datasets/edit?dataset_id=${dataset['id']}" data-original-title="Edit attributes"><span class="fa fa-pencil" title="Edit data"></span></a><a class="icon-btn delete-btn" title="" href="javascript:void(0);" data-original-title="Delete"><span class="fa fa-times" style="" title="Delete" ></span></a><a class="icon-btn display-btn" title="" target="" href="javascript:void(0);" data-original-title="View data"><span class="fa fa-download" style="" title="Download data to JupyterLab Server" ></span></a><a class="icon-btn display-btn"  target="" href="javascript:void(0);" data-original-title="View data"><span class="fa fa-exchange" style="" title="Send data to available tools"></span></a></div>
                     <div class="title-bar clear"  tabindex="0" draggable="true" ondragstart="event.dataTransfer.setData('text/plain',null) > 
                     <span class="state-icon"></span>
    
@@ -2857,16 +2864,34 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
     async dataset_collection_list_item (elements){
 
+
+
         var self = this
         var URL = this.model.get('GalInstance')['URL']
 
         var ListItem = `<div id="dataset-${elements['object']['id']}" class="list-item dataset state-${elements['object']['state']}" >
                           <div class="warnings"></div>
                           <div class="selector"><span class="fa fa-2x fa-square-o"></span></div>
-                          <div class="primary-actions"><a class="icon-btn display-btn" title="" target="galaxy_main" href="${URL}/datasets/${elements['object']['id']}/display/?preview=True" data-original-title="View data"><span class="fa fa-eye" style=""></span></a><a class="icon-btn edit-btn" title="" href="${URL}/datasets/edit?dataset_id=${elements['object']['id']}" data-original-title="Edit attributes"><span class="fa fa-pencil" style=""></span></a><a class="icon-btn display-btn" title="" target="" href="javascript:void(0);" data-original-title="View data"><span class="fa fa-download" style=""></span></a></div>
+                          <div class="primary-actions"><a class="icon-btn display-btn" title="" target="galaxy_main" href="${URL}/datasets/${elements['object']['id']}/display/?preview=True" data-original-title="View data"><span class="fa fa-eye" style="" title="View data"></span></a><a class="icon-btn edit-btn" title="" href="${URL}/datasets/edit?dataset_id=${elements['object']['id']}" data-original-title="Edit attributes"><span class="fa fa-pencil" style="" title="Edit data"></span></a><a class="icon-btn display-btn" title="" target="" href="javascript:void(0);" data-original-title="View data"><span class="fa fa-download"  style="" title="Download data to jupyterlab server"></span></a><a class="icon-btn display-btn"  target="" href="javascript:void(0);" data-original-title="View data"><span class="fa fa-exchange" style="" title="Send data to available tools"></span></a></div>
                           <div class="title-bar clear" tabindex="${elements['element_index']}" draggable="true"><span class="state-icon"></span>
-                          <div class="title"><span class="name">${elements['element_index']}</span></div>
+                          <div class="title"><span class="name">${elements['element_index']}:${elements['element_identifier']}</span></div>
                           </div>
+
+                          <div id="add_data_share_menu" style="display: none;"  class="add_data_share_menu" >
+            
+                          <div class="send-data-genepattern-tools"> 
+
+                              <div class="gt" >  Send data to Galaxy  </div>
+                              <div class="galaxy-tool-list" style="display: none"> 
+                              </div>
+                               
+                              <div class="gpt" >  Send data to GenePattern  </div>
+                              <div class="genepattern-tool-list" style="display: none"> 
+                              </div>
+                          </div>
+                          </div>
+
+
                           <div class="details" style="display: none;">
                           <div class="summary">
                                 <div class="detail-messages"></div>
@@ -2899,6 +2924,66 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             row.querySelector('.details').style.display = 'block'
         }
         });
+
+        var Exch  = row.querySelector('.fa.fa-exchange')
+        var Title = row.querySelector('.title')
+        var GpTools = row.querySelector('.gpt')
+        var GTools = row.querySelector('.gt')
+
+        Title.data = elements
+
+        GTools.addEventListener("click", (e) => {
+
+            var server =  row.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode.querySelector('.Galaxy-form').data
+            var GpToolsDiv = row.querySelector('.galaxy-tool-list')
+
+            elements['object']['extension'] = elements['object']['file_ext']
+            elements['object']['name'] = elements['element_identifier']
+            
+            this.galaxy_data_upload(GpToolsDiv, elements['object'], server)
+
+            if (row.querySelector('.galaxy-tool-list').style.display == 'block') {
+                row.querySelector('.galaxy-tool-list').style.display = 'none'
+            } 
+            else{
+                row.querySelector('.galaxy-tool-list').style.display = 'block'
+            }
+        })
+
+        GpTools.addEventListener("click", (e) => {
+
+            console.log(elements)
+
+            var GpToolsDiv = row.querySelector('.genepattern-tool-list')
+
+            this.data_upload(GpToolsDiv, elements)
+
+            if (GpToolsDiv.childNodes.length == 0){
+                var Div = document.createElement('div')
+                var msg = document.createElement('p')
+                Div.append(msg)
+                msg.innerText = '  No tools are available..'
+                GpToolsDiv.append(Div)
+            } 
+
+            if (row.querySelector('.genepattern-tool-list').style.display == 'block') {
+                row.querySelector('.genepattern-tool-list').style.display = 'none'
+            } 
+            else{
+                row.querySelector('.genepattern-tool-list').style.display = 'block'
+            }
+        })
+
+        Exch.addEventListener("click", async (event) =>{ 
+            // var show_dataset = await KernelSideDataObjects(`from GiN  import GalaxyTaskWidget\nGalaxyTaskWidget.show_data_set(server=${JSON.stringify(this.model.get('GalInstance')['URL'])}, dataset_id=${JSON.stringify(elements['id'])} )`)
+
+            if (row.querySelector('#add_data_share_menu').style.display == 'block') {
+                row.querySelector('#add_data_share_menu').style.display = 'none'
+            } 
+            else{
+                row.querySelector('#add_data_share_menu').style.display = 'block'
+            }
+        })
 
         var Download = row.querySelector('.fa.fa-download')
 
