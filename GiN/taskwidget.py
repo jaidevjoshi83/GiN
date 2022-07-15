@@ -159,6 +159,24 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
 
         if (Tool_inputs) and (toolID):
 
+            # Tool_inputs = {
+            #             "input1": [
+            #                 {
+            #                 "id": "f9cad7b01a4721354c1067e5bc96aecd",
+            #                 "hid": 1,
+            #                 "name": "UCSC Main on Human: knownGene (chr21:1-48,129,895)",
+            #                 "tags": [],
+            #                 "src": "hda"
+            #                 }
+            #             ],
+            #             "maf_source_type|maf_source": "cached",
+            #             "maf_source_type|mafFile": [],
+            #             "maf_source_type|mafType": "100_WAY_MULTIZ_v2_hg19",
+            #             "split_blocks_by_species_selector|split_blocks_by_species": "dont_split_blocks_by_species",
+            #             "split_blocks_by_species_selector|remove_all_gap_columns": "remove_all_gap_columns"
+            #     }
+
+
             inputs = gi6.tools.gi.tools.build(
                 tool_id=toolID,
                 inputs=Tool_inputs,
