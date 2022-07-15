@@ -42,7 +42,7 @@ class GalaxyAuthWidget(UIBuilder):
                 'choices': GALAXY_SERVERS
             },
             'email': {
-                'name': 'Email',
+                'name': 'Email or Username',
                 'sendto': False,
             },
             'password': {
