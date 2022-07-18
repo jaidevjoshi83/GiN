@@ -1433,6 +1433,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             var SelectedIndex = {}
             SelectedIndex['HID'] = select.selectedIndex
 
+            console.log(refine_inputs['inputs'])
+
             self.form_builder(refine_inputs['inputs'],  SelectedIndex)  
  
             var HistoryID = select.value
@@ -1473,22 +1475,13 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             var HistoryID = select.value
 
             if (this.model.get('inputs')['id'] != 'GiN_data_upload_tool') {
-
-                console.log('#############')
-
                 var form = self.element.querySelector('.Galaxy-form')
                 var Inputs = self.get_form_data(form)
-
-                console.log(Inputs)
-
                 var refine_inputs  = await KernelSideDataObjects(`from GiN import GalaxyTaskWidget\nGalaxyTaskWidget.UpdateForm(${JSON.stringify(self.model.get('GalInstance')['URL'])}, ${JSON.stringify(Inputs)}, ${JSON.stringify(self.model.get('ToolID'))}, ${JSON.stringify(HistoryID)})`)
                 var FormParent = self.el.querySelector('.Galaxy-form')    
                 self.removeAllChildNodes(FormParent)
                 var SelectedIndex = {}
                 SelectedIndex['HID'] = select.selectedIndex
-
-                console.log(refine_inputs['inputs'])
-
                 self.form_builder(refine_inputs['inputs'],  SelectedIndex)  
             }
         });
@@ -1602,6 +1595,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
             const row1 = document.createElement('div')
             row1.className = 'internal-ui-repeat section-row'
+            row1.dataset.value = count
             row1.id = NamePrefix+SuffixName+`_${count}`
 
             var DeleteButton = document.createElement('button')
@@ -1621,8 +1615,30 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
             row1.append(InnerTitle)
 
-            DeleteButton.addEventListener("click", function(e){ 
-                self.el.querySelector('.delete-button').closest('.internal-ui-repeat.section-row').remove()
+            DeleteButton.addEventListener("click", async function(e){ 
+
+                var del =  e.target.parentNode.parentNode.parentNode
+                delete input_def.cache[del.dataset.value]
+                self.removeAllChildNodes(row)
+
+                if (Object.keys(input_def.cache).length > 0 ){
+                    input_def['min'] = Object.keys(input_def.cache).length
+                    for (var j = 0; j < Object.keys(input_def.cache).length; j++){
+                        add_internal_repeat(input_def.cache[Object.keys(input_def.cache)[j]], j)
+                    }
+                }
+
+                var form = self.element.querySelector('.Galaxy-form')
+                var Inputs = self.get_form_data(form)
+    
+                var HistoryID = self.el.querySelector('.galaxy-history-list').querySelector('#History_IDs').value
+    
+                var refine_inputs  = await KernelSideDataObjects(`from GiN import GalaxyTaskWidget\nGalaxyTaskWidget.UpdateForm(${JSON.stringify(self.model.get('GalInstance')['URL'])}, ${JSON.stringify(Inputs)}, ${JSON.stringify(self.model.get('ToolID'))}, ${JSON.stringify(HistoryID)})`)
+                var FormParent = self.el.querySelector('.Galaxy-form')    
+                self.removeAllChildNodes(FormParent)
+                var SelectedIndex = {}
+                SelectedIndex['HID'] = HistoryID    
+                self.form_builder(refine_inputs['inputs'],  SelectedIndex) 
             });
 
              for (var j in inputs){
@@ -1632,11 +1648,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
              row.append(row1)
         }
 
-
         if (Object.keys(input_def.cache).length > 0 ){
-
             input_def['min'] = Object.keys(input_def.cache).length
-
             for (var j = 0; j < Object.keys(input_def.cache).length; j++){
                 add_internal_repeat(input_def.cache[Object.keys(input_def.cache)[j]], j)
             }
@@ -1648,41 +1661,30 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                     add_internal_repeat(input_def['inputs'], x)  
                 }
             } 
-
         }
         
         Button.addEventListener("click", async (e)=>{ 
-
-         
-
             var Count = ++click + input_def['min']
             add_internal_repeat(input_def['inputs'], Count-1)
 
-            // var form = self.element.querySelector('.Galaxy-form')
-            // var Inputs = self.get_form_data(form)
+            var form = self.element.querySelector('.Galaxy-form')
+            var Inputs = self.get_form_data(form)
+            var HistoryID = self.el.querySelector('.galaxy-history-list').querySelector('#History_IDs').value
+            var refine_inputs  = await KernelSideDataObjects(`from GiN import GalaxyTaskWidget\nGalaxyTaskWidget.UpdateForm(${JSON.stringify(self.model.get('GalInstance')['URL'])}, ${JSON.stringify(Inputs)}, ${JSON.stringify(self.model.get('ToolID'))}, ${JSON.stringify(HistoryID)})`)
+            var FormParent = self.el.querySelector('.Galaxy-form')    
+            self.removeAllChildNodes(FormParent)
+            var SelectedIndex = {}
+            SelectedIndex['HID'] = HistoryID
 
-            // console.log(Inputs)
-
-            // var refine_inputs  = await KernelSideDataObjects(`from GiN import GalaxyTaskWidget\nGalaxyTaskWidget.UpdateForm(${JSON.stringify(self.model.get('GalInstance')['URL'])}, ${JSON.stringify(Inputs)}, ${JSON.stringify(self.model.get('ToolID'))}, ${JSON.stringify(select.value)})`)
-
-            // var FormParent = self.el.querySelector('.Galaxy-form')    
-            // self.removeAllChildNodes(FormParent)
-            // var SelectedIndex = {}
-            // SelectedIndex['HID'] = select.selectedIndex
-
-            // console.log(refine_inputs['inputs'])
-
-            // self.form_builder(refine_inputs['inputs'],  SelectedIndex)  
-
+            self.form_builder(refine_inputs['inputs'],  SelectedIndex)  
         });
 
-        DeleteButton.addEventListener("click", function(e){ 
+        DeleteButton.addEventListener("click", async function(e){ 
             self.el.querySelector('.delete-button').closest('.internal-ui-repeat.section-row').remove()
         });
 
         return row
     }
-
 
     removeAllChildNodes(parent){
          while (parent.firstChild) {
