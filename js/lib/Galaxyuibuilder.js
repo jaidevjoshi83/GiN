@@ -18,6 +18,7 @@ import * as tus from "tus-js-client";
 import axios from "axios";
 import { Data } from '@g2nb/nbtools/lib/dataregistry';
 import { ContextManager } from '@g2nb/nbtools';
+import { Toolbox } from '@g2nb/nbtools';
 
 export class GalaxyUIBuilderModel extends BaseWidgetModel{
      
@@ -86,7 +87,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         </div>
     </div>
     
-    
     <div class="nbtools-footer"></div>
     <div class="nbtools-buttons">
         <button class="nbtools-run" type="button" data-traitlet="run_label"></button>
@@ -124,8 +124,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         this.activate_run_buttons();
         // Attach custom buttons
         this.activate_custom_buttons();
-
         this.AddHelpSection(inputs['help'])
+        
     }
 
     un_wrap(input, name){
@@ -616,9 +616,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
                                     var form = document.querySelector(`#${e.target.parentNode.parentNode.parentNode.id.replace('g-tool-','')}`)
                                     var hi = form.parentNode.querySelector('#History_IDs').value
-
-                                    console.log('downloading from', server)
-                                    console.log('uploading to', e.target.data)
 
                                     var uri = await KernelSideDataObjects(`from GiN import GalaxyTaskWidget\nGalaxyTaskWidget.send_data_to_galaxy_tool(server_d=${JSON.stringify(server)}, server_u=${JSON.stringify(e.target.data)}, dataset_id=${JSON.stringify(dataset['id'])}, ext=${JSON.stringify(dataset['extension'])}, history_id=${JSON.stringify(hi)})`)
                                     
@@ -1200,7 +1197,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         }
     }
 
-
     NewTusUpload( data){
 
         var self = this
@@ -1433,8 +1429,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             var SelectedIndex = {}
             SelectedIndex['HID'] = select.selectedIndex
 
-            console.log(refine_inputs['inputs'])
-
             self.form_builder(refine_inputs['inputs'],  SelectedIndex)  
  
             var HistoryID = select.value
@@ -1617,6 +1611,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
             DeleteButton.addEventListener("click", async function(e){ 
 
+                //Future Fix: repetitive form building 
                 var del =  e.target.parentNode.parentNode.parentNode
                 delete input_def.cache[del.dataset.value]
                 self.removeAllChildNodes(row)
@@ -1627,18 +1622,17 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                         add_internal_repeat(input_def.cache[Object.keys(input_def.cache)[j]], j)
                     }
                 }
-
                 var form = self.element.querySelector('.Galaxy-form')
                 var Inputs = self.get_form_data(form)
-    
                 var HistoryID = self.el.querySelector('.galaxy-history-list').querySelector('#History_IDs').value
-    
                 var refine_inputs  = await KernelSideDataObjects(`from GiN import GalaxyTaskWidget\nGalaxyTaskWidget.UpdateForm(${JSON.stringify(self.model.get('GalInstance')['URL'])}, ${JSON.stringify(Inputs)}, ${JSON.stringify(self.model.get('ToolID'))}, ${JSON.stringify(HistoryID)})`)
+                // console.log(self.get_repeat_params(refine_inputs['inputs'], input_def['name']))
                 var FormParent = self.el.querySelector('.Galaxy-form')    
                 self.removeAllChildNodes(FormParent)
                 var SelectedIndex = {}
                 SelectedIndex['HID'] = HistoryID    
                 self.form_builder(refine_inputs['inputs'],  SelectedIndex) 
+
             });
 
              for (var j in inputs){
@@ -1684,6 +1678,28 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         });
 
         return row
+    }
+
+    get_repeat_params(input, name){
+        var self = this
+        var out  
+
+        for (var i = 0; i < input.length ; i++){
+            if (input[i].model_class == 'Repeat'){
+                if(input[i].name == name){
+                   return input[i]
+                }
+            } 
+            else if (input[i].model_class == 'Conditional') {
+                for(var j = 0; j < input[i].cases.length; j++){
+                    return self.get_repeat_params(input[i].cases[j].inputs, name)
+                }
+            }
+            else if (input[i].model_class == 'Section') {
+                return self.get_repeat_params(input[i].inputs, name)
+            }
+        }
+        return out
     }
 
     removeAllChildNodes(parent){
@@ -1795,8 +1811,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 const el = document.createElement("option");
 
                 el.textContent = opt;
-                // console.log(draged_item.data)
-
                 var dataID = draged_item.getAttribute('data-value')
                 var show_dataset = await KernelSideDataObjects(`from GiN  import GalaxyTaskWidget\nGalaxyTaskWidget.show_data_set(server=${JSON.stringify(self.model.get('GalInstance')['URL'])}, dataset_id=${JSON.stringify( dataID)} )`)
                 el.data = {'id': draged_item.getAttribute('data-value'), 'src':show_dataset['hda_ldda']} //Fix me 
@@ -1840,7 +1854,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
                 self.removeAllChildNodes(FormParent)
                 self.form_builder(refine_inputs['inputs'])
-
             }
 
             }, false);
@@ -2116,11 +2129,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
             var children = self.el.querySelector('.Galaxy-form')
             var Inputs = self.get_form_data(children)
-
-
             var HistoryID = self.el.querySelector('.galaxy-history-list').querySelector('#History_IDs').value
-
-            // console.log(HistoryID)
             var refine_inputs  = await KernelSideDataObjects(`from GiN import GalaxyTaskWidget\nGalaxyTaskWidget.UpdateForm(${JSON.stringify(self.model.get('GalInstance')['URL'])}, ${JSON.stringify(Inputs)}, ${JSON.stringify(self.model.get('ToolID'))}, ${JSON.stringify(HistoryID)})`)
             // var FormParent = self.el.querySelector('.Galaxy-form')
 
@@ -2736,7 +2745,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         for (let i = 0; i < Infinity; ++i) {
 
             var data = await KernelSideDataObjects(`from GiN import GalaxyTaskWidget\nGalaxyTaskWidget.OutPutData(server=${JSON.stringify(this.model.get('GalInstance')['URL'])}, JobID=${JSON.stringify(job['id'])} )`);
-            console.log(data)
+
             var JobState = data[0]['state']
             var ListItem =  this.el.querySelector('.list-item')
 
