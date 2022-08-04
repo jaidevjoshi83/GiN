@@ -806,8 +806,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
     add_drill_down_section1(input_def, FormParent, jai){
 
-        console.log(input_def)
-
         input_def.id = this.uid()
 
         const container = document.createElement('div')
@@ -1070,7 +1068,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         var credentials = this.model.get('GalInstance')
         data['key'] =  credentials['API_key']
 
-        // Create a new tus upload
         var upload = new tus.Upload(file, {
             endpoint: `${credentials['URL']}/api/upload/resumable_upload/`,
             retryDelays: [0, 3000, 5000, 10000, 20000],
@@ -1353,7 +1350,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         helpSection.append(HelpButton)
         helpSection.append(HelpContent)
 
-        // Update relative img srcs to point to original server
         var imgs = HelpContent.getElementsByTagName("img");
         for (var i = 0; i < imgs.length; i++) {
             const imgsrc = imgs[i].getAttribute("src");
@@ -1374,9 +1370,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             }
           });
     }
-     
-    // Improvised version of add_repeat_section(), it will replace the current implementation.
- 
+      
     add_repeat_section(input_def, FormParent, NamePrefix){
 
         var self = this
@@ -1477,7 +1471,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 var Inputs = self.get_form_data(form)
                 var HistoryID = self.el.querySelector('.galaxy-history-list').querySelector('#History_IDs').value
                 var refine_inputs  = await KernelSideDataObjects(`from GiN import GalaxyTaskWidget\nGalaxyTaskWidget.UpdateForm(${JSON.stringify(self.model.get('GalInstance')['URL'])}, ${JSON.stringify(Inputs)}, ${JSON.stringify(self.model.get('ToolID'))}, ${JSON.stringify(HistoryID)})`)
-                // console.log(self.get_repeat_params(refine_inputs['inputs'], input_def['name']))
                 var FormParent = self.el.querySelector('.Galaxy-form')    
                 self.removeAllChildNodes(FormParent)
                 var SelectedIndex = {}
@@ -2658,6 +2651,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
     
     async AddJobStatusWidget(Inputs, HistoryID){
 
+
         this.JobStatusTemplate(HistoryID)
         this.hide_run_buttons(true)
 
@@ -2692,6 +2686,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             var ListItem =  this.el.querySelector('.list-item')
 
             if (JobState=='running'  ){
+
 
                 var gearrotate = this.el.querySelector('.gear-rotate-icon')
                 gearrotate.style.display = 'block'
@@ -2734,6 +2729,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             } 
             else if (JobState == 'ok'){
 
+                this.el.querySelector('.rbtn').style.display = 'block'
+
                 for (var j =0; j < data.length; j++){
                     var id=`dataset-${data[j]['id']}`
 
@@ -2759,6 +2756,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             } 
 
             else if (JobState == 'error'){
+
+                this.el.querySelector('.rbtn').style.display = 'block'
 
                 for (var j =0; j < data.length; j++){
 
@@ -2831,7 +2830,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                                 </div>
 
                                 <div class="tool-form-reset">
-                                    <button class="rbtn"><i class="fa fa-refresh"></i></button>
+                                    <button class="rbtn" style="display: none"><i class="fa fa-refresh"></i></button>
                                 </div>
                                 
                             </div>
@@ -3006,9 +3005,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         GpTools.addEventListener("click", (e) => {
 
-            
             var GpToolsDiv = row.querySelector('.genepattern-tool-list')
-
             this.data_upload(GpToolsDiv, elements)
 
             if (GpToolsDiv.childNodes.length == 0){
@@ -3062,7 +3059,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         const display = this.model.get('display_footer') ? 'block' : 'none';
         this.element.querySelector('.nbtools-buttons:last-of-type').style.display = display;
         this.element.querySelector('.nbtools-footer').style.display = display;
-        // If there is an output_var element, hide or show it as necessary
+
         if (!this.output_var_displayed())
             return;
         this.element.querySelector('.nbtools-input:last-of-type').style.display = display;
@@ -3090,13 +3087,9 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         var self  = this;
         this.el.querySelectorAll('.nbtools-run').forEach((button) => button.addEventListener('click', () => {
-
         var HistoryID = self.element.querySelector('#History_IDs').value 
         var form = self.element.querySelector('.Galaxy-form')
-        console.log(form)
         var Inputs = this.get_form_data(form, 'on')
-
-        console.log(Inputs)
 
         if (Inputs == 'error'){
             return
