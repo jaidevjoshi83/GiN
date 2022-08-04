@@ -162,7 +162,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         }
     }
 
-
     form_builder(inputs, call_back_data={}, parent='', el_name='') {
 
         var self = this
@@ -222,7 +221,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 this.add_section(input_def, FormParent, NamePrefix) 
                 break
             case "drill_down":
-                this.add_drill_down_section(input_def, FormParent, NamePrefix)
+                this.add_drill_down_section1(input_def, FormParent, NamePrefix)
                 break
             case "data_upload":
                 this.data_upload_tool(FormParent)
@@ -236,34 +235,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
     //         ContextManager.data_registry.unregister({ data: f });
     // }
 
-    Dirll_Down_Output(drill_down){
-
-        var Name = []
-        var values = {} 
-        var Key = []
-
-        for(var i = 0; i < drill_down.length; i++){
-
-            if (drill_down[i].className == 'outer-drill') {
-                for (var j = 0; j <  drill_down[i].children.length; j++) {
-                    if (drill_down[i].children[j].className == 'inner-div'){
-                        if (drill_down[i].children[j].children[0].checked == true) {
-                            Name.push(drill_down[i].children[j].children[0].name)
-                            Key.push(drill_down[i].children[j].children[0].value)
-                        }
-                    }
-                }
-                this.Dirll_Down_Output(drill_down[i].children)
-                Object.assign(values, this.Dirll_Down_Output(drill_down[i].children))
-            }
-        }
-
-        if (Name.length !== 0 ) {
-            values[Name[0]] = Key
-        } 
-
-        return values
-    }
 
     async data_upload(gp_tool_list, dataset) {
 
@@ -417,9 +388,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                     Object.assign(out,  self.get_form_data(form.children[j], checking))
                 }
             }
-
         } else if (form.querySelector('.InputData')){
-          
            if (checking == 'on'){
                if (form.querySelector('.InputData').value == "") {
                     form.querySelector('.InputData').style.backgroundColor = 'pink'
@@ -433,10 +402,20 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
            }
            
         } else if (form.querySelector('.outer-checkbox-div')){
+
             var select_list = []
-            for (var k = 0; k < form.querySelector('.outer-checkbox-div').children.length; k++ ) {
-                if (form.querySelector('.outer-checkbox-div').children[k].querySelector('.InputDataCheckbox').checked) {
-                    select_list.push(form.querySelector('.outer-checkbox-div').children[k].querySelector('.InputDataCheckbox').value)
+
+            if (checking == 'on') {
+                for (var k = 0; k < form.querySelector('.outer-checkbox-div').children.length; k++ ) {
+                    if (form.querySelector('.outer-checkbox-div').children[k].querySelector('.InputDataCheckbox').checked) {
+                        select_list.push(form.querySelector('.outer-checkbox-div').children[k].querySelector('.InputDataCheckbox').value)
+                    }
+                }
+
+                if (select_list.length == 0 ){
+                    form.querySelector('.outer-checkbox-div').children[0].querySelector('.InputDataCheckbox').parentNode.style.backgroundColor = 'pink' 
+                } else{
+                    form.querySelector('.outer-checkbox-div').children[0].querySelector('.InputDataCheckbox').parentNode.style.backgroundColor = ''
                 }
             }
 
@@ -449,15 +428,14 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                     out[form.querySelector('.outer-checkbox-div').querySelector('.InputDataCheckbox').name] = select_list
                 }
             } else {
-
                 if (form.querySelector('.outer-checkbox-div').querySelector('.InputDataCheckbox')){
                     out[form.querySelector('.outer-checkbox-div').querySelector('.InputDataCheckbox').name] = select_list
                 }
             }
 
         } else if (form.querySelector('.InputDataFile')){
-            var input_files = []  
 
+            var input_files = []  
             out[form.querySelector('.InputDataFile').name] = input_files  
 
             for (var i = 0; i < form.querySelector('.InputDataFile').options.length; i++) {
@@ -465,7 +443,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                     input_files.push(form.querySelector('.InputDataFile').options[i].data)
                 }
             }
-
             if (checking == 'on') {
                 if (out[form.querySelector('.InputDataFile').name].length < 1 ){
                     form.querySelector('.InputDataFile').style.backgroundColor = 'pink'
@@ -478,11 +455,33 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             } else {
                 out[form.querySelector('.InputDataFile').name] = input_files
             }
-        }
-
+        } 
         if (Object.keys(out).length > 0){
             return out  
         }
+    }
+
+    return_drill_down_data(element){
+
+        var options = []
+        for (var i = 0; i < element.querySelectorAll('input').length; i++){
+            if (element.querySelectorAll('input')[i].checked ==true ){
+                options.push(element.querySelectorAll('input')[i].value)
+                // console.log( element.querySelectorAll('input')[i].checked)
+            }
+        }
+
+        // if(element.className = 'options'){
+        //   console.log(  element.querySelector('input'))
+        // }
+
+        // this.return_drill_down_data(element.children[0])
+        // // console.log(element.children)
+        // // for (var i = 0; i < element.children.length; i++) {
+        // //     console.log(element.children[i])
+        // // }
+
+        return options
     }
 
     galaxy_data_verify(file_cache, id) {
@@ -678,7 +677,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                                     e.target.parentNode.parentNode.querySelector('.fas.fa-spinner.fa-spin').style.display = 'none'
                                     e.target.parentNode.parentNode.querySelector('.fas.fa-solid.fa-check').style.display = 'block'
                                 }
-
                             }
                         })
                     }
@@ -701,276 +699,132 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
          return false
     }
 
-    // Drill_down2(inputs, parent) {
+    // drill_down(options, parent){
 
-    //     console.log(parent)
+    //     console.log(options)
 
-    //     var self = this
+    //     for (var i = 0; i < options.length; i++){
+    //         var div = document.createElement('div')
 
-    //     var Div = document.createElement('div')
-    //     var Div1 = document.createElement('div')
+    //         var option_div = document.createElement('div')
+    //         option_div.className = 'options'
 
-    //     Div1.className = 'Label-div'
+    //         var subgroup = document.createElement('div')
+    //         subgroup.className = 'subgroup'
 
-    //     var option = document.createElement('div')
-    //     option.className = 'ui-options'
+    //         div.append(option_div)
+    //         div.append(subgroup)
 
-    //     var label = document.createElement('label')
-    //     label.className = 'ui-options-label'
+    //         var input = document.createElement('input')
+    //         input.type = 'checkbox'
+    //         option_div.append(input)
 
-    //     label.innerText = inputs['options'][0]['name']
-
-    //     option.append(label)
-
-    //     var SubGroup = document.createElement('div')
-    //     SubGroup.className = 'sub-group'
-    //     // SubGroup.style.display = 'none'
-
-    //     var Span = document.createElement('span')
-    //     Span.className = "icon fa mr-1 fa-plus"
-
-    //     // Span.addEventListener('click', (e) => {
-
-    //     //     if (e.target.className ==  "icon fa mr-1 fa-plus"){
-    //     //         Span.className = "icon fa mr-1 fa-minus"
-    //     //         SubGroup.style.display = 'block'
-    //     //     } else{
-    //     //         e.target.className =  "icon fa mr-1 fa-plus"
-    //     //         SubGroup.style.display = 'none'
-    //     //     }
-    //     // })
-
-    //     Div1.append(Span)
-    //     Div1.append(option)
-
-    //     Div.append(Div1)
-    //     Div.append(SubGroup)
-
-    //     for (var i = 0; i < inputs['options'].length; i++) {
-    //         if (inputs['options'][i]['options'].length > 0 ) {
-
-    //             var option1 = document.createElement('div')
-    //             var label1 = document.createElement('label')
-
-    //             option1.className = 'ui-options'
-    //             label1.className = 'ui-options-label'
-                
-    //             label1.innerText = inputs['options'][i]['name']
-
-    //             // console.log(label1)
-
-    //             option1.append(label1)
-    //             SubGroup.append(option1)
-
-    //             parent.append( self.Drill_down2(inputs['options'][i], SubGroup) )
-    //         }
-
-    //         else {
-    //             // var option1 = document.createElement('div')
-    //             // var label1 = document.createElement('label')
-
-    //             // option1.className = 'ui-options'
-    //             // label1.className = 'ui-options-label'
-
-    //             // label1.innerText = inputs['options'][i]['name']
-
-    //             // option1.append(label1)
-    //             // SubGroup.append(option1)
-
+    //         if (options[i].options.length > 0){
+    //             parent.append(this.drill_down(options[i].options, subgroup))
     //         }
     //     }
-
-    //     return Div
+    //     return div
     // }
-    
-    Drill_down2(inputs) {
-        var self = this
 
-        for (var i = 0; i < inputs['options'].length; i++) {
 
-            var Div = document.createElement('div')
-            
-            if (inputs['options'][i]['options'].length > 0 ) {
-                console.log('------->',  inputs['options'][i]['name'])
-                var label1 = document.createElement('label')
-                label1.className = 'ui-options-label'
-                label1.innerText = inputs['options'][i]['name']
-
-                Div.append(label1)
-                Div.append(self.Drill_down2(inputs['options'][i]) )
-            }
-
-            else {
-
-                var Div1 = document.createElement('div')
-                var label = document.createElement('label')
-
-                label.className = 'ui-options-label'
-                label.innerText = inputs['options'][i]['name']
-
-                Div1.append(label)
-                Div.append(Div1)
-
-                console.log(inputs['options'][i]['name'])
-                // var option1 = document.createElement('div')
-                // var label1 = document.createElement('label')
-                // option1.className = 'ui-options'
-                // label1.className = 'ui-options-label'
-                // label1.innerText = inputs['options'][i]['name']
-                // option1.append(label1)
-                // SubGroup.append(option1)
-            }
-        }
-        return Div
-    }
-
-    Drill_down(options, param_name='default'){
+    drill_down(options){
 
         var OuterDrillDown = document.createElement('div')
-        OuterDrillDown.className = 'outer-drill'
 
-        const Icon = document.createElement('span')
-        Icon.className = 'icon fa mr-1 fa-plus'
+        for (var i = 0; i<options.length; i++){
 
-        // OuterDrillDown.append(Icon)
+            const Icon = document.createElement('span')
+            Icon.className = 'icon fa mr-1 fa-plus'
+   
+            Icon.style.marginRight = '2px'
+            Icon.style.padding = '2px'
 
-        for (var i = 0; i < options.length; i++){
+            Icon.addEventListener('click', (e) => {
+
+                if(e.target.parentNode.parentNode.querySelector('.subgroup').style.display == 'none') {
+                    e.target.parentNode.parentNode.querySelector('.subgroup').style.display = 'block'
+                } else{
+                    e.target.parentNode.parentNode.querySelector('.subgroup').style.display = 'none'
+                }
+
+                if (Icon.className == 'icon fa mr-1 fa-plus') {
+                    Icon.className = 'icon fa mr-1 fa-minus'
+                } else{
+                    Icon.className = 'icon fa mr-1 fa-plus'
+                }
+            })
+
             const Innerdiv  = document.createElement('div')
-            Innerdiv.className = 'inner-div'
+            Innerdiv.className = 'options'
+            
+            const subgroup = document.createElement('div')
+            subgroup.className = 'subgroup'
+            subgroup.style.display = 'none'
+
+            var Input = document.createElement('input')
+            Input.type = 'checkbox'
+            Input.style.marginRight = '4px'
+
+            Input.value = options[i].value
 
             var InputID = `input-id-${this.uid()}`
-            var Input = document.createElement('input')
-
-            Input.id = InputID
-            Input.value = options[i]['value']
-
-            Input.style.maxWidth = '20px'
-            Input.style.float = 'left'
-            Input.name = param_name
 
             var Label = document.createElement('label')
             Label.setAttribute('for', InputID)
             Label.innerText = options[i]['name']
-            Label.style.width= "80%"
 
-            Input.type = 'checkbox'
-            OuterDrillDown.style.marginLeft = "20px"
+            if (options[i]['options'].length !== 0){
+                Innerdiv.append(Icon)
+            }
 
-            Innerdiv.append(Icon)
             Innerdiv.append(Input)
             Innerdiv.append(Label)
             
             OuterDrillDown.append(Innerdiv)
+            OuterDrillDown.append(subgroup)
+
+            var div4 = document.createElement('div')
+            div4.className = 'Main'
+            div4.style.marginLeft = '20px'
+
+            div4.append(Innerdiv)
+            div4.append(subgroup)
+
+            OuterDrillDown.append(div4)
+
+            console.log(options[i]['options'])
 
             if (options[i]['options'].length !== 0 ) {
-                OuterDrillDown.append(this.Drill_down(options[i]['options'], param_name))
+
+               console.log(this.drill_down(options[i]['options']))
+               subgroup.append(this.drill_down(options[i]['options']))
             }
         }
         return OuterDrillDown
     }
 
-    add_drill_down_sectionNew(input_def, FormParent, NamePrefix) {
 
-        input_def.id = this.uid()
-        const row = document.createElement('div')
-        row.className = 'drill-down ui-form-element section-row'
-        row.id = `uid-${input_def.id}`
+    add_drill_down_section1(input_def, FormParent, jai){
 
-        const title = document.createElement('div')
-        title.className = 'ui-from-title'
-
-        const TitleSpan = document.createElement('span')
-        TitleSpan.className = "ui-form-title-text"
-
-        TitleSpan.textContent = input_def.label
-        TitleSpan.style.display = 'inline'
-
-        const SelectAllDiv = document.createElement('div')
-        const Icon = document.createElement('span')
-        Icon.className = 'far fa-square'
-
-        const CheckBoxLabel = document.createElement('span')
-        CheckBoxLabel.textContent = 'Select/Unselect all'
-
-        SelectAllDiv.append(Icon)
-
-        // SelectAllDiv.append(CheckBox)
-
-        title.append(TitleSpan)
-        row.append(title)
-        row.append(SelectAllDiv)
-        FormParent.append(row)
-
-        return row
-
-    }
-
-    add_drill_down_section(input_def, FormParent, NamePrefix){
+        console.log(input_def)
 
         input_def.id = this.uid()
 
-        const title = document.createElement('div')
-        title.className = 'ui-from-title'
-        const TitleSpan = document.createElement('span')
-        TitleSpan.className = "ui-form-title-text"
-        TitleSpan.textContent = input_def.label
-        TitleSpan.style.display = 'inline'
-        title.append(TitleSpan)
-
-        const UIFormField = document.createElement('div')
-        UIFormField.className = 'ui-form-field'
-
-        const UIFormOption = document.createElement('div')
-        UIFormOption.className  = 'ui-options'
-        UIFormOption.id = `field-uid-${input_def.id}`
-
-        const UIOptionsMenu = document.createElement('div')
-        UIOptionsMenu.className =  'ui-options-menu'
-
-        const MBuiButtonCheck = document.createElement('div')
-        MBuiButtonCheck.className = 'mb-2 ui-button-check'
-
-        const Icon = document.createElement('span')
-        Icon.className = 'icon fa mr-1 fa-check-square-o'
-
-        Icon.addEventListener("click", () => {
-
-            if (Icon.className == 'icon fa mr-1 fa-check-square-o')
-              Icon.className = 'icon fa mr-1 fa-square-o'
-            else {
-                Icon.className = 'icon fa mr-1 fa-check-square-o'
-            }
-        });
-
-        const Parent = document.createElement('div')
-        Parent.className = 'drill-down-main'
-
-        const SelectTitle = document.createElement('span')
-        SelectTitle.innerText = 'Select/Unselect all'
-        SelectTitle.style.paddingLeft = '5px'
-
-        MBuiButtonCheck.append(Icon)
-        MBuiButtonCheck.append(SelectTitle)
-        UIOptionsMenu.append(MBuiButtonCheck)
-        UIFormOption.append(UIOptionsMenu)
-        UIFormField.append(UIFormOption)
+        const container = document.createElement('div')
+        container.className = 'ui-options-list drilldown-container'
 
         const row = document.createElement('div')
-        row.className = 'drill-down ui-form-element section-row'
-        row.id = `uid-${input_def.id}`
+        row.className = 'ui-form-element section-row'
+        row.id = input_def.id
 
-        const DDContainer = document.createElement('div')
-        DDContainer.className =  'ui-options-list drilldown-container'
+        var Div2 = document.createElement('div')
+        Div2.className = 'drill-down container'
 
-        row.append(title)
-        row.append(UIFormField)
+        row.append(Div2)
 
-        var Div = document.createElement('div')
+        console.log(this.drill_down(input_def.options))
 
-        DDContainer.append( this.Drill_down2(input_def, Div))
-        row.append(DDContainer)
-
-        // row.append(this.Drill_down(input_def['options'], input_def['name'] ))
+        Div2.append(this.drill_down(input_def.options))
         FormParent.append(row)
 
         return row
@@ -1071,7 +925,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 utm.querySelector('#from_url').style.display  = 'none'
                 utm.querySelector('#create_data').style.display  = 'none'
             }
-
         }));
 
         var datatypes_genomes = await KernelSideDataObjects(`from GiN import GalaxyTaskWidget\nGalaxyTaskWidget.get_data_type_and_genomes(server=${JSON.stringify(this.model.get('GalInstance')['URL'])})`)
@@ -1141,8 +994,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
     async resumable (data){
 
         var HistoryID = this.el.querySelector('#History_IDs').value
-
-        
         var state
 
         var e = this.el.querySelector('.list-item')
@@ -1828,7 +1679,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
                     self.removeAllChildNodes(FormParent)
                     self.form_builder(refine_inputs['inputs'])
-
                 }
             }
         }, false);
@@ -1973,9 +1823,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
             });
         }
-
         FormParent.append(row)
-
         return row
     }
 
@@ -1987,7 +1835,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                         ['False', 'False', 'False']]
 
         const select = document.createElement('select')
-
         select.name = NamePrefix+input_def['name']
 
         for(var i = 0; i < options.length; i++) {
@@ -2035,38 +1882,170 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         const Childrens  = this.el.querySelector('.nbtools-form').children;
     }
 
+    // async add_conditional_section(input_def, parent, NamePrefix, call_back_data={}){
+
+    //    // ########################################################
+    //     input_def.id = this.uid()
+    //     var self = this
+
+    //     const options =  input_def['test_param']['options']
+    //     const select = document.createElement('select')
+    //     select.name = NamePrefix+input_def['name']+"|"+input_def['test_param']['name']
+
+    //     select.id = `select-${input_def.id}`    
+    //     select.className = 'InputData' 
+   
+    //     for(var i = 0; i < options.length; i++) {
+    //         const opt = options[i][0];
+    //         const el = document.createElement("option");
+    //         el.textContent = opt;
+    //         el.value = options[i][1];
+    //         select.appendChild(el);
+
+    //         if (input_def.test_param.value == options[i][1]){
+    //             el.selected = i
+    //         }
+    //     }
+
+    //     const row = document.createElement('div')
+    //     const title = document.createElement('div')
+    //     title.className = 'ui-from-title'
+    //     const TitleSpan = document.createElement('span')
+    //     TitleSpan.className = "ui-form-title-text"
+    //     TitleSpan.textContent = input_def['test_param']['label']
+
+    //     TitleSpan.style.display = 'inline'
+    //     title.append(TitleSpan)
+    //     row.className = 'ui-form-element section-row conditional'
+    //     row.id = input_def.id
+    //     row.append(title)
+    //     row.append(select)
+    //     parent.append(row)
+
+    //     var NewNamePrefix = NamePrefix+input_def['name']+"|"
+    //     input_def.id = this.uid()
+
+    //     var ids = []
+
+    //     for (var i = 0; i < input_def['cases'].length; i++ ) {
+
+    //         var  ConditionalDiv
+    //         ConditionalDiv = document.createElement('div')
+    //         ConditionalDiv.className = 'ui-form-element section-row pl-2'
+    //         ConditionalDiv.style.display = 'none' 
+    //         ConditionalDiv.dataset.value = input_def['cases'][i].value
+    //         ConditionalDiv.id = this.uid()
+
+    //         ids.push(ConditionalDiv)
+
+    //         if (input_def.test_param.value == input_def.cases[i].value){
+    //             ConditionalDiv.style.display = 'block'
+    //         }
+
+    //         for (var j in input_def.cases[i].inputs) {
+    //             this.add(input_def.cases[i].inputs[j], ConditionalDiv, NewNamePrefix, call_back_data)
+    //             input_def.cases[i].inputs[j].id = this.uid()
+    //         }
+
+    //         parent.append(ConditionalDiv)
+    //     }
+    
+    //     // for( var i = 0; i < input_def['test_param']['options'].length; i++ ) {
+    //     //     if (input_def['test_param'].value == input_def['cases'][i]['value']) {
+    //     //         for (var j in input_def.cases[i].inputs) {
+    //     //             this.add(input_def.cases[i].inputs[j], ConditionalDiv, NewNamePrefix, call_back_data)
+    //     //             input_def.cases[i].inputs[j].id = this.uid()
+    //     //         }
+    //     //     }
+    //     // }
+
+    //     select.addEventListener("change", async () => {
+
+    //         var ConditionalDiv
+
+    //         var self = this
+    //         var queryID = select.value
+    //         for (var i = 0; i < ids.length; i++) {
+    //             if (ids[i].dataset.value == select.value) {
+    //                 ConditionalDiv = ids[i]
+    //                 ids[i].style.display = 'block'
+    //             } else{
+    //                 ids[i].style.display = 'none'
+    //             }
+    //         }
+
+    //         var children = self.el.querySelector('.Galaxy-form')
+    //         var Inputs = self.get_form_data(children)
+    //         var HistoryID = self.el.querySelector('.galaxy-history-list').querySelector('#History_IDs').value
+    //         var refine_inputs  = await KernelSideDataObjects(`from GiN import GalaxyTaskWidget\nGalaxyTaskWidget.UpdateForm(${JSON.stringify(self.model.get('GalInstance')['URL'])}, ${JSON.stringify(Inputs)}, ${JSON.stringify(self.model.get('ToolID'))}, ${JSON.stringify(HistoryID)})`)
+    //         console.log(refine_inputs)
+    //         // var FormParent = self.el.querySelector('.Galaxy-form')
+
+    //         // self.removeAllChildNodes(FormParent)
+    //         // self.form_builder(refine_inputs['inputs'])
+
+    //     //     var form = self.element.querySelector('.Galaxy-form')
+       
+    //     //     var Inputs = self.get_form_data(form)
+
+    //     //     self.removeAllChildNodes(ConditionalDiv)
+       
+    //     //     var HistoryID = self.element.querySelector('#History_IDs').value 
+    //     //     var refine_inputs = await KernelSideDataObjects(`from GiN import GalaxyTaskWidget\nGalaxyTaskWidget.UpdateForm(${JSON.stringify(self.model.get('GalInstance')['URL'])}, ${JSON.stringify(Inputs)}, ${JSON.stringify(self.model.get('ToolID'))}, ${JSON.stringify(HistoryID)})`)
+
+    //         this.conditional_name = input_def['name']
+    //         var input = refine_inputs['inputs']
+
+    //        var input_def1 = this.un_wrap(input, this.conditional_name)
+
+    //        self.removeAllChildNodes(ConditionalDiv)
+
+    //         for (var l in input_def1.cases){
+    //             if  (input_def1.cases[l].value == queryID) {
+    //                 for (var j in input_def1.cases[l].inputs) {
+    //                     this.add(input_def1.cases[l].inputs[j], ConditionalDiv, NewNamePrefix, call_back_data),  
+    //                     input_def1.cases[l].inputs[j].id = this.uid()
+    //                 }
+    //             }
+    //         }
+    //     });
+    // }
+
     async add_conditional_section(input_def, parent, NamePrefix, call_back_data={}){
 
-       // ########################################################
+        // ########################################################
         input_def.id = this.uid()
         var self = this
-
+ 
         const options =  input_def['test_param']['options']
         const select = document.createElement('select')
         select.name = NamePrefix+input_def['name']+"|"+input_def['test_param']['name']
-
+ 
         select.id = `select-${input_def.id}`    
         select.className = 'InputData' 
-   
+    
         for(var i = 0; i < options.length; i++) {
             const opt = options[i][0];
             const el = document.createElement("option");
             el.textContent = opt;
             el.value = options[i][1];
             select.appendChild(el);
-
-            if (input_def.test_param.value == options[i][1]){
-                el.selected = i
+        }
+ 
+        for(var i, j = 0; i = select.options[j]; j++) {
+            if(i.value == input_def.test_param.value) {
+                select.selectedIndex = j;
+                break;
             }
         }
-
+    
         const row = document.createElement('div')
         const title = document.createElement('div')
         title.className = 'ui-from-title'
         const TitleSpan = document.createElement('span')
         TitleSpan.className = "ui-form-title-text"
         TitleSpan.textContent = input_def['test_param']['label']
-
+ 
         TitleSpan.style.display = 'inline'
         title.append(TitleSpan)
         row.className = 'ui-form-element section-row conditional'
@@ -2074,94 +2053,57 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         row.append(title)
         row.append(select)
         parent.append(row)
-
-        var NewNamePrefix = NamePrefix+input_def['name']+"|"
-        input_def.id = this.uid()
-
-        var ids = []
-
-        for (var i = 0; i < input_def['cases'].length; i++ ) {
-
-            var  ConditionalDiv
-            ConditionalDiv = document.createElement('div')
-            ConditionalDiv.className = 'ui-form-element section-row pl-2'
-            ConditionalDiv.style.display = 'none' 
-            ConditionalDiv.dataset.value = input_def['cases'][i].value
-            ConditionalDiv.id = this.uid()
-
-            ids.push(ConditionalDiv)
-
-            if (input_def.test_param.value == input_def.cases[i].value){
-                ConditionalDiv.style.display = 'block'
-            }
-
-            for (var j in input_def.cases[i].inputs) {
-                this.add(input_def.cases[i].inputs[j], ConditionalDiv, NewNamePrefix, call_back_data)
-                input_def.cases[i].inputs[j].id = this.uid()
-            }
-
-            parent.append(ConditionalDiv)
-        }
-    
-        // for( var i = 0; i < input_def['test_param']['options'].length; i++ ) {
-        //     if (input_def['test_param'].value == input_def['cases'][i]['value']) {
-        //         for (var j in input_def.cases[i].inputs) {
-        //             this.add(input_def.cases[i].inputs[j], ConditionalDiv, NewNamePrefix, call_back_data)
-        //             input_def.cases[i].inputs[j].id = this.uid()
-        //         }
-        //     }
-        // }
-
-        select.addEventListener("change", async () => {
-
-            var ConditionalDiv
-
-            var self = this
-            var queryID = select.value
-            for (var i = 0; i < ids.length; i++) {
-                if (ids[i].dataset.value == select.value) {
-                    ConditionalDiv = ids[i]
-                    ids[i].style.display = 'block'
-                } else{
-                    ids[i].style.display = 'none'
-                }
-            }
-
-            var children = self.el.querySelector('.Galaxy-form')
-            var Inputs = self.get_form_data(children)
-            var HistoryID = self.el.querySelector('.galaxy-history-list').querySelector('#History_IDs').value
-            var refine_inputs  = await KernelSideDataObjects(`from GiN import GalaxyTaskWidget\nGalaxyTaskWidget.UpdateForm(${JSON.stringify(self.model.get('GalInstance')['URL'])}, ${JSON.stringify(Inputs)}, ${JSON.stringify(self.model.get('ToolID'))}, ${JSON.stringify(HistoryID)})`)
-            // var FormParent = self.el.querySelector('.Galaxy-form')
-
-            // self.removeAllChildNodes(FormParent)
-            // self.form_builder(refine_inputs['inputs'])
-
-        //     var form = self.element.querySelector('.Galaxy-form')
-       
-        //     var Inputs = self.get_form_data(form)
-
-        //     self.removeAllChildNodes(ConditionalDiv)
-       
-        //     var HistoryID = self.element.querySelector('#History_IDs').value 
-        //     var refine_inputs = await KernelSideDataObjects(`from GiN import GalaxyTaskWidget\nGalaxyTaskWidget.UpdateForm(${JSON.stringify(self.model.get('GalInstance')['URL'])}, ${JSON.stringify(Inputs)}, ${JSON.stringify(self.model.get('ToolID'))}, ${JSON.stringify(HistoryID)})`)
-
-            this.conditional_name = input_def['name']
-            var input = refine_inputs['inputs']
-
-           var input_def1 = this.un_wrap(input, this.conditional_name)
-
-           self.removeAllChildNodes(ConditionalDiv)
-
-            for (var l in input_def1.cases){
-                if  (input_def1.cases[l].value == queryID) {
-                    for (var j in input_def1.cases[l].inputs) {
-                        this.add(input_def1.cases[l].inputs[j], ConditionalDiv, NewNamePrefix, call_back_data),  
-                        input_def1.cases[l].inputs[j].id = this.uid()
-                    }
-                }
-            }
-        });
-    }
+ 
+         var NewNamePrefix = NamePrefix+input_def['name']+"|"
+         input_def.id = this.uid()
+ 
+         var  ConditionalDiv
+ 
+         ConditionalDiv = document.createElement('div')
+         ConditionalDiv.className = 'ui-form-element section-row pl-2'
+         ConditionalDiv.id = this.uid()
+ 
+         for( var i = 0; i < input_def['test_param']['options'].length; i++ ) {
+             if (input_def['test_param'].value == input_def['cases'][i]['value']) {
+                 for (var j in input_def.cases[i].inputs) {
+                     this.add(input_def.cases[i].inputs[j], ConditionalDiv, NewNamePrefix, call_back_data)
+                     input_def.cases[i].inputs[j].id = this.uid()
+                 }
+             }
+         }
+ 
+         select.addEventListener("change", async () => {
+ 
+             var self = this
+ 
+             var queryID = select.value
+             var form = self.element.querySelector('.Galaxy-form')
+        
+             var Inputs = self.get_form_data(form)
+ 
+             self.removeAllChildNodes(ConditionalDiv)
+        
+             var HistoryID = self.element.querySelector('#History_IDs').value 
+             var refine_inputs = await KernelSideDataObjects(`from GiN import GalaxyTaskWidget\nGalaxyTaskWidget.UpdateForm(${JSON.stringify(self.model.get('GalInstance')['URL'])}, ${JSON.stringify(Inputs)}, ${JSON.stringify(self.model.get('ToolID'))}, ${JSON.stringify(HistoryID)})`)
+ 
+             this.conditional_name = input_def['name']
+             var input = refine_inputs['inputs']
+ 
+            var input_def1 = this.un_wrap(input, this.conditional_name)
+ 
+             for (var l in input_def1.cases){
+                 if  (input_def1.cases[l].value == queryID) {
+                     for (var j in input_def1.cases[l].inputs) {
+                         this.add(input_def1.cases[l].inputs[j], ConditionalDiv, NewNamePrefix, call_back_data),  
+                         input_def1.cases[l].inputs[j].id = this.uid()
+                     }
+                 }
+             }
+         });
+ 
+         parent.append(ConditionalDiv)
+     }
+ 
 
     add_section (input_def, parent, NamePrefix){
 
@@ -2978,8 +2920,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
     async dataset_collection_list_item (elements){
 
-
-
         var self = this
         var URL = this.model.get('GalInstance')['URL']
 
@@ -3152,8 +3092,11 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         this.el.querySelectorAll('.nbtools-run').forEach((button) => button.addEventListener('click', () => {
 
         var HistoryID = self.element.querySelector('#History_IDs').value 
-        var children = self.element.querySelector('.Galaxy-form')
-        var Inputs = this.get_form_data(children, 'on')
+        var form = self.element.querySelector('.Galaxy-form')
+        console.log(form)
+        var Inputs = this.get_form_data(form, 'on')
+
+        console.log(Inputs)
 
         if (Inputs == 'error'){
             return
