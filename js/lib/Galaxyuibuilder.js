@@ -455,7 +455,20 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             } else {
                 out[form.querySelector('.InputDataFile').name] = input_files
             }
-        } 
+        } else if(form.querySelector('.drill-down.container')) {
+
+           var drill_down_inputs = []
+
+            for(var n = 0; n < form.querySelector('.drill-down.container').querySelectorAll('input').length; n++) {
+                if (form.querySelector('.drill-down.container').querySelectorAll('input')[n].checked) {
+                   console.log( form.querySelector('.drill-down.container').querySelectorAll('input')[n].value)
+                    drill_down_inputs.push(form.querySelector('.drill-down.container').querySelectorAll('input')[n].value)
+                }
+            }
+
+            out[form.querySelector('.drill-down.container').name] =  drill_down_inputs
+        }
+
         if (Object.keys(out).length > 0){
             return out  
         }
@@ -764,9 +777,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             var Input = document.createElement('input')
             Input.type = 'checkbox'
             Input.style.marginRight = '4px'
-
             Input.value = options[i].value
-
+            
             var InputID = `input-id-${this.uid()}`
 
             var Label = document.createElement('label')
@@ -792,11 +804,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
             OuterDrillDown.append(div4)
 
-            console.log(options[i]['options'])
-
             if (options[i]['options'].length !== 0 ) {
-
-               console.log(this.drill_down(options[i]['options']))
                subgroup.append(this.drill_down(options[i]['options']))
             }
         }
@@ -804,12 +812,33 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
     }
 
 
-    add_drill_down_section1(input_def, FormParent, jai){
+    add_drill_down_section1(input_def, FormParent, NamePrefix){
 
         input_def.id = this.uid()
 
         const container = document.createElement('div')
         container.className = 'ui-options-list drilldown-container'
+
+        const TitleSpan = document.createElement('span')
+        TitleSpan.className = "ui-form-title-text"
+        TitleSpan.textContent = input_def.label
+        TitleSpan.style.display = 'inline'
+
+
+        // const selectspan = document.createElement('span')
+        // selectspan.className = "ui-form-title-text"
+        // selectspan.textContent = 'Select/Unselect all'
+        // selectspan.style.display = 'inline'
+        // selectspan.style.marginLeft = '5px'
+
+        // const Input = document.createElement('input')
+        // Input.type = 'checkbox'
+
+        // const select_lable = document.createElement('div')
+        // select_lable.style.marginLeft = '20px'
+
+        // select_lable.append(Input)
+        // select_lable.append(selectspan)
 
         const row = document.createElement('div')
         row.className = 'ui-form-element section-row'
@@ -818,13 +847,37 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         var Div2 = document.createElement('div')
         Div2.className = 'drill-down container'
 
+        Div2.name = NamePrefix+input_def['name']
+        
+        row.append(TitleSpan)
+        // row.append(select_lable)
         row.append(Div2)
 
-        console.log(this.drill_down(input_def.options))
-
         Div2.append(this.drill_down(input_def.options))
-        FormParent.append(row)
 
+        // Input.addEventListener('click', () => {
+
+        //     for (var i = 0; i < Div2.querySelectorAll('.subgroup').length; i++ ) {
+           
+        //         if( Div2.querySelectorAll('.subgroup')[i].style.display == 'none'){
+        //             Div2.querySelectorAll('.subgroup')[i].style.display == 'block'
+        //         } else{
+        //             Div2.querySelectorAll('.subgroup')[i].style.display == 'none'
+        //         }
+        //     }
+
+        //     for (var i = 0; i < Div2.querySelectorAll('input').length; i++) {
+        //         Div2.querySelectorAll('input')[i].checked = 'true'
+        //     }
+
+        //     for (var i = 0; i < Div2.querySelectorAll('span').length; i++ ){
+        //         Div2.querySelectorAll('span')[i].className = 'icon fa mr-1 fa-minus'
+        //     }
+
+        //     console.log(Div2)
+        // })
+
+        FormParent.append(row)
         return row
     }
 
@@ -3090,6 +3143,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         var HistoryID = self.element.querySelector('#History_IDs').value 
         var form = self.element.querySelector('.Galaxy-form')
         var Inputs = this.get_form_data(form, 'on')
+
+        console.log(Inputs)
 
         if (Inputs == 'error'){
             return
