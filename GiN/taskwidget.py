@@ -5,9 +5,12 @@ from .Galaxyuibuilder import GalaxyUIBuilder
 from .util import DEFAULT_COLOR, DEFAULT_LOGO
 import bioblend.galaxy.objects as hi
 import json5
+import logging
 import IPython.display
 import glob
 from nbtools import UIBuilder
+
+log = logging.getLogger(__name__)
 
 try:
     from genepattern import authwidget
@@ -15,7 +18,11 @@ except:
     print('need to be fixed...!')
     pass
 
-from gp import GPTask
+try:
+    from gp import GPTask
+except ModuleNotFoundError:
+    log.warning('gp module is not available, will not be able to mix GiN with GenePattern')
+    GPTask = None
 import GiN
 
 
@@ -93,15 +100,17 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
         gi3 = a.get(server=server)
 
         history = gi3.gi.histories.show_history(history_id=HistoryID)
-        a = hi.History(history, gi=gi)
+        # a = hi.History(history, gi=gi3.gi)
 
         if (upload_method == 'text'):
             job = gi3.gi.tools.put_url(content=file_path, history_id=HistoryID)
+            return IPython.display.JSON(job)
 
         elif (upload_method == 'textarea'):
             job = gi3.gi.tools.put_url(content=file_path, history_id=HistoryID)
+            return IPython.display.JSON(job)
 
-        return IPython.display.JSON(job)
+        # return IPython.display.JSON(job)
 
     def TestOut(server=None, JobID=None):
 
@@ -127,8 +136,6 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
                     hda_ldda=showJob['outputs'][i]['src'])
                 )
 
-        print(DataList)
-
         return IPython.display.JSON(DataList)
 
     def RefinedInputs(inputs, gi):
@@ -151,6 +158,24 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
         gi6 = a.get(server=server)
 
         if (Tool_inputs) and (toolID):
+
+            # Tool_inputs = {
+            #             "input1": [
+            #                 {
+            #                 "id": "f9cad7b01a4721354c1067e5bc96aecd",
+            #                 "hid": 1,
+            #                 "name": "UCSC Main on Human: knownGene (chr21:1-48,129,895)",
+            #                 "tags": [],
+            #                 "src": "hda"
+            #                 }
+            #             ],
+            #             "maf_source_type|maf_source": "cached",
+            #             "maf_source_type|mafFile": [],
+            #             "maf_source_type|mafType": "100_WAY_MULTIZ_v2_hg19",
+            #             "split_blocks_by_species_selector|split_blocks_by_species": "dont_split_blocks_by_species",
+            #             "split_blocks_by_species_selector|remove_all_gap_columns": "remove_all_gap_columns"
+            #     }
+
 
             inputs = gi6.tools.gi.tools.build(
                 tool_id=toolID,
@@ -189,8 +214,12 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
 
     def history_data_list(server=None, HistoryID=None):
 
+        print('okkk', server)
+
         a = GiN.sessions.SessionList()
         gi7 = a.get(server=server)
+
+        dir(gi7)
 
         HistoryData = gi7.gi.datasets.gi.datasets.get_datasets(
                         history_id=HistoryID,
@@ -307,7 +336,6 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
 
         file_name = glob.glob(temp_dir+'/*.*')
 
-
         out = gi14.tools.gi.tools.upload_file(
                                     path=file_name[0],
                                     history_id=history_id
@@ -389,7 +417,7 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
             self.tool = tool
 
             self.GalInstance = {
-                                # "API_key":  self.tool['gi']._key,
+                                "API_key":  self.tool['gi']._key,
                                 # "email_ID": self.tool['gi'].users.get_current_user()['email'],
                                 "URL":      self.tool['gi'].base_url,
                                 "tool_ID": self.tool['id'],
