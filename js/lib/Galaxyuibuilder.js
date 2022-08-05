@@ -235,7 +235,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
     //         ContextManager.data_registry.unregister({ data: f });
     // }
 
-
     async data_upload(gp_tool_list, dataset) {
 
         var self = this
@@ -472,29 +471,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         if (Object.keys(out).length > 0){
             return out  
         }
-    }
-
-    return_drill_down_data(element){
-
-        var options = []
-        for (var i = 0; i < element.querySelectorAll('input').length; i++){
-            if (element.querySelectorAll('input')[i].checked ==true ){
-                options.push(element.querySelectorAll('input')[i].value)
-                // console.log( element.querySelectorAll('input')[i].checked)
-            }
-        }
-
-        // if(element.className = 'options'){
-        //   console.log(  element.querySelector('input'))
-        // }
-
-        // this.return_drill_down_data(element.children[0])
-        // // console.log(element.children)
-        // // for (var i = 0; i < element.children.length; i++) {
-        // //     console.log(element.children[i])
-        // // }
-
-        return options
     }
 
     galaxy_data_verify(file_cache, id) {

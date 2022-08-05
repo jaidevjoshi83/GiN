@@ -38,12 +38,44 @@
 .galaxy-uibuilder .fa.fa-floppy-o{font-family:Font Awesome\ 5 Free;font-weight:400;}
 .galaxy-uibuilder .fa.fa-floppy-o:before{content:"";}
 .galaxy-uibuilder .clear:after{display:block;clear:both;content:"";}
-.galaxy-uibuilder .icon-btn{display:inline-block;height:22px;width:22px;text-align:center;line-height:19px;border-radius:3px;border:1px solid transparent;background-color:#e9ecef;color:#2c3143;cursor:pointer;}
-.galaxy-uibuilder .icon-btn:focus,.icon-btn:hover{outline:0;background-color:#fff;color:#2077b3;}
+
+.galaxy-uibuilder .icon-btn{
+  display:inline-block;
+  height:22px;
+  width:22px;
+  text-align:center;
+  line-height:19px;
+  border-radius:3px;
+  border:1px solid transparent;
+  background-color:#e9ecef;
+  color:#2c3143;
+  cursor:pointer;
+}
+
+.galaxy-uibuilder .icon-btn:focus,.icon-btn:hover{
+  outline:0;
+  background-color:#fff;
+  color:#2077b3;
+}
+
 .galaxy-uibuilder .dataset .details .actions .left,.list-item .primary-actions{display:inline-block;}
-.galaxy-uibuilder .dataset .details .actions .left .icon-btn:not(:last-of-type),.list-item .primary-actions .icon-btn:not(:last-of-type){margin:0;border-radius:0;border-right:none;}
-.galaxy-uibuilder .dataset .details .actions .left .icon-btn:first-child,.list-item .primary-actions .icon-btn:first-child{margin-right:0;border-top-left-radius:3px;border-bottom-left-radius:3px;}
-.galaxy-uibuilder .dataset .details .actions .left .icon-btn:last-child,.list-item .primary-actions .icon-btn:last-child{margin-left:0;border-radius:0 3px 3px 0;}
+.galaxy-uibuilder .dataset .details .actions .left .icon-btn:not(:last-of-type),.list-item .primary-actions .icon-btn:not(:last-of-type){
+  margin:0;
+  border-radius:0;
+  border-right:none;
+}
+
+.galaxy-uibuilder .dataset .details .actions .left .icon-btn:first-child,.list-item .primary-actions .icon-btn:first-child{
+  margin-right:0;
+  border-top-left-radius:3px;
+  border-bottom-left-radius:3px;
+}
+
+.galaxy-uibuilder .dataset .details .actions .left .icon-btn:last-child,.list-item .primary-actions .icon-btn:last-child{
+  margin-left:0;
+  border-radius:0 3px 3px 0;
+}
+
 .galaxy-uibuilder .dataset .details .summary .info{border:1px solid rgba(189,198,208,.5);padding:4px;}
 .galaxy-uibuilder .dataset .details .actions:not(:last-child),.dataset .details .annotation-display,.dataset .details .dataset-peek,.dataset .details .display-applications .display-application:last-child,.dataset .details .summary,.dataset .details .summary .dbkey:after{margin-bottom:8px;}
 .galaxy-uibuilder .dataset .details .summary .datatype .value:after,.list-item .details .prompt{font-weight:400;color:#404862;}
@@ -83,7 +115,19 @@
 
 
 .galaxy-uibuilder .clear:after{display:block;clear:both;content:"";}
-.galaxy-uibuilder .icon-btn{display:inline-block;height:22px;width:22px;text-align:center;line-height:19px;border-radius:3px;border:1px solid transparent;background-color:#e9ecef;color:#2c3143;cursor:pointer;}
+
+.galaxy-uibuilder .icon-btn{
+  display:inline-block;
+  height:22px;
+  width:22px;
+  text-align:center;
+  line-height:19px;
+  border-radius:3px;
+  border:1px solid transparent;
+  background-color:#e9ecef;
+  color:#2c3143;
+  cursor:pointer;
+}
 .galaxy-uibuilder .icon-btn:focus,.icon-btn:hover{outline:0;background-color:#fff;color:#2077b3;}
 .galaxy-uibuilder .dataset .details .actions .left,.dataset .details .actions .right,.list-item .primary-actions{display:inline-block;}
 .galaxy-uibuilder .dataset .details .actions .left .icon-btn:not(:last-of-type),.dataset .details .actions .right .icon-btn:not(:last-of-type),.list-item .primary-actions .icon-btn:not(:last-of-type){margin:0;border-radius:0;border-right:none;}
@@ -97,7 +141,7 @@
 .galaxy-uibuilder .list-item .title-bar .title{display:inline;font-weight:700;word-wrap:break-word;word-break:break-all;line-height:16px;}
 .galaxy-uibuilder .list-item .title-bar .title:hover{text-decoration:underline;}
 .galaxy-uibuilder .list-item .primary-actions{float:right;}
-.galaxy-uibuilder .list-item .primary-actions .icon-btn{margin-left:2px;}
+/* .galaxy-uibuilder .list-item .primary-actions .icon-btn{margin-left:2px;} */
 .galaxy-uibuilder .list-item .details{display:none;}
 .galaxy-uibuilder .list-panel .list-items .list-item{border-width:1px 0;}
 .galaxy-uibuilder .list-panel .list-items .list-item:not(:last-child){border-bottom-width:0;}
