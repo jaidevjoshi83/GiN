@@ -159,7 +159,40 @@
   padding-top: 5px;
 }
 
+.galaxy-uibuilder .select-unselect{
+  margin-bottom: 10px;
+  margin-top: 10px;
+}
 
+.galaxy-uibuilder .select-ui-form-title-text {
+  background: rgb(191,197,197);
+  padding: 2px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-radius: 3px;
+}
+.galaxy-uibuilder .unselect-ui-form-title-text {
+  background: rgb(191,197,197);
+  padding: 2px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-radius: 3px;
+}
 
+.unselect-ui-form-title-text:hover {
+  background-color: rgb(47,45,84);
+  color: white;
+}
 
+.select-ui-form-title-text:hover {
+  background-color: rgb(47,45,84);
+  color: white;
+}
 
+.drill-down.container{
+  margin-left: 20px;
+}
+
+.drill-down.container{
+  margin-left: 20px;
+}
