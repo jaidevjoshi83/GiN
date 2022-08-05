@@ -688,34 +688,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
          return false
     }
 
-    // drill_down(options, parent){
-
-    //     console.log(options)
-
-    //     for (var i = 0; i < options.length; i++){
-    //         var div = document.createElement('div')
-
-    //         var option_div = document.createElement('div')
-    //         option_div.className = 'options'
-
-    //         var subgroup = document.createElement('div')
-    //         subgroup.className = 'subgroup'
-
-    //         div.append(option_div)
-    //         div.append(subgroup)
-
-    //         var input = document.createElement('input')
-    //         input.type = 'checkbox'
-    //         option_div.append(input)
-
-    //         if (options[i].options.length > 0){
-    //             parent.append(this.drill_down(options[i].options, subgroup))
-    //         }
-    //     }
-    //     return div
-    // }
-
-
     drill_down(options){
 
         var OuterDrillDown = document.createElement('div')
@@ -801,20 +773,27 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         TitleSpan.style.display = 'inline'
 
 
-        // const selectspan = document.createElement('span')
-        // selectspan.className = "ui-form-title-text"
-        // selectspan.textContent = 'Select/Unselect all'
-        // selectspan.style.display = 'inline'
-        // selectspan.style.marginLeft = '5px'
+        const selectspan = document.createElement('span')
+        selectspan.className = "select-ui-form-title-text"
+        selectspan.textContent = 'Select all'
+        selectspan.style.display = 'inline'
+        selectspan.style.marginLeft = '5px'
 
-        // const Input = document.createElement('input')
-        // Input.type = 'checkbox'
+        const Unselect = document.createElement('span')
+        Unselect.className = "unselect-ui-form-title-text"
+        Unselect.textContent = 'Unselect all'
+        Unselect.style.display = 'inline'
+        Unselect.style.marginLeft = '5px'
 
-        // const select_lable = document.createElement('div')
-        // select_lable.style.marginLeft = '20px'
+        const Input = document.createElement('input')
+        Input.type = 'checkbox'
+        const select_lable = document.createElement('div')
+        select_lable.className = 'select-unselect'
+        select_lable.style.marginLeft = '20px'
 
-        // select_lable.append(Input)
-        // select_lable.append(selectspan)
+        select_lable.append(Unselect)
+        select_lable.append(selectspan)
+
 
         const row = document.createElement('div')
         row.className = 'ui-form-element section-row'
@@ -826,32 +805,41 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         Div2.name = NamePrefix+input_def['name']
         
         row.append(TitleSpan)
-        // row.append(select_lable)
+        row.append(select_lable)
         row.append(Div2)
 
         Div2.append(this.drill_down(input_def.options))
 
-        // Input.addEventListener('click', () => {
+        selectspan.addEventListener('click', () => {
 
-        //     for (var i = 0; i < Div2.querySelectorAll('.subgroup').length; i++ ) {
-           
-        //         if( Div2.querySelectorAll('.subgroup')[i].style.display == 'none'){
-        //             Div2.querySelectorAll('.subgroup')[i].style.display == 'block'
-        //         } else{
-        //             Div2.querySelectorAll('.subgroup')[i].style.display == 'none'
-        //         }
-        //     }
+            for (var i = 0; i < Div2.querySelectorAll('.subgroup').length; i++ ) {
+                Div2.querySelectorAll('.subgroup')[i].style.display = 'block'
+            }
 
-        //     for (var i = 0; i < Div2.querySelectorAll('input').length; i++) {
-        //         Div2.querySelectorAll('input')[i].checked = 'true'
-        //     }
+            for (var i = 0; i < Div2.querySelectorAll('input').length; i++) {
+                Div2.querySelectorAll('input')[i].checked = 'true'
+            }
 
-        //     for (var i = 0; i < Div2.querySelectorAll('span').length; i++ ){
-        //         Div2.querySelectorAll('span')[i].className = 'icon fa mr-1 fa-minus'
-        //     }
+            for (var i = 0; i < Div2.querySelectorAll('span').length; i++ ){
+                Div2.querySelectorAll('span')[i].className = 'icon fa mr-1 fa-minus'
+            }
+        })
 
-        //     console.log(Div2)
-        // })
+        Unselect.addEventListener('click', () => {
+
+            for (var i = 0; i < Div2.querySelectorAll('.subgroup').length; i++ ) {
+                Div2.querySelectorAll('.subgroup')[i].style.display = 'none'
+            }
+
+            for (var i = 0; i < Div2.querySelectorAll('input').length; i++) {
+                Div2.querySelectorAll('input')[i].checked = 'false'
+                Div2.querySelectorAll('input')[i].click()
+            }
+
+            for (var i = 0; i < Div2.querySelectorAll('span').length; i++ ){
+                Div2.querySelectorAll('span')[i].className = 'icon fa mr-1 fa-plus'
+            }
+        })
 
         FormParent.append(row)
         return row
