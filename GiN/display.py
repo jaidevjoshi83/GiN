@@ -1,8 +1,8 @@
 import IPython
 
-#from .jobwidget import GalaxyJobWidget
-#from .authwidget import GalaxyAuthWidget
-#from .taskwidget import GalaxyTaskWidget
+# from .jobwidget import GalaxyJobWidget
+# from .authwidget import GalaxyAuthWidget
+# from .taskwidget import GalaxyTaskWidget
 
 
 def display(content):
@@ -12,11 +12,11 @@ def display(content):
     :param content:
     :return:
     """
-    #if isinstance(content, ToDo):
+    # if isinstance(content, ToDo):
     #    IPython.display.display(GalaxyAuthWidget(content))
-    #elif isinstance(content, ToDo):
+    # elif isinstance(content, ToDo):
     #    IPython.display.display(GalaxyTaskWidget(content))
-    #elif isinstance(content, ToDo):
+    # elif isinstance(content, ToDo):
     #    IPython.display.display(GalaxywJobWidget(content))
-    #else:
-    IPython.display.display(content)  
+    # else:
+    IPython.display.display(content)

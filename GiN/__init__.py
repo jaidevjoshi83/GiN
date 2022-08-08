@@ -5,6 +5,7 @@
 # Distributed under the terms of the Modified BSD License.
 import json
 from pathlib import Path
+
 try:
     from .authwidget import GALAXY_SERVERS, GalaxyAuthWidget
 except:
@@ -12,9 +13,11 @@ except:
 from .taskwidget import GalaxyTaskWidget
 from .jobwidget import GalaxyJobWidget
 from .sessions import session, get_session
-#from .galaxyoutput import GalaxyOutputWidget
+
+# from .galaxyoutput import GalaxyOutputWidget
 from .uioutput import GalaxyUIOutput
 from .Galaxyuibuilder import GalaxyUIBuilder
+
 # from .JobSubmit import Job
 from ._version import __version__
 
@@ -24,11 +27,9 @@ HERE = Path(__file__).parent.resolve()
 with (HERE / "labextension" / "package.json").open() as fid:
     data = json.load(fid)
 
+
 def _jupyter_labextension_paths():
-    return [{
-        "src": "labextension",
-        "dest": data["name"]
-    }]
+    return [{"src": "labextension", "dest": data["name"]}]
 
 
 def _jupyter_labextension_paths():
@@ -43,10 +44,12 @@ def _jupyter_labextension_paths():
         from `src` directory into <jupyter path>/labextensions/<dest> directory
         during widget installation
     """
-    return [{
-        'src': 'labextension',
-        'dest': 'GiN',
-    }]
+    return [
+        {
+            "src": "labextension",
+            "dest": "GiN",
+        }
+    ]
 
 
 def _jupyter_nbextension_paths():
@@ -65,17 +68,20 @@ def _jupyter_nbextension_paths():
     require: Path to importable AMD Javascript module inside the
         <jupyter path>/nbextensions/<dest> directory
     """
-    return [{
-        'section': 'notebook',
-        'src': 'nbextension',
-        'dest': 'GiN',
-        'require': 'GiN/extension'
-    }]
+    return [
+        {
+            "section": "notebook",
+            "src": "nbextension",
+            "dest": "GiN",
+            "require": "GiN/extension",
+        }
+    ]
 
-#from .display import display
 
-__author__ = 'Jayadev Joshi'
-__copyright__ = 'Copyright 2021 Galaxy Contributors'
-__version__ = '0.1.0'
-__status__ = 'prealpha'
-__license__ = 'BSD-3-Clause'
+# from .display import display
+
+__author__ = "Jayadev Joshi"
+__copyright__ = "Copyright 2021 Galaxy Contributors"
+__version__ = "0.1.0"
+__status__ = "prealpha"
+__license__ = "BSD-3-Clause"
