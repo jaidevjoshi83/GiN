@@ -988,7 +988,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
     submitPayload(payload, credentials) {
 
         var self = this
-        axios.post(`${credentials['URL']}/api/tools/fetch`, payload, {
+        axios.post(`${credentials['url']}/api/tools/fetch`, payload, {
 
             headers: {
                 'x-api-key': this.model.get('gal_instance')['api_key'],
@@ -1064,12 +1064,13 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
     NewTusUpload( data){
 
         var self = this
-
         var elm = this.el.querySelector('#inputupload')
         var rp = this.el.querySelector('.resumable-upload-title')
 
-        elm.style.display = 'none'
-        rp.style.display = 'none'
+        // elm.style.display = 'none'
+        // rp.style.display = 'none'
+
+        // elm.files = []
 
         var title = document.createElement('p')
         title.className = 'upload-title'
@@ -1080,11 +1081,11 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
       
         var chunkSize = 10485760;
         var file = data.files[0];
-        var credentials = this.model.get('gal_instance')['url']
-        data['key'] =  credentials['API_key']
+        var credentials = this.model.get('gal_instance')
+        data['key'] =  credentials['api_key']
 
         var upload = new tus.Upload(file, {
-            endpoint: `${credentials['URL']}/api/upload/resumable_upload/`,
+            endpoint: `${credentials['url']}/api/upload/resumable_upload/`,
             retryDelays: [0, 3000, 5000, 10000, 20000],
             chunkSize: chunkSize,
 
@@ -1093,7 +1094,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 filetype: file.type,
             },
             headers: {
-                'x-api-key': credentials['API_key'],
+                'x-api-key': credentials['api_key'],
             },
             
             onError: function(error) {
