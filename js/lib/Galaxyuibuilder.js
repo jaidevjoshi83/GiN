@@ -22,9 +22,9 @@ import { Toolbox } from '@g2nb/nbtools';
 
 export class GalaxyUIBuilderModel extends BaseWidgetModel{
      
-     defaults() {
-         return Object.assign(Object.assign(Object.assign({}, super.defaults()), { _model_name: GalaxyUIBuilderModel.model_name, _model_module: GalaxyUIBuilderModel.model_module, _model_module_version: GalaxyUIBuilderModel.model_module_version, _view_name: GalaxyUIBuilderModel.view_name, _view_module: GalaxyUIBuilderModel.view_module, _view_module_version: GalaxyUIBuilderModel.view_module_version, name: 'Python Function', description: '', origin: '', _parameters: [], parameter_groups: [], function_import: '', register_tool: true, collapse: true, events: {}, buttons: {}, display_header: true, display_footer: true, busy: false, run_label: 'Execute', gal_instance: {}, output: undefined, inputs:{}, form_output:{}, UI:{}, galaxy_tool_id:'', history_data:[], history_ids:[] }));
-     }
+    defaults() {
+        return Object.assign(Object.assign(Object.assign({}, super.defaults()), { _model_name: GalaxyUIBuilderModel.model_name, _model_module: GalaxyUIBuilderModel.model_module, _model_module_version: GalaxyUIBuilderModel.model_module_version, _view_name: GalaxyUIBuilderModel.view_name, _view_module: GalaxyUIBuilderModel.view_module, _view_module_version: GalaxyUIBuilderModel.view_module_version, name: 'Python Function', description: '', origin: '', _parameters: [], parameter_groups: [], function_import: '', register_tool: true, collapse: true, events: {}, buttons: {}, display_header: true, display_footer: true, busy: false, run_label: 'Execute', gal_instance: {}, output: undefined, inputs:{}, form_output:{}, UI:{}, galaxy_tool_id:'', history_data:[], history_ids:[] }));
+    }
  }
 
  GalaxyUIBuilderModel.model_name = 'GalaxyUIBuilderModel';
@@ -35,7 +35,7 @@ export class GalaxyUIBuilderModel extends BaseWidgetModel{
  GalaxyUIBuilderModel.view_module_version = MODULE_VERSION;
  GalaxyUIBuilderModel.serializers = Object.assign(Object.assign({}, BaseWidgetModel.serializers), { tool: {
          deserialize: (value, manager) => unpack_models(value, manager)
-     } });
+    } });
 
 export class GalaxyUIBuilderView extends BaseWidgetView {
     constructor() {
@@ -913,7 +913,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                                 Example test for testing
                                 </textarea>
                             </div>
-
                         </div>`
 
         const utm = new DOMParser().parseFromString(data_upload, 'text/html').querySelector('.upload_tab')
@@ -1066,12 +1065,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         var self = this
         var elm = this.el.querySelector('#inputupload')
         var rp = this.el.querySelector('.resumable-upload-title')
-
-        // elm.style.display = 'none'
-        // rp.style.display = 'none'
-
-        // elm.files = []
-
         var title = document.createElement('p')
         title.className = 'upload-title'
         var Parent = elm.parentElement
@@ -1134,7 +1127,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 elm.style.display = 'block'
                 self.submitPayload(data, credentials)
             }
-            
         })
     
         // Check if there are any previous uploads to continue.
@@ -1143,9 +1135,9 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             if (previousUploads.length) {
                 upload.resumeFromPreviousUpload(previousUploads[0])
             }
-
             upload.start()
         })
+        this.el.querySelector('#inputupload').value = null
     }
 
     Upload_callback(input){
@@ -1177,8 +1169,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 'files': input.files,
             }
             self.NewTusUpload(data)
-
-            }));
+        }));
     }
 
    async dataupload_job( uplood_status='', HistoryID='' ) {
@@ -1665,18 +1656,15 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
                 Select.appendChild(el);
 
-                if (input_def['is_dynamic'] == true){
+                var history_id = self.el.querySelector('.galaxy-history-list').querySelector('#history_ids').value
+                var children = self.el.querySelector('.Galaxy-form')
+                var inputs = self.get_form_data(children)
 
-                    var children = self.el.querySelector('.Galaxy-form')
-                    var inputs = self.get_form_data(children)
-                    var history_id = self.el.querySelector('.galaxy-history-list').querySelector('#history_ids').value
+                var refine_inputs  = await KernelSideDataObjects(`from GiN import GalaxyTaskWidget\nGalaxyTaskWidget.updated_form(${JSON.stringify(self.model.get('gal_instance')['url'])}, ${JSON.stringify(inputs)}, ${JSON.stringify(self.model.get('galaxy_tool_id'))}, ${JSON.stringify(history_id)})`)
+                var form_parent = self.el.querySelector('.Galaxy-form')
 
-                    var refine_inputs  = await KernelSideDataObjects(`from GiN import GalaxyTaskWidget\nGalaxyTaskWidget.updated_form(${JSON.stringify(self.model.get('gal_instance')['url'])}, ${JSON.stringify(inputs)}, ${JSON.stringify(self.model.get('galaxy_tool_id'))}, ${JSON.stringify(history_id)})`)
-                    var form_parent = self.el.querySelector('.Galaxy-form')
-
-                    self.removeAllChildNodes(form_parent)
-                    self.form_builder(refine_inputs['inputs'])
-                }
+                self.removeAllChildNodes(form_parent)
+                self.form_builder(refine_inputs['inputs'])
             }
         }, false);
 
@@ -1690,19 +1678,17 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         
         Select.addEventListener("change", async (e) => {
 
-            if (input_def['is_dynamic'] == true){
+            console.log('OK-1')
+            var children = self.el.querySelector('.Galaxy-form')
+            var inputs = self.get_form_data(children)
+            var history_id = self.el.querySelector('.galaxy-history-list').querySelector('#history_ids').value
+            var refine_inputs  = await KernelSideDataObjects(`from GiN import GalaxyTaskWidget\nGalaxyTaskWidget.updated_form(${JSON.stringify(self.model.get('gal_instance')['url'])}, ${JSON.stringify(inputs)}, ${JSON.stringify(self.model.get('galaxy_tool_id'))}, ${JSON.stringify(history_id)})`)
+            var FormParent = self.el.querySelector('.Galaxy-form')
 
-                var children = self.el.querySelector('.Galaxy-form')
-                var inputs = self.get_form_data(children)
-                var history_id = self.el.querySelector('.dataset-list').querySelector('#history_ids').value
-                var refine_inputs  = await KernelSideDataObjects(`from GiN import GalaxyTaskWidget\nGalaxyTaskWidget.updated_form(${JSON.stringify(self.model.get('gal_instance')['url'])}, ${JSON.stringify(inputs)}, ${JSON.stringify(self.model.get('galaxy_tool_id'))}, ${JSON.stringify(history_id)})`)
-                var FormParent = self.el.querySelector('.Galaxy-form')
+            self.removeAllChildNodes(FormParent)
+            self.form_builder(refine_inputs['inputs'])
 
-                self.removeAllChildNodes(FormParent)
-                self.form_builder(refine_inputs['inputs'])
-            }
-
-            }, false);
+        }, false);
 
         FormParent.append(row)
         return row
