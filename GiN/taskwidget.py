@@ -163,7 +163,6 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
         gi6 = a.get(server=server)
 
         if (tool_inputs) and (tool_id):
-            print(tool_inputs, tool_id)
             # Tool_inputs = {
             #             "input1": [
             #                 {
@@ -213,8 +212,6 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
 
     def history_data_list(server=None, history_id=None):
 
-        print("okkk", server)
-
         a = GiN.sessions.SessionList()
         gi7 = a.get(server=server)
 
@@ -232,8 +229,6 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
 
         a = GiN.sessions.SessionList()
         gi8 = a.get(server=server)
-
-        print(dataset_id)
 
         show_dataset = gi8.gi.datasets.gi.datasets.show_dataset(dataset_id=dataset_id)
         return IPython.display.JSON(show_dataset)
@@ -377,10 +372,6 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
         return IPython.display.JSON({"uri": uri.uri})
 
     def return_job_status(server=None, job_id=None):
-
-        print("############")
-        print(job_id)
-        print("#############")
 
         a = GiN.sessions.SessionList()
         gi15 = a.get(server=server)

@@ -2182,9 +2182,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         var datasets = await KernelSideDataObjects(`from GiN  import GalaxyTaskWidget\nGalaxyTaskWidget.history_data_list(server=${JSON.stringify(server)}, history_id=${JSON.stringify(history_id)} )`) 
 
         for (var i = 0; i < datasets.length; i++){
-
             if ('ok' == datasets[i]['state'] || datasets[i]['populated_state']) {
-
                 if (datasets[i]['history_content_type'] == 'dataset') {
                     data_list.append( await this.dataset_row_ok_state(datasets[i], history_id))
                 } 
@@ -2195,6 +2193,12 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
             else if ('error' == datasets[i]['state'] || datasets[i]['populated_state']) {
                 data_list.append(await this.dataset_row_error_state(datasets[i], history_id))
+            }
+            else if (['queued', 'new'].includes(datasets[i]['state']) || datasets[i]['populated_state']) {
+                data_list.append(await this.dataset_row_queued_state(datasets[i]))
+            }
+            else if (['running'].includes(datasets[i]['state']) || datasets[i]['populated_state']) {
+                data_list.append(await this.dataset_row_running_state(datasets[i]))
             }
         }
         return data_list
@@ -2706,7 +2710,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             var list_item =  this.el.querySelector('.list-item')
 
             if (job_state=='running'  ){
-
                 var gear_rotate = this.el.querySelector('.gear-rotate-icon')
                 gear_rotate.style.display = 'block'
 
@@ -2718,47 +2721,48 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 var StdError  = this.el.querySelector('.donemessagelarge')
                 StdError.style.background = '#ffe6cd'
 
-                for (var j =0; j < data.length; j++){
+                if (history_id == this.el.querySelector('#dataset-history-list').value){
+                    for (var j =0; j < data.length; j++){
+                        var id=`dataset-${data[j]['id']}`
 
-                    var id=`dataset-${data[j]['id']}`
-
-                    if(list_item.querySelector(`#${id}`) !== null){
-                        var e = list_item.querySelector(`#${id}`)
-                        e.parentElement.removeChild(e)
-                    }
-                    if (list_item.querySelector(`#dataset-${data[j]['id']}`) == null ) {
-                        list_item.prepend(await this.dataset_row_running_state(data[j]))
+                        if (list_item.querySelector(`#${id}`) !== null){
+                            var e = list_item.querySelector(`#${id}`)
+                            e.parentElement.removeChild(e)
+                        }
+                        if (list_item.querySelector(`#dataset-${data[j]['id']}`) == null ) {
+                            list_item.prepend(await this.dataset_row_running_state(data[j]))
+                        }
                     }
                 }
             } 
-            else if (['queued', 'new'].includes(job_state)) {
 
+            else if (['queued', 'new'].includes(job_state)) {
                 var job_done_text = this.el.querySelector(".job-state-text")
                 job_done_text.innerText = 'Job queued'
-
                 var StdError  = this.el.querySelector('.donemessagelarge')
                 StdError.style.background = '#7d959d70'
 
-                for (var j =0; j < data.length; j++){
-
-                    if (list_item.querySelector(`#dataset-${data[j]['id']}`) == null ) {
-                        list_item.prepend(await this.dataset_row_queued_state(data[j]))
+                if (history_id == this.el.querySelector('#dataset-history-list').value){
+                    for (var j =0; j < data.length; j++){
+                        if (list_item.querySelector(`#dataset-${data[j]['id']}`) == null ) {
+                            list_item.prepend(await this.dataset_row_queued_state(data[j]))
+                        }
                     }
                 }
             } 
             else if (job_state == 'ok'){
+                if (history_id == this.el.querySelector('#dataset-history-list').value){
+                    for (var j =0; j < data.length; j++){
+                        var id=`dataset-${data[j]['id']}`
+                        if ( list_item.querySelector(`#${id}`) !== null) {
+                            var e = list_item.querySelector(`#${id}`)
+                            e.parentElement.removeChild(e)
+                        }
+                        list_item.prepend(await this.dataset_row_ok_state(data[j], history_id))
+                    }
+                }
 
                 this.el.querySelector('.rbtn').style.display = 'block'
-
-                for (var j =0; j < data.length; j++){
-                    var id=`dataset-${data[j]['id']}`
-                    if ( list_item.querySelector(`#${id}`) !== null) {
-                        var e = list_item.querySelector(`#${id}`)
-                        e.parentElement.removeChild(e)
-                    }
-
-                    list_item.prepend(await this.dataset_row_ok_state(data[j], history_id))
-                }
 
                 var StdError  = this.el.querySelector('.donemessagelarge')
                 StdError.style.background = '#c2ebc2'               
@@ -2774,16 +2778,18 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             } 
 
             else if (job_state == 'error'){
-                this.el.querySelector('.rbtn').style.display = 'block'
-
-                for (var j =0; j < data.length; j++){
-                    var id=`dataset-${data[j]['id']}`
-                    if ( list_item.querySelector(`#${id}`) !== null) {
-                        var e = list_item.querySelector(`#${id}`)
-                        e.parentElement.removeChild(e)
+                if (history_id == this.el.querySelector('#dataset-history-list').value){
+                    for (var j =0; j < data.length; j++){
+                        var id=`dataset-${data[j]['id']}`
+                        if ( list_item.querySelector(`#${id}`) !== null) {
+                            var e = list_item.querySelector(`#${id}`)
+                            e.parentElement.removeChild(e)
+                        }
+                        list_item.prepend(await this.dataset_row_error_state(data[j], history_id))                
                     }
-                    list_item.prepend(await this.dataset_row_error_state(data[j], history_id))
-                 }
+                }
+
+                this.el.querySelector('.rbtn').style.display = 'block'
 
                 var job_done_text = this.el.querySelector(".job-state-text")
                 job_done_text.innerText = 'Fatal Error'
@@ -2797,6 +2803,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
                 var StdError  = this.el.querySelector('.donemessagelarge')
                 StdError.style.background = '#f4a3a5'
+                
             }
 
             await this.waitforme(5000);
