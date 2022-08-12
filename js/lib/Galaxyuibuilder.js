@@ -1060,7 +1060,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         }
     }
 
-    NewTusUpload( data){
+    NewTusUpload(data){
 
         var self = this
         var elm = this.el.querySelector('#inputupload')
@@ -1273,16 +1273,18 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         select.addEventListener("change", async () => {
 
-            var form = self.element.querySelector('.Galaxy-form')
-            var Inputs = self.get_form_data(form)
-            var refine_inputs  = await KernelSideDataObjects(`from GiN import GalaxyTaskWidget\nGalaxyTaskWidget.updated_form(server=${JSON.stringify(self.model.get('gal_instance')['url'])}, tool_inputs=${JSON.stringify(Inputs)},tool_id=${JSON.stringify(self.model.get('galaxy_tool_id'))}, history_id=${JSON.stringify(select.value)})`)
-            
-            var FormParent = self.el.querySelector('.Galaxy-form')    
-            self.removeAllChildNodes(FormParent)
-            var selected_index = {}
-            selected_index['HID'] = select.selectedIndex
+            if (this.model.get('galaxy_tool_id') != 'GiN_data_upload_tool'){
 
-            self.form_builder(refine_inputs['inputs'],  selected_index)  
+                var form = self.element.querySelector('.Galaxy-form')
+                var Inputs = self.get_form_data(form)
+                var refine_inputs  = await KernelSideDataObjects(`from GiN import GalaxyTaskWidget\nGalaxyTaskWidget.updated_form(server=${JSON.stringify(self.model.get('gal_instance')['url'])}, tool_inputs=${JSON.stringify(Inputs)},tool_id=${JSON.stringify(self.model.get('galaxy_tool_id'))}, history_id=${JSON.stringify(select.value)})`)
+                
+                var FormParent = self.el.querySelector('.Galaxy-form')    
+                self.removeAllChildNodes(FormParent)
+                var selected_index = {}
+                selected_index['HID'] = select.selectedIndex
+                self.form_builder(refine_inputs['inputs'],  selected_index) 
+            }
  
             var history_id = select.value
 
@@ -1290,7 +1292,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             e.parentElement.removeChild(e)
 
             DataListdiv.append(await this.data_row_list(this.model.get('gal_instance')['url'], history_id))
-
         });
 
         var DataList = this.el.querySelector('#history-list')
@@ -2194,7 +2195,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             else if ('error' == datasets[i]['state'] || datasets[i]['populated_state']) {
                 data_list.append(await this.dataset_row_error_state(datasets[i], history_id))
             }
-            else if (['queued', 'new'].includes(datasets[i]['state']) || datasets[i]['populated_state']) {
+            else if ([ 'new'].includes(datasets[i]['state']) || datasets[i]['populated_state']) {
                 data_list.append(await this.dataset_row_queued_state(datasets[i]))
             }
             else if (['running'].includes(datasets[i]['state']) || datasets[i]['populated_state']) {
