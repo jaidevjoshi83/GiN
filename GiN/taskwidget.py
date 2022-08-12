@@ -15,19 +15,22 @@ log = logging.getLogger(__name__)
 try:
     from genepattern import authwidget
 except:
-    print('need to be fixed...!')
+    print("need to be fixed...!")
     pass
 
 try:
     from gp import GPTask
 except ModuleNotFoundError:
-    log.warning('gp module is not available, will not be able to mix GiN with GenePattern')
+    log.warning(
+        "gp module is not available, will not be able to mix GiN with GenePattern"
+    )
     GPTask = None
 import GiN
 
 
 class GalaxyTaskWidget(GalaxyUIBuilder):
     """A widget for representing the status of a Galaxy job"""
+
     # default_color = 'rgba(10, 45, 105, 0.80)'
     default_color = DEFAULT_COLOR
     default_logo = DEFAULT_LOGO
@@ -36,49 +39,42 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
     def __init__(self, tool=None, **kwargs):
         self.tool = tool
 
-    def RetrivParm(inputs, prefix=''):
+    def RetrivParm(inputs, prefix=""):
 
         OutDict = {}
 
         for i in inputs:
 
-            full_name = prefix+i['name']
+            full_name = prefix + i["name"]
 
             OutDict[full_name] = i
-            if i['model_class'] == 'Conditional':
-                for j in i['cases']:
-                    Dict1 = GalaxyTaskWidget.RetrivParm(
-                        j['inputs'],
-                        full_name+'|')
-                    OutDict = dict(
-                        list(OutDict.items()) +
-                        list(Dict1.items()))
-            elif i['model_class'] == 'Repeat':
-                Dict2 = GalaxyTaskWidget.RetrivParm(i['inputs'], full_name+'|')
+            if i["model_class"] == "Conditional":
+                for j in i["cases"]:
+                    Dict1 = GalaxyTaskWidget.RetrivParm(j["inputs"], full_name + "|")
+                    OutDict = dict(list(OutDict.items()) + list(Dict1.items()))
+            elif i["model_class"] == "Repeat":
+                Dict2 = GalaxyTaskWidget.RetrivParm(i["inputs"], full_name + "|")
                 OutDict = dict(list(OutDict.items()) + list(Dict2.items()))
-            elif i['model_class'] == 'Section':
-                Dict3 = GalaxyTaskWidget.RetrivParm(i['inputs'], full_name+'|')
+            elif i["model_class"] == "Section":
+                Dict3 = GalaxyTaskWidget.RetrivParm(i["inputs"], full_name + "|")
                 OutDict = dict(list(OutDict.items()) + list(Dict3.items()))
 
         return OutDict
 
-    def submit_job(GalInstance=None, Tool_inputs=None, HistoryID=None):
+    def submit_job(gal_instance=None, tool_inputs=None, history_id=None):
 
         a = GiN.sessions.SessionList()
-        gi1 = a.get(server=GalInstance['URL'])
-        tool_inputs = json5.loads(Tool_inputs)
+        gi1 = a.get(server=gal_instance["url"])
+        tool_inputs = json5.loads(tool_inputs)
 
-        NewInputs = GalaxyTaskWidget.RefinedInputs(tool_inputs, gi1)
+        new_inputs = GalaxyTaskWidget.RefinedInputs(tool_inputs, gi1)
 
         job = gi1.tools.gi.tools.run_tool(
-            history_id=HistoryID,
-            tool_id=GalInstance['tool_ID'],
-            tool_inputs=NewInputs)
-        showJob = gi1.jobs.gi.jobs.show_job(
-            job['jobs'][0]['id'],
-            full_details=True)
+            history_id=history_id, tool_id=gal_instance["tool_id"], tool_inputs=new_inputs
+        )
+        show_job = gi1.jobs.gi.jobs.show_job(job["jobs"][0]["id"], full_details=True)
 
-        return IPython.display.JSON(showJob)
+        return IPython.display.JSON(show_job)
 
     def get_data_type_and_genomes(server=None):
 
@@ -88,13 +84,15 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
         data_types = gi2.gi.datatypes.get_datatypes()
         genomes = gi2.gi.genomes.get_genomes()
         datatypes_genomes = {
-                'datatypes': data_types,
-                'genomes': genomes,
-                }
+            "datatypes": data_types,
+            "genomes": genomes,
+        }
 
         return IPython.display.JSON(datatypes_genomes)
 
-    def upload_dataset(file_path, upload_method, datatype, genome, server=None,  HistoryID=None):
+    def upload_dataset(
+        file_path, upload_method, datatype, genome, server=None, HistoryID=None
+    ):
 
         a = GiN.sessions.SessionList()
         gi3 = a.get(server=server)
@@ -102,11 +100,11 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
         history = gi3.gi.histories.show_history(history_id=HistoryID)
         # a = hi.History(history, gi=gi3.gi)
 
-        if (upload_method == 'text'):
+        if upload_method == "text":
             job = gi3.gi.tools.put_url(content=file_path, history_id=HistoryID)
             return IPython.display.JSON(job)
 
-        elif (upload_method == 'textarea'):
+        elif upload_method == "textarea":
             job = gi3.gi.tools.put_url(content=file_path, history_id=HistoryID)
             return IPython.display.JSON(job)
 
@@ -129,12 +127,13 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
 
         DataList = []
 
-        for i in showJob['outputs'].keys():
+        for i in showJob["outputs"].keys():
             DataList.append(
                 gi5.gi.datasets.gi.datasets.show_dataset(
-                    dataset_id=showJob['outputs'][i]['id'],
-                    hda_ldda=showJob['outputs'][i]['src'])
+                    dataset_id=showJob["outputs"][i]["id"],
+                    hda_ldda=showJob["outputs"][i]["src"],
                 )
+            )
 
         return IPython.display.JSON(DataList)
 
@@ -142,23 +141,28 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
 
         for i in inputs.keys():
             if type(inputs[i]) == dict:
-                if list(inputs[i].keys())[0] == 'values':
+                if list(inputs[i].keys())[0] == "values":
                     new_values = []
-                    for j in inputs[i]['values']:
+                    for j in inputs[i]["values"]:
                         # print(j)
                         # Dataset = gi.gi.datasets.gi.datasets.show_dataset(dataset_id=j)
                         # new_values.append({'src':Dataset['hda_ldda'],'id':Dataset['id']})
                         new_values.append(j)
-                    inputs[i]['values'] = new_values
+                    inputs[i]["values"] = new_values
         return inputs
 
-    def UpdateForm(server=None, Tool_inputs=None, toolID=None, HistoryID=None, Python_side=False, InputDataParam=False):
-
+    def updated_form(
+        server=None,
+        tool_inputs=None,
+        tool_id=None,
+        history_id=None,
+        python_side=False,
+        input_data_param=False,
+    ):
         a = GiN.sessions.SessionList()
         gi6 = a.get(server=server)
 
-        if (Tool_inputs) and (toolID):
-
+        if (tool_inputs) and (tool_id):
             # Tool_inputs = {
             #             "input1": [
             #                 {
@@ -176,72 +180,57 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
             #             "split_blocks_by_species_selector|remove_all_gap_columns": "remove_all_gap_columns"
             #     }
 
-
             inputs = gi6.tools.gi.tools.build(
-                tool_id=toolID,
-                inputs=Tool_inputs,
-                history_id=HistoryID
-                )
+                tool_id=tool_id, inputs=tool_inputs, history_id=history_id
+            )
 
-            if InputDataParam is False:
+            if input_data_param is False:
                 return IPython.display.JSON(data=inputs)
             else:
                 return IPython.display.JSON(
-                    GalaxyTaskWidget.RetrivParm(inputs['inputs'])
-                    )
+                    GalaxyTaskWidget.RetrivParm(inputs["inputs"])
+                )
 
-        elif (Tool_inputs is None) and (toolID is not None):
+        elif (tool_inputs is None) and (tool_id is not None):
 
-            inputs = gi6.tools.gi.tools.build(
-                    tool_id=toolID,
-                    history_id=HistoryID
-                    )
+            inputs = gi6.tools.gi.tools.build(tool_id=tool_id, history_id=history_id)
             return IPython.display.JSON(data=inputs)
 
         else:
-            HistoryData = gi6.gi.datasets.gi.datasets.get_datasets(
-                            history_id=HistoryID,
-                            state='ok',
-                            deleted=False,
-                            purged=False,
-                            visible=True
-                        )
+            history_data = gi6.gi.datasets.gi.datasets.get_datasets(
+                history_id=history_id,
+                state="ok",
+                deleted=False,
+                purged=False,
+                visible=True,
+            )
 
-            if Python_side is True:
-                return HistoryData
+            if python_side is True:
+                return history_data
             else:
-                return IPython.display.JSON(data=HistoryData)
+                return IPython.display.JSON(data=history_data)
 
-    def history_data_list(server=None, HistoryID=None):
-
-        print('okkk', server)
+    def history_data_list(server=None, history_id=None):
 
         a = GiN.sessions.SessionList()
         gi7 = a.get(server=server)
 
         dir(gi7)
 
-        HistoryData = gi7.gi.datasets.gi.datasets.get_datasets(
-                        history_id=HistoryID,
-                        deleted=False,
-                        purged=False,
-                        visible=True
-                    )
+        history_data = gi7.gi.datasets.gi.datasets.get_datasets(
+            history_id=history_id, deleted=False, purged=False, visible=True
+        )
         # for i in HistoryData:
         #     datasets.append(gi.gi.datasets.gi.datasets.show_dataset(dataset_id=i['id']))
 
-        return IPython.display.JSON(HistoryData)
+        return IPython.display.JSON(history_data)
 
     def show_data_set(server=None, dataset_id=None):
 
         a = GiN.sessions.SessionList()
         gi8 = a.get(server=server)
 
-        print(dataset_id)
-
-        show_dataset = gi8.gi.datasets.gi.datasets.show_dataset(
-                        dataset_id=dataset_id
-                      )
+        show_dataset = gi8.gi.datasets.gi.datasets.show_dataset(dataset_id=dataset_id)
         return IPython.display.JSON(show_dataset)
 
     def delete_dataset(server=None, history_id=None, dataset_id=None):
@@ -250,21 +239,21 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
         gi9 = a.get(server=server)
 
         gi9.gi.histories.gi.histories.delete_dataset(
-                        history_id=history_id,
-                        dataset_id=dataset_id,
-                        purge=True
-                      )
+            history_id=history_id, dataset_id=dataset_id, purge=True
+        )
 
-    def delete_dataset_collection(server=None, history_id=None, dataset_collection_id=None):
+    def delete_dataset_collection(
+        server=None, history_id=None, dataset_collection_id=None
+    ):
 
         a = GiN.sessions.SessionList()
         gi10 = a.get(server=server)
 
         gi10.gi.histories.gi.histories.delete_dataset_collection(
-                        history_id=history_id,
-                        dataset_collection_id=dataset_collection_id,
-                        purge=True
-                      )
+            history_id=history_id,
+            dataset_collection_id=dataset_collection_id,
+            purge=True,
+        )
 
     def show_dataset_collection(server=None, dataset_id=None):
 
@@ -272,8 +261,8 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
         gi11 = a.get(server=server)
 
         show_dataset = gi11.gi.dataset_collections.show_dataset_collection(
-                        dataset_collection_id=dataset_id
-                      )
+            dataset_collection_id=dataset_id
+        )
         return IPython.display.JSON(show_dataset)
 
     # def read_datafiles_files(data_url, ext):
@@ -292,7 +281,14 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
     #         fasta = response.read().decode("utf-8", "ignore")
     #         return fasta
 
-    def download_file_to_jupyter_server(server=None, data_type='dataset', collection_id=None, ext='zip', file_name=None, dir='galaxy_data'):
+    def download_file_to_jupyter_server(
+        server=None,
+        data_type="dataset",
+        collection_id=None,
+        ext="zip",
+        file_name=None,
+        dir="galaxy_data",
+    ):
 
         a = GiN.sessions.SessionList()
         gi12 = a.get(server=server)
@@ -302,25 +298,30 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
         if not os.path.exists(galaxy_data):
             os.mkdir(galaxy_data)
 
-        if data_type == 'collection':
-            file_path = os.path.join(galaxy_data, file_name)+'.'+ext
+        if data_type == "collection":
+            file_path = os.path.join(galaxy_data, file_name) + "." + ext
             gi12.gi.dataset_collections.download_dataset_collection(
-                                dataset_collection_id=collection_id,
-                                file_path=file_path
-                                )
+                dataset_collection_id=collection_id, file_path=file_path
+            )
         else:
             gi12.gi.datasets.download_dataset(
-                        dataset_id=collection_id,
-                        file_path=galaxy_data
-                        )
+                dataset_id=collection_id, file_path=galaxy_data
+            )
 
-    def send_data_to_galaxy_tool(server_d=None, server_u=None, file_name=None, dataset_id=None, ext='zip', history_id=None):
+    def send_data_to_galaxy_tool(
+        server_d=None,
+        server_u=None,
+        file_name=None,
+        dataset_id=None,
+        ext="zip",
+        history_id=None,
+    ):
 
         a = GiN.sessions.SessionList()
         gi13 = a.get(server=server_d)
         gi14 = a.get(server=server_u)
 
-        temp_dir = os.path.join(os.getcwd(), 'temp')
+        temp_dir = os.path.join(os.getcwd(), "temp")
 
         if not os.path.exists(temp_dir):
             os.mkdir(temp_dir)
@@ -329,17 +330,12 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
             os.remove(os.path.join(temp_dir, f))
 
         gi13.gi.datasets.download_dataset(
-                                    dataset_id=dataset_id,
-                                    file_path=temp_dir,
-                                    require_ok_state=False
-                                    )
+            dataset_id=dataset_id, file_path=temp_dir, require_ok_state=False
+        )
 
-        file_name = glob.glob(temp_dir+'/*.*')
+        file_name = glob.glob(temp_dir + "/*.*")
 
-        out = gi14.tools.gi.tools.upload_file(
-                                    path=file_name[0],
-                                    history_id=history_id
-                                    )
+        out = gi14.tools.gi.tools.upload_file(path=file_name[0], history_id=history_id)
 
         return IPython.display.JSON(out)
 
@@ -349,7 +345,7 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
 
     def send_data_to_gp_server(file_name, tool_id, dataset_id, server, ext):
 
-        temp_dir = os.path.join(os.getcwd(), 'temp')
+        temp_dir = os.path.join(os.getcwd(), "temp")
 
         if not os.path.exists(temp_dir):
             os.mkdir(temp_dir)
@@ -358,33 +354,29 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
             os.remove(os.path.join(temp_dir, f))
 
         GalaxyTaskWidget.download_file_to_jupyter_server(
-                                                     server=server,
-                                                     collection_id=dataset_id,
-                                                     dir='temp'
-                                                     )
+            server=server, collection_id=dataset_id, dir="temp"
+        )
 
-        file_name = glob.glob(os.path.join(temp_dir, '*.*'))
-        new_file = os.path.join("/".join(file_name[0].split('/')[:len(file_name[0].split('/'))-1]), 'data.'+ext)
+        file_name = glob.glob(os.path.join(temp_dir, "*.*"))
+        new_file = os.path.join(
+            "/".join(file_name[0].split("/")[: len(file_name[0].split("/")) - 1]),
+            "data." + ext,
+        )
         os.rename(file_name[0], new_file)
         ####################
         task = GPTask(authwidget.session.sessions[0], tool_id)
-        uri = task.server_data.upload_file(new_file.split('/')[len(new_file.split('/'))-1], new_file)
+        uri = task.server_data.upload_file(
+            new_file.split("/")[len(new_file.split("/")) - 1], new_file
+        )
         #####################
-        return IPython.display.JSON({'uri': uri.uri})
+        return IPython.display.JSON({"uri": uri.uri})
 
     def return_job_status(server=None, job_id=None):
-
-        print('############')
-        print(job_id)
-        print('#############')
 
         a = GiN.sessions.SessionList()
         gi15 = a.get(server=server)
 
-        job_state = gi15.gi.jobs.show_job(
-                            job_id=job_id,
-                            full_details=True
-                            )
+        job_state = gi15.gi.jobs.show_job(job_id=job_id, full_details=True)
 
         return IPython.display.JSON(job_state)
 
@@ -395,9 +387,9 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
 
         job_state = gi16.gi.jobs.get_state(job_id=job_id)
 
-        return IPython.display.JSON({'job_state': job_state})
+        return IPython.display.JSON({"job_state": job_state})
 
-    def handle_error_task(self, error_message, name='Galaxy Module', **kwargs):
+    def handle_error_task(self, error_message, name="Galaxy Module", **kwargs):
         """Display an error message if the task is None"""
         UIBuilder.__init__(self, lambda: None, color=self.default_color, **kwargs)
 
@@ -410,48 +402,58 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
 
         """Initialize the task widget"""
 
-        if (tool is None):
+        if tool is None:
             pass
         else:
 
             self.tool = tool
 
-            self.GalInstance = {
-                                "API_key":  self.tool['gi']._key,
-                                # "email_ID": self.tool['gi'].users.get_current_user()['email'],
-                                "URL":      self.tool['gi'].base_url,
-                                "tool_ID": self.tool['id'],
-                                "tool_name": self.tool['name'],
-                                "tool_description": self.tool['description'],
-                            }
+            self.gal_instance = {
+                "api_key": self.tool["gi"]._key,
+                # "email_ID": self.tool['gi'].users.get_current_user()['email'],
+                "url": self.tool["gi"].base_url,
+                "tool_id": self.tool["id"],
+                "tool_name": self.tool["name"],
+                "tool_description": self.tool["description"],
+            }
 
-            History_IDs = self.tool['gi'].histories.gi.histories.get_histories()
+            history_ids = self.tool["gi"].histories.gi.histories.get_histories()
 
-            if self.tool['id'] == 'GiN_data_upload_tool':
+            if self.tool["id"] == "GiN_data_upload_tool":
                 inputs = {
-                            "id": "GiN_data_upload_tool",
-                            "inputs": [
-                                {"model_class": "DataToolParameter", "name": "input1", "type": "data_upload"}
-                            ],
-                            "help": "<p>Upload data tool</p>\n<p>This tool uploads data to the selected history of the Galaxy server. User can select file from the local machine, data can be fetch directly from the URL or can be generated by available UI and uploaded to the server.</p>\n",
+                    "id": "GiN_data_upload_tool",
+                    "inputs": [
+                        {
+                            "model_class": "DataToolParameter",
+                            "name": "input1",
+                            "type": "data_upload",
                         }
+                    ],
+                    "help": "<p>Upload data tool</p>\n<p>This tool uploads data to the selected history of the Galaxy server. User can select file from the local machine, data can be fetch directly from the URL or can be generated by available UI and uploaded to the server.</p>\n",
+                }
 
             else:
-                inputs = self.tool['gi'].tools.gi.tools.build(tool_id=tool['id'], history_id=History_IDs[0]['id'])
+                inputs = self.tool["gi"].tools.gi.tools.build(
+                    tool_id=tool["id"], history_id=history_ids[0]["id"]
+                )
 
-            HistoryData = GalaxyTaskWidget.UpdateForm(server=self.GalInstance["URL"], HistoryID=History_IDs[0]['id'], Python_side=True)
+            history_data = GalaxyTaskWidget.updated_form(
+                server=self.gal_instance["url"],
+                history_id=history_ids[0]["id"],
+                python_side=True,
+            )
 
             GalaxyUIBuilder.__init__(
-                                    self,
-                                    inputs=inputs,
-                                    ToolID=self.tool['id'],
-                                    History_IDs=History_IDs,
-                                    HistoryData=HistoryData,
-                                    GalInstance=self.GalInstance,
-                                    color=self.default_color,
-                                    logo=self.default_logo,
-                                    **kwargs
-                                    )
+                self,
+                inputs=inputs,
+                galaxy_tool_id=self.tool["id"],
+                history_ids=history_ids,
+                history_data=history_data,
+                gal_instance=self.gal_instance,
+                color=self.default_color,
+                logo=self.default_logo,
+                **kwargs
+            )
 
     @staticmethod
     def form_value(raw_value):
@@ -460,7 +462,7 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
         if raw_value is not None:
             return raw_value
         else:
-            return ''
+            return ""
 
 
 class TaskTool(NBTool):
@@ -470,7 +472,7 @@ class TaskTool(NBTool):
     def __init__(self, server_name, tool):
         NBTool.__init__(self)
         self.origin = server_name
-        self.id = tool['id']
-        self.name = tool['name']
-        self.description = tool['description']
+        self.id = tool["id"]
+        self.name = tool["name"]
+        self.description = tool["description"]
         self.load = lambda: GalaxyTaskWidget(tool)

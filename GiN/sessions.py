@@ -1,11 +1,12 @@
-
-#from bioblend import galaxy
+# from bioblend import galaxy
 from bioblend.galaxy.objects import GalaxyInstance
+
 
 class SessionList:
     """
     Keeps a list of all currently registered Galaxy server sessions
     """
+
     sessions = []
 
     def register(self, server, email, password):
@@ -82,6 +83,7 @@ class SessionList:
             if session._notebook_url == server_url:
                 return i
         return -1
+
 
 """
 Galaxy Sessions Singleton
