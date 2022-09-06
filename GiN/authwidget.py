@@ -3,13 +3,11 @@ from .display import display
 from nbtools import UIBuilder, ToolManager, NBTool, EventManager
 from threading import Thread
 from .sessions import session
-
 # from .shim import login, system_message
 from .taskwidget import TaskTool
 from .util import DEFAULT_COLOR, DEFAULT_LOGO, GALAXY_SERVERS
 from urllib.error import HTTPError
 from .Galaxyuibuilder import GalaxyUIBuilder
-
 
 REGISTER_EVENT = """
     const target = event.target;
@@ -17,7 +15,6 @@ REGISTER_EVENT = """
     const server_input = widget.querySelector('input[type=text]');
     if (server_input) window.open(server_input.value + '/login#register');
     else console.warn('Cannot obtain Galaxy Server URL');"""
-
 
 class GalaxyAuthWidget(UIBuilder):
     """A widget for authenticating with a Galaxy server"""
@@ -192,14 +189,12 @@ class GalaxyAuthWidget(UIBuilder):
 
         EventManager.instance().dispatch("galaxy.login", self.session)
 
-
 def server_name(search_url):
     """Search the GALAXY_SERVERS dict for the server with the matching URL"""
     for name, url in GALAXY_SERVERS.items():
         if url == search_url:
             return name
     return search_url
-
 
 class AuthenticationTool(NBTool):
     """Tool wrapper for the authentication widget"""
@@ -210,7 +205,6 @@ class AuthenticationTool(NBTool):
     description = "Log into a Galaxy server"
     load = lambda x: GalaxyAuthWidget()
 
-
 class UploadData(NBTool):
     """Tool wrapper for the authentication widget"""
 
@@ -220,7 +214,6 @@ class UploadData(NBTool):
     description = "Upload Datafilis to galaxy history"
 
     load = lambda x: UploadData()
-
 
 # Register the authentication widget
 ToolManager.instance().register(AuthenticationTool())
