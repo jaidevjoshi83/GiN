@@ -2360,11 +2360,12 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             
                             <div class="send-data-genepattern-tools"> 
 
-                                <div class="gt" >  Send data to Galaxy  </div>
+                                <div class="gt" >  Send data to Galaxy  <i class="fa fa-refresh" aria-hidden="true"></i></div>
+
                                 <div class="galaxy-tool-list" style="display: none"> 
                                 </div>
                                  
-                                <div class="gpt" >  Send data to GenePattern  </div>
+                                <div class="gpt" >  Send data to GenePattern  <i class="fa fa-refresh" aria-hidden="true"></i></div>
                                 <div class="genepattern-tool-list" style="display: none"> 
                                 </div>
                             </div>
