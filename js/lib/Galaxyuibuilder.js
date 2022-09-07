@@ -66,6 +66,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             <div class="tool-forms"> 
                 <div class="galaxy-history-list">
                     <label id="dataset-history-label" for="history-list">Select History</label><br>
+                    
                 </div>
 
                 <form class="Galaxy-form">
@@ -73,7 +74,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             </div>
 
             <div class="dataset-list">
-                <label id="dataset-history-label" for="history-list">Select History</label><br>
+                <label id="dataset-history-label" for="history-list">Select History</label>
+                <label id="dataset-update-label" for="history-list"> Update <i class="fa fa-refresh" aria-hidden="true"></i></label>
 
                 <div id='history-list' class="history-list">
                 </div>
@@ -194,6 +196,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         }
     }
 
+    
+
     form_builder(inputs, call_back_data={}, parent='', el_name='') {
 
         var self = this
@@ -266,6 +270,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
     //     for (let f of this.file_cache)
     //         ContextManager.data_registry.unregister({ data: f });
     // }
+
+
 
     async data_upload(gp_tool_list, dataset) {
 
@@ -1327,6 +1333,19 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             DataListdiv.append(await this.data_row_list(this.model.get('gal_instance')['url'], history_id))
         });
 
+        var update = self.element.querySelector('#dataset-update-label')
+
+        update.addEventListener('click', async() => {
+
+            self.removeAllChildNodes(DataListdiv)
+            var history_id = select.value
+
+            DataListdiv.append(await this.data_row_list(this.model.get('gal_instance')['url'], history_id))
+
+            console.log('ok')
+
+        })
+
         var DataList = this.el.querySelector('#history-list')
         DataList.append(select)
     }
@@ -1367,6 +1386,12 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 self.form_builder(refine_inputs['inputs'],  selected_index)  
             }
         });
+
+
+
+
+
+
 
         var HistoryList = this.el.querySelector('.galaxy-history-list')
         HistoryList.append(select)
@@ -2713,8 +2738,10 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         var out_file_name = this.el.querySelector('.job-output-files')
         out_file_name.append(await this.input_output_file_name(job))
 
+        var usr_email = this.model.get('gal_instance')['email_ID']
+
         this.el.querySelector('.job-id').innerText = 'Job ID : '+ job['id']
-        this.el.querySelector('.job-detail-text-name').innerText = 'Submitted by : '+ job['user_email']+' on '+ job['update_time']
+        this.el.querySelector('.job-detail-text-name').innerText = 'Submitted by : '+ usr_email+' on '+ job['update_time']
 
         var dhl = this.el.querySelector('#dataset-history-list')
         var data_list_div = this.el.querySelector('.history-dataset-list');
@@ -3192,7 +3219,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 link.href = url+data[i]['links'][j]['href']
                 link.innerText = data[i]['links'][j]['text']
 
-                dis_apps_span_link.append(Link)
+                dis_apps_span_link.append(link)
             }
         }
         return display_apps

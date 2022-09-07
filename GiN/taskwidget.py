@@ -410,7 +410,7 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
 
             self.gal_instance = {
                 "api_key": self.tool["gi"]._key,
-                # "email_ID": self.tool['gi'].users.get_current_user()['email'],
+                "email_ID": self.tool['gi'].users.get_current_user()['email'],
                 "url": self.tool["gi"].base_url,
                 "tool_id": self.tool["id"],
                 "tool_name": self.tool["name"],
