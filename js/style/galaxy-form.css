@@ -194,4 +194,17 @@
   background: rgb(255,255,255);
 }
 
+.galaxy-uibuilder .ui-radiobutton{
+  display:inline;
+  float:left;   
+  padding-top: 12px;
+  padding-right: 4px;
+}
+
+.galaxy-uibuilder .ui-option{
+  border: 1px solid #bab1b1;
+  background: rgb(218,217,215);
+}
+
+
 

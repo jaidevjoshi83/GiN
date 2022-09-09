@@ -180,6 +180,8 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
             #             "split_blocks_by_species_selector|remove_all_gap_columns": "remove_all_gap_columns"
             #     }
 
+            print(tool_inputs)
+
             inputs = gi6.tools.gi.tools.build(
                 tool_id=tool_id, inputs=tool_inputs, history_id=history_id
             )
@@ -215,7 +217,6 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
         a = GiN.sessions.SessionList()
         gi7 = a.get(server=server)
 
-        dir(gi7)
 
         history_data = gi7.gi.datasets.gi.datasets.get_datasets(
             history_id=history_id, deleted=False, purged=False, visible=True

@@ -472,6 +472,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         } else if (form.querySelector('.InputDataFile')){
 
             var input_files = []  
+
             out[form.querySelector('.InputDataFile').name] = input_files  
 
             for (var i = 0; i < form.querySelector('.InputDataFile').options.length; i++) {
@@ -485,12 +486,19 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                     return 'error'
                 }
                 else {
+                    console.log(input_files)
                     form.querySelector('.InputDataFile').style.backgroundColor = ''
                     out[form.querySelector('.InputDataFile').name] = input_files
+                    form.querySelector('.InputDataFile').parentElement['data-file']['values'] = input_files
+                    out[form.querySelector('.InputDataFile').name] = form.querySelector('.InputDataFile').parentElement['data-file']
                 }
             } else {
-                out[form.querySelector('.InputDataFile').name] = input_files
+                // out[form.querySelector('.InputDataFile').name] = input_files
+                form.querySelector('.InputDataFile').parentElement['data-file']['values'] = input_files
+                out[form.querySelector('.InputDataFile').name] = form.querySelector('.InputDataFile').parentElement['data-file']
             }
+
+
         } else if(form.querySelector('.drill-down.container')) {
 
            var drill_down_inputs = []
@@ -620,7 +628,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
                                 const el = document.createElement("option");
                                 el.textContent = dataset['name'];
-                                console.log(dataset['id'])
+
                                 el.value = dataset['id']
 
                                 el.data = {'id': dataset['id'], 'src':dataset['hda_ldda']}
@@ -648,7 +656,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
                                         var out = await KernelSideDataObjects(`from GiN import GalaxyTaskWidget\nGalaxyTaskWidget.show_data_set(server=${JSON.stringify(e.target.data)},  dataset_id=${JSON.stringify(uri['outputs'][0]['id'])})`)
                                         
-                                        console.log(out)
                                         await this.waitforme(5000);
         
                                         if (out['state'] === 'ok') {
@@ -1312,12 +1319,14 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         select.addEventListener("change", async () => {
 
+            console.log(select.value)
+
             if (this.model.get('galaxy_tool_id') != 'GiN_data_upload_tool'){
 
                 var form = self.element.querySelector('.Galaxy-form')
                 var Inputs = self.get_form_data(form)
                 var refine_inputs  = await KernelSideDataObjects(`from GiN import GalaxyTaskWidget\nGalaxyTaskWidget.updated_form(server=${JSON.stringify(self.model.get('gal_instance')['url'])}, tool_inputs=${JSON.stringify(Inputs)},tool_id=${JSON.stringify(self.model.get('galaxy_tool_id'))}, history_id=${JSON.stringify(select.value)})`)
-                
+                console.log(Inputs)
                 var FormParent = self.el.querySelector('.Galaxy-form')    
                 self.removeAllChildNodes(FormParent)
                 var selected_index = {}
@@ -1378,6 +1387,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             if (this.model.get('inputs')['id'] != 'GiN_data_upload_tool') {
                 var form = self.element.querySelector('.Galaxy-form')
                 var inputs = self.get_form_data(form)
+
+                console.log(inputs)
                 var refine_inputs  = await KernelSideDataObjects(`from GiN import GalaxyTaskWidget\nGalaxyTaskWidget.updated_form(${JSON.stringify(self.model.get('gal_instance')['url'])}, ${JSON.stringify(inputs)}, ${JSON.stringify(self.model.get('galaxy_tool_id'))}, ${JSON.stringify(history_id)})`)
                 var FormParent = self.el.querySelector('.Galaxy-form')    
                 self.removeAllChildNodes(FormParent)
@@ -1386,12 +1397,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 self.form_builder(refine_inputs['inputs'],  selected_index)  
             }
         });
-
-
-
-
-
-
 
         var HistoryList = this.el.querySelector('.galaxy-history-list')
         HistoryList.append(select)
@@ -1612,8 +1617,10 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
     add_input_data(input_def, FormParent, NamePrefix, call_back_data={}){ 
 
-        input_def.id = this.uid()
+        console.log(input_def.options)
 
+
+        input_def.id = this.uid()
         var self = this
         const row = document.createElement('div')
         row.className = 'ui-form-element section-row'
@@ -1623,20 +1630,45 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         FileManu.className = 'multi-selectbox'
         FileManu.style.width = '100%'
 
+        FileManu['data-file'] = { "values": [], "batch":"false"}
+
         var Select = document.createElement('select')
         Select.className = 'InputDataFile'
 
-        Select.style.width = '100%'
+        Select.style.width = '85%'
+
+        var select_input_mode = `<div class="ui-radiobutton" style="display: inline-block;">
+                                    <label id="data-file-input" role="button" class="ui-option" data-original-title="" title=""><i class="fa fa-file-o no-padding"></i><input type="radio" name="uid-64" value="0" style="display: none;" /></label>
+                                    <label id="batch-file-input" role="button" class="ui-option" data-original-title="" title=""><i class="fa fa-files-o no-padding"></i><input type="radio" name="uid-64" value="1" style="display: none;" /></label>
+                                    <label id="collection-data-input" role="button" class="ui-option" data-original-title="" title=""><i class="fa fa-folder-o no-padding"></i><input type="radio" name="uid-64" value="2" style="display: none;" /></label>
+                                </div>`
+
+        const sim = new DOMParser().parseFromString(select_input_mode, 'text/html').querySelector('.ui-radiobutton')
+        
+        var Label = sim.querySelectorAll('.ui-option')
 
         if (input_def.multiple == true ){
             Select.multiple = true
             Select.style.height = '200px'
+            sim.querySelector('#data-file-input').style.display = 'none'
         }
 
+
+        Label.forEach((button)=> button.addEventListener('click', (e) => {
+
+            for (var i = 0; i < Label.length; i++){
+                if (Label[i] == button){
+                    Label[i].style.background = 'white';
+                } else{
+                    Label[i].style.background = 'rgb(218,217,215)';
+                }
+            } 
+        }))
+
+        FileManu.append(sim)
         Select.name = NamePrefix+input_def['name']
 
         var options = input_def.options
-
         Select.ondrop="drop(event)"
         Select.ondragover="allowDrop(event)"
 
@@ -1659,16 +1691,79 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         help.style.marginLeft = '10px'
         help.append( helpSpan)
 
+        
         for (var i = 0; i < options['hda'].length; i++) {
             const el = document.createElement("option");
             if (input_def['options']['hda'].length !== 0) {
-                el.textContent = options['hda'][i].name;
+                el.textContent = options['hda'][i].hid+': '+options['hda'][i].name;
                 delete options['hda'][i].keep
                 // el.value =JSON.stringify( {'id': options['hda'][i]['id'], "src": options['hda'][i]['src'] })   
                 el.data = options['hda'][i] 
             }
             Select.appendChild(el);
         }
+
+
+        sim.querySelector('#data-file-input').addEventListener('click', (e) => {
+            FileManu['data-file']['batch'] = 'false'
+            Select.multiple = false
+
+            self.removeAllChildNodes(Select)
+
+            for (var i = 0; i < options['hda'].length; i++) {
+                const el = document.createElement("option");
+                if (input_def['options']['hda'].length !== 0) {
+                    el.textContent = options['hda'][i].hid+': '+options['hda'][i].name;
+                    delete options['hda'][i].keep
+                    // el.value =JSON.stringify( {'id': options['hda'][i]['id'], "src": options['hda'][i]['src'] })   
+                    el.data = options['hda'][i] 
+                }
+                Select.appendChild(el);
+            }
+        })
+
+        sim.querySelector('#batch-file-input').addEventListener('click', (e) => {
+            FileManu['data-file']['batch'] = 'true'
+            Select.multiple = true
+
+            self.removeAllChildNodes(Select)
+
+            for (var i = 0; i < options['hda'].length; i++) {
+                const el = document.createElement("option");
+                if (input_def['options']['hda'].length !== 0) {
+                    el.textContent = options['hda'][i].hid+': '+options['hda'][i].name;
+                    delete options['hda'][i].keep
+                    // el.value =JSON.stringify( {'id': options['hda'][i]['id'], "src": options['hda'][i]['src'] })   
+                    el.data = options['hda'][i] 
+                }
+                Select.appendChild(el);
+            }
+        })
+
+        sim.querySelector('#collection-data-input').addEventListener('click', (e) => {
+
+
+            console.log(input_def.options)
+
+
+            Select.multiple = false
+
+            FileManu['data-file']['batch'] = 'true'
+
+            self.removeAllChildNodes(Select)
+
+            for (var i = 0; i < options['hdca'].length; i++) {
+                const el = document.createElement("option");
+                if (input_def['options']['hdca'].length !== 0) {
+                    el.textContent = options['hdca'][i].hid+': '+options['hdca'][i].name;
+                    delete options['hdca'][i].keep
+                    // el.value =JSON.stringify( {'id': options['hda'][i]['id'], "src": options['hda'][i]['src'] })   
+                    el.data = options['hdca'][i] 
+                }
+                Select.appendChild(el);
+            }
+        })
+
         // need to be fixed: manage empty data list during API:build() call. 
         if (input_def.value != null)  {
             if(input_def.value.values != null) {
@@ -1686,7 +1781,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         Select.addEventListener("dragover", function(event) {
             event.preventDefault();
-      
         }, false);
 
         Select.id = `input-data-${this.uid()}`
@@ -1695,32 +1789,46 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             // prevent default action (open as link for some elements)
             event.preventDefault();
             // move dragged elem to the selected drop targe
-            if (event.target.className == "InputDataFile") {
-                event.target.style.background = "";
-                var draged_item = self.dragged.firstElementChild
-                self.removeAllChildNodes(Select)
 
-                const opt = draged_item.querySelector('.name').innerText
-                const el = document.createElement("option");
+            // if (Select.multiple == true || FileManu['data-file']['batch'] == 'true'){
 
-                el.textContent = opt;
-                var dataID = draged_item.getAttribute('data-value')
-                var show_dataset = await KernelSideDataObjects(`from GiN  import GalaxyTaskWidget\nGalaxyTaskWidget.show_data_set(server=${JSON.stringify(self.model.get('gal_instance')['url'])}, dataset_id=${JSON.stringify( dataID)} )`)
-                el.data = {'id': draged_item.getAttribute('data-value'), 'src':show_dataset['hda_ldda']} //Fix me 
+            // } else { 
 
-                Select.appendChild(el);
+                if (event.target.className == "InputDataFile") {
+                    event.target.style.background = "";
+                    var draged_item = self.dragged.firstElementChild
+                    self.removeAllChildNodes(Select)
 
-                var history_id = self.el.querySelector('.galaxy-history-list').querySelector('#history_ids').value
-                var children = self.el.querySelector('.Galaxy-form')
-                var inputs = self.get_form_data(children)
+                    const opt = draged_item.querySelector('.name').innerText
+                    const el = document.createElement("option");
 
-                var refine_inputs  = await KernelSideDataObjects(`from GiN import GalaxyTaskWidget\nGalaxyTaskWidget.updated_form(${JSON.stringify(self.model.get('gal_instance')['url'])}, ${JSON.stringify(inputs)}, ${JSON.stringify(self.model.get('galaxy_tool_id'))}, ${JSON.stringify(history_id)})`)
-                var form_parent = self.el.querySelector('.Galaxy-form')
+                    el.textContent = opt;
+                    var dataID = draged_item.getAttribute('data-value')
 
-                self.removeAllChildNodes(form_parent)
-                self.form_builder(refine_inputs['inputs'])
-            }
+
+                    var show_dataset = await KernelSideDataObjects(`from GiN  import GalaxyTaskWidget\nGalaxyTaskWidget.show_data_set(server=${JSON.stringify(self.model.get('gal_instance')['url'])}, dataset_id=${JSON.stringify( dataID)} )`)
+                   
+                    // var show_dataset =   await KernelSideDataObjects( `import GiN\na=GiN.sessions.SessionList()\ngi = a.get(server=${JSON.stringify(self.model.get('gal_instance')['url'])})\ngi.gi.datasets.gi.dataset_collections.show_dataset_collection(dataset_collection_id=${JSON.stringify( dataID)})`)
+
+                   
+                    el.data = {'id': draged_item.getAttribute('data-value'), 'src':show_dataset['hda_ldda']} //Fix me 
+
+                    Select.appendChild(el);
+
+                    var history_id = self.el.querySelector('.galaxy-history-list').querySelector('#history_ids').value
+                    var children = self.el.querySelector('.Galaxy-form')
+                    var inputs = self.get_form_data(children)
+
+                    var refine_inputs  = await KernelSideDataObjects(`from GiN import GalaxyTaskWidget\nGalaxyTaskWidget.updated_form(${JSON.stringify(self.model.get('gal_instance')['url'])}, ${JSON.stringify(inputs)}, ${JSON.stringify(self.model.get('galaxy_tool_id'))}, ${JSON.stringify(history_id)})`)
+                    var form_parent = self.el.querySelector('.Galaxy-form')
+
+                    // self.removeAllChildNodes(form_parent)
+                    // self.form_builder(refine_inputs['inputs'])
+                }
+        // }
+
         }, false);
+
 
         FileManu.append(Select)
         FileManu.style.width = '100%'
@@ -1732,15 +1840,19 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         
         Select.addEventListener("change", async (e) => {
 
-            console.log('OK-1')
-            var children = self.el.querySelector('.Galaxy-form')
-            var inputs = self.get_form_data(children)
-            var history_id = self.el.querySelector('.galaxy-history-list').querySelector('#history_ids').value
-            var refine_inputs  = await KernelSideDataObjects(`from GiN import GalaxyTaskWidget\nGalaxyTaskWidget.updated_form(${JSON.stringify(self.model.get('gal_instance')['url'])}, ${JSON.stringify(inputs)}, ${JSON.stringify(self.model.get('galaxy_tool_id'))}, ${JSON.stringify(history_id)})`)
-            var FormParent = self.el.querySelector('.Galaxy-form')
+            if (Select.multiple == true || FileManu['data-file']['batch'] == 'true'){
 
-            self.removeAllChildNodes(FormParent)
-            self.form_builder(refine_inputs['inputs'])
+            } else{
+                console.log('OK-1')
+                var children = self.el.querySelector('.Galaxy-form')
+                var inputs = self.get_form_data(children)
+                var history_id = self.el.querySelector('.galaxy-history-list').querySelector('#history_ids').value
+                var refine_inputs  = await KernelSideDataObjects(`from GiN import GalaxyTaskWidget\nGalaxyTaskWidget.updated_form(${JSON.stringify(self.model.get('gal_instance')['url'])}, ${JSON.stringify(inputs)}, ${JSON.stringify(self.model.get('galaxy_tool_id'))}, ${JSON.stringify(history_id)})`)
+                var FormParent = self.el.querySelector('.Galaxy-form')
+    
+                self.removeAllChildNodes(FormParent)
+                self.form_builder(refine_inputs['inputs'])
+            }
 
         }, false);
 
@@ -2294,6 +2406,10 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                     // self.removeAllChildNodes( Tbl.querySelector('.list-items'))
                 } else{
                     for (var i = 0; i < show_dataset['elements'].length; i++){
+
+
+                        show_dataset['elements'][i]['populated_state'] = show_dataset['populated_state']
+
                 
                         Tbl.querySelector('.list-items').append(await self.dataset_collection_list_item(show_dataset['elements'][i]))
                     }
@@ -2999,7 +3115,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         var self = this
         var URL = this.model.get('gal_instance')['url']
 
-        var list_item = `<div id="dataset-${elements['object']['id']}" class="list-item dataset state-${elements['object']['state']}" >
+        var list_item = `<div id="dataset-${elements['object']['id']}" class="list-item dataset state-${elements['populated_state']}" >
                           <div class="warnings"></div>
                           <div class="selector"><span class="fa fa-2x fa-square-o"></span></div>
                           <div class="primary-actions"><a class="icon-btn display-btn" title="" target="galaxy_main" href="${URL}/datasets/${elements['object']['id']}/display/?preview=True" data-original-title="View data"><span class="fa fa-eye" style="" title="View data"></span></a><a class="icon-btn edit-btn" title="" href="${URL}/datasets/edit?dataset_id=${elements['object']['id']}" data-original-title="Edit attributes"><span class="fa fa-pencil" style="" title="Edit data"></span></a><a class="icon-btn display-btn" title="" target="" href="javascript:void(0);" data-original-title="View data"><span class="fa fa-download"  style="" title="Download data to jupyterlab server"></span></a><a class="icon-btn display-btn"  target="" href="javascript:void(0);" data-original-title="View data"><span class="fa fa-exchange" style="" title="Send data to available tools"></span></a></div>
@@ -3048,17 +3164,17 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         row.querySelector('.name').addEventListener('click', async (e) => {
 
-        if (row.querySelector('.details').style.display == 'block') {
-            row.querySelector('.details').style.display = 'none'
-        } else{
-            row.querySelector('.details').style.display = 'block'
-        }
+            if (row.querySelector('.details').style.display == 'block') {
+                row.querySelector('.details').style.display = 'none'
+            } else{
+                row.querySelector('.details').style.display = 'block'
+            }
         });
 
         var exch  = row.querySelector('.fa.fa-exchange')
         var title = row.querySelector('.title')
         var gp_tools = row.querySelector('.gpt')
-        var gt_ools = row.querySelector('.gt')
+        var g_tools = row.querySelector('.gt')
 
         title.data = elements
 
@@ -3167,6 +3283,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         var history_id = self.element.querySelector('#history_ids').value 
         var form = self.element.querySelector('.Galaxy-form')
         var inputs = this.get_form_data(form, 'on')
+
+        console.log(inputs)
 
         if (inputs == 'error'){
             return
