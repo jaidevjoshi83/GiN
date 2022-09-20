@@ -72,9 +72,18 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
         job = gi1.tools.gi.tools.run_tool(
             history_id=history_id, tool_id=gal_instance["tool_id"], tool_inputs=new_inputs
         )
-        show_job = gi1.jobs.gi.jobs.show_job(job["jobs"][0]["id"], full_details=True)
 
-        return IPython.display.JSON(show_job)
+        return IPython.display.JSON(job)
+
+    
+    def show_job(gal_instance=None, job_id=None):
+
+        a = GiN.sessions.SessionList()
+        gi1 = a.get(server=gal_instance["url"])
+        
+        job = gi1.jobs.gi.jobs.show_job(job_id=job_id)
+
+        return IPython.display.JSON(job)
 
     def get_data_type_and_genomes(server=None):
 

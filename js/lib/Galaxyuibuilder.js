@@ -13,7 +13,7 @@ import { MODULE_NAME, MODULE_VERSION } from './version';
 import { unpack_models } from "@jupyter-widgets/base";
 import { BaseWidgetModel, BaseWidgetView } from "@g2nb/nbtools";
 import _ from "underscore";
-import {  is_url, KernelSideDataObjects } from './utils';
+import {  is_url, KernelSideDataObjects, show } from './utils';
 import * as tus from "tus-js-client";
 import axios from "axios";
 import { Data } from '@g2nb/nbtools/lib/dataregistry';
@@ -479,7 +479,9 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 if (form.querySelector('.InputDataFile').options[i].selected == true) {
                     input_files.push(form.querySelector('.InputDataFile').options[i].data)
                 }
+
             }
+
             if (checking == 'on') {
                 if (out[form.querySelector('.InputDataFile').name].length < 1 ){
                     form.querySelector('.InputDataFile').style.backgroundColor = 'pink'
@@ -489,12 +491,19 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                     console.log(input_files)
                     form.querySelector('.InputDataFile').style.backgroundColor = ''
                     out[form.querySelector('.InputDataFile').name] = input_files
+                    
                     form.querySelector('.InputDataFile').parentElement['data-file']['values'] = input_files
                     out[form.querySelector('.InputDataFile').name] = form.querySelector('.InputDataFile').parentElement['data-file']
                 }
             } else {
                 // out[form.querySelector('.InputDataFile').name] = input_files
-                form.querySelector('.InputDataFile').parentElement['data-file']['values'] = input_files
+
+                if (input_files.length == 0){
+                    form.querySelector('.InputDataFile').parentElement['data-file']['values'] = [{}]
+                } else{
+                    form.querySelector('.InputDataFile').parentElement['data-file']['values'] = input_files
+                }
+                
                 out[form.querySelector('.InputDataFile').name] = form.querySelector('.InputDataFile').parentElement['data-file']
             }
 
@@ -1319,14 +1328,11 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         select.addEventListener("change", async () => {
 
-            console.log(select.value)
-
             if (this.model.get('galaxy_tool_id') != 'GiN_data_upload_tool'){
 
                 var form = self.element.querySelector('.Galaxy-form')
                 var Inputs = self.get_form_data(form)
                 var refine_inputs  = await KernelSideDataObjects(`from GiN import GalaxyTaskWidget\nGalaxyTaskWidget.updated_form(server=${JSON.stringify(self.model.get('gal_instance')['url'])}, tool_inputs=${JSON.stringify(Inputs)},tool_id=${JSON.stringify(self.model.get('galaxy_tool_id'))}, history_id=${JSON.stringify(select.value)})`)
-                console.log(Inputs)
                 var FormParent = self.el.querySelector('.Galaxy-form')    
                 self.removeAllChildNodes(FormParent)
                 var selected_index = {}
@@ -1350,9 +1356,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             var history_id = select.value
 
             DataListdiv.append(await this.data_row_list(this.model.get('gal_instance')['url'], history_id))
-
-            console.log('ok')
-
         })
 
         var DataList = this.el.querySelector('#history-list')
@@ -1617,9 +1620,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
     add_input_data(input_def, FormParent, NamePrefix, call_back_data={}){ 
 
-        console.log(input_def.options)
-
-
         input_def.id = this.uid()
         var self = this
         const row = document.createElement('div')
@@ -1797,7 +1797,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 if (event.target.className == "InputDataFile") {
                     event.target.style.background = "";
                     var draged_item = self.dragged.firstElementChild
-                    self.removeAllChildNodes(Select)
+                    // self.removeAllChildNodes(Select)
 
                     const opt = draged_item.querySelector('.name').innerText
                     const el = document.createElement("option");
@@ -2374,6 +2374,14 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         var self = this
 
+        if (dataset.collection_type == "list:paired"){
+            dataset.collection_type =  `a list of pairs with ${dataset.element_count} items`
+        } else if (dataset.collection_type == "list") {
+            dataset.collection_type =  `a list of ${dataset.element_count} items`
+        } else if (dataset.collection_type == 'paired') {
+            dataset.collection_type =  `a dataset pair with ${dataset.element_count} items`
+        }       
+
         if (dataset['populated_state'] == 'ok'){
             var pop_state = dataset['populated_state']
  
@@ -2389,7 +2397,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                                 <span class="hid">${dataset['hid']}: </span> <span class="name">${dataset['name']}</span>
                             </div>
                             <br>
-                            <div>a list with ${dataset['element_count']} items</div>
+                            <div> ${dataset.collection_type}</div>
                         </div>
                         
                         <div class="list-items"  style="display: none; border: solid white 2px; margine; margin: 20px; "></div>
@@ -2401,18 +2409,38 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
                 var URL = this.model.get('gal_instance')['url']
                 var show_dataset = await KernelSideDataObjects(`from GiN  import GalaxyTaskWidget\nGalaxyTaskWidget.show_dataset_collection(server=${JSON.stringify(this.model.get('gal_instance')['url'])}, dataset_id=${JSON.stringify(dataset['id'])} )`) 
-        
+          
+                if (show_dataset.collection_type == 'list'){
+                    if (Tbl.querySelector('.list-items').children.length == 0){
+
+                    for(var i = 0; i < show_dataset.elements.length;  i++){
+                            show_dataset.elements[i]['object']['hid'] = i
+                            show_dataset.elements[i]['hid'] = i
+                            show_dataset.elements[i]['name'] = show_dataset.elements[i]['element_identifier']
+                            Tbl.querySelector('.list-items').append(await self.dataset_row_ok_state (show_dataset.elements[i], history_id))
+                        }
+                    }
+
+                } else if (show_dataset.collection_type == 'list:paired'){
+                    if (Tbl.querySelector('.list-items').children.length == 0){
+                        for(var i = 0; i < show_dataset.elements.length;  i++){
+                            Tbl.querySelector('.list-items').append(await self.dataset_collection_list_pairs (show_dataset.elements[i], history_id))
+                        }
+                    }
+                } else{
+                    if (Tbl.querySelector('.list-items').children.length == 0){
+                        for(var i = 0; i < show_dataset.elements.length;  i++){
+                                show_dataset.elements[i]['hid'] = i
+                                show_dataset.elements[i]['name'] = show_dataset.elements[i]['element_identifier']
+                                Tbl.querySelector('.list-items').append(await self.dataset_row_ok_state (show_dataset.elements[i], history_id))
+                            }
+                    }
+                }
+
                 if (Tbl.querySelector('.list-items').childNodes.length > 0) {
                     // self.removeAllChildNodes( Tbl.querySelector('.list-items'))
                 } else{
-                    for (var i = 0; i < show_dataset['elements'].length; i++){
-
-
-                        show_dataset['elements'][i]['populated_state'] = show_dataset['populated_state']
-
-                
-                        Tbl.querySelector('.list-items').append(await self.dataset_collection_list_item(show_dataset['elements'][i]))
-                    }
+                    Tbl.querySelector('.list-items').append(await self.dataset_collection_list_item(show_dataset))
                 }
 
                 if (Tbl.querySelector('.list-items').style.display == 'block') {
@@ -2455,6 +2483,56 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         
         const data_share_menu = new DOMParser().parseFromString(row, 'text/html')
         return data_share_menu.querySelector('#add_data_share_menu')
+    }
+
+    dataset_collection_list_pairs(dataset, history_id){
+
+        var self = this
+
+        var row = `<div id="dataset_collection-${dataset['id']}" class="list-item dataset-collection dataset-collection-element state-ok">
+                            <div class="warnings">
+                            </div>
+                            <div class="selector">
+                                <span class="fa fa-2x fa-square-o"></span>
+                            </div>
+                            <div class="primary-actions"></div>
+                            <div class="title-bar clear" tabindex="0" draggable="true">
+                                <div class="title">
+                                <span class="name">${dataset['element_identifier']}</span>
+                                </div>
+                                <div class="subtitle">a pair of datasets</div>
+                            </div>
+                            <div class="details"></div>
+                        
+
+                            <div class="list-items"  style="display: none; border: solid white 2px; margine; margin: 20px; "></div>
+                    </div>`
+
+                    const Tbl = new DOMParser().parseFromString(row, 'text/html').querySelector(`.list-item.dataset-collection.dataset-collection-element.state-ok`)
+
+                    Tbl.querySelector('.name').addEventListener('click', async (e) => {
+
+                        console.log(dataset['object']['elements'])
+
+                        if (Tbl.querySelector('.list-items').style.display == 'block') {
+                            Tbl.querySelector('.list-items').style.display = 'none'
+                        } else{
+                            Tbl.querySelector('.list-items').style.display = 'block'
+                        }
+
+                        if (Tbl.querySelector('.list-items').children.length == 0){
+
+                            for(var i = 0; i < dataset['object']['elements'].length;  i++){
+                                dataset['object']['elements'][i]['hid'] = i
+                                dataset['object']['elements'][i]['hid'] = i
+                                dataset['object']['elements'][i]['name'] = dataset['object']['elements'][i]['element_identifier']
+                                    Tbl.querySelector('.list-items').append(await self.dataset_row_ok_state (dataset['object']['elements'][i], history_id))
+                                }
+                            }
+                    })
+
+        return Tbl
+
     }
     
     async dataset_row_ok_state (dataset, history_id){
@@ -2850,140 +2928,146 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         this.JobStatusTemplate(history_id)
         this.hide_run_buttons(true)
 
-        var job  = await KernelSideDataObjects(`from GiN import GalaxyTaskWidget\nGalaxyTaskWidget.submit_job(gal_instance=${JSON.stringify(this.model.get('gal_instance'))}, tool_inputs=${JSON.stringify(inputs)}, history_id=${JSON.stringify(history_id)})`)
+        var jobs  = await KernelSideDataObjects(`from GiN import GalaxyTaskWidget\nGalaxyTaskWidget.submit_job(gal_instance=${JSON.stringify(this.model.get('gal_instance'))}, tool_inputs=${JSON.stringify(inputs)}, history_id=${JSON.stringify(history_id)})`)
 
-        var out_file_name = this.el.querySelector('.job-output-files')
-        out_file_name.append(await this.input_output_file_name(job))
+       for (var n = 0; n < jobs['jobs'].length; n++) {
 
-        var usr_email = this.model.get('gal_instance')['email_ID']
+            var job  = await KernelSideDataObjects(`from GiN import GalaxyTaskWidget\nGalaxyTaskWidget.show_job(gal_instance=${JSON.stringify(this.model.get('gal_instance'))}, job_id=${JSON.stringify(jobs["jobs"][n]["id"])})`)
 
-        this.el.querySelector('.job-id').innerText = 'Job ID : '+ job['id']
-        this.el.querySelector('.job-detail-text-name').innerText = 'Submitted by : '+ usr_email+' on '+ job['update_time']
+            var out_file_name = this.el.querySelector('.job-output-files')
+            out_file_name.append(await this.input_output_file_name(job))
 
-        var dhl = this.el.querySelector('#dataset-history-list')
-        var data_list_div = this.el.querySelector('.history-dataset-list');
+            var usr_email = this.model.get('gal_instance')['email_ID']
 
-       for (var i = 0; i <  dhl.options.length; i++ ){
-            if (dhl[i].value == history_id) {
-                dhl.selectedIndex = i
+            this.el.querySelector('.job-id').innerText = 'Job ID : '+ job['id']
+            this.el.querySelector('.job-detail-text-name').innerText = 'Submitted by : '+ usr_email+' on '+ job['update_time']
+
+            var dhl = this.el.querySelector('#dataset-history-list')
+            var data_list_div = this.el.querySelector('.history-dataset-list');
+
+            for (var i = 0; i <  dhl.options.length; i++ ){
+                    if (dhl[i].value == history_id) {
+                        dhl.selectedIndex = i
+                    }
+                }
+
+            var e = this.el.querySelector('.list-item')
+            e.parentElement.removeChild(e)
+            data_list_div.append(await this.data_row_list(this.model.get('gal_instance')['url'], history_id))
+
+            var states = ['ok', 'error']
+
+            for (let i = 0; i < Infinity; ++i) {
+
+                var data = await KernelSideDataObjects(`from GiN import GalaxyTaskWidget\nGalaxyTaskWidget.OutPutData(server=${JSON.stringify(this.model.get('gal_instance')['url'])}, JobID=${JSON.stringify(job['id'])} )`);
+
+                var job_state = data[0]['state']
+                var list_item =  this.el.querySelector('.list-item')
+
+                if (job_state=='running'  ){
+                    var gear_rotate = this.el.querySelector('.gear-rotate-icon')
+                    gear_rotate.style.display = 'block'
+
+                    var job_done_text = this.el.querySelector(".job-state-text")
+
+                    job_done_text.innerText = 'Job Running'
+                    job_done_text.style.color = '#F5A207'
+
+                    var StdError  = this.el.querySelector('.donemessagelarge')
+                    StdError.style.background = '#ffe6cd'
+
+                    if (history_id == this.el.querySelector('#dataset-history-list').value){
+                        for (var j =0; j < data.length; j++){
+                            var id=`dataset-${data[j]['id']}`
+
+                            if (list_item.querySelector(`#${id}`) !== null){
+                                var e = list_item.querySelector(`#${id}`)
+                                e.parentElement.removeChild(e)
+                            }
+                            if (list_item.querySelector(`#dataset-${data[j]['id']}`) == null ) {
+                                list_item.prepend(await this.dataset_row_running_state(data[j]))
+                            }
+                        }
+                    }
+                } 
+
+                else if (['queued', 'new'].includes(job_state)) {
+                    var job_done_text = this.el.querySelector(".job-state-text")
+                    job_done_text.innerText = 'Job queued'
+                    var StdError  = this.el.querySelector('.donemessagelarge')
+                    StdError.style.background = '#7d959d70'
+
+                    if (history_id == this.el.querySelector('#dataset-history-list').value){
+                        for (var j =0; j < data.length; j++){
+                            if (list_item.querySelector(`#dataset-${data[j]['id']}`) == null ) {
+                                list_item.prepend(await this.dataset_row_queued_state(data[j]))
+                            }
+                        }
+                    }
+                } 
+                else if (job_state == 'ok'){
+                    if (history_id == this.el.querySelector('#dataset-history-list').value){
+                        for (var j =0; j < data.length; j++){
+                            var id=`dataset-${data[j]['id']}`
+                            if ( list_item.querySelector(`#${id}`) !== null) {
+                                var e = list_item.querySelector(`#${id}`)
+                                e.parentElement.removeChild(e)
+                            }
+                            list_item.prepend(await this.dataset_row_ok_state(data[j], history_id))
+                        }
+                    }
+
+                    this.el.querySelector('.rbtn').style.display = 'block'
+
+                    var StdError  = this.el.querySelector('.donemessagelarge')
+                    StdError.style.background = '#c2ebc2'               
+
+                    var job_done_text = this.el.querySelector(".job-state-text")
+                    job_done_text.innerText = 'Job complete'
+
+                    var gear_rotate = this.el.querySelector('.gear-rotate-icon')
+                    gear_rotate.style.display = 'none'
+
+                    var gear_rotate = this.el.querySelector('.job-done-icon')
+                    gear_rotate.style.display = 'block'
+                } 
+
+                else if (job_state == 'error'){
+                    if (history_id == this.el.querySelector('#dataset-history-list').value){
+                        for (var j =0; j < data.length; j++){
+                            var id=`dataset-${data[j]['id']}`
+                            if ( list_item.querySelector(`#${id}`) !== null) {
+                                var e = list_item.querySelector(`#${id}`)
+                                e.parentElement.removeChild(e)
+                            }
+                            list_item.prepend(await this.dataset_row_error_state(data[j], history_id))                
+                        }
+                    }
+
+                    this.el.querySelector('.rbtn').style.display = 'block'
+
+                    var job_done_text = this.el.querySelector(".job-state-text")
+                    job_done_text.innerText = 'Fatal Error'
+                    job_done_text.style.color = 'white'
+
+                    var gear_rotate = this.el.querySelector('.gear-rotate-icon')
+                    gear_rotate.style.display = 'none'
+
+                    var gear_rotate = this.el.querySelector('.job-error-icon')
+                    gear_rotate.style.display = 'block'
+
+                    var StdError  = this.el.querySelector('.donemessagelarge')
+                    StdError.style.background = '#f4a3a5'
+                    
+                }
+
+                await this.waitforme(5000);
+
+                if (states.includes(job_state) === true ) {
+                    break;
+                }      
             }
-        }
 
-        var e = this.el.querySelector('.list-item')
-        e.parentElement.removeChild(e)
-        data_list_div.append(await this.data_row_list(this.model.get('gal_instance')['url'], history_id))
-
-        var states = ['ok', 'error']
-
-        for (let i = 0; i < Infinity; ++i) {
-
-            var data = await KernelSideDataObjects(`from GiN import GalaxyTaskWidget\nGalaxyTaskWidget.OutPutData(server=${JSON.stringify(this.model.get('gal_instance')['url'])}, JobID=${JSON.stringify(job['id'])} )`);
-
-            var job_state = data[0]['state']
-            var list_item =  this.el.querySelector('.list-item')
-
-            if (job_state=='running'  ){
-                var gear_rotate = this.el.querySelector('.gear-rotate-icon')
-                gear_rotate.style.display = 'block'
-
-                var job_done_text = this.el.querySelector(".job-state-text")
-
-                job_done_text.innerText = 'Job Running'
-                job_done_text.style.color = '#F5A207'
-
-                var StdError  = this.el.querySelector('.donemessagelarge')
-                StdError.style.background = '#ffe6cd'
-
-                if (history_id == this.el.querySelector('#dataset-history-list').value){
-                    for (var j =0; j < data.length; j++){
-                        var id=`dataset-${data[j]['id']}`
-
-                        if (list_item.querySelector(`#${id}`) !== null){
-                            var e = list_item.querySelector(`#${id}`)
-                            e.parentElement.removeChild(e)
-                        }
-                        if (list_item.querySelector(`#dataset-${data[j]['id']}`) == null ) {
-                            list_item.prepend(await this.dataset_row_running_state(data[j]))
-                        }
-                    }
-                }
-            } 
-
-            else if (['queued', 'new'].includes(job_state)) {
-                var job_done_text = this.el.querySelector(".job-state-text")
-                job_done_text.innerText = 'Job queued'
-                var StdError  = this.el.querySelector('.donemessagelarge')
-                StdError.style.background = '#7d959d70'
-
-                if (history_id == this.el.querySelector('#dataset-history-list').value){
-                    for (var j =0; j < data.length; j++){
-                        if (list_item.querySelector(`#dataset-${data[j]['id']}`) == null ) {
-                            list_item.prepend(await this.dataset_row_queued_state(data[j]))
-                        }
-                    }
-                }
-            } 
-            else if (job_state == 'ok'){
-                if (history_id == this.el.querySelector('#dataset-history-list').value){
-                    for (var j =0; j < data.length; j++){
-                        var id=`dataset-${data[j]['id']}`
-                        if ( list_item.querySelector(`#${id}`) !== null) {
-                            var e = list_item.querySelector(`#${id}`)
-                            e.parentElement.removeChild(e)
-                        }
-                        list_item.prepend(await this.dataset_row_ok_state(data[j], history_id))
-                    }
-                }
-
-                this.el.querySelector('.rbtn').style.display = 'block'
-
-                var StdError  = this.el.querySelector('.donemessagelarge')
-                StdError.style.background = '#c2ebc2'               
-
-                var job_done_text = this.el.querySelector(".job-state-text")
-                job_done_text.innerText = 'Job complete'
-
-                var gear_rotate = this.el.querySelector('.gear-rotate-icon')
-                gear_rotate.style.display = 'none'
-
-                var gear_rotate = this.el.querySelector('.job-done-icon')
-                gear_rotate.style.display = 'block'
-            } 
-
-            else if (job_state == 'error'){
-                if (history_id == this.el.querySelector('#dataset-history-list').value){
-                    for (var j =0; j < data.length; j++){
-                        var id=`dataset-${data[j]['id']}`
-                        if ( list_item.querySelector(`#${id}`) !== null) {
-                            var e = list_item.querySelector(`#${id}`)
-                            e.parentElement.removeChild(e)
-                        }
-                        list_item.prepend(await this.dataset_row_error_state(data[j], history_id))                
-                    }
-                }
-
-                this.el.querySelector('.rbtn').style.display = 'block'
-
-                var job_done_text = this.el.querySelector(".job-state-text")
-                job_done_text.innerText = 'Fatal Error'
-                job_done_text.style.color = 'white'
-
-                var gear_rotate = this.el.querySelector('.gear-rotate-icon')
-                gear_rotate.style.display = 'none'
-
-                var gear_rotate = this.el.querySelector('.job-error-icon')
-                gear_rotate.style.display = 'block'
-
-                var StdError  = this.el.querySelector('.donemessagelarge')
-                StdError.style.background = '#f4a3a5'
-                
-            }
-
-            await this.waitforme(5000);
-
-            if (states.includes(job_state) === true ) {
-                break;
-            }      
         }
     }
 
@@ -3110,7 +3194,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
     return JobPanel
     }
 
-    async dataset_collection_list_item (elements){
+    async dataset_collection_list_item1 (elements){
 
         var self = this
         var URL = this.model.get('gal_instance')['url']
@@ -3237,6 +3321,157 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         return row
     }
 
+
+    async dataset_collection_list_item (show_dataset){
+
+        var self = this
+        var URL = this.model.get('gal_instance')['url']
+
+        var list_item = `<div id="dataset-${show_dataset['id']}" class="list-item dataset state-${show_dataset['populated_state']}" >
+
+                            <div class="warnings">
+                          
+                            </div>
+
+                            <div class="selector">
+                                <span class="fa fa-2x fa-square-o"></span>
+                            </div>
+
+                            <div class="title-bar clear" tabindex="" draggable="true">
+                                <span class="state-icon"></span>
+
+                                <div class="title"><span class="name"></span></div>
+                                </div>
+
+                                <div class="details" style="display: none;">
+                                    <h1> jai </h1>
+                                </div>
+
+                            </div>
+                        </div>`
+      
+        const row = new DOMParser().parseFromString(list_item, 'text/html').querySelector('.list-item.dataset.state-ok')
+
+
+        // for (var i = 0; i < show_dataset.object.elements.length; i++){
+
+        //   console.log('ok')
+
+        // }
+
+         
+        // var line = `<div id="dataset-${dataset['dataset_id']}" class="list-item dataset history-content state-running" style="display: none;">
+        //                 <div class="warnings"></div>
+        //                 <div class="selector"><span class="fa fa-2x fa-square-o"></span></div>
+        //                 <div class="primary-actions"><a class="icon-btn display-btn" title="" target="galaxy_main" href="${URL}/datasets/${dataset['dataset_id']}/display/?preview=True" data-original-title="View data"><span class="fa fa-eye" style=""></span></a><a class="icon-btn edit-btn" title="" href="${URL}/datasets/edit?dataset_id=${dataset['dataset_id']}" data-original-title="Edit attributes"><span class="fa fa-pencil" style=""></span></a><a class="icon-btn delete-btn" title="" href="javascript:void(0);" data-original-title="Delete"><span class="fa fa-times" style=""></span></a><a class="icon-btn display-btn" title="" target="galaxy_main" href="${URL}/datasets/${dataset['dataset_id']}/display/?preview=True" data-original-title="View data"><span class="fa fa-eye" style=""></span></a></div>
+        //                 <div class="title-bar clear" tabindex="0" draggable="true"> <span class="state-icon"></span>
+        //                     <div class="title"> <span class="hid">${dataset['hid']}</span> <span class="name">${dataset['name']}/span> </div>
+        //                     <br>
+        //                     <div class="nametags"></div>
+        //                 </div>
+        //                 <div class="details" style="display: block;">
+        //                     <div class="summary">
+        //                         <div class="detail-messages"></div>
+        //                         <div>This job is currently running</div>
+        //                     </div>
+        //                     <div class="actions clear">
+        //                         <div class="left"><a class="icon-btn params-btn" title="" target="galaxy_main" href="${URL}/datasets/${dataset['dataset_id']}show_params" data-original-title="View details"><span class="fa fa-info-circle" style=""></span></a><a class="icon-btn rerun-btn" title="" target="galaxy_main" href="${URL}/tool_runner/rerun?id=${dataset['dataset_id']}" data-original-title="Run this job again"><span class="fa fa-refresh" style=""></span></a><a class="icon-btn icon-btn" title="" href="#" data-original-title="Tool Help"><span class="fa fa-question" style=""></span></a></div>
+        //                         <div class="right"><a class="icon-btn tag-btn" title="" href="" data-original-title="Edit dataset tags"><span class="fa fa-tags" style=""></span></a><a class="icon-btn annotate-btn" title="" href="" data-original-title="Edit dataset annotation"><span class="fa fa-comment" style=""></span></a></div>
+        //                     </div>
+        //                     <div class="annotation-display"></div>
+        //                     <div class="display-applications"></div>
+        //                 </div>
+        //             </div>`
+
+        // const Tbl = new DOMParser().parseFromString(row, 'text/html').querySelector('.list-item.dataset.history-content.state-error')
+
+
+
+    
+
+        row.querySelector('.name').addEventListener('click', async (e) => {
+
+            if (row.querySelector('.details').style.display == 'block') {
+                row.querySelector('.details').style.display = 'none'
+            } else{
+                row.querySelector('.details').style.display = 'block'
+            }
+
+
+            console.log(show_dataset)
+
+
+
+        });
+
+        console.log('ok1')
+
+        // var exch  = row.querySelector('.fa.fa-exchange')
+        // var title = row.querySelector('.title')
+        // var gp_tools = row.querySelector('.gpt')
+        // var g_tools = row.querySelector('.gt')
+
+        // title.data = elements
+
+        // g_tools.addEventListener("click", (e) => {
+
+        //     var server =  row.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode.querySelector('.Galaxy-form').data
+        //     var gp_tools_div = row.querySelector('.galaxy-tool-list')
+
+        //     elements['object']['extension'] = elements['object']['file_ext']
+        //     elements['object']['name'] = elements['element_identifier']
+            
+        //     this.galaxy_data_upload(gp_tools_div, elements['object'], server)
+
+        //     if (row.querySelector('.galaxy-tool-list').style.display == 'block') {
+        //         row.querySelector('.galaxy-tool-list').style.display = 'none'
+        //     } 
+        //     else{
+        //         row.querySelector('.galaxy-tool-list').style.display = 'block'
+        //     }
+        // })
+
+        // gp_tools.addEventListener("click", (e) => {
+
+        //     var gp_tools_div = row.querySelector('.genepattern-tool-list')
+        //     this.data_upload(gp_tools_div, elements)
+
+        //     if (gp_tools_div.childNodes.length == 0){
+        //         var div = document.createElement('div')
+        //         var msg = document.createElement('p')
+        //         div.append(msg)
+        //         msg.innerText = '  No tools are available..'
+        //         gp_tools_div.append(div)
+        //     } 
+
+        //     if (row.querySelector('.genepattern-tool-list').style.display == 'block') {
+        //         row.querySelector('.genepattern-tool-list').style.display = 'none'
+        //     } 
+        //     else{
+        //         row.querySelector('.genepattern-tool-list').style.display = 'block'
+        //     }
+        // })
+
+        // exch.addEventListener("click", async (event) =>{ 
+        //     // var show_dataset = await KernelSideDataObjects(`from GiN  import GalaxyTaskWidget\nGalaxyTaskWidget.show_data_set(server=${JSON.stringify(this.model.get('gal_instance')['url']['URL'])}, dataset_id=${JSON.stringify(elements['id'])} )`)
+
+        //     if (row.querySelector('#add_data_share_menu').style.display == 'block') {
+        //         row.querySelector('#add_data_share_menu').style.display = 'none'
+        //     } 
+        //     else{
+        //         row.querySelector('#add_data_share_menu').style.display = 'block'
+        //     }
+        // })
+
+        // var download = row.querySelector('.fa.fa-download')
+
+        // download.addEventListener('click', () => {
+        //     KernelSideDataObjects(`from GiN import GalaxyTaskWidget\nGalaxyTaskWidget.download_file_to_jupyter_server( server=${JSON.stringify(self.model.get('gal_instance')['url'])}, collection_id=${JSON.stringify(elements['object']['id'])}) `);
+        // })
+
+        return row
+    }
+
     busy_changed (){
          const display = this.model.get('busy') ? 'block' : 'none';
          this.element.querySelector('.nbtools-busy').style.display = display;
@@ -3314,7 +3549,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         var url = this.model.get('gal_instance')['url']
         var apps1 = data['display_apps']
         var apps2 = data['display_types']
-        var data = apps1.concat(apps2)
+        // var data = apps1.concat(apps2)
+        var data = []
 
         for (var i = 0; i < data.length; i++){
 
