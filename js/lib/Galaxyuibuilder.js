@@ -2430,9 +2430,10 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 } else{
                     if (Tbl.querySelector('.list-items').children.length == 0){
                         for(var i = 0; i < show_dataset.elements.length;  i++){
-                                show_dataset.elements[i]['hid'] = i
-                                show_dataset.elements[i]['name'] = show_dataset.elements[i]['element_identifier']
-                                Tbl.querySelector('.list-items').append(await self.dataset_row_ok_state (show_dataset.elements[i], history_id))
+                            console.log(show_dataset.elements[i])
+                                show_dataset.elements[i]['object']['hid'] = i
+                                show_dataset.elements[i]['object']['name'] = show_dataset.elements[i]['element_identifier']
+                                Tbl.querySelector('.list-items').append(await self.dataset_row_ok_state (show_dataset.elements[i]['object'], history_id))
                             }
                     }
                 }
@@ -2512,8 +2513,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
                     Tbl.querySelector('.name').addEventListener('click', async (e) => {
 
-                        console.log(dataset['object']['elements'])
-
                         if (Tbl.querySelector('.list-items').style.display == 'block') {
                             Tbl.querySelector('.list-items').style.display = 'none'
                         } else{
@@ -2523,10 +2522,10 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                         if (Tbl.querySelector('.list-items').children.length == 0){
 
                             for(var i = 0; i < dataset['object']['elements'].length;  i++){
-                                dataset['object']['elements'][i]['hid'] = i
-                                dataset['object']['elements'][i]['hid'] = i
-                                dataset['object']['elements'][i]['name'] = dataset['object']['elements'][i]['element_identifier']
-                                    Tbl.querySelector('.list-items').append(await self.dataset_row_ok_state (dataset['object']['elements'][i], history_id))
+                                dataset['object']['elements'][i]['object']['hid'] = i
+                                dataset['object']['elements'][i]['object']['hid'] = i
+                                dataset['object']['elements'][i]['object']['name'] = dataset['object']['elements'][i]['element_identifier']
+                                    Tbl.querySelector('.list-items').append(await self.dataset_row_ok_state (dataset['object']['elements'][i]['object'], history_id))
                                 }
                             }
                     })
