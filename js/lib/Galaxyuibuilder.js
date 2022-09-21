@@ -633,6 +633,11 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                                 e.target.parentNode.parentNode.querySelector('.fas.fa-spinner.fa-spin').style.display = 'none'
                                 e.target.parentNode.parentNode.querySelector('.fas.fa-solid.fa-check').style.display = 'block'
 
+
+                                if (dataset['extension'] == null){
+                                    dataset['extension'] = dataset['name'].split('.')[1]
+                                }
+
                                 self.galaxy_file_cache.push(new Data(e.target.data, [dataset['name'], 'NA'], [dataset['id'], 'NA'], dataset['extension']));
 
                                 const el = document.createElement("option");
@@ -671,6 +676,13 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
                                             e.target.parentNode.parentNode.querySelector('.fas.fa-spinner.fa-spin').style.display = 'none'
                                             e.target.parentNode.parentNode.querySelector('.fas.fa-solid.fa-check').style.display = 'block'
+
+
+                                            if (dataset['extension'] == null){
+                                                dataset['extension'] = dataset['name'].split('.')[1]
+                                            }
+
+
                                             self.galaxy_file_cache.push(new Data(e.target.data, [dataset['name'], out['name']], [dataset['id'], out['id']], dataset['extension']));
 
                                             const el = document.createElement("option");
@@ -2389,7 +2401,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                         <div class="warnings"></div>
                         <div class="selector"><span class="fa fa-2x fa-square-o"></span></div>
                         <div class="primary-actions">
-                            <a class="download-btn icon-btn" href="${URL}/api/dataset_collections/${dataset['id']}/download" title="" data-original-title="Download"> <span class="fa fa-floppy-o"></span> </a><a class="icon-btn delete-btn" title="" href="javascript:void(0);" data-original-title="Delete"><span class="fa fa-times" style=""></span></a><a class="icon-btn display-btn" title="" target="" href="javascript:void(0);" data-original-title="View data"><span class="fa fa-download" style=""></span></a>
+                            <a class="icon-btn delete-btn" title="" href="" data-original-title="Delete"><span class="fa fa-times" style=""></span></a><a><span class="icon-btn fa fa-exchange" style="" title="Send data to available tools"></span></a>
                         </div>
                         <div class="title-bar clear"  tabindex="0" draggable="true" ondragstart="event.dataTransfer.setData('text/plain',null) > 
                             <span class="state-icon"></span>
@@ -2399,12 +2411,82 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                             <br>
                             <div> ${dataset.collection_type}</div>
                         </div>
+
+                        <div id="add_data_share_menu" style="display: none;"  class="add_data_share_menu" >
+                            <div class="send-data-genepattern-tools"> 
+
+                                <div class="gt" >  Send data to Galaxy  <i class="fa fa-refresh" aria-hidden="true"></i></div>
+
+                                <div class="galaxy-tool-list" style="display: none"> 
+                                </div>
+                                
+                                <div class="gpt" >  Send data to GenePattern  <i class="fa fa-refresh" aria-hidden="true"></i></div>
+                                <div class="genepattern-tool-list" style="display: none"> 
+                                </div>
+                            </div>
+                        </div>
                         
                         <div class="list-items"  style="display: none; border: solid white 2px; margine; margin: 20px; "></div>
                     </div>`
             
             const Tbl = new DOMParser().parseFromString(row, 'text/html').querySelector(`.list-item.${dataset['history_content_type']}.history-content.state-${pop_state}`)
 
+            var exch  = Tbl.querySelector('.fa.fa-exchange')
+            var gp_tools = Tbl.querySelector('.gpt')
+            var g_tools = Tbl.querySelector('.gt')
+
+            exch.addEventListener("click", async (event) =>{ 
+
+                if (Tbl.querySelector('#add_data_share_menu').style.display == 'block') {
+                    Tbl.querySelector('#add_data_share_menu').style.display = 'none'
+                } 
+                else{
+                    Tbl.querySelector('#add_data_share_menu').style.display = 'block'
+                }
+            })
+
+            g_tools.addEventListener("click", (e) => {
+
+                // var server =  Tbl.parentNode.parentNode.parentNode.parentNode.querySelector('.Galaxy-form').data
+                // var server =  Tbl.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode.querySelector('.Galaxy-form').data
+                var server =  Tbl.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode.querySelector('.Galaxy-form').data
+                var gp_tools_div = Tbl.querySelector('.galaxy-tool-list')
+    
+                this.galaxy_data_upload(gp_tools_div, dataset, server)
+    
+                if (Tbl.querySelector('.galaxy-tool-list').style.display == 'block') {
+                    Tbl.querySelector('.galaxy-tool-list').style.display = 'none'
+                } 
+                else{
+                    Tbl.querySelector('.galaxy-tool-list').style.display = 'block'
+                }
+            })
+    
+            gp_tools.addEventListener("click", (e) => {
+    
+                var gp_tools_div = Tbl.querySelector('.genepattern-tool-list')
+    
+                console.log(dataset)
+                this.data_upload(gp_tools_div, dataset)
+    
+                if (gp_tools_div.childNodes.length == 0){
+                    var div = document.createElement('div')
+                    var msg = document.createElement('p')
+                    div.append(msg)
+                    msg.innerText = '  No tools are available..'
+                    gp_tools_div.append(div)
+                } 
+    
+                if (Tbl.querySelector('.genepattern-tool-list').style.display == 'block') {
+                    Tbl.querySelector('.genepattern-tool-list').style.display = 'none'
+                } 
+                else{
+                    Tbl.querySelector('.genepattern-tool-list').style.display = 'block'
+                }
+            })
+    
+
+           
             Tbl.querySelector('.name').addEventListener('click', async (e) => {
 
                 var URL = this.model.get('gal_instance')['url']
@@ -2430,7 +2512,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 } else{
                     if (Tbl.querySelector('.list-items').children.length == 0){
                         for(var i = 0; i < show_dataset.elements.length;  i++){
-                            console.log(show_dataset.elements[i])
                                 show_dataset.elements[i]['object']['hid'] = i
                                 show_dataset.elements[i]['object']['name'] = show_dataset.elements[i]['element_identifier']
                                 Tbl.querySelector('.list-items').append(await self.dataset_row_ok_state (show_dataset.elements[i]['object'], history_id))
@@ -2461,9 +2542,11 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
             var download = Tbl.querySelector('.fa.fa-download')
 
-            download.addEventListener('click', () => {
-                KernelSideDataObjects(`from GiN import GalaxyTaskWidget\nGalaxyTaskWidget.download_file_to_jupyter_server(collection_id=${JSON.stringify(show_dataset['id'])}, server=${JSON.stringify(this.model.get('gal_instance')['url'])}, file_name=${JSON.stringify(dataset['name'])}, data_type='collection')`);
-            })
+            if(download){
+                download.addEventListener('click', () => {
+                    KernelSideDataObjects(`from GiN import GalaxyTaskWidget\nGalaxyTaskWidget.download_file_to_jupyter_server(collection_id=${JSON.stringify(show_dataset['id'])}, server=${JSON.stringify(this.model.get('gal_instance')['url'])}, file_name=${JSON.stringify(dataset['name'])}, data_type='collection')`);
+                })
+            }
 
             self.delete_dataset(Tbl, dataset['id'],  history_id, 'collection')
             return Tbl
@@ -2579,7 +2662,9 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         g_tools.addEventListener("click", (e) => {
 
-            var server =  Tbl.parentNode.parentNode.parentNode.parentNode.querySelector('.Galaxy-form').data
+            // var server =  Tbl.parentNode.parentNode.parentNode.parentNode.querySelector('.Galaxy-form').data
+            // var server =  Tbl.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode.querySelector('.Galaxy-form').data
+            var server =  Tbl.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode.querySelector('.Galaxy-form').data
             var gp_tools_div = Tbl.querySelector('.galaxy-tool-list')
 
             this.galaxy_data_upload(gp_tools_div, dataset, server)
@@ -2902,15 +2987,17 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         var delete_button = row.querySelector('.fa.fa-times')
 
-        delete_button.addEventListener('click',  (e) => {
-            delete_button.parentNode.parentNode.parentNode.parentNode.removeChild(delete_button.parentNode.parentNode.parentNode)
-            if (datatype == 'dataset') {
-             KernelSideDataObjects(`from GiN import GalaxyTaskWidget\nGalaxyTaskWidget.delete_dataset(server=${JSON.stringify(this.model.get('gal_instance')['url'])}, history_id=${JSON.stringify(history_id)}, dataset_id=${JSON.stringify(dataset_id)})`)
-            } 
-            else if (datatype == 'collection') {
-                KernelSideDataObjects(`from GiN import GalaxyTaskWidget\nGalaxyTaskWidget.delete_dataset_collection(server=${JSON.stringify(this.model.get('gal_instance')['url'])}, history_id=${JSON.stringify(history_id)}, dataset_collection_id=${JSON.stringify(dataset_id)})`)
-            }    
-        });
+        if (delete_button != null){
+            delete_button.addEventListener('click',  (e) => {
+                delete_button.parentNode.parentNode.parentNode.parentNode.removeChild(delete_button.parentNode.parentNode.parentNode)
+                if (datatype == 'dataset') {
+                 KernelSideDataObjects(`from GiN import GalaxyTaskWidget\nGalaxyTaskWidget.delete_dataset(server=${JSON.stringify(this.model.get('gal_instance')['url'])}, history_id=${JSON.stringify(history_id)}, dataset_id=${JSON.stringify(dataset_id)})`)
+                } 
+                else if (datatype == 'collection') {
+                    KernelSideDataObjects(`from GiN import GalaxyTaskWidget\nGalaxyTaskWidget.delete_dataset_collection(server=${JSON.stringify(this.model.get('gal_instance')['url'])}, history_id=${JSON.stringify(history_id)}, dataset_collection_id=${JSON.stringify(dataset_id)})`)
+                }    
+            });
+        }
     }
 
     copy_download_link (ok_details_html){
