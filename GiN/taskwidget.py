@@ -262,7 +262,7 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
         gi10.gi.histories.gi.histories.delete_dataset_collection(
             history_id=history_id,
             dataset_collection_id=dataset_collection_id,
-            purge=True,
+            # purge=True,
         )
 
     def show_dataset_collection(server=None, dataset_id=None):

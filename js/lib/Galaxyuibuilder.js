@@ -630,12 +630,18 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
                             if (server == e.target.data){
 
+                                console.log('ok1')
+
                                 e.target.parentNode.parentNode.querySelector('.fas.fa-spinner.fa-spin').style.display = 'none'
                                 e.target.parentNode.parentNode.querySelector('.fas.fa-solid.fa-check').style.display = 'block'
 
 
                                 if (dataset['extension'] == null){
                                     dataset['extension'] = dataset['name'].split('.')[1]
+                                }
+
+                                if(dataset['file_ext'] ){
+                                    dataset['extension'] = dataset['file_ext']
                                 }
 
                                 self.galaxy_file_cache.push(new Data(e.target.data, [dataset['name'], 'NA'], [dataset['id'], 'NA'], dataset['extension']));
@@ -659,17 +665,31 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
                             } else {
 
+                                console.log('ok2')
+
                                 if (self.galaxy_data_verify(self.galaxy_file_cache, dataset['id']) == false) {
+
+                                    if (dataset['extension'] == null){
+                                        dataset['extension'] = dataset['name'].split('.')[1]
+                                    }
+    
+                                    if(dataset['file_ext'] ){
+                                        dataset['extension'] = dataset['file_ext']
+                                    }
+
+                                    console.log(dataset)
 
                                     var form = document.querySelector(`#${e.target.parentNode.parentNode.parentNode.id.replace('g-tool-','')}`)
                                     var hi = form.parentNode.querySelector('#history_ids').value
 
                                     var uri = await KernelSideDataObjects(`from GiN import GalaxyTaskWidget\nGalaxyTaskWidget.send_data_to_galaxy_tool(server_d=${JSON.stringify(server)}, server_u=${JSON.stringify(e.target.data)}, dataset_id=${JSON.stringify(dataset['id'])}, ext=${JSON.stringify(dataset['extension'])}, history_id=${JSON.stringify(hi)})`)
                                     
+                                    console.log('ok4')
+
                                     for (let i = 0; i < Infinity; ++i) {
 
                                         var out = await KernelSideDataObjects(`from GiN import GalaxyTaskWidget\nGalaxyTaskWidget.show_data_set(server=${JSON.stringify(e.target.data)},  dataset_id=${JSON.stringify(uri['outputs'][0]['id'])})`)
-                                        
+                                        console.log(out)
                                         await this.waitforme(5000);
         
                                         if (out['state'] === 'ok') {
@@ -677,11 +697,9 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                                             e.target.parentNode.parentNode.querySelector('.fas.fa-spinner.fa-spin').style.display = 'none'
                                             e.target.parentNode.parentNode.querySelector('.fas.fa-solid.fa-check').style.display = 'block'
 
-
                                             if (dataset['extension'] == null){
                                                 dataset['extension'] = dataset['name'].split('.')[1]
                                             }
-
 
                                             self.galaxy_file_cache.push(new Data(e.target.data, [dataset['name'], out['name']], [dataset['id'], out['id']], dataset['extension']));
 
@@ -1656,6 +1674,9 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                                 </div>`
 
         const sim = new DOMParser().parseFromString(select_input_mode, 'text/html').querySelector('.ui-radiobutton')
+
+
+        sim.querySelector('#data-file-input').style.background = 'white'
         
         var Label = sim.querySelectorAll('.ui-option')
 
@@ -1703,6 +1724,29 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         help.style.marginLeft = '10px'
         help.append( helpSpan)
 
+
+        const input_file_type = document.createElement('div')
+        input_file_type.className = 'input-file-type'
+
+
+        input_file_type.innerHTML = `<div class='fi' style="float: left; display: none" > <a><span class="fa fa-sitemap" style="" title="Send data to available tools"></span></a> </div>`
+
+        const ts = document.createElement('span')
+        ts.className = "ui-form-title-text"
+        ts.textContent = ''
+        ts.style.marginLeft = '10px'
+
+        input_file_type.append(ts)
+
+        FileManu.append(Select)
+        FileManu.style.width = '100%'
+
+        row.append(title)
+        row.append(FileManu)
+        row.append(input_file_type)
+        // row.append(FileManu)
+        row.append(help)
+
         
         for (var i = 0; i < options['hda'].length; i++) {
             const el = document.createElement("option");
@@ -1717,6 +1761,11 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
 
         sim.querySelector('#data-file-input').addEventListener('click', (e) => {
+
+            ts.textContent = ''
+
+            input_file_type.querySelector('.fi').style.display = 'none'
+
             FileManu['data-file']['batch'] = 'false'
             Select.multiple = false
 
@@ -1735,6 +1784,13 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         })
 
         sim.querySelector('#batch-file-input').addEventListener('click', (e) => {
+
+            input_file_type.querySelector('.fi').style.display = 'block'
+
+
+            ts.textContent = 'This is a batch mode input field. Separate jobs will be triggered for each dataset selection.'
+
+
             FileManu['data-file']['batch'] = 'true'
             Select.multiple = true
 
@@ -1754,9 +1810,9 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         sim.querySelector('#collection-data-input').addEventListener('click', (e) => {
 
+            ts.textContent = 'This is a batch mode input field. Separate jobs will be triggered for each dataset selection.' 
 
-            console.log(input_def.options)
-
+            input_file_type.querySelector('.fi').style.display = 'block'
 
             Select.multiple = false
 
@@ -1842,13 +1898,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         }, false);
 
 
-        FileManu.append(Select)
-        FileManu.style.width = '100%'
 
-        row.append(title)
-        row.append(FileManu)
-        row.append(FileManu)
-        row.append(help)
         
         Select.addEventListener("change", async (e) => {
 
@@ -2401,7 +2451,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                         <div class="warnings"></div>
                         <div class="selector"><span class="fa fa-2x fa-square-o"></span></div>
                         <div class="primary-actions">
-                            <a class="icon-btn delete-btn" title="" href="" data-original-title="Delete"><span class="fa fa-times" style=""></span></a><a><span class="icon-btn fa fa-exchange" style="" title="Send data to available tools"></span></a>
+                            <a class="icon-btn delete-btn" title="" href="javascript:void(0);" data-original-title="Delete"><span class="fa fa-times" style=""></span></a><a><span class="icon-btn fa fa-exchange" style="" title="Send data to available tools"></span></a>
                         </div>
                         <div class="title-bar clear"  tabindex="0" draggable="true" ondragstart="event.dataTransfer.setData('text/plain',null) > 
                             <span class="state-icon"></span>
@@ -2435,15 +2485,20 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             var gp_tools = Tbl.querySelector('.gpt')
             var g_tools = Tbl.querySelector('.gt')
 
-            exch.addEventListener("click", async (event) =>{ 
+            if(exch){
 
-                if (Tbl.querySelector('#add_data_share_menu').style.display == 'block') {
-                    Tbl.querySelector('#add_data_share_menu').style.display = 'none'
-                } 
-                else{
-                    Tbl.querySelector('#add_data_share_menu').style.display = 'block'
-                }
-            })
+                exch.addEventListener("click", async (event) =>{ 
+
+                    if (Tbl.querySelector('#add_data_share_menu').style.display == 'block') {
+                        Tbl.querySelector('#add_data_share_menu').style.display = 'none'
+                    } 
+                    else{
+                        Tbl.querySelector('#add_data_share_menu').style.display = 'block'
+                    }
+                })
+
+            }
+
 
             g_tools.addEventListener("click", (e) => {
 
@@ -2681,7 +2736,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
             var gp_tools_div = Tbl.querySelector('.genepattern-tool-list')
 
-            console.log(dataset)
             this.data_upload(gp_tools_div, dataset)
 
             if (gp_tools_div.childNodes.length == 0){
@@ -2828,7 +2882,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                         </div>
                         <div class="actions clear">
                             <div class="left"><a class="icon-btn params-btn" title="" target="galaxy_main" href="${URL}/datasets/${dataset['dataset_id']}/show_params" data-original-title="View details"><span class="fa fa-info-circle" style=""></span></a><a class="icon-btn rerun-btn" title="" target="galaxy_main" href="${URL}/tool_runner/rerun?id=${dataset['dataset_id']}" data-original-title="Run this job again"><span class="fa fa-refresh" style=""></span></a><a class="icon-btn icon-btn" title="" href="#" data-original-title="Tool Help"><span class="fa fa-question" style=""></span></a></div>
-                            <div class="right"><a class="icon-btn tag-btn" title="" href="" data-original-title="Edit dataset tags"><span class="fa fa-tags" style=""></span></a><a class="icon-btn annotate-btn" title="" href="" data-original-title="Edit dataset annotation"><span class="fa fa-comment" style=""></span></a></div>
+                            <div class="right"><a class="icon-btn tag-btn" title="" href="javascript:void(0);" data-original-title="Edit dataset tags"><span class="fa fa-tags" style=""></span></a><a class="icon-btn annotate-btn" title="" href="javascript:void(0);" data-original-title="Edit dataset annotation"><span class="fa fa-comment" style=""></span></a></div>
                         </div>
                         
                         <div class="annotation-display"></div>
@@ -2957,7 +3011,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                             </div>
                             <div class="actions clear">
                                 <div class="left"><a class="icon-btn params-btn" title="" target="galaxy_main" href="${URL}/datasets/${dataset['dataset_id']}show_params" data-original-title="View details"><span class="fa fa-info-circle" style=""></span></a><a class="icon-btn rerun-btn" title="" target="galaxy_main" href="${URL}/tool_runner/rerun?id=${dataset['dataset_id']}" data-original-title="Run this job again"><span class="fa fa-refresh" style=""></span></a><a class="icon-btn icon-btn" title="" href="#" data-original-title="Tool Help"><span class="fa fa-question" style=""></span></a></div>
-                                <div class="right"><a class="icon-btn tag-btn" title="" href="" data-original-title="Edit dataset tags"><span class="fa fa-tags" style=""></span></a><a class="icon-btn annotate-btn" title="" href="" data-original-title="Edit dataset annotation"><span class="fa fa-comment" style=""></span></a></div>
+                                <div class="right"><a class="icon-btn tag-btn" title="" href="javascript:void(0);" data-original-title="Edit dataset tags"><span class="fa fa-tags" style=""></span></a><a class="icon-btn annotate-btn" title="" href="javascript:void(0);" data-original-title="Edit dataset annotation"><span class="fa fa-comment" style=""></span></a></div>
                             </div>
                             <div class="annotation-display"></div>
                             <div class="display-applications"></div>
