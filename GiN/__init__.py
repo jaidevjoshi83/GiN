@@ -10,6 +10,8 @@ try:
     from .authwidget import GALAXY_SERVERS, GalaxyAuthWidget
 except:
     pass
+
+import authwidget
 from .taskwidget import GalaxyTaskWidget
 from .jobwidget import GalaxyJobWidget
 from .sessions import session, get_session

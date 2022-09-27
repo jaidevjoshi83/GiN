@@ -202,6 +202,7 @@
 .galaxy-uibuilder .donemessagelarge{padding-left:52px;}
 
 .galaxy-uibuilder .list-item.dataset_collection.history-content.state-ok{background:#c2ebc2;}
+.galaxy-uibuilder .list-item.dataset_collection.history-content.state-new{background:#c2ebc2;}
 
 .galaxy-uibuilder .list-item{
     padding-left: 0;
