@@ -1842,6 +1842,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 var draged_item = self.dragged.firstElementChild
                 // self.removeAllChildNodes(Select)
 
+                console.log(draged_item)
+
                 const opt = draged_item.querySelector('.name').innerText
                 const el = document.createElement("option");
 
@@ -2725,7 +2727,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 Tbl.querySelector('.title-bar.clear').prepend(spn)
             }
 
-            console.log(dataset['state'], "ok")
             for (let i = 0; i < Infinity; ++i) {
 
                 var data = await KernelSideDataObjects(`from GiN.taskwidget  import GalaxyTaskWidget\nGalaxyTaskWidget.show_data_set(server=${JSON.stringify(this.model.get('gal_instance')['url'])}, dataset_id=${JSON.stringify(dataset['id'])} )`)
@@ -2733,9 +2734,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 if ( data['state'] == 'new'  ){
                     Tbl.className = `list-item ${dataset['history_content_type']} history-content state-new`
                     Tbl.style.background = '#7d959d70'
-
-
-                    // Tbl.querySelector('.state-icon-div').innerHTML = `<i class="fa fa-spinner fa-spin"></i>`
                 }   
 
                 else if ( data['state'] == 'queued' ){
@@ -3284,12 +3282,11 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             }
         }
 
-        var job  = await KernelSideDataObjects(`from GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.show_job(gal_instance=${JSON.stringify(this.model.get('gal_instance'))}, job_id=${JSON.stringify(jobs["jobs"][0]["id"])})`)
-
-        console.log(jobs)
-
-        var out_file_name = this.el.querySelector('.job-output-files')
-        out_file_name.append(await this.input_output_file_name(job))
+        for(var n = 0; n < jobs['jobs'].length; n++){
+            var job  = await KernelSideDataObjects(`from GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.show_job(gal_instance=${JSON.stringify(this.model.get('gal_instance'))}, job_id=${JSON.stringify(jobs["jobs"][n]["id"])})`)
+            var out_file_name = this.el.querySelector('.job-output-files')
+            out_file_name.append(await this.input_output_file_name(job))
+        } 
 
         var usr_email = this.model.get('gal_instance')['email_ID']
 
