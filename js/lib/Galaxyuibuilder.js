@@ -1093,42 +1093,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         DataListdiv.append(await this.data_row_list(this.model.get('gal_instance')['url'], HistoryID ))
         var ListItem =  this.el.querySelector('.list-item')
         data['type_id'] =`dataset-${data['id']}` 
-        ListItem.prepend(await this.dataset_row_queued_state(data))
-
-        for (let i = 0; i < Infinity; ++i) {
-
-            state = await KernelSideDataObjects(`from GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.show_data_set(server=${JSON.stringify(this.model.get('gal_instance')['url'])}, dataset_id=${JSON.stringify(data['id'])} )`);
-           
-            if (state['state'] == "running") {
-                if (ListItem.querySelector(`#${data['type_id']}`) !== null ) {
-                    var e = ListItem.querySelector(`#${data['type_id']}`)
-                    e.parentElement.removeChild(e)
-                    ListItem.prepend(await this.dataset_row_running_state(data))
-                }
-            } 
-
-            else if (state['state'] == "ok") {
-                if ( ListItem.querySelector(`#${data['type_id']}`) !== null) {
-                    var e = ListItem.querySelector(`#${data['type_id']}`)
-                    e.parentElement.removeChild(e)
-                    ListItem.prepend(await this.dataset_row_ok_state(data, HistoryID))
-                }
-            }
-               
-            else if (state['state'] == "error")  {
-                if ( ListItem.querySelector(`#${data['type_id']}`) !== null) {
-                    var e = ListItem.querySelector(`#${data['type_id']}`)
-                    e.parentElement.removeChild(e)
-                }
-                ListItem.prepend(await this.dataset_row_error_state(data, HistoryID))
-            }
-
-            await this.waitforme(5000)
-
-            if (state['state'] == 'ok' || state['state'] == 'error') {
-                break;
-            }    
-        }
+        this.add_dataset(ListItem, this.data_row_list, HistoryID)
     }
 
     NewTusUpload(data){
@@ -2712,7 +2677,17 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             if (Tbl.querySelector('.primary-actions')){
                 Tbl.querySelector('.primary-actions').innerHTML = `<a class="icon-btn display-btn" title="" target="_blank" href="${URL}/datasets/${dataset['id']}/display/?preview=True" data-original-title="View data"><span class="fas fa-eye" style="" title="View Data" ></span></a><a class="icon-btn edit-btn" target="_blank"  href="${URL}/datasets/edit?dataset_id=${dataset['id']}" data-original-title="Edit attributes"><span class="fa fa-pencil" title="Edit data"></span></a><a class="icon-btn delete-btn" title="" href="javascript:void(0);" data-original-title="Delete"><span class="fa fa-times" style="" title="Delete" ></span></a><a class="icon-btn display-btn" title="" target="" href="javascript:void(0);" data-original-title="View data"><span class="fa fa-download" style="" title="Download data to JupyterLab Server" ></span></a><a class="icon-btn display-btn"  target="" href="javascript:void(0);" data-original-title="View data"><span class="fa fa-exchange" style="" title="Send data to available tools"></span></a>`
             }
-        }
+        } 
+        // else if (dataset['state'] = 'paused') {
+        //     console.log(dataset['state'])
+        //      Tbl.style.background = '#daecf8'
+        //     // Tbl.className = `list-item ${dataset['history_content_type']} history-content state-paused`
+           
+        //     if (Tbl.querySelector('.primary-actions')){
+        //         Tbl.querySelector('.primary-actions').innerHTML = `<a class="icon-btn display-btn" title="" target="_blank" href="${URL}/datasets/${dataset['id']}/display/?preview=True" data-original-title="View data"><span class="fas fa-eye" style="" title="View Data" ></span></a><a class="icon-btn edit-btn" target="_blank"  href="${URL}/datasets/edit?dataset_id=${dataset['id']}" data-original-title="Edit attributes"><span class="fa fa-pencil" title="Edit data"></span></a><a class="icon-btn delete-btn" title="" href="javascript:void(0);" data-original-title="Delete"><span class="fa fa-times" style="" title="Delete" ></span></a>`
+        //     }
+
+        // }
 
         parent.append(Tbl)
 
@@ -2720,12 +2695,18 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         var sub_states = ['new', 'queued']
 
         if (states.includes(dataset['state']) ){
-            if(sub_states.includes(dataset["state"])){
+            if (sub_states.includes(dataset["state"])){
                 var spn = document.createElement('li')
                 spn.className = "fa fa-clock-o"
                 spn.style.color = 'black'
                 Tbl.querySelector('.title-bar.clear').prepend(spn)
-            }
+            } 
+            // else if (dataset['state'] == 'paused') {
+            //     var spn = document.createElement('li')
+            //     spn.className =  "fa fa-pause"
+            //     spn.style.color = 'black'
+            //     Tbl.querySelector('.title-bar.clear').prepend(spn)
+            // }
 
             for (let i = 0; i < Infinity; ++i) {
 
@@ -2769,8 +2750,23 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                     if (Tbl.querySelector('.primary-actions')){
                         Tbl.querySelector('.primary-actions').innerHTML = `<a class="icon-btn display-btn" title="" target="_blank" href="${URL}/datasets/${dataset['id']}/display/?preview=True" data-original-title="View data"><span class="fas fa-eye" style="" title="View Data" ></span></a><a class="icon-btn edit-btn" target="_blank"  href="${URL}/datasets/edit?dataset_id=${dataset['id']}" data-original-title="Edit attributes"><span class="fa fa-pencil" title="Edit data"></span></a><a class="icon-btn delete-btn" title="" href="javascript:void(0);" data-original-title="Delete"><span class="fa fa-times" style="" title="Delete" ></span></a>`
                     }
-                    break
-                }    
+                    break;
+                }     
+
+                // else if (data['state'] = 'paused') {
+                //     Tbl.style.background = '#daecf8'
+                //     Tbl.className = `list-item ${dataset['history_content_type']} history-content state-paused`
+                   
+                //     if (Tbl.querySelector('.primary-actions')){
+                //         Tbl.querySelector('.primary-actions').innerHTML = `<a class="icon-btn display-btn" title="" target="_blank" href="${URL}/datasets/${dataset['id']}/display/?preview=True" data-original-title="View data"><span class="fas fa-eye" style="" title="View Data" ></span></a><a class="icon-btn edit-btn" target="_blank"  href="${URL}/datasets/edit?dataset_id=${dataset['id']}" data-original-title="Edit attributes"><span class="fa fa-pencil" title="Edit data"></span></a><a class="icon-btn delete-btn" title="" href="javascript:void(0);" data-original-title="Delete"><span class="fa fa-times" style="" title="Delete" ></span></a>`
+                //     }
+
+                //     // var spn = document.createElement('li')
+                //     // spn.className = "fa fa-pause"
+                //     // spn.style.color = 'black'
+                //     // Tbl.querySelector('.title-bar.clear').prepend(spn)
+                //     break;
+                // }
             }
         }
 
@@ -2998,46 +2994,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         return Tbl
     } 
     
-    async dataset_row_error_state (dataset, history_id){
-
-        var URL = this.model.get('gal_instance')['url']
-
-        var id = dataset['type_id'] || dataset['id']
-        var id  = `dataset-${id}`
-
-        var row = `<div id="${dataset['type_id']}" class="list-item ${dataset['history_content_type']} history-content state-error">
-                        <div class="warnings"></div>
-                        <div class="selector"><span class="fa fa-2x fa-square-o"></span></div>
-                        <div class="primary-actions"><a class="icon-btn display-btn" title="" target="_blank" href="${URL}/datasets/${dataset['id']}/display/?preview=True" data-original-title="View data"><span class="fas fa-eye" style=""></span></a><a class="icon-btn edit-btn" title="" target="_blank"  href="${URL}/datasets/edit?dataset_id=${dataset['id']}" data-original-title="Edit attributes"><span class="fa fa-pencil" style=""></span></a><a class="icon-btn delete-btn" title="" href="javascript:void(0);" data-original-title="Delete"><span class="fa fa-times" style=""></span></a></div>
-                        <div class="title-bar clear" tabindex="0" draggable="true"> <span class="state-icon"></span>
-                            <div class="title"> <span class="hid">${dataset['hid']}: </span> <span class="name">${dataset['name']}</span> </div>
-                            <br>
-                            <div title="0 nametags" class="nametags"></div>
-                        </div>
-                    </div>`
-
-        const Tbl = new DOMParser().parseFromString(row, 'text/html').querySelector(`.list-item.${dataset['history_content_type']}.history-content.state-error`)
-        
-        Tbl.addEventListener('click', async (e) => {
-
-            if (Tbl.querySelector('.details')  == null){
-                var show_dataset = await KernelSideDataObjects(`from GiN.taskwidget  import GalaxyTaskWidget\nGalaxyTaskWidget.show_data_set(server=${JSON.stringify(this.model.get('gal_instance')['url'])}, dataset_id=${JSON.stringify(dataset['id'])} )`) 
-                var error_details = await this.dataset_error_details(show_dataset)
-                Tbl.append(error_details)
-            }
-
-            if (Tbl.querySelector('.details').style.display == 'block') {
-                Tbl.querySelector('.details').style.display = 'none'
-            } else{
-                Tbl.querySelector('.details').style.display = 'block'
-            }
-        });
-
-        this.delete_dataset(Tbl, dataset['id'],  history_id)
-
-        return Tbl
-    }
-
     async dataset_error_details (dataset){
 
         var URL = this.model.get('gal_instance')['url']
@@ -3059,54 +3015,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         const error_details_html = new DOMParser().parseFromString(details, 'text/html').querySelector('.details')
 
         return error_details_html
-    }
-
-    async dataset_row_queued_state (dataset){
-
-    var URL = this.model.get('gal_instance')['url']
-
-    var row =   `<div id="${dataset['type_id']}" class="list-item dataset history-content state-queued" style="display: block;">
-                    <div class="warnings"></div>
-                    <div class="selector"><span class="fa fa-clock-o"></span></div>
-                    <div class="primary-actions"><a class="icon-btn display-btn" title="" target="galaxy_main" href="${URL}/datasets/${dataset['dataset_id']}/display/?preview=True" data-original-title="View data"><span class="fa fa-eye" style=""></span></a><a class="icon-btn edit-btn" title="" href="${URL}/datasets/edit?dataset_id=${dataset['dataset_id']}" data-original-title="Edit attributes"><span class="fa fa-pencil" style=""></span></a><a class="icon-btn delete-btn" title="" href="#" data-original-title="Delete"><span class="fa fa-times" style=""></span></a></div>
-                    <div class="title-bar clear" tabindex="0" draggable="true"> <span class="fa fa-clock-o"></span>
-                        <div class="title"> <span class="hid">${dataset['hid']}</span> <span class="name">${dataset['name']}</span> </div>
-                        <br>
-                        <div class="nametags"></div>
-                    </div>
-                    <div class="details" style="display: none;">
-                        <div class="summary">
-                            <div class="detail-messages"></div>
-                            <div>This job is waiting to run</div>
-                        </div>
-                        <div class="actions clear">
-                            <div class="left"><a class="icon-btn params-btn" title="" target="galaxy_main" href="${URL}/datasets/${dataset['dataset_id']}/show_params" data-original-title="View details"><span class="fa fa-info-circle" style=""></span></a><a class="icon-btn rerun-btn" title="" target="galaxy_main" href="${URL}/tool_runner/rerun?id=${dataset['dataset_id']}" data-original-title="Run this job again"><span class="fa fa-refresh" style=""></span></a><a class="icon-btn icon-btn" title="" href="#" data-original-title="Tool Help"><span class="fa fa-question" style=""></span></a></div>
-                            <div class="right"><a class="icon-btn tag-btn" title="" href="javascript:void(0);" data-original-title="Edit dataset tags"><span class="fa fa-tags" style=""></span></a><a class="icon-btn annotate-btn" title="" href="javascript:void(0);" data-original-title="Edit dataset annotation"><span class="fa fa-comment" style=""></span></a></div>
-                        </div>
-                        
-                        <div class="annotation-display"></div>
-                        <div class="display-applications"></div>
-                    </div>
-                </div>`
-
-    const Tbl = new DOMParser().parseFromString(row, 'text/html').querySelector('.list-item.dataset.history-content.state-queued')
-
-    Tbl.addEventListener('click', async (e) => {
-
-        if (Tbl.querySelector('.details')  == null){
-            var show_dataset = await KernelSideDataObjects(`from GiN.taskwidget  import GalaxyTaskWidget\nGalaxyTaskWidget.show_data_set(server=${JSON.stringify(this.model.get('gal_instance')['url'])}, dataset_id=${JSON.stringify(dataset['id'])} )`) 
-            var error_details = await this.dataset_error_details(show_dataset)
-            Tbl.append(error_details)
-        }
-
-        if (Tbl.querySelector('.details').style.display == 'block') {
-            Tbl.querySelector('.details').style.display = 'none'
-        } else{
-            Tbl.querySelector('.details').style.display = 'block'
-        }
-    });
-
-    return Tbl
     }
 
     async dataset_ok_details (dataset){
@@ -3147,79 +3055,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         this.copy_download_link(ok_details_html)
 
         return ok_details_html
-    }
-
-    async dataset_row_running_state (dataset){
-
-        var URL = this.model.get('gal_instance')['url']
-        
-            var row = `<div id="${dataset['type_id']}" class="list-item dataset history-content state-running" >
-                            <div class="warnings"></div>
-                            <div class="selector"><span class="fa fa-2x fa-square-o"></span></div>
-                            <div class="primary-actions"><a class="icon-btn display-btn" title="" target="galaxy_main" href="${URL}/datasets/${dataset['dataset_id']}/display/?preview=True" data-original-title="View data"><span class="fa fa-eye" style=""></span></a><a class="icon-btn edit-btn" title="" href="${URL}/datasets/edit?dataset_id=${dataset['dataset_id']}" data-original-title="Edit attributes"><span class="fa fa-pencil" style=""></span></a><a class="icon-btn delete-btn" title="" href="javascript:void(0);" data-original-title="Delete"><span class="fa fa-times" style=""></span></a></div>
-                            <div class="title-bar clear" tabindex="0" draggable="true"> <span class="state-icon"></span>
-                                <div class="title"> <span class="hid">${dataset['hid']}: </span> <span class="name">${dataset['name']}</span> </div>
-                                <br>
-                                <div class="nametags"></div>
-                            </div>
-                            <div class="details" style="display: none;">
-                                <div class="summary">
-                                    <div class="detail-messages"></div>
-                                    <div>This job is currently running</div>
-                                </div>
-                                <div class="actions clear">
-                                    <div class="left"><a class="icon-btn params-btn" title="" target="galaxy_main" href="${URL}/datasets/${dataset['dataset_id']}/show_params" data-original-title="View details"><span class="fa fa-info-circle" style=""></span></a><a class="icon-btn rerun-btn" title="" target="galaxy_main" href="#" data-original-title="Run this job again"><span class="fa fa-refresh" style=""></span></a><a class="icon-btn icon-btn" title="" href="#" data-original-title="Tool Help"><span class="fa fa-question" style=""></span></a></div>
-                                    <div class="right"><a class="icon-btn tag-btn" title="" href="javascript:void(0);" data-original-title="Edit dataset tags"><span class="fa fa-tags" style=""></span></a><a class="icon-btn annotate-btn" title="" href="javascript:void(0);" data-original-title="Edit dataset annotation"><span class="fa fa-comment" style=""></span></a></div>
-                                </div>
-                            
-                                <div class="annotation-display"></div>
-                                <div class="display-applications"></div>
-                            </div>
-                        </div>`
-
-            const Tbl = new DOMParser().parseFromString(row, 'text/html').querySelector('.list-item.dataset.history-content.state-running')
-        
-            Tbl.addEventListener('click', (e) => {
-        
-                if (Tbl.querySelector('.details').style.display == 'block') {
-                    Tbl.querySelector('.details').style.display = 'none'
-                } else{
-                    Tbl.querySelector('.details').style.display = 'block'
-                }
-            })
-        return Tbl
-    }
-    
-    async dataset_row_new_state (dataset){
-
-        var URL = this.model.get('gal_instance')['url']
-    
-        var row = `<div id="dataset-${dataset['dataset_id']}" class="list-item dataset history-content state-running" style="display: none;">
-                        <div class="warnings"></div>
-                        <div class="selector"><span class="fa fa-2x fa-square-o"></span></div>
-                        <div class="primary-actions"><a class="icon-btn display-btn" title="" target="galaxy_main" href="${URL}/datasets/${dataset['dataset_id']}/display/?preview=True" data-original-title="View data"><span class="fa fa-eye" style=""></span></a><a class="icon-btn edit-btn" title="" href="${URL}/datasets/edit?dataset_id=${dataset['dataset_id']}" data-original-title="Edit attributes"><span class="fa fa-pencil" style=""></span></a><a class="icon-btn delete-btn" title="" href="javascript:void(0);" data-original-title="Delete"><span class="fa fa-times" style=""></span></a><a class="icon-btn display-btn" title="" target="galaxy_main" href="${URL}/datasets/${dataset['dataset_id']}/display/?preview=True" data-original-title="View data"><span class="fa fa-eye" style=""></span></a></div>
-                        <div class="title-bar clear" tabindex="0" draggable="true"> <span class="state-icon"></span>
-                            <div class="title"> <span class="hid">${dataset['hid']}</span> <span class="name">${dataset['name']}/span> </div>
-                            <br>
-                            <div class="nametags"></div>
-                        </div>
-                        <div class="details" style="display: block;">
-                            <div class="summary">
-                                <div class="detail-messages"></div>
-                                <div>This job is currently running</div>
-                            </div>
-                            <div class="actions clear">
-                                <div class="left"><a class="icon-btn params-btn" title="" target="galaxy_main" href="${URL}/datasets/${dataset['dataset_id']}show_params" data-original-title="View details"><span class="fa fa-info-circle" style=""></span></a><a class="icon-btn rerun-btn" title="" target="galaxy_main" href="${URL}/tool_runner/rerun?id=${dataset['dataset_id']}" data-original-title="Run this job again"><span class="fa fa-refresh" style=""></span></a><a class="icon-btn icon-btn" title="" href="#" data-original-title="Tool Help"><span class="fa fa-question" style=""></span></a></div>
-                                <div class="right"><a class="icon-btn tag-btn" title="" href="javascript:void(0);" data-original-title="Edit dataset tags"><span class="fa fa-tags" style=""></span></a><a class="icon-btn annotate-btn" title="" href="javascript:void(0);" data-original-title="Edit dataset annotation"><span class="fa fa-comment" style=""></span></a></div>
-                            </div>
-                            <div class="annotation-display"></div>
-                            <div class="display-applications"></div>
-                        </div>
-                    </div>`
-    
-        const Tbl = new DOMParser().parseFromString(row, 'text/html').querySelector('.list-item.dataset.history-content.state-error')
-    
-        return Tbl
     }
     
     async attach_event (node, className){ 
@@ -3434,7 +3269,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
     async input_output_file_name (job){
 
-        var Table = `<div class="donemessagelarge">
+        var Table = `<div id ="${job['id']}" class="donemessagelarge">
                         <p> Executed <b>${this.model.get('gal_instance')['tool_name']}</b> and successfully added 1 job to the queue. </p>
                         <p>The tool uses this input:</p>
                         <ul class="inputs">
