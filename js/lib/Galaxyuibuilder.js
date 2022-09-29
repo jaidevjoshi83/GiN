@@ -3268,7 +3268,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         this.hide_run_buttons(true)
 
         var jobs  = await KernelSideDataObjects(`from GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.submit_job(gal_instance=${JSON.stringify(this.model.get('gal_instance'))}, tool_inputs=${JSON.stringify(inputs)}, history_id=${JSON.stringify(history_id)})`)
-
         var data_list_div = this.el.querySelector('.history-dataset-list');
         var e = this.el.querySelector('.list-item')
         e.parentElement.removeChild(e)
@@ -3298,19 +3297,15 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         for (let i = 0; i < Infinity; ++i) {
 
             var data = await KernelSideDataObjects(`from GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.OutPutData(server=${JSON.stringify(this.model.get('gal_instance')['url'])}, JobID=${JSON.stringify(job['id'])} )`);
-
             var job_state = data[0]['state']
 
-
             if (job_state=='running'  ){
+
                 var gear_rotate = this.el.querySelector('.gear-rotate-icon')
                 gear_rotate.style.display = 'block'
-
                 var job_done_text = this.el.querySelector(".job-state-text")
-
                 job_done_text.innerText = 'Job Running'
                 job_done_text.style.color = '#F5A207'
-
                 var StdError  = this.el.querySelector('.donemessagelarge')
                 StdError.style.background = '#ffe6cd'
             } 
@@ -3321,19 +3316,16 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 var StdError  = this.el.querySelector('.donemessagelarge')
                 StdError.style.background = '#7d959d70'
             } 
+
             else if (job_state == 'ok'){
 
                 this.el.querySelector('.rbtn').style.display = 'block'
-
                 var StdError  = this.el.querySelector('.donemessagelarge')
                 StdError.style.background = '#c2ebc2'               
-
                 var job_done_text = this.el.querySelector(".job-state-text")
                 job_done_text.innerText = 'Job complete'
-
                 var gear_rotate = this.el.querySelector('.gear-rotate-icon')
                 gear_rotate.style.display = 'none'
-
                 var gear_rotate = this.el.querySelector('.job-done-icon')
                 gear_rotate.style.display = 'block'
             } 
@@ -3341,20 +3333,15 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             else if (job_state == 'error'){
 
                 this.el.querySelector('.rbtn').style.display = 'block'
-
                 var job_done_text = this.el.querySelector(".job-state-text")
                 job_done_text.innerText = 'Fatal Error'
                 job_done_text.style.color = 'white'
-
                 var gear_rotate = this.el.querySelector('.gear-rotate-icon')
                 gear_rotate.style.display = 'none'
-
                 var gear_rotate = this.el.querySelector('.job-error-icon')
                 gear_rotate.style.display = 'block'
-
                 var StdError  = this.el.querySelector('.donemessagelarge')
                 StdError.style.background = '#f4a3a5'
-                
             }
 
             await this.waitforme(3000);
@@ -3486,133 +3473,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             }
 
     return JobPanel
-    }
-
-    async dataset_collection_list_item1 (elements){
-
-        var self = this
-        var URL = this.model.get('gal_instance')['url']
-
-        var list_item = `<div id="dataset-${elements['object']['id']}" class="list-item dataset state-${elements['populated_state']}" >
-                          <div class="warnings"></div>
-                          <div class="selector"><span class="fa fa-2x fa-square-o"></span></div>
-                          <div class="primary-actions"><a class="icon-btn display-btn" title="" target="galaxy_main" href="${URL}/datasets/${elements['object']['id']}/display/?preview=True" data-original-title="View data"><span class="fa fa-eye" style="" title="View data"></span></a><a class="icon-btn edit-btn" title="" href="${URL}/datasets/edit?dataset_id=${elements['object']['id']}" data-original-title="Edit attributes"><span class="fa fa-pencil" style="" title="Edit data"></span></a><a class="icon-btn display-btn" title="" target="" href="javascript:void(0);" data-original-title="View data"><span class="fa fa-download"  style="" title="Download data to jupyterlab server"></span></a><a class="icon-btn display-btn"  target="" href="javascript:void(0);" data-original-title="View data"><span class="fa fa-exchange" style="" title="Send data to available tools"></span></a></div>
-                          <div class="title-bar clear" tabindex="${elements['element_index']}" draggable="true"><span class="state-icon"></span>
-                          <div class="title"><span class="name">${elements['element_index']}:${elements['element_identifier']}</span></div>
-                          </div>
-
-                          <div id="add_data_share_menu" style="display: none;"  class="add_data_share_menu" >
-            
-                          <div class="send-data-genepattern-tools"> 
-
-                              <div class="gt" >  Send data to Galaxy  </div>
-                              <div class="galaxy-tool-list" style="display: none"> 
-                              </div>
-                               
-                              <div class="gpt" >  Send data to GenePattern  </div>
-                              <div class="genepattern-tool-list" style="display: none"> 
-                              </div>
-                          </div>
-                          </div>
-
-
-                          <div class="details" style="display: none;">
-                          <div class="summary">
-                                <div class="detail-messages"></div>
-                                <div class="blurb"><span class="value">${elements['object']['misc_blurb']}</span></div>
-                                <div class="datatype">
-                                    <label class="prompt">format</label><span class="value">${elements['object']['file_ext']}</span></div>
-                                <div class="dbkey">
-                                    <label class="prompt">database</label><a class="value" href="/datasets/edit?dataset_id=${elements['object']['id']}" target="_top">?</a></div>
-                                <div class="info"><span class="value">${elements['object']['misc_info']}</span></div>
-                            </div>
-                            <div class="actions clear">
-                                <div class="left">
-                                    <a class="download-btn icon-btn"  href="${URL}/datasets/${elements['object']['id']}/display?to_ext=${elements['object']['file_ext']}" title="" data-original-title="Download"> <span class="fa fa-save"></span> </a><a class="icon-btn" title=""  href="javascript:void(0);" data-original-title="Copy link"><span class="fa fa-chain" style=""></span></a><a class="icon-btn params-btn" title="" target="_blank" href="${URL}/datasets/${elements['object']['id']}/show_params" data-original-title="View details"><span class="fa fa-info-circle" style=""></span></a><a class="icon-btn visualization-link" title="" target="_blank" href="${URL}/visualizations?dataset_id=${elements['object']['id']}" data-original-title="Visualize this data"><span class="fa fa-bar-chart" style=""></span></a>
-                                </div>
-                                <div class="right"><a class="icon-btn tag-btn" title="" href="javascript:void(0);" data-original-title="Edit dataset tags"><span class="fa fa-tags" style=""></span></a><a class="icon-btn annotate-btn" title="" href="javascript:void(0);" data-original-title="Edit dataset annotation"><span class="fa fa-comment" style=""></span></a></div>
-                            </div>
-                            <div class="annotation-display"></div>
-                            <div class="display-applications"></div>
-                            <pre class="dataset-peek">${elements['object']['peek']}</pre>
-                         </div>
-                         </div>`
-      
-        const row = new DOMParser().parseFromString(list_item, 'text/html').querySelector('.list-item.dataset.state-ok')
-
-        row.querySelector('.name').addEventListener('click', async (e) => {
-
-            if (row.querySelector('.details').style.display == 'block') {
-                row.querySelector('.details').style.display = 'none'
-            } else{
-                row.querySelector('.details').style.display = 'block'
-            }
-        });
-
-        var exch  = row.querySelector('.fa.fa-exchange')
-        var title = row.querySelector('.title')
-        var gp_tools = row.querySelector('.gpt')
-        var g_tools = row.querySelector('.gt')
-
-        title.data = elements
-
-        g_tools.addEventListener("click", (e) => {
-
-            var server =  row.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode.querySelector('.Galaxy-form').data
-            var gp_tools_div = row.querySelector('.galaxy-tool-list')
-
-            elements['object']['extension'] = elements['object']['file_ext']
-            elements['object']['name'] = elements['element_identifier']
-            
-            this.galaxy_data_upload(gp_tools_div, elements['object'], server)
-
-            if (row.querySelector('.galaxy-tool-list').style.display == 'block') {
-                row.querySelector('.galaxy-tool-list').style.display = 'none'
-            } 
-            else{
-                row.querySelector('.galaxy-tool-list').style.display = 'block'
-            }
-        })
-
-        gp_tools.addEventListener("click", (e) => {
-
-            var gp_tools_div = row.querySelector('.genepattern-tool-list')
-            this.data_upload(gp_tools_div, elements)
-
-            if (gp_tools_div.childNodes.length == 0){
-                var div = document.createElement('div')
-                var msg = document.createElement('p')
-                div.append(msg)
-                msg.innerText = '  No tools are available..'
-                gp_tools_div.append(div)
-            } 
-
-            if (row.querySelector('.genepattern-tool-list').style.display == 'block') {
-                row.querySelector('.genepattern-tool-list').style.display = 'none'
-            } 
-            else{
-                row.querySelector('.genepattern-tool-list').style.display = 'block'
-            }
-        })
-
-        exch.addEventListener("click", async (event) =>{ 
-            // var show_dataset = await KernelSideDataObjects(`from GiN  import GalaxyTaskWidget\nGalaxyTaskWidget.show_data_set(server=${JSON.stringify(this.model.get('gal_instance')['url']['URL'])}, dataset_id=${JSON.stringify(elements['id'])} )`)
-
-            if (row.querySelector('#add_data_share_menu').style.display == 'block') {
-                row.querySelector('#add_data_share_menu').style.display = 'none'
-            } 
-            else{
-                row.querySelector('#add_data_share_menu').style.display = 'block'
-            }
-        })
-
-        var download = row.querySelector('.fa.fa-download')
-
-        download.addEventListener('click', () => {
-            KernelSideDataObjects(`from GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.download_file_to_jupyter_server( server=${JSON.stringify(self.model.get('gal_instance')['url'])}, collection_id=${JSON.stringify(elements['object']['id'])}) `);
-        })
-
-        return row
     }
 
 
