@@ -1284,45 +1284,9 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         DataListdiv.append(await this.data_row_list(this.model.get('gal_instance')['url'], history_id ))
 
         var ListItem =  DataListdiv.querySelector('.list-item')
-
-        for (let i = 0; i < Infinity; ++i) {
-
-            var jobstate = await KernelSideDataObjects(`from GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.return_job_status(server=${JSON.stringify(this.model.get('gal_instance')['url'])}, job_id=${JSON.stringify(InitialData['jobs'][0]['id'])} )`);
-
-            var data = await KernelSideDataObjects(`from GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.OutPutData(server=${JSON.stringify(this.model.get('gal_instance')['url'])}, JobID=${JSON.stringify(InitialData['jobs'][0]['id'])} )`);
-
-            if (jobstate['state'] == 'queued' || 'new' || 'running' ) {
-                var id=`dataset-${jobstate['outputs']['output0']['id']}`
-                if (ListItem.querySelector(`#${id}`) == null ) {
-                    ListItem.prepend(await this.dataset_row_running_state(data[0]))
-                }
-
-            } 
-            if (jobstate['state'] ==  'error')  {
-
-                if(ListItem.querySelector(`#${id}`) !== null){
-                    var e = ListItem.querySelector(`#${id}`)
-                    e.parentElement.removeChild(e)
-                }
-                if (ListItem.querySelector(id) == null ) {
-                    ListItem.prepend(await this.dataset_row_error_state(data[0], history_id))
-                }
-            }
-            
-            if (jobstate['state'] ==  'ok')  {
-                if ( ListItem.querySelector(`#${id}`) !== null) {
-                    var e = ListItem.querySelector(`#${id}`)
-                    e.parentElement.removeChild(e)
-                }
-                ListItem.prepend(await this.dataset_row_ok_state(data[0],  history_id ))
-            }
-
-            await this.waitforme(5000);
-
-            if (jobstate['state'] == 'ok' || jobstate['state'] == 'error' ) {
-                break;
-            }      
-        }
+        var data = await KernelSideDataObjects(`from GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.OutPutData(server=${JSON.stringify(this.model.get('gal_instance')['url'])}, JobID=${JSON.stringify(InitialData['jobs'][0]['id'])} )`);
+       
+        await this.dataset_row_ok_state(ListItem, data[0],  history_id)
     }
 
     async add_dataset_table(selected_value='default'){
@@ -2312,7 +2276,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         return data_list
     }
 
-
     async dataset_collection_row_state (dataset, history_id){
 
         var show_dataset = await KernelSideDataObjects(`from GiN.taskwidget  import GalaxyTaskWidget\nGalaxyTaskWidget.show_dataset_collection(server=${JSON.stringify(this.model.get('gal_instance')['url'])}, dataset_id=${JSON.stringify(dataset['id'])} )`)
@@ -2322,11 +2285,11 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         var self = this
 
         if (dataset.collection_type == "list:paired"){
-            dataset.collection_type =  `a list of pairs with ${dataset.element_count} items`
+            dataset.collection_type_title =  `a list of pairs with ${dataset.element_count} items`
         } else if (dataset.collection_type == "list") {
-            dataset.collection_type =  `a list of ${dataset.element_count} items`
+            dataset.collection_type_title =  `a list of ${dataset.element_count} items`
         } else if (dataset.collection_type == 'paired') {
-            dataset.collection_type =  `a dataset pair with ${dataset.element_count} items`
+            dataset.collection_type_title =  `a dataset pair with ${dataset.element_count} items`
         }       
 
         if (dataset['populated_state'] == 'ok'){
@@ -2344,7 +2307,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                                 <span class="hid">${dataset['hid']}: </span> <span class="name">${dataset['name']}</span>
                             </div>
                             <br>
-                            <div> ${dataset.collection_type}</div>
+                            <div> ${dataset.collection_type_title}</div>
                         </div>
 
                         <div id="add_data_share_menu" style="display: none;"  class="add_data_share_menu" >
@@ -2423,23 +2386,23 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
     
             Tbl.querySelector('.name').addEventListener('click', async (e) => {
 
-                // var URL = this.model.get('gal_instance')['url']
-                // var show_dataset = await KernelSideDataObjects(`from GiN.taskwidget  import GalaxyTaskWidget\nGalaxyTaskWidget.show_dataset_collection(server=${JSON.stringify(this.model.get('gal_instance')['url'])}, dataset_id=${JSON.stringify(dataset['id'])} )`) 
+                var URL = this.model.get('gal_instance')['url']
+                var show_dataset = await KernelSideDataObjects(`from GiN.taskwidget  import GalaxyTaskWidget\nGalaxyTaskWidget.show_dataset_collection(server=${JSON.stringify(this.model.get('gal_instance')['url'])}, dataset_id=${JSON.stringify(dataset['id'])} )`) 
           
                 if (show_dataset.collection_type == 'list'){
                     if (Tbl.querySelector('.list-items').children.length == 0){
                         for(var i = 0; i < show_dataset.elements.length;  i++){
                             show_dataset.elements[i]['object']['hid'] = i
                             show_dataset.elements[i]['object']['hid'] = i
-                            show_dataset.elements[i]['object']['name'] = show_dataset.elements[i]['object']['element_identifier']
-                            Tbl.querySelector('.list-items').append(await self.dataset_row_ok_state (show_dataset.elements[i]['object'], history_id))
+                            show_dataset.elements[i]['object']['name'] = show_dataset.elements[i]['element_identifier']
+                            await self.add_dataset(Tbl.querySelector('.list-items'), show_dataset.elements[i]['object'], history_id)
                         }
                     }
 
                 } else if (show_dataset.collection_type == 'list:paired'){
                     if (Tbl.querySelector('.list-items').children.length == 0){
                         for(var i = 0; i < show_dataset.elements.length;  i++){
-                            Tbl.querySelector('.list-items').append(await self.dataset_collection_list_pairs (show_dataset.elements[i]['object'], history_id))
+                            Tbl.querySelector('.list-items').append(await self.dataset_collection_list_pairs (show_dataset.elements[i], history_id))
                         }
                     }
                 } else{
@@ -2447,7 +2410,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                         for(var i = 0; i < show_dataset.elements.length;  i++){
                             show_dataset.elements[i]['object']['hid'] = i
                             show_dataset.elements[i]['object']['name'] = show_dataset.elements[i]['element_identifier']
-                            Tbl.querySelector('.list-items').append(await self.dataset_row_ok_state (show_dataset.elements[i]['object'], history_id))
+                            await self.add_dataset(Tbl.querySelector('.list-items'), show_dataset.elements[i]['object'], history_id)
                         }
                     }
                 }
@@ -2540,7 +2503,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                                 dataset['object']['elements'][i]['object']['hid'] = i
                                 dataset['object']['elements'][i]['object']['hid'] = i
                                 dataset['object']['elements'][i]['object']['name'] = dataset['object']['elements'][i]['element_identifier']
-                                    Tbl.querySelector('.list-items').append(await self.dataset_row_ok_state (dataset['object']['elements'][i]['object'], history_id))
+                                    await self.add_dataset(Tbl.querySelector('.list-items'), dataset['object']['elements'][i]['object'], history_id)
                                 }
                             }
                     })
@@ -3013,6 +2976,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
     
     async AddJobStatusWidget(inputs, history_id){
 
+        //To Do: Multiple job status color
+
         this.JobStatusTemplate(history_id)
         this.hide_run_buttons(true)
 
@@ -3239,6 +3204,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
 
 
+
     async dataset_collection_list_item (show_dataset){
 
         var self = this
@@ -3270,41 +3236,38 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         const row = new DOMParser().parseFromString(list_item, 'text/html').querySelector('.list-item.dataset.state-ok')
 
 
-        // for (var i = 0; i < show_dataset.object.elements.length; i++){
+        for (var i = 0; i < show_dataset.object.elements.length; i++){
 
-        //   console.log('ok')
+          console.log('ok')
 
-        // }
+        }
 
-         
-        // var line = `<div id="dataset-${dataset['dataset_id']}" class="list-item dataset history-content state-running" style="display: none;">
-        //                 <div class="warnings"></div>
-        //                 <div class="selector"><span class="fa fa-2x fa-square-o"></span></div>
-        //                 <div class="primary-actions"><a class="icon-btn display-btn" title="" target="galaxy_main" href="${URL}/datasets/${dataset['dataset_id']}/display/?preview=True" data-original-title="View data"><span class="fa fa-eye" style=""></span></a><a class="icon-btn edit-btn" title="" href="${URL}/datasets/edit?dataset_id=${dataset['dataset_id']}" data-original-title="Edit attributes"><span class="fa fa-pencil" style=""></span></a><a class="icon-btn delete-btn" title="" href="javascript:void(0);" data-original-title="Delete"><span class="fa fa-times" style=""></span></a><a class="icon-btn display-btn" title="" target="galaxy_main" href="${URL}/datasets/${dataset['dataset_id']}/display/?preview=True" data-original-title="View data"><span class="fa fa-eye" style=""></span></a></div>
-        //                 <div class="title-bar clear" tabindex="0" draggable="true"> <span class="state-icon"></span>
-        //                     <div class="title"> <span class="hid">${dataset['hid']}</span> <span class="name">${dataset['name']}/span> </div>
-        //                     <br>
-        //                     <div class="nametags"></div>
-        //                 </div>
-        //                 <div class="details" style="display: block;">
-        //                     <div class="summary">
-        //                         <div class="detail-messages"></div>
-        //                         <div>This job is currently running</div>
-        //                     </div>
-        //                     <div class="actions clear">
-        //                         <div class="left"><a class="icon-btn params-btn" title="" target="galaxy_main" href="${URL}/datasets/${dataset['dataset_id']}show_params" data-original-title="View details"><span class="fa fa-info-circle" style=""></span></a><a class="icon-btn rerun-btn" title="" target="galaxy_main" href="${URL}/tool_runner/rerun?id=${dataset['dataset_id']}" data-original-title="Run this job again"><span class="fa fa-refresh" style=""></span></a><a class="icon-btn icon-btn" title="" href="#" data-original-title="Tool Help"><span class="fa fa-question" style=""></span></a></div>
-        //                         <div class="right"><a class="icon-btn tag-btn" title="" href="" data-original-title="Edit dataset tags"><span class="fa fa-tags" style=""></span></a><a class="icon-btn annotate-btn" title="" href="" data-original-title="Edit dataset annotation"><span class="fa fa-comment" style=""></span></a></div>
-        //                     </div>
-        //                     <div class="annotation-display"></div>
-        //                     <div class="display-applications"></div>
-        //                 </div>
-        //             </div>`
+        var line = `<div id="dataset-${dataset['dataset_id']}" class="list-item dataset history-content state-running" style="display: none;">
+                        <div class="warnings"></div>
+                        <div class="selector"><span class="fa fa-2x fa-square-o"></span></div>
+                        <div class="primary-actions"><a class="icon-btn display-btn" title="" target="galaxy_main" href="${URL}/datasets/${dataset['dataset_id']}/display/?preview=True" data-original-title="View data"><span class="fa fa-eye" style=""></span></a><a class="icon-btn edit-btn" title="" href="${URL}/datasets/edit?dataset_id=${dataset['dataset_id']}" data-original-title="Edit attributes"><span class="fa fa-pencil" style=""></span></a><a class="icon-btn delete-btn" title="" href="javascript:void(0);" data-original-title="Delete"><span class="fa fa-times" style=""></span></a><a class="icon-btn display-btn" title="" target="galaxy_main" href="${URL}/datasets/${dataset['dataset_id']}/display/?preview=True" data-original-title="View data"><span class="fa fa-eye" style=""></span></a></div>
+                        <div class="title-bar clear" tabindex="0" draggable="true"> <span class="state-icon"></span>
+                            <div class="title"> <span class="hid">${dataset['hid']}</span> <span class="name">${dataset['name']}/span> </div>
+                            <br>
+                            <div class="nametags"></div>
+                        </div>
+                        <div class="details" style="display: block;">
+                            <div class="summary">
+                                <div class="detail-messages"></div>
+                                <div>This job is currently running</div>
+                            </div>
+                            <div class="actions clear">
+                                <div class="left"><a class="icon-btn params-btn" title="" target="galaxy_main" href="${URL}/datasets/${dataset['dataset_id']}show_params" data-original-title="View details"><span class="fa fa-info-circle" style=""></span></a><a class="icon-btn rerun-btn" title="" target="galaxy_main" href="${URL}/tool_runner/rerun?id=${dataset['dataset_id']}" data-original-title="Run this job again"><span class="fa fa-refresh" style=""></span></a><a class="icon-btn icon-btn" title="" href="#" data-original-title="Tool Help"><span class="fa fa-question" style=""></span></a></div>
+                                <div class="right"><a class="icon-btn tag-btn" title="" href="" data-original-title="Edit dataset tags"><span class="fa fa-tags" style=""></span></a><a class="icon-btn annotate-btn" title="" href="" data-original-title="Edit dataset annotation"><span class="fa fa-comment" style=""></span></a></div>
+                            </div>
+                            <div class="annotation-display"></div>
+                            <div class="display-applications"></div>
+                        </div>
+                    </div>`
 
-        // const Tbl = new DOMParser().parseFromString(row, 'text/html').querySelector('.list-item.dataset.history-content.state-error')
-
+        const Tbl = new DOMParser().parseFromString(row, 'text/html').querySelector('.list-item.dataset.history-content.state-error')
 
 
-    
 
         row.querySelector('.name').addEventListener('click', async (e) => {
 
@@ -3315,68 +3278,68 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             }
         });
 
-        // var exch  = row.querySelector('.fa.fa-exchange')
-        // var title = row.querySelector('.title')
-        // var gp_tools = row.querySelector('.gpt')
-        // var g_tools = row.querySelector('.gt')
+        var exch  = row.querySelector('.fa.fa-exchange')
+        var title = row.querySelector('.title')
+        var gp_tools = row.querySelector('.gpt')
+        var g_tools = row.querySelector('.gt')
 
-        // title.data = elements
+        title.data = elements
 
-        // g_tools.addEventListener("click", (e) => {
+        g_tools.addEventListener("click", (e) => {
 
-        //     var server =  row.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode.querySelector('.Galaxy-form').data
-        //     var gp_tools_div = row.querySelector('.galaxy-tool-list')
+            var server =  row.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode.querySelector('.Galaxy-form').data
+            var gp_tools_div = row.querySelector('.galaxy-tool-list')
 
-        //     elements['object']['extension'] = elements['object']['file_ext']
-        //     elements['object']['name'] = elements['element_identifier']
+            elements['object']['extension'] = elements['object']['file_ext']
+            elements['object']['name'] = elements['element_identifier']
             
-        //     this.galaxy_data_upload(gp_tools_div, elements['object'], server)
+            this.galaxy_data_upload(gp_tools_div, elements['object'], server)
 
-        //     if (row.querySelector('.galaxy-tool-list').style.display == 'block') {
-        //         row.querySelector('.galaxy-tool-list').style.display = 'none'
-        //     } 
-        //     else{
-        //         row.querySelector('.galaxy-tool-list').style.display = 'block'
-        //     }
-        // })
+            if (row.querySelector('.galaxy-tool-list').style.display == 'block') {
+                row.querySelector('.galaxy-tool-list').style.display = 'none'
+            } 
+            else{
+                row.querySelector('.galaxy-tool-list').style.display = 'block'
+            }
+        })
 
-        // gp_tools.addEventListener("click", (e) => {
+        gp_tools.addEventListener("click", (e) => {
 
-        //     var gp_tools_div = row.querySelector('.genepattern-tool-list')
-        //     this.data_upload(gp_tools_div, elements)
+            var gp_tools_div = row.querySelector('.genepattern-tool-list')
+            this.data_upload(gp_tools_div, elements)
 
-        //     if (gp_tools_div.childNodes.length == 0){
-        //         var div = document.createElement('div')
-        //         var msg = document.createElement('p')
-        //         div.append(msg)
-        //         msg.innerText = '  No tools are available..'
-        //         gp_tools_div.append(div)
-        //     } 
+            if (gp_tools_div.childNodes.length == 0){
+                var div = document.createElement('div')
+                var msg = document.createElement('p')
+                div.append(msg)
+                msg.innerText = '  No tools are available..'
+                gp_tools_div.append(div)
+            } 
 
-        //     if (row.querySelector('.genepattern-tool-list').style.display == 'block') {
-        //         row.querySelector('.genepattern-tool-list').style.display = 'none'
-        //     } 
-        //     else{
-        //         row.querySelector('.genepattern-tool-list').style.display = 'block'
-        //     }
-        // })
+            if (row.querySelector('.genepattern-tool-list').style.display == 'block') {
+                row.querySelector('.genepattern-tool-list').style.display = 'none'
+            } 
+            else{
+                row.querySelector('.genepattern-tool-list').style.display = 'block'
+            }
+        })
 
-        // exch.addEventListener("click", async (event) =>{ 
-        //     // var show_dataset = await KernelSideDataObjects(`from GiN  import GalaxyTaskWidget\nGalaxyTaskWidget.show_data_set(server=${JSON.stringify(this.model.get('gal_instance')['url']['URL'])}, dataset_id=${JSON.stringify(elements['id'])} )`)
+        exch.addEventListener("click", async (event) =>{ 
+            // var show_dataset = await KernelSideDataObjects(`from GiN  import GalaxyTaskWidget\nGalaxyTaskWidget.show_data_set(server=${JSON.stringify(this.model.get('gal_instance')['url']['URL'])}, dataset_id=${JSON.stringify(elements['id'])} )`)
 
-        //     if (row.querySelector('#add_data_share_menu').style.display == 'block') {
-        //         row.querySelector('#add_data_share_menu').style.display = 'none'
-        //     } 
-        //     else{
-        //         row.querySelector('#add_data_share_menu').style.display = 'block'
-        //     }
-        // })
+            if (row.querySelector('#add_data_share_menu').style.display == 'block') {
+                row.querySelector('#add_data_share_menu').style.display = 'none'
+            } 
+            else{
+                row.querySelector('#add_data_share_menu').style.display = 'block'
+            }
+        })
 
-        // var download = row.querySelector('.fa.fa-download')
+        var download = row.querySelector('.fa.fa-download')
 
-        // download.addEventListener('click', () => {
-        //     KernelSideDataObjects(`from GiN import GalaxyTaskWidget\nGalaxyTaskWidget.download_file_to_jupyter_server( server=${JSON.stringify(self.model.get('gal_instance')['url'])}, collection_id=${JSON.stringify(elements['object']['id'])}) `);
-        // })
+        download.addEventListener('click', () => {
+            KernelSideDataObjects(`from GiN import GalaxyTaskWidget\nGalaxyTaskWidget.download_file_to_jupyter_server( server=${JSON.stringify(self.model.get('gal_instance')['url'])}, collection_id=${JSON.stringify(elements['object']['id'])}) `);
+        })
 
         return row
     }
