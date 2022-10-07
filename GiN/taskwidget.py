@@ -318,6 +318,29 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
                 dataset_id=collection_id, file_path=galaxy_data
             )
 
+    def CORS_fallback_upload(
+        file_name,
+        data, 
+        server,
+        history_id,
+    ):
+
+        temp_dir = os.path.join(os.getcwd(), "temp")
+
+        if not os.path.exists(temp_dir):
+            os.mkdir(temp_dir)
+
+        f = open(os.path.join(temp_dir, file_name), 'w')
+        f.write(data)
+  
+        a = GiN.sessions.SessionList()
+        gi = a.get(server=server)
+
+        path = os.path.join(temp_dir, file_name)
+        out = gi.tools.gi.tools.upload_file(path=path, history_id=history_id)
+       
+        return IPython.display.JSON(out)
+
     def send_data_to_galaxy_tool(
         server_d=None,
         server_u=None,
@@ -352,6 +375,20 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
         # if not os.path.exists(galaxy_data):
         #     os.mkdir(galaxy_data)
         #     gi.gi.datasets.download_dataset(dataset_id=collection_id, file_path=galaxy_data)
+
+
+    def upload_fallback(
+        server_u=None,
+        file_name=None,
+    ):
+
+        gi14 = a.get(server=server_u)
+        file_name = glob.glob(temp_dir + "/*.*")
+
+        out = gi14.tools.gi.tools.upload_file(path=file_name[0], history_id=history_id)
+
+        return IPython.display.JSON(out)
+
 
     def send_data_to_gp_server(file_name, tool_id, dataset_id, server, ext):
 

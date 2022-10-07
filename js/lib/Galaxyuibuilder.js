@@ -23,9 +23,9 @@ import { Toolbox } from '@g2nb/nbtools';
 export class GalaxyUIBuilderModel extends BaseWidgetModel{
      
     defaults() {
-        return Object.assign(Object.assign(Object.assign({}, super.defaults()), { _model_name: GalaxyUIBuilderModel.model_name, _model_module: GalaxyUIBuilderModel.model_module, _model_module_version: GalaxyUIBuilderModel.model_module_version, _view_name: GalaxyUIBuilderModel.view_name, _view_module: GalaxyUIBuilderModel.view_module, _view_module_version: GalaxyUIBuilderModel.view_module_version, name: 'Python Function', description: '', origin: '', _parameters: [], parameter_groups: [], function_import: '', register_tool: true, collapse: true, events: {}, buttons: {}, display_header: true, display_footer: true, busy: false, run_label: 'Execute', gal_instance: {}, output: undefined, inputs:{}, form_output:{}, UI:{}, galaxy_tool_id:'', history_data:[], history_ids:[] }));
+        return Object.assign(Object.assign(Object.assign({}, super.defaults()), { _model_name: GalaxyUIBuilderModel.model_name, _model_module: GalaxyUIBuilderModel.model_module, _model_module_version: GalaxyUIBuilderModel.model_module_version, _view_name: GalaxyUIBuilderModel.view_name, _view_module: GalaxyUIBuilderModel.view_module, _view_module_version: GalaxyUIBuilderModel.view_module_version, name: 'Python Function', description: '', origin: '', _parameters: [], parameter_groups: [], function_import: '', register_tool: true, collapse: true, events: {}, buttons: {}, display_header: true, display_footer: true, busy: false, run_label: 'Execute', gal_instance: {}, output: undefined, inputs:{}, form_output:{}, UI:{}, galaxy_tool_id:'', history_data:[], history_ids:[], data_base64:'' }));
     }
- }
+}
 
  GalaxyUIBuilderModel.model_name = 'GalaxyUIBuilderModel';
  GalaxyUIBuilderModel.model_module = MODULE_NAME;
@@ -969,7 +969,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
                             <!-- Tab content -->
                             <div id="upload" class="tabcontent">
-                                <p class="resumable-upload-title"><b>Upload file to the Galaxy server.</b></p>
+                                <div style="margin-top:10px"><div style="float: left;"><p class="resumable-upload-title"><b>Upload file to the Galaxy server.</b></p></div><div style="float:left; margin-top:5px; margin-left:5px;"><i class="fa fa-spinner fa-spin" style="font-size:10px; float:left;"></i></div></div>
+                                <div class="resumable-upload-warning" style="display: none;"> <b>Warning:</b> CORS error, file uploaded through bioblend API..</div>
                                 <input id="inputupload" class="input_upload" type="file" style="display: block" >
                             </div>
                     
@@ -1066,6 +1067,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         })
             .then((response) => {
                 self.resumable(response['data']['outputs'][0])
+
+                console.log(payload)
                 console.log('ok')
             })
         
@@ -1127,7 +1130,10 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             },
             
             onError: function(error) {
+
+                self.readFile()
                 console.log("Failed because: " + error)
+                // return
             },
 
             onProgress: function(bytesUploaded, bytesTotal) {
@@ -1162,9 +1168,9 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
                 elm.style.display = 'block'
                 self.submitPayload(data, credentials)
+                this.el.querySelector('#inputupload').value = null
             }
         })
-    
         // Check if there are any previous uploads to continue.
         upload.findPreviousUploads().then(function (previousUploads) {
             // Found previous uploads so we select the first one. 
@@ -1173,16 +1179,50 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             }
             upload.start()
         })
-        this.el.querySelector('#inputupload').value = null
+        // this.el.querySelector('#inputupload').value = null
+    }
+
+    async readFile() {
+
+        this.el.querySelector('.resumable-upload-warning').style.display = 'block'
+        this.el.querySelector('.resumable-upload-warning').style.color = 'red'
+
+        var elm = this.el.querySelector('#inputupload')
+        var hi = this.el.querySelector('#history_ids').value
+
+        const file = elm.files.item(0);
+        const reader = new FileReader();
+        
+        reader.onload = async () => {
+           var out  = await KernelSideDataObjects(`from GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.CORS_fallback_upload(file_name=${JSON.stringify(file['name'])}, data=${JSON.stringify(reader.result)}, server=${JSON.stringify(this.model.get('gal_instance')['url'])}, history_id=${JSON.stringify(hi)})`);
+           this.el.querySelector('#inputupload').value = null
+
+           var data_list_div = this.el.querySelector('.history-dataset-list');
+           var e = this.el.querySelector('.list-item')
+           e.parentElement.removeChild(e)
+           data_list_div.append(await this.data_row_list(this.model.get('gal_instance')['url'], hi))
+   
+           var hl = this.el.querySelector('#dataset-history-list')
+   
+           for (var i = 0; i <  hl.options.length; i++ ){
+               if (hl[i].value == hi) {
+                   hl.selectedIndex = i
+               }
+           }
+        }
+        reader.readAsText(file);
     }
 
     Upload_callback(input){
 
+      
         var self  = this
         var children = this.element.querySelector('.Galaxy-form')
 
         this.el.querySelectorAll('.nbtools-run').forEach((button) => button.addEventListener('click', () => {
-
+           
+            this.el.querySelector('.resumable-upload-warning').style.display = 'none'
+            
             var cnf = {};
 
             var data = {
@@ -1212,7 +1252,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         // this.hide_run_buttons(true)
         var children = this.element.querySelector('.Galaxy-form')
         var upload_link 
-        var  upload_method
+        var upload_method
 
         for (var i = 0; i < children.querySelectorAll('.tabcontent').length; i++ ) {
             if (children.querySelectorAll('.tabcontent')[i].style.display == 'block') {
@@ -3119,7 +3159,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         for(var n = 0; n < jobs['jobs'].length; n++){
             var job  = await KernelSideDataObjects(`from GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.show_job(gal_instance=${JSON.stringify(this.model.get('gal_instance'))}, job_id=${JSON.stringify(jobs["jobs"][n]["id"])})`)
             var out_file_name = this.el.querySelector('.job-output-files')
-            out_file_name.append(await this.input_output_file_name(job))
+            out_file_name.append(this.input_output_file_name(job))
         } 
 
         var usr_email = this.model.get('gal_instance')['email_ID']
@@ -3129,62 +3169,62 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         var states = ['ok', 'error']
 
-        for (let i = 0; i < Infinity; ++i) {
+        // for (let i = 0; i < Infinity; ++i) {
 
-            var data = await KernelSideDataObjects(`from GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.OutPutData(server=${JSON.stringify(this.model.get('gal_instance')['url'])}, JobID=${JSON.stringify(job['id'])} )`);
-            var job_state = data[0]['state']
+        //     var data = await KernelSideDataObjects(`from GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.OutPutData(server=${JSON.stringify(this.model.get('gal_instance')['url'])}, JobID=${JSON.stringify(job['id'])} )`);
+        //     var job_state = data[0]['state']
 
-            if (job_state=='running'  ){
+        //     if (job_state=='running'  ){
 
-                var gear_rotate = this.el.querySelector('.gear-rotate-icon')
-                gear_rotate.style.display = 'block'
-                var job_done_text = this.el.querySelector(".job-state-text")
-                job_done_text.innerText = 'Job Running'
-                job_done_text.style.color = '#F5A207'
-                var StdError  = this.el.querySelector('.donemessagelarge')
-                StdError.style.background = '#ffe6cd'
-            } 
+        //         var gear_rotate = this.el.querySelector('.gear-rotate-icon')
+        //         gear_rotate.style.display = 'block'
+        //         var job_done_text = this.el.querySelector(".job-state-text")
+        //         job_done_text.innerText = 'Job Running'
+        //         job_done_text.style.color = '#F5A207'
+        //         var StdError  = this.el.querySelector('.donemessagelarge')
+        //         StdError.style.background = '#ffe6cd'
+        //     } 
 
-            else if (['queued', 'new'].includes(job_state)) {
-                var job_done_text = this.el.querySelector(".job-state-text")
-                job_done_text.innerText = 'Job queued'
-                var StdError  = this.el.querySelector('.donemessagelarge')
-                StdError.style.background = '#7d959d70'
-            } 
+        //     else if (['queued', 'new'].includes(job_state)) {
+        //         var job_done_text = this.el.querySelector(".job-state-text")
+        //         job_done_text.innerText = 'Job queued'
+        //         var StdError  = this.el.querySelector('.donemessagelarge')
+        //         StdError.style.background = '#7d959d70'
+        //     } 
 
-            else if (job_state == 'ok'){
+        //     else if (job_state == 'ok'){
 
-                this.el.querySelector('.rbtn').style.display = 'block'
-                var StdError  = this.el.querySelector('.donemessagelarge')
-                StdError.style.background = '#c2ebc2'               
-                var job_done_text = this.el.querySelector(".job-state-text")
-                job_done_text.innerText = 'Job complete'
-                var gear_rotate = this.el.querySelector('.gear-rotate-icon')
-                gear_rotate.style.display = 'none'
-                var gear_rotate = this.el.querySelector('.job-done-icon')
-                gear_rotate.style.display = 'block'
-            } 
+        //         this.el.querySelector('.rbtn').style.display = 'block'
+        //         var StdError  = this.el.querySelector('.donemessagelarge')
+        //         StdError.style.background = '#c2ebc2'               
+        //         var job_done_text = this.el.querySelector(".job-state-text")
+        //         job_done_text.innerText = 'Job complete'
+        //         var gear_rotate = this.el.querySelector('.gear-rotate-icon')
+        //         gear_rotate.style.display = 'none'
+        //         var gear_rotate = this.el.querySelector('.job-done-icon')
+        //         gear_rotate.style.display = 'block'
+        //     } 
 
-            else if (job_state == 'error'){
+        //     else if (job_state == 'error'){
 
-                this.el.querySelector('.rbtn').style.display = 'block'
-                var job_done_text = this.el.querySelector(".job-state-text")
-                job_done_text.innerText = 'Fatal Error'
-                job_done_text.style.color = 'white'
-                var gear_rotate = this.el.querySelector('.gear-rotate-icon')
-                gear_rotate.style.display = 'none'
-                var gear_rotate = this.el.querySelector('.job-error-icon')
-                gear_rotate.style.display = 'block'
-                var StdError  = this.el.querySelector('.donemessagelarge')
-                StdError.style.background = '#f4a3a5'
-            }
+        //         this.el.querySelector('.rbtn').style.display = 'block'
+        //         var job_done_text = this.el.querySelector(".job-state-text")
+        //         job_done_text.innerText = 'Fatal Error'
+        //         job_done_text.style.color = 'white'
+        //         var gear_rotate = this.el.querySelector('.gear-rotate-icon')
+        //         gear_rotate.style.display = 'none'
+        //         var gear_rotate = this.el.querySelector('.job-error-icon')
+        //         gear_rotate.style.display = 'block'
+        //         var StdError  = this.el.querySelector('.donemessagelarge')
+        //         StdError.style.background = '#f4a3a5'
+        //     }
 
-            await this.waitforme(3000);
+        //     await this.waitforme(3000);
 
-            if (states.includes(job_state) === true ) {
-                break;
-            }      
-        }
+        //     if (states.includes(job_state) === true ) {
+        //         break;
+        //     }      
+        // }
     }
 
     JobStatusTemplate (history_id){
@@ -3289,23 +3329,81 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         var inputs = JobPanel.querySelector('.inputs')
         var outputs = JobPanel.querySelector('.outputs')
 
-        for (var j =0; j < Object.keys(job['inputs']).length; j++){
-            var show_dataset = await KernelSideDataObjects(`from GiN.taskwidget  import GalaxyTaskWidget\nGalaxyTaskWidget.show_data_set(server=${JSON.stringify(this.model.get('gal_instance')['url'])}, dataset_id=${JSON.stringify(job['inputs'][Object.keys(job['inputs'])[j]]['id'])} )`) 
-            var ili  = document.createElement('li')
-            var ib = document.createElement('b')
-            ib.innerText = `${show_dataset['name']}`
-            ili.append(ib)
-            inputs.append(ili)
+        for (let i = 0; i < Infinity; ++i) {
+
+            var job  = await KernelSideDataObjects(`from GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.show_job(gal_instance=${JSON.stringify(this.model.get('gal_instance'))}, job_id=${JSON.stringify(job)})`)
+            console.log(job)
+            // var job_state = data[0]['state']
+
+            // if (job_state=='running'  ){
+
+            //     var gear_rotate = this.el.querySelector('.gear-rotate-icon')
+            //     gear_rotate.style.display = 'block'
+            //     var job_done_text = this.el.querySelector(".job-state-text")
+            //     job_done_text.innerText = 'Job Running'
+            //     job_done_text.style.color = '#F5A207'
+            //     var StdError  = this.el.querySelector('.donemessagelarge')
+            //     StdError.style.background = '#ffe6cd'
+            // } 
+
+            // else if (['queued', 'new'].includes(job_state)) {
+            //     var job_done_text = this.el.querySelector(".job-state-text")
+            //     job_done_text.innerText = 'Job queued'
+            //     var StdError  = this.el.querySelector('.donemessagelarge')
+            //     StdError.style.background = '#7d959d70'
+            // } 
+
+            // else if (job_state == 'ok'){
+
+            //     this.el.querySelector('.rbtn').style.display = 'block'
+            //     var StdError  = this.el.querySelector('.donemessagelarge')
+            //     StdError.style.background = '#c2ebc2'               
+            //     var job_done_text = this.el.querySelector(".job-state-text")
+            //     job_done_text.innerText = 'Job complete'
+            //     var gear_rotate = this.el.querySelector('.gear-rotate-icon')
+            //     gear_rotate.style.display = 'none'
+            //     var gear_rotate = this.el.querySelector('.job-done-icon')
+            //     gear_rotate.style.display = 'block'
+            // } 
+
+            // else if (job_state == 'error'){
+
+            //     this.el.querySelector('.rbtn').style.display = 'block'
+            //     var job_done_text = this.el.querySelector(".job-state-text")
+            //     job_done_text.innerText = 'Fatal Error'
+            //     job_done_text.style.color = 'white'
+            //     var gear_rotate = this.el.querySelector('.gear-rotate-icon')
+            //     gear_rotate.style.display = 'none'
+            //     var gear_rotate = this.el.querySelector('.job-error-icon')
+            //     gear_rotate.style.display = 'block'
+            //     var StdError  = this.el.querySelector('.donemessagelarge')
+            //     StdError.style.background = '#f4a3a5'
+            // }
+
+            await this.waitforme(3000);
+
+            if (states.includes(job_state) === true ) {
+                break;
+            }      
         }
 
-        for (var k =0; k < Object.keys(job['outputs']).length; k++){
-            var oli  = document.createElement('li')
-            var ob = document.createElement('b')
-            var show_dataset = await KernelSideDataObjects(`from GiN.taskwidget  import GalaxyTaskWidget\nGalaxyTaskWidget.show_data_set(server=${JSON.stringify(this.model.get('gal_instance')['url'])}, dataset_id=${JSON.stringify(job['outputs'][Object.keys(job['outputs'])[k]]['id'])} )`) 
-            ob.innerText =  `${show_dataset['name']}`
-            oli.append(ob)
-            outputs.append(oli)
-            }
+        // for (var j =0; j < Object.keys(job['inputs']).length; j++){
+        //     var show_dataset = await KernelSideDataObjects(`from GiN.taskwidget  import GalaxyTaskWidget\nGalaxyTaskWidget.show_data_set(server=${JSON.stringify(this.model.get('gal_instance')['url'])}, dataset_id=${JSON.stringify(job['inputs'][Object.keys(job['inputs'])[j]]['id'])} )`) 
+        //     var ili  = document.createElement('li')
+        //     var ib = document.createElement('b')
+        //     ib.innerText = `${show_dataset['name']}`
+        //     ili.append(ib)
+        //     inputs.append(ili)
+        // }
+
+        // for (var k =0; k < Object.keys(job['outputs']).length; k++){
+        //     var oli  = document.createElement('li')
+        //     var ob = document.createElement('b')
+        //     var show_dataset = await KernelSideDataObjects(`from GiN.taskwidget  import GalaxyTaskWidget\nGalaxyTaskWidget.show_data_set(server=${JSON.stringify(this.model.get('gal_instance')['url'])}, dataset_id=${JSON.stringify(job['outputs'][Object.keys(job['outputs'])[k]]['id'])} )`) 
+        //     ob.innerText =  `${show_dataset['name']}`
+        //     oli.append(ob)
+        //     outputs.append(oli)
+        //     }
 
     return JobPanel
     }
