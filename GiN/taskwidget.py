@@ -354,7 +354,7 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
         gi13 = a.get(server=server_d)
         gi14 = a.get(server=server_u)
 
-        temp_dir = os.path.join(os.getcwd(), "temp")
+        temp_dir = os.path.join(os.getcwd(), "temp1")
 
         if not os.path.exists(temp_dir):
             os.mkdir(temp_dir)
@@ -392,7 +392,7 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
 
     def send_data_to_gp_server(file_name, tool_id, dataset_id, server, ext):
 
-        temp_dir = os.path.join(os.getcwd(), "temp")
+        temp_dir = os.path.join(os.getcwd(), "temp1")
 
         if not os.path.exists(temp_dir):
             os.mkdir(temp_dir)
@@ -401,7 +401,7 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
             os.remove(os.path.join(temp_dir, f))
 
         GalaxyTaskWidget.download_file_to_jupyter_server(
-            server=server, collection_id=dataset_id, dir="temp"
+            server=server, collection_id=dataset_id, dir="temp1"
         )
 
         file_name = glob.glob(os.path.join(temp_dir, "*.*"))
