@@ -1811,16 +1811,14 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
             if (event.target.className == "InputDataFile") {
                 event.target.style.background = "";
-                var draged_item = self.dragged.firstElementChild
+                var draged_item = self.dragged
                 // self.removeAllChildNodes(Select)
 
-                console.log(draged_item)
-
-                const opt = draged_item.querySelector('.name').innerText
+                const opt = self.dragged.querySelector('.name').innerText
                 const el = document.createElement("option");
 
                 el.textContent = opt;
-                var dataID = JSON.parse(draged_item.getAttribute('data-value'))
+                var dataID = JSON.parse(self.dragged.querySelector('.title').getAttribute('data-value'))
 
                 if (dataID[1] == 'collection'){
                     el.data = {'id':dataID[0], 'src':'hdca'} 
@@ -1831,7 +1829,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 Select.prepend(el);
 
                 Select.selectedIndex = 0
-
             }
         // }
         }, false);
