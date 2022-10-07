@@ -3,6 +3,7 @@ import pickle
 import functools
 import warnings
 
+
 from IPython.core.display import display
 from traitlets import Unicode, List, Bool, Dict, Instance, Bytes
 from ipywidgets import widget_serialization, Output
@@ -50,7 +51,7 @@ class GalaxyUIBuilder(BaseWidget, NBTool):
         self.history_ids = history_ids
         self.galaxy_tool_id = galaxy_tool_id
         self.history_data = history_data
-
+        
         BaseWidget.__init__(self, **kwargs)
 
     def _apply_defaults(self, function_or_method=None):
@@ -74,3 +75,4 @@ class GalaxyUIBuilder(BaseWidget, NBTool):
         # register_tool and collapse are True by default
         self.register_tool = True
         self.collapse = False
+

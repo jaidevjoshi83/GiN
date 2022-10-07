@@ -194,4 +194,31 @@
   background: rgb(255,255,255);
 }
 
+.galaxy-uibuilder .ui-radiobutton{
+  display:inline;
+  float:left;   
+  padding-top: 12px;
+  padding-right: 4px;
+}
+
+.galaxy-uibuilder .ui-option{
+  border: 1px solid #bab1b1;
+  background: rgb(218,217,215);
+}
+
+
+.galaxy-uibuilder .input-file-type{
+  margin-left: 30px;
+  margin-bottom: 10px;
+}
+
+
+.galaxy-uibuilder .fa.fa-times-circle{
+  color: red;
+  font-size: 15px;
+  background-color: white;
+  border-radius: 9px;
+  }
+
+
 

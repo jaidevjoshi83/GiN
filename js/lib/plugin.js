@@ -55,5 +55,6 @@ function init_context(app, notebook_tracker) {
     ContextManager.jupyter_app = app;
     ContextManager.notebook_tracker = notebook_tracker;
     ContextManager.context();
+
 }
 

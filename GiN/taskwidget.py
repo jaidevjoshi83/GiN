@@ -72,9 +72,18 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
         job = gi1.tools.gi.tools.run_tool(
             history_id=history_id, tool_id=gal_instance["tool_id"], tool_inputs=new_inputs
         )
-        show_job = gi1.jobs.gi.jobs.show_job(job["jobs"][0]["id"], full_details=True)
 
-        return IPython.display.JSON(show_job)
+        return IPython.display.JSON(job)
+
+    
+    def show_job(gal_instance=None, job_id=None):
+
+        a = GiN.sessions.SessionList()
+        gi1 = a.get(server=gal_instance["url"])
+        
+        job = gi1.jobs.gi.jobs.show_job(job_id=job_id)
+
+        return IPython.display.JSON(job)
 
     def get_data_type_and_genomes(server=None):
 
@@ -180,6 +189,8 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
             #             "split_blocks_by_species_selector|remove_all_gap_columns": "remove_all_gap_columns"
             #     }
 
+            print(tool_inputs)
+
             inputs = gi6.tools.gi.tools.build(
                 tool_id=tool_id, inputs=tool_inputs, history_id=history_id
             )
@@ -215,7 +226,6 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
         a = GiN.sessions.SessionList()
         gi7 = a.get(server=server)
 
-        dir(gi7)
 
         history_data = gi7.gi.datasets.gi.datasets.get_datasets(
             history_id=history_id, deleted=False, purged=False, visible=True
@@ -252,7 +262,7 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
         gi10.gi.histories.gi.histories.delete_dataset_collection(
             history_id=history_id,
             dataset_collection_id=dataset_collection_id,
-            purge=True,
+            # purge=True,
         )
 
     def show_dataset_collection(server=None, dataset_id=None):
@@ -308,6 +318,29 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
                 dataset_id=collection_id, file_path=galaxy_data
             )
 
+    def CORS_fallback_upload(
+        file_name,
+        data, 
+        server,
+        history_id,
+    ):
+
+        temp_dir = os.path.join(os.getcwd(), "temp")
+
+        if not os.path.exists(temp_dir):
+            os.mkdir(temp_dir)
+
+        f = open(os.path.join(temp_dir, file_name), 'w')
+        f.write(data)
+  
+        a = GiN.sessions.SessionList()
+        gi = a.get(server=server)
+
+        path = os.path.join(temp_dir, file_name)
+        out = gi.tools.gi.tools.upload_file(path=path, history_id=history_id)
+       
+        return IPython.display.JSON(out)
+
     def send_data_to_galaxy_tool(
         server_d=None,
         server_u=None,
@@ -321,7 +354,7 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
         gi13 = a.get(server=server_d)
         gi14 = a.get(server=server_u)
 
-        temp_dir = os.path.join(os.getcwd(), "temp")
+        temp_dir = os.path.join(os.getcwd(), "temp1")
 
         if not os.path.exists(temp_dir):
             os.mkdir(temp_dir)
@@ -343,9 +376,23 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
         #     os.mkdir(galaxy_data)
         #     gi.gi.datasets.download_dataset(dataset_id=collection_id, file_path=galaxy_data)
 
+
+    def upload_fallback(
+        server_u=None,
+        file_name=None,
+    ):
+
+        gi14 = a.get(server=server_u)
+        file_name = glob.glob(temp_dir + "/*.*")
+
+        out = gi14.tools.gi.tools.upload_file(path=file_name[0], history_id=history_id)
+
+        return IPython.display.JSON(out)
+
+
     def send_data_to_gp_server(file_name, tool_id, dataset_id, server, ext):
 
-        temp_dir = os.path.join(os.getcwd(), "temp")
+        temp_dir = os.path.join(os.getcwd(), "temp1")
 
         if not os.path.exists(temp_dir):
             os.mkdir(temp_dir)
@@ -354,7 +401,7 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
             os.remove(os.path.join(temp_dir, f))
 
         GalaxyTaskWidget.download_file_to_jupyter_server(
-            server=server, collection_id=dataset_id, dir="temp"
+            server=server, collection_id=dataset_id, dir="temp1"
         )
 
         file_name = glob.glob(os.path.join(temp_dir, "*.*"))
