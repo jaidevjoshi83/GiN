@@ -23,7 +23,7 @@ import { Toolbox } from '@g2nb/nbtools';
 export class GalaxyUIBuilderModel extends BaseWidgetModel{
      
     defaults() {
-        return Object.assign(Object.assign(Object.assign({}, super.defaults()), { _model_name: GalaxyUIBuilderModel.model_name, _model_module: GalaxyUIBuilderModel.model_module, _model_module_version: GalaxyUIBuilderModel.model_module_version, _view_name: GalaxyUIBuilderModel.view_name, _view_module: GalaxyUIBuilderModel.view_module, _view_module_version: GalaxyUIBuilderModel.view_module_version, name: 'Python Function', description: '', origin: '', _parameters: [], parameter_groups: [], function_import: '', register_tool: true, collapse: true, events: {}, buttons: {}, display_header: true, display_footer: true, busy: false, run_label: 'Execute', gal_instance: {}, output: undefined, inputs:{}, form_output:{}, UI:{}, galaxy_tool_id:'', history_data:[], history_ids:[], data_base64:'' }));
+        return Object.assign(Object.assign(Object.assign({}, super.defaults()), { _model_name: GalaxyUIBuilderModel.model_name, _model_module: GalaxyUIBuilderModel.model_module, _model_module_version: GalaxyUIBuilderModel.model_module_version, _view_name: GalaxyUIBuilderModel.view_name, _view_module: GalaxyUIBuilderModel.view_module, _view_module_version: GalaxyUIBuilderModel.view_module_version, name: 'Python Function', description: '', origin: '', _parameters: [], parameter_groups: [], function_import: '', register_tool: true, collapse: true, events: {}, buttons: {}, display_header: true, display_footer: true, busy: false, run_label: 'Execute', gal_instance: {}, output: undefined, inputs:{}, form_output:{}, UI:{}, galaxy_tool_id:'', history_data:[], history_ids:[] }));
     }
 }
 
@@ -969,9 +969,9 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
                             <!-- Tab content -->
                             <div id="upload" class="tabcontent">
-                                <div style="margin-top:10px"><div style="float: left;"><p class="resumable-upload-title"><b>Upload file to the Galaxy server.</b></p></div><div style="float:left; margin-top:5px; margin-left:5px;"><i class="fa fa-spinner fa-spin" style="font-size:10px; float:left;"></i></div></div>
-                                <div class="resumable-upload-warning" style="display: none;"> <b>Warning:</b> CORS error, file uploaded through bioblend API..</div>
+                                <div style="margin-top:10px"><div style="float: left;"><p class="resumable-upload-title"><b>Upload file to the Galaxy server.</b></p></div><div class="upload-status-icon" style="float:left; margin-top:5px; margin-left:5px; display: none;"><i class="fa fa-spinner fa-spin" style="font-size:10px; float:left;"></i></div></div>
                                 <input id="inputupload" class="input_upload" type="file" style="display: block" >
+                                <div class="resumable-upload-warning" style="display: none;"> <b>Warning:</b> CORS error, file uploaded through bioblend API..</div>
                             </div>
                     
                             <div id="from_url" class="tabcontent" style="display: none;">
@@ -1169,6 +1169,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 elm.style.display = 'block'
                 self.submitPayload(data, credentials)
                 this.el.querySelector('#inputupload').value = null
+                this.el.querySelector('.upload-status-icon').style.display = 'none'
             }
         })
         // Check if there are any previous uploads to continue.
@@ -1209,6 +1210,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                    hl.selectedIndex = i
                }
            }
+
+           this.el.querySelector('.upload-status-icon').style.display = 'none'
         }
         reader.readAsText(file);
     }
@@ -1222,6 +1225,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         this.el.querySelectorAll('.nbtools-run').forEach((button) => button.addEventListener('click', () => {
            
             this.el.querySelector('.resumable-upload-warning').style.display = 'none'
+            this.el.querySelector('.upload-status-icon').style.display = 'block'
             
             var cnf = {};
 
