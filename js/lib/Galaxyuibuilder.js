@@ -251,7 +251,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 this.add_select_field(input_def, form_parent, name_prefix)
                 break
             case "data_collection":
-                this.add_select_field(input_def, form_parent, name_prefix)
+                this.add_input_data(input_def, form_parent, name_prefix, data)
                 break
             case "repeat":  
                 this.add_repeat_section(input_def, form_parent, name_prefix) 
@@ -381,6 +381,95 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             }
         }
     }
+
+    add_DataCollectionToolParameter(input_def, FormParent, NamePrefix){
+
+        input_def.id = this.uid()
+        var self = this
+
+        const row = document.createElement('div')
+        row.className =  'ui-form-element section-row'
+        row.id =  this.uid()
+
+        var options 
+        options = input_def['options']['hdca']
+
+        const select = document.createElement('select')
+        select.id = `select-${input_def.id}`  
+        select.className = 'data_collection'   
+        select.name = NamePrefix+input_def['name']
+    
+        for(var i = 0; i < options.length; i++) {
+
+            const el = document.createElement("option");
+
+            if (input_def['type'] != 'data_collection'){
+                const opt = options[i][0];
+                el.value =  options[i][1];
+                el.textContent = opt;
+            } else{
+                const opt = options[i]['name'];
+                el.value =  JSON.stringify(options[i]);
+                el.textContent = opt;
+            }
+            select.appendChild(el);
+
+            if(input_def.value == options[i][1]){
+                el.selected = 'true'
+            }
+        }
+
+        const title = document.createElement('div')
+        title.className = 'ui-from-title'
+        const TitleSpan = document.createElement('span')
+        TitleSpan.className = "ui-form-title-text"
+        TitleSpan.textContent = input_def['label']
+
+        TitleSpan.style.display = 'inline'
+        title.append(TitleSpan)
+
+        row.className = 'ui-form-element section-row'
+        row.id = input_def.id
+
+        row.append(title)
+        row.append(select)
+
+        const help = document.createElement('div')
+        help.className = 'ui-from-help'
+        const helpSpan = document.createElement('span')
+        helpSpan.className = "ui-form-help-text"
+        helpSpan.innerHTML = `<b> Help:</b> ${input_def['help']}`
+        helpSpan.style.fontWeight = 'normal'
+        helpSpan.style.display = 'inline'
+        help.style.marginBottom = '10px'
+        help.style.marginLeft = '10px'
+
+        help.append( helpSpan)
+        row.append(help)
+
+        select.addEventListener("change", async () => {
+
+            var queryID = select.value
+
+            if (input_def['is_dynamic'] == true){
+
+                var children = self.el.querySelector('.Galaxy-form')
+                var inputs = self.get_form_data(children)
+                var history_id = self.el.querySelector('.galaxy-history-list').querySelector('#history_ids').value
+                var refine_inputs  = await KernelSideDataObjects(`from GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.updated_form(${JSON.stringify(self.model.get('gal_instance')['url'])}, ${JSON.stringify(inputs)}, ${JSON.stringify(self.model.get('galaxy_tool_id'))}, ${JSON.stringify(history_id)})`)
+                var form_parent = self.el.querySelector('.Galaxy-form')
+
+                self.removeAllChildNodes(form_parent)
+                self.form_builder(refine_inputs['inputs'])
+
+            }
+
+        });
+    
+        FormParent.append(row)
+        return row
+    }
+
 
     extract_input_dom(form){
 
@@ -519,6 +608,41 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             }
 
             out[form.querySelector('.drill-down.container').name] =  drill_down_inputs
+        } else if (form.querySelector('.data_collection')){
+            var input_files = []  
+
+            out[form.querySelector('.data_collection').name] = input_files  
+
+            for (var i = 0; i < form.querySelector('.data_collection').options.length; i++) {
+                if (form.querySelector('.data_collection').options[i].selected == true) {
+                    input_files.push(form.querySelector('.data_collection').options[i].data)
+                }
+            }
+
+            if (checking == 'on') {
+                if (out[form.querySelector('.data_collection').name].length < 1 ){
+                    form.querySelector('.data_collection').style.backgroundColor = 'pink'
+                    return 'error'
+                }
+                else {
+              
+                    form.querySelector('.data_collection').style.backgroundColor = ''
+                    out[form.querySelector('.data_collection').name] = input_files
+                    
+                    form.querySelector('.data_collection').parentElement['data-file']['values'] = input_files
+                    out[form.querySelector('.data_collection').name] = form.querySelector('.data_collection').parentElement['data-file']
+                }
+            } else {
+                // out[form.querySelector('.InputDataFile').name] = input_files
+
+                if (input_files.length == 0){
+                    form.querySelector('.data_collection').parentElement['data-file']['values'] = [{}]
+                } else{
+                    form.querySelector('.data_collection').parentElement['data-file']['values'] = input_files
+                }
+                
+                out[form.querySelector('.data_collection').name] = form.querySelector('.data_collection').parentElement['data-file']
+            }
         }
 
         if (Object.keys(out).length > 0){
@@ -915,7 +1039,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
     }
 
     add_text (input_def, FormParent, NamePrefix){
-
+ 
         input_def.id = this.uid()
  
         const input = document.createElement('input')
@@ -1615,7 +1739,11 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         FileManu.className = 'multi-selectbox'
         FileManu.style.width = '100%'
 
-        FileManu['data-file'] = { "values": [], "batch":"false"}
+        if (input_def.type == 'data_collection'){
+            FileManu['data-file'] = { "values": [], "batch":"true"}
+        } else{
+            FileManu['data-file'] = { "values": [], "batch":"false"}
+        }
 
         var Select = document.createElement('select')
         Select.className = 'InputDataFile'
@@ -1651,7 +1779,10 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             } 
         }))
 
-        FileManu.append(sim)
+        if (input_def.typ != 'data_collection') {
+            FileManu.append(sim)
+        } 
+
         Select.name = NamePrefix+input_def['name']
 
         var options = input_def.options
@@ -1697,6 +1828,34 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         row.append(input_file_type)
         // row.append(FileManu)
         row.append(help)
+
+        console.log(options)
+
+        if (input_def.type == 'data_collection'){
+
+            for (var i = 0; i < options['hdca'].length; i++) {
+                const el = document.createElement("option");
+                if (input_def['options']['hdca'].length !== 0) {
+                    el.textContent = options['hdca'][i].hid+': '+options['hdca'][i].name;
+                    delete options['hdca'][i].keep
+                    // el.value =JSON.stringify( {'id': options['hda'][i]['id'], "src": options['hda'][i]['src'] })   
+                    el.data = options['hdca'][i] 
+                }
+                Select.appendChild(el);
+            }
+
+        } else {
+            for (var i = 0; i < options['hda'].length; i++) {
+                const el = document.createElement("option");
+                if (input_def['options']['hda'].length !== 0) {
+                    el.textContent = options['hda'][i].hid+': '+options['hda'][i].name;
+                    delete options['hda'][i].keep
+                    // el.value =JSON.stringify( {'id': options['hda'][i]['id'], "src": options['hda'][i]['src'] })   
+                    el.data = options['hda'][i] 
+                }
+                Select.appendChild(el);
+            }
+        }
 
         for (var i = 0; i < options['hda'].length; i++) {
             const el = document.createElement("option");
@@ -2972,6 +3131,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
     }
     
     async AddJobStatusWidget(inputs, history_id){
+
+        console.log(inputs)
 
         //To Do: Multiple job status color
 
