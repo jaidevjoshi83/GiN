@@ -12,6 +12,7 @@ from nbtools import UIBuilder
 
 log = logging.getLogger(__name__)
 
+import json
 try:
     from genepattern import authwidget
 except:
