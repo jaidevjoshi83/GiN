@@ -66,7 +66,7 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
 
         a = GiN.sessions.SessionList()
         gi1 = a.get(server=gal_instance["url"])
-        tool_inputs = json5.loads(tool_inputs)
+        # tool_inputs = json5.loads(tool_inputs)
 
         new_inputs = GalaxyTaskWidget.RefinedInputs(tool_inputs, gi1)
 
@@ -169,28 +169,11 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
         python_side=False,
         input_data_param=False,
     ):
+
         a = GiN.sessions.SessionList()
         gi6 = a.get(server=server)
 
         if (tool_inputs) and (tool_id):
-            # Tool_inputs = {
-            #             "input1": [
-            #                 {
-            #                 "id": "f9cad7b01a4721354c1067e5bc96aecd",
-            #                 "hid": 1,
-            #                 "name": "UCSC Main on Human: knownGene (chr21:1-48,129,895)",
-            #                 "tags": [],
-            #                 "src": "hda"
-            #                 }
-            #             ],
-            #             "maf_source_type|maf_source": "cached",
-            #             "maf_source_type|mafFile": [],
-            #             "maf_source_type|mafType": "100_WAY_MULTIZ_v2_hg19",
-            #             "split_blocks_by_species_selector|split_blocks_by_species": "dont_split_blocks_by_species",
-            #             "split_blocks_by_species_selector|remove_all_gap_columns": "remove_all_gap_columns"
-            #     }
-
-            print(tool_inputs)
 
             inputs = gi6.tools.gi.tools.build(
                 tool_id=tool_id, inputs=tool_inputs, history_id=history_id

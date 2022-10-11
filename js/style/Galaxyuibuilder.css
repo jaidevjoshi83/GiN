@@ -484,19 +484,17 @@ select#History_IDs.InputData{
 }
 
 .job-details-icon{
-  width: 100%;
-  height: 100%;
+  width: 95%;
+  height: 95%;
 }
 
 .rbtni{
   border: hsl(240, 4%, 22%);
 }
 
-
 .job-status-footer{
   background: hsl(240, 4%, 22%);
 }
-
 
 .footer-txt{
   margin-left: 12px;
