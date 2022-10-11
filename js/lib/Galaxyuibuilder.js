@@ -1729,8 +1729,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
     add_input_data(input_def, FormParent, NamePrefix, call_back_data={}){ 
 
-        console.log(input_def)
-
         input_def.id = this.uid()
         var self = this
         const row = document.createElement('div')
@@ -1831,7 +1829,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         // row.append(FileManu)
         row.append(help)
 
-        console.log(options)
 
         if (input_def.type == 'data_collection'){
 
@@ -3180,112 +3177,68 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             console.log(ok_details_html.querySelector('.download-btn.icon-btn')['href'])
         });
     }
-    
-    async AddJobStatusWidget(inputs, history_id){
 
-        //To Do: Multiple job status color
-
-        console.log(inputs)
-
-        this.JobStatusTemplate(history_id)
-        this.hide_run_buttons(true)
-
-        var jobs  = await KernelSideDataObjects(`from GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.submit_job(gal_instance=${JSON.stringify(this.model.get('gal_instance'))}, tool_inputs=${JSON.stringify(inputs)}, history_id=${JSON.stringify(history_id)})`)
-    
-        var data_list_div = this.el.querySelector('.history-dataset-list');
-        var e = this.el.querySelector('.list-item')
-        e.parentElement.removeChild(e)
-        data_list_div.append(await this.data_row_list(this.model.get('gal_instance')['url'], history_id))
-
-        var hl = this.el.querySelector('#dataset-history-list')
-
-        for (var i = 0; i <  hl.options.length; i++ ){
-            if (hl[i].value == history_id) {
-                hl.selectedIndex = i
-            }
-        }
-
-        for(var n = 0; n < jobs['jobs'].length; n++){
-            var job  = await KernelSideDataObjects(`from GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.show_job(gal_instance=${JSON.stringify(this.model.get('gal_instance'))}, job_id=${JSON.stringify(jobs["jobs"][n]["id"])})`)
-            var out_file_name = this.el.querySelector('.job-output-files')
-
-            var usr_email = this.model.get('gal_instance')['email_ID']
-
-            this.el.querySelector('.job-id').innerText = 'Job ID : '+ job['id']
-            this.el.querySelector('.job-detail-text-name').innerText = 'Submitted by : '+ usr_email+' on '+ job['update_time']  
-
-            out_file_name.append(await this.input_output_file_name(job))
-            await this.input_output_file_status_update(job)
-        } 
-    }
-
-    JobStatusTemplate (history_id){
+    JobStatusTemplate (job){
 
         var self = this
 
-        var job_status = `<div class="form">    
-                        <div class="job-status-widget">
-
+        var job_status = `<div class="job-status-widget">
                             <div class="job-header">
                                 <div class="indicator">
-
                                     <div class="gear-rotate-icon">
                                         <div class="gear-rotate">
                                         </div>
                                     </div>
-
-                                    <div class=job-done-icon>
-                                        <i class="fa fa-check-circle"></i>
+                                    <div class="job-done-icon">
+                                        <i class="fa fa-check-circle"> </i>
                                     </div>
-
-                                    <div class=job-error-icon>
+                                    <div class="job-error-icon">
                                         <i class="fa fa-times-circle"></i>
                                     </div>
-
                                 </div>
-
                                 <div class="job-done-text">
                                     <div class="job-state-text">
-                                        
+                                        Job queued                                        
                                     </div>
                                 </div> 
                                 
-                                <div class=job-status>
+                                <div class="job-status">
                                     <div class="job-id">
                                         Job ID : 934928374hf
                                     </div>
                                 </div>
 
-                                <div class="tool-form-reset">
-                                    <button class="rbtn" style="display: none"><i class="fa fa-refresh"></i></button>
+                                <div class="job-details">
+                                    <div class="job-details-icon">
+                                       <button class="rbtni" style=" background: hsl(240, 4%, 22%);" title="Job details"><i class="fa fa-info-circle" style="size:40px; font-size: 29px; color: white" aria-hidden="true" title="Job details"></i></button>
+                                    </div>
                                 </div>
-                                
+
+                                <div class="tool-form-reset">
+                                    <button class="rbtn" style="display: none" title="Reset tool form"><i class="fa fa-refresh"></i></button>
+                                </div>
                             </div>
 
-                            <div class="job-output-files">
+                            <div class="job-output-files" style="display: none">
  
                             </div>
 
-                            <div class="job-footer">
-                                <div class=job-details>
-                                    <div class="job-detail-text-name">
-                                    </div>
-                                </div>
+                            <div class="job-status-footer" style="width:100%; height: 32px;" >
+                                <p class="footer-txt" style="color; white;font-size:18;" >
+                                </p>
                             </div>
-                        </div>
-                    </div>`
 
-            const job = new DOMParser().parseFromString(job_status, 'text/html').querySelector('.job-status-widget')
+                         </div>`
+
+            const template = new DOMParser().parseFromString(job_status, 'text/html').querySelector('.job-status-widget')
+            template.style.margin = '20px'
+            template.querySelector('.footer-txt').innerText = `Job: ${job['id']} submitted by: ${this.model.get('gal_instance')['email_ID']} at ${job['create_time']}`
 
             var tool_form = this.el.querySelector('.tool-forms')
 
-            this.el.querySelector('.Galaxy-form').style.display = 'none'
-            this.el.querySelector('.galaxy-history-list').style.display = 'none'
+            var BTN = template.querySelector('.rbtn')
 
-            tool_form.style.backgroundColor = 'white'
-            tool_form.append(job)
-
-            var BTN = this.el.querySelector('.rbtn')
+            template.querySelector('.job-id').innerText = `Job ID: ${job['id']}`
 
             BTN.addEventListener('click', async (e) => {
 
@@ -3293,13 +3246,35 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
                 self.el.querySelector('.Galaxy-form').style.display = 'block'
                 self.el.querySelector('.galaxy-history-list').style.display = 'block'
-    
-                job.parentElement.removeChild(job)
+
+                var nodes = self.el.querySelectorAll('.job-status-widget')
+
+                for (var i = 0; i < nodes.length; i++) {
+                    nodes[i].parentElement.removeChild(nodes[i])
+                }
+
                 self.hide_run_buttons()
             } );
+        
+            var BTNI = template.querySelector('.rbtni')
+
+            BTNI.addEventListener('click', (e) => {
+
+                if (template.querySelector('.job-output-files').style.display == 'block') {
+                    template.querySelector('.job-output-files').style.display = 'none'
+                } else{
+                    template.querySelector('.job-output-files').style.display = 'block'
+                }
+            })
+             
+            this.input_output_file_name(template.querySelector('.job-output-files'), job)
+            this.input_output_file_status_update(template, job)
+
+            
+        return template
     }
 
-    async input_output_file_name (job){
+    async input_output_file_name (parent, job){
 
         var Table = `<div id ="${job['id']}" class="donemessagelarge">
                         <p> Executed <b>${this.model.get('gal_instance')['tool_name']}</b> and successfully added 1 job to the queue. </p>
@@ -3323,8 +3298,10 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         var states = ['ok', 'error']
 
-        for (var j =0; j < Object.keys(job['inputs']).length; j++){
-            var show_dataset = await KernelSideDataObjects(`from GiN.taskwidget  import GalaxyTaskWidget\nGalaxyTaskWidget.show_data_set(server=${JSON.stringify(this.model.get('gal_instance')['url'])}, dataset_id=${JSON.stringify(job['inputs'][Object.keys(job['inputs'])[j]]['id'])} )`) 
+        var jb  = await KernelSideDataObjects(`from GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.show_job(gal_instance=${JSON.stringify(this.model.get('gal_instance'))}, job_id=${JSON.stringify(job["id"])})`)
+
+        for (var j =0; j < Object.keys(jb['inputs']).length; j++){
+            var show_dataset = await KernelSideDataObjects(`from GiN.taskwidget  import GalaxyTaskWidget\nGalaxyTaskWidget.show_data_set(server=${JSON.stringify(this.model.get('gal_instance')['url'])}, dataset_id=${JSON.stringify(jb['inputs'][Object.keys(jb['inputs'])[j]]['id'])} )`) 
             var ili  = document.createElement('li')
             var ib = document.createElement('b')
             ib.innerText = `${show_dataset['name']}`
@@ -3332,77 +3309,73 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             inputs.append(ili)
         }
 
-        for (var k =0; k < Object.keys(job['outputs']).length; k++){
+        for (var k =0; k < Object.keys(jb['outputs']).length; k++){
             var oli  = document.createElement('li')
             var ob = document.createElement('b')
-            var show_dataset = await KernelSideDataObjects(`from GiN.taskwidget  import GalaxyTaskWidget\nGalaxyTaskWidget.show_data_set(server=${JSON.stringify(this.model.get('gal_instance')['url'])}, dataset_id=${JSON.stringify(job['outputs'][Object.keys(job['outputs'])[k]]['id'])} )`) 
+            var show_dataset = await KernelSideDataObjects(`from GiN.taskwidget  import GalaxyTaskWidget\nGalaxyTaskWidget.show_data_set(server=${JSON.stringify(this.model.get('gal_instance')['url'])}, dataset_id=${JSON.stringify(jb['outputs'][Object.keys(jb['outputs'])[k]]['id'])} )`) 
             ob.innerText =  `${show_dataset['name']}`
             oli.append(ob)
             outputs.append(oli)
         }
 
-        return JobPanel
+        parent.append(JobPanel)
     }
 
 
-    async input_output_file_status_update(job){
+    async input_output_file_status_update(parent, job){
 
         var states = ['ok', 'error']
 
         for (let i = 0; i < Infinity; ++i) {
-            // console.log(job)
 
             var job  = await KernelSideDataObjects(`from GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.show_job(gal_instance=${JSON.stringify(this.model.get('gal_instance'))}, job_id=${JSON.stringify(job['id'])})`)
-              
             var job_state = job['state']
 
             if (job_state=='running'){
          
-                var gear_rotate = this.el.querySelector('.gear-rotate-icon')
+                var gear_rotate = parent.querySelector('.gear-rotate-icon')
                 gear_rotate.style.display = 'block'
-                var job_done_text = this.el.querySelector(".job-state-text")
+                var job_done_text = parent.querySelector(".job-state-text")
                 job_done_text.innerText = 'Job Running'
                 job_done_text.style.color = '#F5A207'
-                var StdError  = this.el.querySelector('.donemessagelarge')
+                var StdError  = parent.querySelector('.donemessagelarge')
                 StdError.style.background = '#ffe6cd'
             } 
 
-            else if (['queued', 'new'].includes(job_state)) {
+            // else if (['queued', 'new'].includes(job_state)) {
              
-                var job_done_text = this.el.querySelector(".job-state-text")
+            //     var job_done_text = parent.querySelector(".job-state-text")
 
-                console.log(job_done_text)
+            //     job_done_text.innerText = 'Job queued'
 
-                job_done_text.innerText = 'Job queued'
-
-                var StdError  = this.el.querySelector('.donemessagelarge')
-                StdError.style.background = '#7d959d70'
-            } 
+            //     var StdError  = parent.querySelector('.donemessagelarge')
+            //     StdError.style.background = '#7d959d70'
+            // } 
 
             else if (job_state == 'ok'){
                
-                this.el.querySelector('.rbtn').style.display = 'block'
-                var StdError  = this.el.querySelector('.donemessagelarge')
+                parent.querySelector('.rbtn').style.display = 'block'
+                var StdError  = parent.querySelector('.donemessagelarge')
                 StdError.style.background = '#c2ebc2'               
-                var job_done_text = this.el.querySelector(".job-state-text")
+                var job_done_text = parent.querySelector(".job-state-text")
                 job_done_text.innerText = 'Job complete'
-                var gear_rotate = this.el.querySelector('.gear-rotate-icon')
+                var gear_rotate = parent.querySelector('.gear-rotate-icon')
                 gear_rotate.style.display = 'none'
-                var gear_rotate = this.el.querySelector('.job-done-icon')
+                var gear_rotate = parent.querySelector('.job-done-icon')
                 gear_rotate.style.display = 'block'
             } 
 
             else if (job_state == 'error'){
            
-                this.el.querySelector('.rbtn').style.display = 'block'
-                var job_done_text = this.el.querySelector(".job-state-text")
+                parent.querySelector('.rbtn').style.display = 'block'
+                var job_done_text = parent.querySelector(".job-state-text")
                 job_done_text.innerText = 'Fatal Error'
                 job_done_text.style.color = 'white'
-                var gear_rotate = this.el.querySelector('.gear-rotate-icon')
+                var gear_rotate = parent.querySelector('.gear-rotate-icon')
                 gear_rotate.style.display = 'none'
-                var gear_rotate = this.el.querySelector('.job-error-icon')
+                var gear_rotate = parent.querySelector('.job-error-icon')
                 gear_rotate.style.display = 'block'
-                var StdError  = this.el.querySelector('.donemessagelarge')
+                var StdError  = parent.querySelector('.donemessagelarge')
                 StdError.style.background = '#f4a3a5'
             }
 
@@ -3412,11 +3385,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 break;
             }      
         }
-
     }
-
-
-
 
     async dataset_collection_list_item (show_dataset){
 
@@ -3611,9 +3580,40 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         if (this.model.get('inputs')['id'] == 'GiN_data_upload_tool') {
             this.dataupload_job()
         } else {
-            this.AddJobStatusWidget(inputs, history_id)
+            // this.AddJobStatusWidget(inputs, history_id)
+           this.SubmitJob(inputs, history_id)
         }
         }));
+    }
+
+    async SubmitJob(inputs, history_id){
+
+        var toolforms = this.el.querySelector('.tool-forms')
+ 
+        var hl = this.el.querySelector('#dataset-history-list')
+
+        for (var i = 0; i <  hl.options.length; i++ ){
+            if (hl[i].value == history_id) {
+                hl.selectedIndex = i
+            }
+        }
+   
+        var jobs  = await KernelSideDataObjects(`from GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.submit_job(gal_instance=${JSON.stringify(this.model.get('gal_instance'))}, tool_inputs=${JSON.stringify(inputs)}, history_id=${JSON.stringify(history_id)})`)
+       
+       
+        var data_list_div = this.el.querySelector('.history-dataset-list');
+        var e = this.el.querySelector('.list-item')
+        e.parentElement.removeChild(e)
+
+        data_list_div.append(await this.data_row_list(this.model.get('gal_instance')['url'], history_id))
+    
+
+        this.el.querySelector('.Galaxy-form').style.display = 'none'
+        this.el.querySelector('.galaxy-history-list').style.display = 'none'
+
+        for (var i = 0; i < jobs['jobs'].length; i++ ) {
+            toolforms.append(this.JobStatusTemplate(jobs['jobs'][i]))
+        }
     }
 
     hide_run_buttons (hide){

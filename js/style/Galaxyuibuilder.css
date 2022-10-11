@@ -248,15 +248,13 @@ width: 350px;
   
   .job-status-widget{
     background: hsl(0, 4%, 66%);
-    width: 100%;
-    height: 290px;
-
+    width: 90%;
   }
   
   .job-header{
     width: 100%;
-    height: 30px;
-    height: 30px;
+    height: 31px;
+    background: hsl(240, 4%, 22%);
   }
   
   .indicator{
@@ -268,7 +266,7 @@ width: 350px;
   
   .job-status{
     background: hsl(240, 4%, 22%);
-    width: 75%;
+    width: 70%;
     float: left;
     height: 30px;
   }
@@ -279,7 +277,6 @@ width: 350px;
     float: right;
     height: 30px;
   }
-  
   
   .rerun-button{
   
@@ -472,4 +469,37 @@ select#History_IDs.InputData{
 .tablinks:hover{
   background-color: rgb(54,52,71);
   color: white;
+}
+
+
+.job-output-files{
+  height: 200px;
+}
+
+.job-details{
+  width: 5%;
+  height: 30px;
+  float: left;
+  background: hsl(240, 4%, 22%);
+}
+
+.job-details-icon{
+  width: 100%;
+  height: 100%;
+}
+
+.rbtni{
+  border: hsl(240, 4%, 22%);
+}
+
+
+.job-status-footer{
+  background: hsl(240, 4%, 22%);
+}
+
+
+.footer-txt{
+  margin-left: 12px;
+  color: #e37434;
+  font-size: 20px;
 }
