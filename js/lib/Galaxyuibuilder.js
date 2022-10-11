@@ -461,7 +461,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
                 self.removeAllChildNodes(form_parent)
                 self.form_builder(refine_inputs['inputs'])
-
             }
 
         });
@@ -2166,9 +2165,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
     
                     self.removeAllChildNodes(form_parent)
                     self.form_builder(refine_inputs['inputs'])
-    
                 }
-
             });
         }
         FormParent.append(row)
@@ -3149,8 +3146,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                             <div class="job-header">
                                 <div class="indicator">
                                     <div class="gear-rotate-icon">
-                                        <div class="gear-rotate">
-                                        </div>
+                                        <i class="fas fa-cog fa-spin" ></i>
                                     </div>
                                     <div class="job-done-icon">
                                         <i class="fa fa-check-circle"> </i>
@@ -3171,14 +3167,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                                     </div>
                                 </div>
 
-                                <div class="job-details">
-                                    <div class="job-details-icon">
-                                       <button class="rbtni" style=" background: hsl(240, 4%, 22%);" title="Job details"><i class="fa fa-info-circle" style="size:40px; font-size: 29px; color: white" aria-hidden="true" title="Job details"></i></button>
-                                    </div>
-                                </div>
-
-                                <div class="tool-form-reset">
-                                    <button class="rbtn" style="display: none" title="Reset tool form"><i class="fa fa-refresh"></i></button>
+                                <div class="job-status-buttons" style="margin-top:2px; float:right;" >
+                                    <a class="icon-btn display-btn" title=""  data-original-title="View data"><span class="fas fa-eye" style="" title="View job details" ></span></a><a class="icon-btn display-btn" title=""  data-original-title="View data"><span class="fa fa-refresh" style="" title="Reset tool form" ></span></a>
                                 </div>
                             </div>
 
@@ -3187,7 +3177,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                             </div>
 
                             <div class="job-status-footer" style="width:100%; height: 32px;" >
-                                <p class="footer-txt" style="color; white;font-size:18;" >
+                                <p class="footer-txt" style="color; white" >
                                 </p>
                             </div>
 
@@ -3195,11 +3185,11 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
             const template = new DOMParser().parseFromString(job_status, 'text/html').querySelector('.job-status-widget')
             template.style.margin = '20px'
-            template.querySelector('.footer-txt').innerText = `Job: ${job['id']} submitted by: ${this.model.get('gal_instance')['email_ID']} at ${job['create_time']}`
+            template.querySelector('.footer-txt').innerHTML = `Job: <b> ${job['id']}</b> submitted by: <b> ${this.model.get('gal_instance')['email_ID']}</b> on <b>${job['create_time'].split('T')[0]}</b> at <b>${job['create_time'].split('T')[1].split('.')[0]} </b>`
 
             var tool_form = this.el.querySelector('.tool-forms')
 
-            var BTN = template.querySelector('.rbtn')
+            var BTN = template.querySelector('.fa.fa-refresh')
 
             template.querySelector('.job-id').innerText = `Job ID: ${job['id']}`
 
@@ -3215,11 +3205,10 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 for (var i = 0; i < nodes.length; i++) {
                     nodes[i].parentElement.removeChild(nodes[i])
                 }
-
                 self.hide_run_buttons()
             } );
         
-            var BTNI = template.querySelector('.rbtni')
+            var BTNI = template.querySelector('.fas.fa-eye')
 
             BTNI.addEventListener('click', (e) => {
 
@@ -3295,7 +3284,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             var job_state = job['state']
 
             if (job_state=='running'){
-         
                 var gear_rotate = parent.querySelector('.gear-rotate-icon')
                 gear_rotate.style.display = 'block'
                 var job_done_text = parent.querySelector(".job-state-text")
@@ -3306,8 +3294,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             } 
 
             else if (['queued', 'new'].includes(job_state)) {
-
-                console.log(parent)
                 var job_done_text = parent.querySelector(".job-state-text")
                 job_done_text.innerText = 'Job queued'
                 var StdError  = parent.querySelector('.donemessagelarge')
@@ -3315,8 +3301,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             } 
 
             else if (job_state == 'ok'){
-               
-                parent.querySelector('.rbtn').style.display = 'block'
                 var StdError  = parent.querySelector('.donemessagelarge')
                 StdError.style.background = '#c2ebc2'               
                 var job_done_text = parent.querySelector(".job-state-text")
@@ -3328,8 +3312,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             } 
 
             else if (job_state == 'error'){
-           
-                parent.querySelector('.rbtn').style.display = 'block'
+                // parent.querySelector('.rbtn').style.display = 'block'
                 var job_done_text = parent.querySelector(".job-state-text")
                 job_done_text.innerText = 'Fatal Error'
                 job_done_text.style.color = 'white'
@@ -3357,7 +3340,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         var list_item = `<div id="dataset-${show_dataset['id']}" class="list-item dataset state-${show_dataset['populated_state']}" >
 
                             <div class="warnings">
-                          
                             </div>
 
                             <div class="selector">
@@ -3373,18 +3355,10 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                                 <div class="details" style="display: none;">
                                     <h1> jai </h1>
                                 </div>
-
                             </div>
                         </div>`
       
         const row = new DOMParser().parseFromString(list_item, 'text/html').querySelector('.list-item.dataset.state-ok')
-
-
-        for (var i = 0; i < show_dataset.object.elements.length; i++){
-
-          console.log('ok')
-
-        }
 
         var line = `<div id="dataset-${dataset['dataset_id']}" class="list-item dataset history-content state-running" style="display: none;">
                         <div class="warnings"></div>
