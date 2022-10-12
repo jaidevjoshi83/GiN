@@ -1596,8 +1596,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         helpSpan.className = "ui-form-help-text"
         helpSpan.textContent = input_def['help']
         helpSpan.style.display = 'inline'
-        help.style.marginBottom = '10px'
         help.append( helpSpan)
+        help.style.marginBottom = '10px'
         help.style.margin = '10px'
 
         row.className = 'ui-repeat section-row'
@@ -1738,18 +1738,12 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         FileManu.className = 'multi-selectbox'
         FileManu.style.width = '100%'
 
-        // if (input_def.type == 'data_collection'){
-        //     FileManu['data-file'] = { "values": [], "batch":"true"}
-        // } else{
-         FileManu['data-file'] = { "values": [], "batch":false}
-        // }
+        FileManu['data-file'] = { "values": [], "batch":false}
 
         var Select = document.createElement('select')
         Select.className = 'InputDataFile'
 
-        Select.style.width = '85%'
-
-        var select_input_mode = `<div class="ui-radiobutton" style="display: inline-block;">
+        var select_input_mode = `<div class="ui-radiobutton" >
                                     <label id="data-file-input" role="button" class="ui-option" data-original-title="" title=""><i class="fa fa-file-o no-padding"></i><input type="radio" name="uid-64" value="0" style="display: none;" /></label>
                                     <label id="batch-file-input" role="button" class="ui-option" data-original-title="" title=""><i class="fa fa-files-o no-padding"></i><input type="radio" name="uid-64" value="1" style="display: none;" /></label>
                                     <label id="collection-data-input" role="button" class="ui-option" data-original-title="" title=""><i class="fa fa-folder-o no-padding"></i><input type="radio" name="uid-64" value="2" style="display: none;" /></label>
@@ -1778,9 +1772,12 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             } 
         }))
 
-        if (input_def.typ != 'data_collection') {
+        if (input_def.type != 'data_collection') {
+            Select.style.width = '100%'
             FileManu.append(sim)
-        } 
+        } else{
+            
+        }
 
         Select.name = NamePrefix+input_def['name']
 
@@ -1807,27 +1804,13 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         help.style.marginLeft = '10px'
         help.append( helpSpan)
 
-        const input_file_type = document.createElement('div')
-        input_file_type.className = 'input-file-type'
-
-        input_file_type.innerHTML = `<div class='fi' style="float: left; display: none" > <a><span class="fa fa-sitemap" style="" title="Send data to available tools"></span></a> </div>`
-
-        const ts = document.createElement('span')
-        ts.className = "ui-form-title-text"
-        ts.textContent = ''
-        ts.style.marginLeft = '10px'
-
-        input_file_type.append(ts)
-
         FileManu.append(Select)
         FileManu.style.width = '100%'
 
         row.append(title)
         row.append(FileManu)
-        row.append(input_file_type)
-        // row.append(FileManu)
-        row.append(help)
 
+        row.append(help)
 
         if (input_def.type == 'data_collection'){
 
@@ -1868,11 +1851,11 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         sim.querySelector('#data-file-input').addEventListener('click', (e) => {
 
-            ts.textContent = ''
+            // ts.textContent = ''
 
-            input_file_type.querySelector('.fi').style.display = 'none'
+            // input_file_type.querySelector('.fi').style.display = 'none'
 
-            FileManu['data-file']['batch'] = 'false'
+            FileManu['data-file']['batch'] = false
             Select.multiple = false
 
             self.removeAllChildNodes(Select)
@@ -1891,11 +1874,11 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         sim.querySelector('#batch-file-input').addEventListener('click', (e) => {
 
-            input_file_type.querySelector('.fi').style.display = 'block'
+            // input_file_type.querySelector('.fi').style.display = 'block'
 
-            ts.textContent = 'This is a batch mode input field. Separate jobs will be triggered for each dataset selection.'
+            // ts.textContent = 'This is a batch mode input field. Separate jobs will be triggered for each dataset selection.'
 
-            FileManu['data-file']['batch'] = 'true'
+            FileManu['data-file']['batch'] = true
             Select.multiple = true
 
             self.removeAllChildNodes(Select)
@@ -1914,13 +1897,9 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         sim.querySelector('#collection-data-input').addEventListener('click', (e) => {
 
-            ts.textContent = 'This is a batch mode input field. Separate jobs will be triggered for each dataset selection.' 
-
-            input_file_type.querySelector('.fi').style.display = 'block'
-
             Select.multiple = false
 
-            FileManu['data-file']['batch'] = 'true'
+            FileManu['data-file']['batch'] = true
 
             self.removeAllChildNodes(Select)
 
@@ -2412,7 +2391,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                         <div class="warnings"></div>
                         <div class="selector"><span class="fa fa-2x fa-square-o"></span></div>
                         <div class="primary-actions">
-                            <a class="icon-btn delete-btn" title="" href="javascript:void(0);" data-original-title="Delete"><span class="fa fa-times" style=""></span></a><a><span class="icon-btn fa fa-exchange" style="" title="Send data to available tools"></span></a>
+                            <a class="icon-btn delete-btn" title="" href="javascript:void(0);" data-original-title="Delete"><span class="fa fa-times" style=""></span></a>
                         </div>
                         <div class="title-bar clear"  tabindex="0" draggable="true" ondragstart="event.dataTransfer.setData('text/plain',null) > 
                             <span class="state-icon"></span>
@@ -3138,7 +3117,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         });
     }
 
-    JobStatusTemplate (job){
+    async JobStatusTemplate (parent, job){
 
         var self = this
 
@@ -3183,47 +3162,88 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
                          </div>`
 
-            const template = new DOMParser().parseFromString(job_status, 'text/html').querySelector('.job-status-widget')
-            template.style.margin = '20px'
-            template.querySelector('.footer-txt').innerHTML = `Job: <b> ${job['id']}</b> submitted by: <b> ${this.model.get('gal_instance')['email_ID']}</b> on <b>${job['create_time'].split('T')[0]}</b> at <b>${job['create_time'].split('T')[1].split('.')[0]} </b>`
+        const template = new DOMParser().parseFromString(job_status, 'text/html').querySelector('.job-status-widget')
+        template.style.margin = '20px'
+        template.querySelector('.footer-txt').innerHTML = `Job: <b> ${job['id']}</b> submitted by: <b> ${this.model.get('gal_instance')['email_ID']}</b> on <b>${job['create_time'].split('T')[0]}</b> at <b>${job['create_time'].split('T')[1].split('.')[0]} </b>`
 
-            var tool_form = this.el.querySelector('.tool-forms')
+        var tool_form = this.el.querySelector('.tool-forms')
 
-            var BTN = template.querySelector('.fa.fa-refresh')
+        var BTN = template.querySelector('.fa.fa-refresh')
 
-            template.querySelector('.job-id').innerText = `Job ID: ${job['id']}`
+        template.querySelector('.job-id').innerText = `Job ID: ${job['id']}`
 
-            BTN.addEventListener('click', async (e) => {
+        BTN.addEventListener('click', async (e) => {
 
-                tool_form.style.backgroundColor = 'rgb(246,246,246)'
+            tool_form.style.backgroundColor = 'rgb(246,246,246)'
 
-                self.el.querySelector('.Galaxy-form').style.display = 'block'
-                self.el.querySelector('.galaxy-history-list').style.display = 'block'
+            self.el.querySelector('.Galaxy-form').style.display = 'block'
+            self.el.querySelector('.galaxy-history-list').style.display = 'block'
 
-                var nodes = self.el.querySelectorAll('.job-status-widget')
+            var nodes = self.el.querySelectorAll('.job-status-widget')
 
-                for (var i = 0; i < nodes.length; i++) {
-                    nodes[i].parentElement.removeChild(nodes[i])
-                }
-                self.hide_run_buttons()
-            } );
-        
-            var BTNI = template.querySelector('.fas.fa-eye')
+            for (var i = 0; i < nodes.length; i++) {
+                nodes[i].parentElement.removeChild(nodes[i])
+            }
+            self.hide_run_buttons()
+        } );
+    
+        var BTNI = template.querySelector('.fas.fa-eye')
 
-            BTNI.addEventListener('click', (e) => {
+        BTNI.addEventListener('click', (e) => {
 
-                if (template.querySelector('.job-output-files').style.display == 'block') {
-                    template.querySelector('.job-output-files').style.display = 'none'
-                } else{
-                    template.querySelector('.job-output-files').style.display = 'block'
-                }
-            })
-             
-            this.input_output_file_name(template.querySelector('.job-output-files'), job)
-            this.input_output_file_status_update(template, job)
+            if (template.querySelector('.job-output-files').style.display == 'block') {
+                template.querySelector('.job-output-files').style.display = 'none'
+            } else{
+                template.querySelector('.job-output-files').style.display = 'block'
+            }
+        })
 
-            
-        return template
+
+        var Table = `<div id ="${job['id']}" class="donemessagelarge">
+                        <p> Executed <b>${this.model.get('gal_instance')['tool_name']}</b> and successfully added 1 job to the queue. </p>
+                        <p>The tool uses this input:</p>
+                        <ul class="inputs">
+                        </ul>
+                        <p>It produces this output:</p>
+                        <ul class=outputs>
+                        </ul> 
+
+                        <p> You can check the status of queued jobs and view the resulting data at the History panel.
+                            When the job has been run the status will change from 'Job queued', 'running' to ' Job Complete' if completed successfully or
+                        'fatal error' if problems were encountered. </p>
+                    </div>`
+
+        var JobPanel = new DOMParser().parseFromString(Table, 'text/html').querySelector('.donemessagelarge')
+
+        var inputs = JobPanel.querySelector('.inputs')
+        var outputs = JobPanel.querySelector('.outputs')
+
+        var states = ['ok', 'error']
+
+        var jb  = await KernelSideDataObjects(`from GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.show_job(gal_instance=${JSON.stringify(this.model.get('gal_instance'))}, job_id=${JSON.stringify(job["id"])})`)
+
+        for (var j =0; j < Object.keys(jb['inputs']).length; j++){
+            var show_dataset = await KernelSideDataObjects(`from GiN.taskwidget  import GalaxyTaskWidget\nGalaxyTaskWidget.show_data_set(server=${JSON.stringify(this.model.get('gal_instance')['url'])}, dataset_id=${JSON.stringify(jb['inputs'][Object.keys(jb['inputs'])[j]]['id'])} )`) 
+            var ili  = document.createElement('li')
+            var ib = document.createElement('b')
+            ib.innerText = `${show_dataset['name']}`
+            ili.append(ib)
+            inputs.append(ili)
+        }
+
+        for (var k =0; k < Object.keys(jb['outputs']).length; k++){
+            var oli  = document.createElement('li')
+            var ob = document.createElement('b')
+            var show_dataset = await KernelSideDataObjects(`from GiN.taskwidget  import GalaxyTaskWidget\nGalaxyTaskWidget.show_data_set(server=${JSON.stringify(this.model.get('gal_instance')['url'])}, dataset_id=${JSON.stringify(jb['outputs'][Object.keys(jb['outputs'])[k]]['id'])} )`) 
+            ob.innerText =  `${show_dataset['name']}`
+            oli.append(ob)
+            outputs.append(oli)
+        }
+
+        template.querySelector('.job-output-files').append(JobPanel)             
+        this.input_output_file_status_update(template, job)
+
+        parent.append(template)
     }
 
     async input_output_file_name (parent, job){
@@ -3284,11 +3304,14 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             var job_state = job['state']
 
             if (job_state=='running'){
+
                 var gear_rotate = parent.querySelector('.gear-rotate-icon')
                 gear_rotate.style.display = 'block'
+
                 var job_done_text = parent.querySelector(".job-state-text")
                 job_done_text.innerText = 'Job Running'
                 job_done_text.style.color = '#F5A207'
+
                 var StdError  = parent.querySelector('.donemessagelarge')
                 StdError.style.background = '#ffe6cd'
             } 
@@ -3296,32 +3319,40 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             else if (['queued', 'new'].includes(job_state)) {
                 var job_done_text = parent.querySelector(".job-state-text")
                 job_done_text.innerText = 'Job queued'
+
                 var StdError  = parent.querySelector('.donemessagelarge')
-                // StdError.style.background = '#7d959d70'
+                StdError.style.background = '#7d959d70'
             } 
 
             else if (job_state == 'ok'){
-                var StdError  = parent.querySelector('.donemessagelarge')
-                StdError.style.background = '#c2ebc2'               
                 var job_done_text = parent.querySelector(".job-state-text")
                 job_done_text.innerText = 'Job complete'
+
                 var gear_rotate = parent.querySelector('.gear-rotate-icon')
                 gear_rotate.style.display = 'none'
+
                 var gear_rotate = parent.querySelector('.job-done-icon')
                 gear_rotate.style.display = 'block'
+
+                var StdError  =  parent.querySelector('.donemessagelarge')
+                StdError.style.background = '#c2ebc2' 
             } 
 
             else if (job_state == 'error'){
-                // parent.querySelector('.rbtn').style.display = 'block'
+
                 var job_done_text = parent.querySelector(".job-state-text")
                 job_done_text.innerText = 'Fatal Error'
                 job_done_text.style.color = 'white'
+
                 var gear_rotate = parent.querySelector('.gear-rotate-icon')
                 gear_rotate.style.display = 'none'
+
                 var gear_rotate = parent.querySelector('.job-error-icon')
                 gear_rotate.style.display = 'block'
+
                 var StdError  = parent.querySelector('.donemessagelarge')
                 StdError.style.background = '#f4a3a5'
+
             }
 
             await this.waitforme(3000);
@@ -3384,8 +3415,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                     </div>`
 
         const Tbl = new DOMParser().parseFromString(row, 'text/html').querySelector('.list-item.dataset.history-content.state-error')
-
-
 
         row.querySelector('.name').addEventListener('click', async (e) => {
 
@@ -3524,10 +3553,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
     async SubmitJob(inputs, history_id){
 
-        console.log(inputs)
-
-        var toolforms = this.el.querySelector('.tool-forms')
- 
+        var toolforms = this.el.querySelector('.tool-forms') 
         var hl = this.el.querySelector('#dataset-history-list')
 
         for (var i = 0; i <  hl.options.length; i++ ){
@@ -3538,19 +3564,18 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
    
         var jobs  = await KernelSideDataObjects(`from GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.submit_job(gal_instance=${JSON.stringify(this.model.get('gal_instance'))}, tool_inputs=json.loads('${JSON.stringify(inputs)}'), history_id=${JSON.stringify(history_id)})`)
        
+        for (var i = 0; i < jobs['jobs'].length; i++ ) {
+            this.JobStatusTemplate(toolforms, jobs['jobs'][i])
+        }
+
         var data_list_div = this.el.querySelector('.history-dataset-list');
         var e = this.el.querySelector('.list-item')
         e.parentElement.removeChild(e)
 
         data_list_div.append(await this.data_row_list(this.model.get('gal_instance')['url'], history_id))
     
-
         this.el.querySelector('.Galaxy-form').style.display = 'none'
         this.el.querySelector('.galaxy-history-list').style.display = 'none'
-
-        for (var i = 0; i < jobs['jobs'].length; i++ ) {
-            toolforms.append(this.JobStatusTemplate(jobs['jobs'][i]))
-        }
     }
 
     hide_run_buttons (hide){
@@ -3569,7 +3594,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         var url = this.model.get('gal_instance')['url']
         var apps1 = data['display_apps']
         var apps2 = data['display_types']
-        // var data = apps1.concat(apps2)
+
         var data = []
 
         for (var i = 0; i < data.length; i++){
