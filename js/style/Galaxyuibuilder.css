@@ -154,36 +154,35 @@ width: 350px;
 
 .job-header{
   width: 100%;
-  height: 31px;
-  background: hsl(240, 4%, 22%);
+  height: 34px;
+  /* background: hsl(240, 56%, 23%); */
+  background: #2c3143;
 }
 
 .indicator{
-  background: hsl(240, 4%, 22%);
+  /* background: hsl(240, 4%, 22%); */
   float: left;
   width: 5%;
-  height: 30px;
+  height: 32px;
 }
 
 .job-status{
-  background: hsl(240, 4%, 22%);
+  /* background: hsl(240, 4%, 22%); */
   width: 74%;
   float: left;
-  height: 30px;
+  height: 32px;
 }
 
 .tool-form-reset{
-  background: hsl(240, 4%, 22%);
+  /* background: hsl(240, 4%, 22%); */
   width: 5%;
   float: right;
   height: 30px;
 }
   
 .rerun-button{
-
   height: 100%;
   width: 100%;
-
 }
 
 .job-input-files{
@@ -192,10 +191,8 @@ width: 350px;
   height: 250px;
 }
 
-
 .job-output-files{
   background: rgb(255, 255, 255);
-
   height: 90%;
   overflow-x: auto;
   overflow-y: auto;
@@ -240,7 +237,7 @@ width: 350px;
 }
 
 .job-footer{
-  background: hsl(240, 4%, 22%);
+  /* background: hsl(240, 4%, 22%); */
   width: 100%;
   height:  20px;
   float: right;
@@ -255,12 +252,12 @@ width: 350px;
 
 .job-done-text {
   text-align: center;
-  font-size: 13px;
+  font-size: 15px;
   color: #ffffff;
   display: block;
-  width: 15%;
+  width: 10%;
   float: left;
-  background: hsl(240, 4%, 22%);
+  /* background: hsl(240, 4%, 22%); */
   height: 100%;
 }
 
@@ -379,7 +376,7 @@ select#History_IDs.InputData{
   width: 5%;
   height: 30px;
   float: left;
-  background: hsl(240, 4%, 22%);
+  /* background: hsl(240, 4%, 22%); */
 }
 
 .job-details-icon{
@@ -392,7 +389,8 @@ select#History_IDs.InputData{
 }
 
 .job-status-footer{
-  background: hsl(240, 4%, 22%);
+  /* background: hsl(240, 4%, 22%); */
+  background: #2c3143
 }
 
 .footer-txt{
@@ -408,10 +406,10 @@ select#History_IDs.InputData{
 }
 
 .job-status{
-  background: hsl(240, 4%, 22%);
+  /* background: hsl(240, 4%, 22%); */
   /* width: 74%; */
   float: left;
-  height: 30px;
+  height: 100%;
 }
 
 .job-status-footer {

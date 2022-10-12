@@ -1443,7 +1443,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
                 var form = self.element.querySelector('.Galaxy-form')
                 var Inputs = self.get_form_data(form)
-                var refine_inputs  = await KernelSideDataObjects(`from GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.updated_form(server=${JSON.stringify(self.model.get('gal_instance')['url'])}, tool_inputs=json.loads('${JSON.stringify(Inputs)}'), tool_id=${JSON.stringify(self.model.get('galaxy_tool_id'))}, history_id=${JSON.stringify(select.value)})`)
+                var refine_inputs  = await KernelSideDataObjects(`import json\nfrom GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.updated_form(server=${JSON.stringify(self.model.get('gal_instance')['url'])}, tool_inputs=json.loads('${JSON.stringify(Inputs)}'), tool_id=${JSON.stringify(self.model.get('galaxy_tool_id'))}, history_id=${JSON.stringify(select.value)})`)
                 var FormParent = self.el.querySelector('.Galaxy-form')    
                 self.removeAllChildNodes(FormParent)
                 var selected_index = {}
@@ -1501,7 +1501,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             if (this.model.get('inputs')['id'] != 'GiN_data_upload_tool') {
                 var form = self.element.querySelector('.Galaxy-form')
                 var inputs = self.get_form_data(form)
-                var refine_inputs  = await KernelSideDataObjects(`from GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.updated_form(${JSON.stringify(self.model.get('gal_instance')['url'])}, json.loads('${JSON.stringify(inputs)}'), ${JSON.stringify(self.model.get('galaxy_tool_id'))}, ${JSON.stringify(history_id)})`)
+                var refine_inputs  = await KernelSideDataObjects(`import json\nfrom GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.updated_form(${JSON.stringify(self.model.get('gal_instance')['url'])}, json.loads('${JSON.stringify(inputs)}'), ${JSON.stringify(self.model.get('galaxy_tool_id'))}, ${JSON.stringify(history_id)})`)
                 var FormParent = self.el.querySelector('.Galaxy-form')    
                 self.removeAllChildNodes(FormParent)
                 var selected_index = {}
@@ -1648,7 +1648,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 var inputs = self.get_form_data(form)
 
                 var history_id = self.el.querySelector('.galaxy-history-list').querySelector('#history_ids').value
-                var refine_inputs  = await KernelSideDataObjects(`from GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.updated_form(${JSON.stringify(self.model.get('gal_instance')['url'])}, json.loads('${JSON.stringify(inputs)}'), ${JSON.stringify(self.model.get('galaxy_tool_id'))}, ${JSON.stringify(history_id)})`)
+                var refine_inputs  = await KernelSideDataObjects(`import json\nfrom GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.updated_form(${JSON.stringify(self.model.get('gal_instance')['url'])}, json.loads('${JSON.stringify(inputs)}'), ${JSON.stringify(self.model.get('galaxy_tool_id'))}, ${JSON.stringify(history_id)})`)
     
                 var selected_index = {}
                 selected_index['HID'] = history_id    
@@ -1805,6 +1805,16 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         help.append( helpSpan)
 
         FileManu.append(Select)
+
+        const data_descriptor = document.createElement('div')
+        data_descriptor.className = 'data-descriptor-label'
+        data_descriptor.style.display = 'none'
+        data_descriptor.style.width = '100%'
+        data_descriptor.style.height = '20px'
+        data_descriptor.style.marginLeft = '10px'
+        data_descriptor.innerHTML = `<div> <i class="fa fa-sitemap"></i> This is a batch mode input field. Separate jobs will be triggered for each dataset selection.</div>`
+        FileManu.append(data_descriptor)
+
         FileManu.style.width = '100%'
 
         row.append(title)
@@ -1851,9 +1861,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         sim.querySelector('#data-file-input').addEventListener('click', (e) => {
 
-            // ts.textContent = ''
-
-            // input_file_type.querySelector('.fi').style.display = 'none'
+            FileManu.querySelector('.data-descriptor-label').style.display = 'none'
 
             FileManu['data-file']['batch'] = false
             Select.multiple = false
@@ -1874,9 +1882,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         sim.querySelector('#batch-file-input').addEventListener('click', (e) => {
 
-            // input_file_type.querySelector('.fi').style.display = 'block'
+            FileManu.querySelector('.data-descriptor-label').style.display = 'block'
 
-            // ts.textContent = 'This is a batch mode input field. Separate jobs will be triggered for each dataset selection.'
 
             FileManu['data-file']['batch'] = true
             Select.multiple = true
@@ -1896,6 +1903,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         })
 
         sim.querySelector('#collection-data-input').addEventListener('click', (e) => {
+
+            FileManu.querySelector('.data-descriptor-label').style.display = 'block'
 
             Select.multiple = false
 
@@ -1972,7 +1981,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 var children = self.el.querySelector('.Galaxy-form')
                 var inputs = self.get_form_data(children)
                 var history_id = self.el.querySelector('.galaxy-history-list').querySelector('#history_ids').value
-                var refine_inputs  = await KernelSideDataObjects(`from GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.updated_form(${JSON.stringify(self.model.get('gal_instance')['url'])}, json.loads('${JSON.stringify(inputs)}'), ${JSON.stringify(self.model.get('galaxy_tool_id'))}, ${JSON.stringify(history_id)})`)
+                var refine_inputs  = await KernelSideDataObjects(`import json\nfrom GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.updated_form(${JSON.stringify(self.model.get('gal_instance')['url'])}, json.loads('${JSON.stringify(inputs)}'), ${JSON.stringify(self.model.get('galaxy_tool_id'))}, ${JSON.stringify(history_id)})`)
                 var FormParent = self.el.querySelector('.Galaxy-form')
     
                 self.removeAllChildNodes(FormParent)
@@ -2139,7 +2148,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                     var children = self.el.querySelector('.Galaxy-form')
                     var inputs = self.get_form_data(children)
                     var history_id = self.el.querySelector('.galaxy-history-list').querySelector('#history_ids').value
-                    var refine_inputs  = await KernelSideDataObjects(`from GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.updated_form(${JSON.stringify(self.model.get('gal_instance')['url'])}, json.loads('${JSON.stringify(inputs)}'), ${JSON.stringify(self.model.get('galaxy_tool_id'))}, ${JSON.stringify(history_id)})`)
+                    var refine_inputs  = await KernelSideDataObjects(`import json\nfrom GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.updated_form(${JSON.stringify(self.model.get('gal_instance')['url'])}, json.loads('${JSON.stringify(inputs)}'), ${JSON.stringify(self.model.get('galaxy_tool_id'))}, ${JSON.stringify(history_id)})`)
                     var form_parent = self.el.querySelector('.Galaxy-form')
     
                     self.removeAllChildNodes(form_parent)
@@ -3155,7 +3164,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
  
                             </div>
 
-                            <div class="job-status-footer" style="width:100%; height: 32px;" >
+                            <div class="job-status-footer" style="width:100%; height: 10px;" >
                                 <p class="footer-txt" style="color; white" >
                                 </p>
                             </div>
@@ -3163,14 +3172,14 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                          </div>`
 
         const template = new DOMParser().parseFromString(job_status, 'text/html').querySelector('.job-status-widget')
+
         template.style.margin = '20px'
-        template.querySelector('.footer-txt').innerHTML = `Job: <b> ${job['id']}</b> submitted by: <b> ${this.model.get('gal_instance')['email_ID']}</b> on <b>${job['create_time'].split('T')[0]}</b> at <b>${job['create_time'].split('T')[1].split('.')[0]} </b>`
+        template.querySelector('.job-id').innerHTML = `Job: <b> ${job['id']}</b> submitted by: <b> ${this.model.get('gal_instance')['email_ID']}</b> on <b>${job['create_time'].split('T')[0]}</b> at <b>${job['create_time'].split('T')[1].split('.')[0]} </b>`
 
         var tool_form = this.el.querySelector('.tool-forms')
-
         var BTN = template.querySelector('.fa.fa-refresh')
 
-        template.querySelector('.job-id').innerText = `Job ID: ${job['id']}`
+        // template.querySelector('.job-id').innerText = `Job ID: ${job['id']}`
 
         BTN.addEventListener('click', async (e) => {
 
