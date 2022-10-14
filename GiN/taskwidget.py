@@ -64,6 +64,8 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
 
     def submit_job(gal_instance=None, tool_inputs=None, history_id=None):
 
+        print(tool_inputs)
+
         a = GiN.sessions.SessionList()
         gi1 = a.get(server=gal_instance["url"])
         # tool_inputs = json5.loads(tool_inputs)
