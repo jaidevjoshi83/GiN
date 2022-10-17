@@ -72,9 +72,13 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
 
         new_inputs = GalaxyTaskWidget.RefinedInputs(tool_inputs, gi1)
 
-        job = gi1.tools.gi.tools.run_tool(
-            history_id=history_id, tool_id=gal_instance["tool_id"], tool_inputs=new_inputs
-        )
+        try:
+
+            job = gi1.tools.gi.tools.run_tool(
+                history_id=history_id, tool_id=gal_instance["tool_id"], tool_inputs=new_inputs
+            )
+        except BaseException as e:
+            job = {"state": "job failed", 'error': str(e)}
 
         return IPython.display.JSON(job)
 
