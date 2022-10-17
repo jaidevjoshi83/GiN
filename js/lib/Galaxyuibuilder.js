@@ -1940,8 +1940,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                     options['hdca'][i].hid = `${options['hdca'][i].hid}`
                     el.textContent = options['hdca'][i].hid+" "+options['hdca'][i].name;
                     delete options['hdca'][i].keep
-                    // el.value =JSON.stringify( {'id': options['hda'][i]['id'], "src": options['hda'][i]['src'] })   
-                    el.data = options['hdca'][i] 
                 }
                 Select.appendChild(el);
             }
@@ -1952,13 +1950,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 if (input_def['options']['hda'].length !== 0) {
                     opt.textContent = options['hda'][i].hid+" "+options['hda'][i].name;
                     delete options['hda'][i].keep
-                    // el.value =JSON.stringify( {'id': options['hda'][i]['id'], "src": options['hda'][i]['src'] })   
-                     
-                    // if(options['hda'][i]['id'] == ''  ){
-                    //     opt.value =  null
-                    // } else{
-                    opt.value= JSON.stringify(options['hda'][i])
-                    // }
+                    opt.value = JSON.stringify(options['hda'][i])
                 }
                 Select.appendChild(opt);
             }
@@ -1981,9 +1973,9 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                     delete options['hda'][i].keep
                     // el.value =JSON.stringify( {'id': options['hda'][i]['id'], "src": options['hda'][i]['src'] })   
                     if(options['hda'][i]['id'] == ''  ){
-                        el.data = '' 
+                        el.data = JSON.stringify("") 
                     } else{
-                        el.data = options['hda'][i] 
+                        el.value = JSON.stringify(options['hda'][i])
                     }
                 }
                 Select.appendChild(el);
@@ -2006,9 +1998,9 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                     delete options['hda'][i].keep
                     // el.value =JSON.stringify( {'id': options['hda'][i]['id'], "src": options['hda'][i]['src'] })   
                     if (options['hda'][i]['id'] == ''  ){
-                        el.data = '' 
+                        el.data = JSON.stringify("") 
                     } else{
-                        el.data = options['hda'][i] 
+                        el.value = JSON.stringify(options['hda'][i])
                     }
                 }
                 Select.appendChild(el);
@@ -2098,8 +2090,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
                 var children = self.el.querySelector('.Galaxy-form')
                 var inputs = self.get_form_data(children)
-
-                console.log(inputs)
 
                 var history_id = self.el.querySelector('.galaxy-history-list').querySelector('#history_ids').value
                 var refine_inputs  = await KernelSideDataObjects(`import json\nfrom GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.updated_form(${JSON.stringify(self.model.get('gal_instance')['url'])}, json.loads('${JSON.stringify(inputs)}'), ${JSON.stringify(self.model.get('galaxy_tool_id'))}, ${JSON.stringify(history_id)})`)
@@ -3422,9 +3412,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             gear_rotate.style.display = 'block'
 
             template.querySelector('.footer-txt').innerHTML = `<b> Job failed at submission</b> for more details view job details`
-
         }
-
 
         parent.append(template)
     }
@@ -3724,8 +3712,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         var history_id = self.element.querySelector('#history_ids').value 
         var form = self.element.querySelector('.Galaxy-form')
         var inputs = this.get_form_data(form, 'on')
-
-        console.log(inputs)
 
         if (inputs == 'error'){
             return
