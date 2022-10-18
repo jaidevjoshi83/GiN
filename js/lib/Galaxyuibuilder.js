@@ -829,9 +829,11 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                                             self.galaxy_file_cache.push(new Data(e.target.data, [dataset['name'], out['name']], [dataset['id'], out['id']], dataset['extension']));
 
                                             const el = document.createElement("option");
+
+                                            console.log(out)
                                 
                                             el.textContent = dataset['name'];
-                                            el.value = out['id']
+                                            el.value = JSON.stringify({'id': out['id'], 'src':out['hda_ldda']})
                                             el.data = {'id': out['id'], 'src':out['hda_ldda']}
                                             el.selected = true
                                             el.dispatchEvent(new Event('change', { bubbles: true }))
@@ -3278,7 +3280,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                                         <i class="fa fa-check-circle"> </i>
                                     </div>
                                     <div class="job-error-icon">
-                                        <i class="fa fa-times-circle"></i>
+                                        <i class="fa fa-times-circle" style="font-size: 25px; margin-top: 5px; border-radius: 22px"></i>
                                     </div>
                                 </div>
                                 <div class="job-done-text" style="width:30%;">
