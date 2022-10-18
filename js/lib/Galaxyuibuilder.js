@@ -1186,11 +1186,14 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         var data_upload = `
                         <div class="upload_tab">
+                         
+                          <div> <select class=available-sessions> </select> </div>
                            <div class="tab">
                                 <button type="button" id="resumable_upload_button" class="tablinks" >Upload</button>
                                 <button type="button" class="tablinks">From URL</button>
                                 <button type="button" class="tablinks">Create data</button>
                            </div>
+
 
                             <!-- Tab content -->
                             <div id="upload" class="tabcontent">
@@ -1235,6 +1238,9 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 utm.querySelector('#create_data').style.display  = 'none'
             }
         }));
+
+
+        utm.querySelector('.available-sessions')
 
         var datatypes_genomes = await KernelSideDataObjects(`from GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.get_data_type_and_genomes(server=${JSON.stringify(this.model.get('gal_instance')['url'])})`)
 
@@ -1356,7 +1362,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
                 self.readFile()
                 console.log("Failed because: " + error)
-                // return
+        
             },
 
             onProgress: function(bytesUploaded, bytesTotal) {
@@ -1403,10 +1409,10 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             }
             upload.start()
         })
-        // this.el.querySelector('#inputupload').value = null
+  
     }
 
-    async readFile() {
+    readFile() {
 
         this.el.querySelector('.resumable-upload-warning').style.display = 'block'
         this.el.querySelector('.resumable-upload-warning').style.color = 'red'
@@ -1418,6 +1424,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         const reader = new FileReader();
         
         reader.onload = async () => {
+
            var out  = await KernelSideDataObjects(`from GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.CORS_fallback_upload(file_name=${JSON.stringify(file['name'])}, data=${JSON.stringify(reader.result)}, server=${JSON.stringify(this.model.get('gal_instance')['url'])}, history_id=${JSON.stringify(hi)})`);
            this.el.querySelector('#inputupload').value = null
 
@@ -1849,7 +1856,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         FileManu.className = 'multi-selectbox'
         FileManu.style.width = '100%'
 
-        // FileManu['data-file'] =  {'optional':input_def.optional, "batch":false, 'id':''}
         FileManu['data-file'] =  {"values":[], "batch":false}
 
         var Select = document.createElement('select')
@@ -1974,7 +1980,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 if (input_def['options']['hda'].length !== 0) {
                     el.textContent = options['hda'][i].hid+options['hda'][i].name;
                     delete options['hda'][i].keep
-                    // el.value =JSON.stringify( {'id': options['hda'][i]['id'], "src": options['hda'][i]['src'] })   
+ 
                     if(options['hda'][i]['id'] == ''  ){
                         el.data = JSON.stringify("") 
                     } else{
@@ -1998,8 +2004,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 const el = document.createElement("option");
                 if (input_def['options']['hda'].length !== 0) {
                     el.textContent = options['hda'][i].hid+options['hda'][i].name;
-                    delete options['hda'][i].keep
-                    // el.value =JSON.stringify( {'id': options['hda'][i]['id'], "src": options['hda'][i]['src'] })   
+                    delete options['hda'][i].keep 
                     if (options['hda'][i]['id'] == ''  ){
                         el.data = JSON.stringify("") 
                     } else{
@@ -2499,8 +2504,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
     async dataset_collection_row_state (dataset, history_id){
 
-        // var show_dataset = await KernelSideDataObjects(`from GiN.taskwidget  import GalaxyTaskWidget\nGalaxyTaskWidget.show_dataset_collection(server=${JSON.stringify(this.model.get('gal_instance')['url'])}, dataset_id=${JSON.stringify(dataset['id'])} )`)
-
         var self = this
 
         if (dataset.collection_type == "list:paired"){
@@ -2686,7 +2689,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 }
 
                 if (Tbl.querySelector('.list-items').childNodes.length > 0) {
-                    // self.removeAllChildNodes( Tbl.querySelector('.list-items'))
                 } else{
                     Tbl.querySelector('.list-items').append(await self.dataset_collection_list_item(show_dataset))
                 }
@@ -3649,7 +3651,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         })
 
         exch.addEventListener("click", async (event) =>{ 
-            // var show_dataset = await KernelSideDataObjects(`from GiN  import GalaxyTaskWidget\nGalaxyTaskWidget.show_data_set(server=${JSON.stringify(this.model.get('gal_instance')['url']['URL'])}, dataset_id=${JSON.stringify(elements['id'])} )`)
 
             if (row.querySelector('#add_data_share_menu').style.display == 'block') {
                 row.querySelector('#add_data_share_menu').style.display = 'none'
@@ -3715,16 +3716,16 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         var form = self.element.querySelector('.Galaxy-form')
         var inputs = this.get_form_data(form, 'on')
 
-        console.log(inputs)
-
         if (inputs == 'error'){
             return
         }
+
+        var toolid =  self.model.get('gal_instance')['url']+"/"+"GiN_data_upload_tool"
    
-        if (this.model.get('inputs')['id'] == 'GiN_data_upload_tool') {
+        if (this.model.get('inputs')['id'] == toolid) {
             this.dataupload_job()
         } else {
-            // this.AddJobStatusWidget(inputs, history_id)
+
            this.SubmitJob(inputs, history_id)
         }
         }));

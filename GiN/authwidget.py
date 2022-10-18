@@ -94,7 +94,7 @@ class GalaxyAuthWidget(UIBuilder):
 
         t = [
             {
-                "id": "GiN_data_upload_tool",
+                "id": server+'/GiN_data_upload_tool',
                 "description": "Upload data files to galaxy server",
                 "name": "Upload Data",
             }
