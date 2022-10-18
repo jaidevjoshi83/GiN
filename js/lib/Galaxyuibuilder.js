@@ -1941,6 +1941,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 if (input_def['options']['hdca'].length !== 0) {
                     options['hdca'][i].hid = `${options['hdca'][i].hid}`
                     el.textContent = options['hdca'][i].hid+" "+options['hdca'][i].name;
+                    el.value = JSON.stringify(options['hdca'][i])
                     delete options['hdca'][i].keep
                 }
                 Select.appendChild(el);
@@ -2022,9 +2023,9 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             for (var i = 0; i < options['hdca'].length; i++) {
                 const el = document.createElement("option");
                 if (input_def['options']['hdca'].length !== 0) {
-                    el.textContent = options['hdca'][i].hid+options['hdca'][i].name;
-                    delete options['hdca'][i].keep  
-                    el.data = options['hdca'][i]  
+                    el.textContent = options['hdca'][i].hid+" "+options['hdca'][i].name; 
+                    el.value = JSON.stringify(options['hdca'][i])
+                    delete options['hdca'][i].keep 
                 }
                 Select.appendChild(el);
             }
@@ -3372,7 +3373,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         var states = ['ok', 'error']
 
-        console.log(job)
 
         if (job['state'] != "job failed"){
             var jb  = await KernelSideDataObjects(`from GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.show_job(gal_instance=${JSON.stringify(this.model.get('gal_instance'))}, job_id=${JSON.stringify(job["id"])})`)
@@ -3714,6 +3714,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         var history_id = self.element.querySelector('#history_ids').value 
         var form = self.element.querySelector('.Galaxy-form')
         var inputs = this.get_form_data(form, 'on')
+
+        console.log(inputs)
 
         if (inputs == 'error'){
             return
