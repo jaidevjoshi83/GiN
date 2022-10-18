@@ -1187,7 +1187,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         var data_upload = `
                         <div class="upload_tab">
                          
-                          <div> <select class=available-sessions> </select> </div>
                            <div class="tab">
                                 <button type="button" id="resumable_upload_button" class="tablinks" >Upload</button>
                                 <button type="button" class="tablinks">From URL</button>
