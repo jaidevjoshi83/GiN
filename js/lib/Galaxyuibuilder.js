@@ -1545,11 +1545,15 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         select.addEventListener("change", async () => {
 
-            if (this.model.get('galaxy_tool_id') != 'GiN_data_upload_tool'){
+            if (this.model.get('galaxy_tool_id') != self.model.get('gal_instance')['url']+"/GiN_data_upload_tool"){
 
                 var form = self.element.querySelector('.Galaxy-form')
                 var Inputs = self.get_form_data(form)
+               
                 var refine_inputs  = await KernelSideDataObjects(`import json\nfrom GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.updated_form(server=${JSON.stringify(self.model.get('gal_instance')['url'])}, tool_inputs=json.loads('${JSON.stringify(Inputs)}'), tool_id=${JSON.stringify(self.model.get('galaxy_tool_id'))}, history_id=${JSON.stringify(select.value)})`)
+               
+                console.log(refine_inputs)
+
                 var FormParent = self.el.querySelector('.Galaxy-form')    
                 self.removeAllChildNodes(FormParent)
                 var selected_index = {}
@@ -1604,7 +1608,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
  
             var history_id = select.value
 
-            if (this.model.get('inputs')['id'] != 'GiN_data_upload_tool') {
+            if (this.model.get('inputs')['id'] != self.model.get('gal_instance')['url']+"/GiN_data_upload_tool") {
                 var form = self.element.querySelector('.Galaxy-form')
                 var inputs = self.get_form_data(form)
                 var refine_inputs  = await KernelSideDataObjects(`import json\nfrom GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.updated_form(${JSON.stringify(self.model.get('gal_instance')['url'])}, json.loads('${JSON.stringify(inputs)}'), ${JSON.stringify(self.model.get('galaxy_tool_id'))}, ${JSON.stringify(history_id)})`)
