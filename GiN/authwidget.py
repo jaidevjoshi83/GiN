@@ -42,21 +42,26 @@ class GalaxyAuthWidget(UIBuilder):
             "email": {
                 "name": "Email or Username",
                 "sendto": False,
+                "optional": True,
+                "description": "Leave this field blank if login through API.",
             },
             "password": {
-                "name": "Password",
+                "name": "API or Password",
                 "type": "password",
                 "sendto": False,
+                "description": "Enter API or Password.",
             },
         },
     }
 
     def __init__(self, session=None, **kwargs):
         """Initialize the authentication widget"""
+
         self.session = session
 
         # Assign the session object, lazily creating one if needed
-        if self.has_credentials() and self.validate_credentials(session):
+
+        if self.validate_credentials(session):
             self.register_session()  # Register the session with the SessionList
             self.register_modules()  # Register the modules with the ToolManager
             self.system_message()  # Display the system message
@@ -89,14 +94,19 @@ class GalaxyAuthWidget(UIBuilder):
 
         t = [
             {
-                "id": "GiN_data_upload_tool",
+                "id": server+'/GiN_data_upload_tool',
                 "description": "Upload data files to galaxy server",
                 "name": "Upload Data",
             }
         ]
 
         try:
-            self.session = GalaxyInstance(server, email=email, password=password)
+            if (email == "" or email == None):
+                self.session = GalaxyInstance(server,  api_key=password)
+                email = ''
+            else:
+                self.session = GalaxyInstance(server, email=email, password=password)
+
             self.session._notebook_url = server
             self.session._notebook_email = email
             self.session._notebook_password = password
@@ -125,8 +135,9 @@ class GalaxyAuthWidget(UIBuilder):
             return False  # Test type
         if not self.session._notebook_url:
             return False  # Test server url
-        if not self.session._notebook_email:
-            return False  # Test email
+        # if not self.session._notebook_email:
+        #     print("error", 'email')
+        #     return False  # Test email
         if not self.session._notebook_password:
             return False  # Test password
         return True
@@ -148,12 +159,15 @@ class GalaxyAuthWidget(UIBuilder):
 
     def replace_widget(self):
         """Replace the unauthenticated widget with the authenticated widget"""
+        # self.form.children[1].value = "" 
+       
         self.form.children[2].value = ""  # Blank password so it doesn't get serialized
         display(GalaxyAuthWidget(self.session))  # Display the authenticated widget
         self.close()  # Close the unauthenticated widget
 
     def register_session(self):
         """Register the validated credentials with the SessionList"""
+
         self.session = session.register(
             self.session._notebook_url,
             self.session._notebook_email,

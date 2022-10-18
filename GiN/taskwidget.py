@@ -64,15 +64,21 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
 
     def submit_job(gal_instance=None, tool_inputs=None, history_id=None):
 
+        print(tool_inputs)
+
         a = GiN.sessions.SessionList()
         gi1 = a.get(server=gal_instance["url"])
         # tool_inputs = json5.loads(tool_inputs)
 
         new_inputs = GalaxyTaskWidget.RefinedInputs(tool_inputs, gi1)
 
-        job = gi1.tools.gi.tools.run_tool(
-            history_id=history_id, tool_id=gal_instance["tool_id"], tool_inputs=new_inputs
-        )
+        try:
+
+            job = gi1.tools.gi.tools.run_tool(
+                history_id=history_id, tool_id=gal_instance["tool_id"], tool_inputs=new_inputs
+            )
+        except BaseException as e:
+            job = {"state": "job failed", 'error': str(e)}
 
         return IPython.display.JSON(job)
 
@@ -259,21 +265,6 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
         )
         return IPython.display.JSON(show_dataset)
 
-    # def read_datafiles_files(data_url, ext):
-
-    #     if ext == 'csv' or ext == 'tabular' or  ext == 'txt' :
-    #         s=requests.get(data_url).content
-    #         dataframe = pd.read_csv(io.StringIO(s.decode('utf-8')))
-    #         return dataframe
-
-    #     elif ext == 'png':
-    #         im = Image.open(requests.get(data_url, stream=True).raw)
-    #         return im
-
-    #     elif ext == 'fasta' or ext == 'bed':
-    #         response = urlopen(data_url)
-    #         fasta = response.read().decode("utf-8", "ignore")
-    #         return fasta
 
     def download_file_to_jupyter_server(
         server=None,
@@ -314,15 +305,16 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
         if not os.path.exists(temp_dir):
             os.mkdir(temp_dir)
 
-        f = open(os.path.join(temp_dir, file_name), 'w')
-        f.write(data)
-  
         a = GiN.sessions.SessionList()
         gi = a.get(server=server)
-
         path = os.path.join(temp_dir, file_name)
-        out = gi.tools.gi.tools.upload_file(path=path, history_id=history_id)
+
+        with open(path, 'w') as f:
+            f.write(data)
        
+        f.close()
+   
+        out = gi.tools.gi.tools.upload_file(path=path, history_id=history_id)
         return IPython.display.JSON(out)
 
     def send_data_to_galaxy_tool(
@@ -450,9 +442,9 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
 
             history_ids = self.tool["gi"].histories.gi.histories.get_histories()
 
-            if self.tool["id"] == "GiN_data_upload_tool":
+            if self.tool["id"] == self.tool["gi"].base_url+"/GiN_data_upload_tool":
                 inputs = {
-                    "id": "GiN_data_upload_tool",
+                    "id": self.tool["gi"].base_url+"/GiN_data_upload_tool",
                     "inputs": [
                         {
                             "model_class": "DataToolParameter",

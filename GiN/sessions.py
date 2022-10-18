@@ -20,13 +20,17 @@ class SessionList:
         """
 
         # Create the session
-        session = GalaxyInstance(server, email=email, password=password, verify=True)
+        if (email==""):
+            session = GalaxyInstance(server,  api_key=password,  verify=True)
+        else:
+            session = GalaxyInstance(server, email=email, password=password, verify=True)
+       
         session._notebook_url = server
         session._notebook_email = email
         session._notebook_password = password
 
         # Validate email if not empty
-        valid_email = email != "" and email is not None
+        valid_email = email is not None
 
         # Validate that the server is not already registered
         index = self._get_index(server)
