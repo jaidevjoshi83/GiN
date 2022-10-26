@@ -11,7 +11,7 @@ try:
 except:
     pass
 
-import authwidget
+import .authwidget
 from .taskwidget import GalaxyTaskWidget
 from .jobwidget import GalaxyJobWidget
 from .sessions import session, get_session
