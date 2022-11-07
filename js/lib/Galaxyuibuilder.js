@@ -18,7 +18,15 @@ import * as tus from "tus-js-client";
 import axios from "axios";
 import { Data } from '@g2nb/nbtools/lib/dataregistry';
 import { ContextManager } from '@g2nb/nbtools';
+import {
+    isExecuteResult,
+    isStream,
+    isError,
+    IError,
+    IExecuteResult,
+  } from "@jupyterlab/nbformat";
 
+  import $ from "jquery";
 
 
 export class GalaxyUIBuilderModel extends BaseWidgetModel{
@@ -105,10 +113,11 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
     this.JOBID = {};
     this.file_cache = [];
     this.galaxy_file_cache = []
-    this.test = []
     this.conditional_name = []
     this.list = []
     this.repeat_del = {'name':"", "index":""}
+    this.toolregistry = {'tools':""}
+
     // this.section_collapse = {'expanded':false, 'name':''}
     // <iframe src="http://localhost:8080/datasets/fa70ae9fc8539e18/display/?preview=True&?api_key=865ad23561f93ec78ed5398e815c1057" title="W3Schools Free Online Web Tutorials"></iframe>
     }
@@ -116,11 +125,13 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
     render() {
 
         super.render();
+
         const inputs = this.model.get('inputs')
         //########################
         this.add_history_list()
         //########################
-        this.form_builder(inputs['inputs'])
+        // this.form_builder(inputs['inputs'])
+        this.generate_tool_form()
         this.add_dataset_table()
         //########################
         // // Hide the header or footer, if necessary
@@ -137,10 +148,39 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         // Attach custom buttons
         this.activate_custom_buttons();
         this.AddHelpSection(inputs['help'])
+        this.return_metadata_inputs()
+    }
+
+    generate_tool_form(){
+        var inp = this.return_metadata_inputs()
+        if (inp != undefined){
+            this.form_builder(inp['inputs'])
+        } else{
+            const inputs = this.model.get('inputs')
+            this.form_builder(inputs['inputs'])
+        }
+    }
+
+    update_metadata_FormState(inputs){
+
+        var form_json = {'count':'', 'user_name':this.model.get('gal_instance')['email_ID'] ,'inputs': inputs}
+        ContextManager.tool_registry.current.content.activeCell.model.metadata.set('inputs', form_json)
+        ContextManager.tool_registry.current.content.activeCell.model.metadata.set('UID', this.model.get('gal_instance')["UID"])
+    }
+
+    return_metadata_inputs(){
+        var Cells = JSON.parse(ContextManager.tool_registry.current.content.model)['cells']
+        for (var i = 0; i <  Cells.length; i++ ){
+            if(Cells[i].metadata['UID'] != undefined){
+                if(Cells[i].metadata['UID'] == this.model.get('gal_instance')['UID']){
+                    return Cells[i].metadata.inputs
+                }
+            }
+        }
     }
 
     un_wrap_repeat1(input, name){
-
+    
         var self = this
         var out 
 
@@ -173,8 +213,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             return out 
         }
     }
-
-
 
     un_wrap_repeat(input, name){
 
@@ -283,8 +321,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             input_def.id = this.uid()
         }
 
-        console.log(input_def)
-
         switch (input_def.type) {
             case "conditional":  
                 this.add_conditional_section(input_def, form_parent, name_prefix, data);
@@ -295,7 +331,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             case "integer" :
             case  "float" :
             case "text":
-                this.add_text(input_def, form_parent, name_prefix)
+            case "color":
+                this.add_input_value(input_def, form_parent, name_prefix)
                 break
             case "boolean":
                 this.add_boolean_field(input_def, form_parent, name_prefix)
@@ -507,7 +544,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 var children = self.el.querySelector('.Galaxy-form')
                 var inputs = self.get_form_data(children)
                 var history_id = self.el.querySelector('.galaxy-history-list').querySelector('#history_ids').value
-                var refine_inputs  = await KernelSideDataObjects(`import json\nfrom GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.updated_form(${JSON.stringify(self.model.get('gal_instance')['url'])}, json.loads('${JSON.stringify(inputs)}'), ${JSON.stringify(self.model.get('galaxy_tool_id'))}, ${JSON.stringify(history_id)})`)
+                var refine_inputs  = await KernelSideDataObjects(`import json\nimport base64\nfrom GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.updated_form(${JSON.stringify(self.model.get('gal_instance')['url'])}, json.loads(base64.b64decode("${btoa(JSON.stringify(inputs))}")), ${JSON.stringify(self.model.get('galaxy_tool_id'))}, ${JSON.stringify(history_id)})`)
                 var form_parent = self.el.querySelector('.Galaxy-form')
 
                 self.removeAllChildNodes(form_parent)
@@ -1030,6 +1067,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
     add_drill_down_section(input_def, FormParent, NamePrefix){
 
+        var self = this
+
         input_def.id = this.uid()
 
         const container = document.createElement('div')
@@ -1076,7 +1115,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         Div2.append(this.drill_down(input_def.options))
 
-        selectspan.addEventListener('click', () => {
+        selectspan.addEventListener('click', async () => {
 
             for (var i = 0; i < Div2.querySelectorAll('.subgroup').length; i++ ) {
                 Div2.querySelectorAll('.subgroup')[i].style.display = 'block'
@@ -1089,9 +1128,15 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             for (var i = 0; i < Div2.querySelectorAll('span').length; i++ ){
                 Div2.querySelectorAll('span')[i].className = 'icon fa mr-1 fa-minus'
             }
+
+            var history_id = self.el.querySelector('#history_ids').value
+            var form = self.el.querySelector('.Galaxy-form')
+            var inputs = self.get_form_data(form)
+            var refine_inputs  = await KernelSideDataObjects(`import json\nimport base64\nfrom GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.updated_form(${JSON.stringify(self.model.get('gal_instance')['url'])}, json.loads(base64.b64decode("${btoa(JSON.stringify(inputs))}")), ${JSON.stringify(self.model.get('galaxy_tool_id'))}, ${JSON.stringify(history_id)})`)
+            self.update_metadata_FormState(refine_inputs['inputs'])
         })
 
-        Unselect.addEventListener('click', () => {
+        Unselect.addEventListener('click', async () => {
 
             for (var i = 0; i < Div2.querySelectorAll('.subgroup').length; i++ ) {
                 Div2.querySelectorAll('.subgroup')[i].style.display = 'none'
@@ -1105,17 +1150,32 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             for (var i = 0; i < Div2.querySelectorAll('span').length; i++ ){
                 Div2.querySelectorAll('span')[i].className = 'icon fa mr-1 fa-plus'
             }
+
+            var history_id = self.el.querySelector('#history_ids').value
+            var form = self.el.querySelector('.Galaxy-form')
+            var inputs = self.get_form_data(form)
+            var refine_inputs  = await KernelSideDataObjects(`import json\nfrom GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.updated_form(${JSON.stringify(self.model.get('gal_instance')['url'])}, json.loads(base64.b64decode("${btoa(JSON.stringify(inputs))}")), ${JSON.stringify(self.model.get('galaxy_tool_id'))}, ${JSON.stringify(history_id)})`)
+            self.update_metadata_FormState(refine_inputs['inputs'])
         })
 
         FormParent.append(row)
         return row
     }
 
-    add_text (input_def, FormParent, NamePrefix){
+    add_input_value (input_def, FormParent, NamePrefix){
+
+        var self = this
  
         input_def.id = this.uid()
  
         const input = document.createElement('input')
+
+        input.type = input_def.type
+
+        if(input.type == 'color'){
+            input.style.height = '40px'
+            input.style.padding= '1px'
+        }
 
         input.id = `input-${input_def.id}`
         input.name = NamePrefix+input_def['name']
@@ -1128,7 +1188,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         TitleSpan.className = "ui-form-title-text"
         TitleSpan.textContent = input_def.label
         TitleSpan.style.display = 'inline'
-
 
         input['data-value'] = input_def['optional']
 
@@ -1149,92 +1208,13 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         row.id = input_def.id
         title.style.float = 'left'
 
-        row.append(title)
-        row.append(input)
-        row.append(help)
-
-        FormParent.append(row)
-        return row
-    }
-
-
-    add_integer (input_def, FormParent, NamePrefix){
- 
-        input_def.id = this.uid()
- 
-        const input = document.createElement('input')
-
-        input.id = `input-${input_def.id}`
-        input.name = NamePrefix+input_def['name']
-        input.value = input_def['value']
-        input.className = 'InputData'
-        const row = document.createElement('div')
-        const title = document.createElement('div')
-        title.className = 'ui-from-title'
-        const TitleSpan = document.createElement('span')
-        TitleSpan.className = "ui-form-title-text"
-        TitleSpan.textContent = input_def.label
-        TitleSpan.style.display = 'inline'
-
-        const help = document.createElement('div')
-        help.className = 'ui-from-help'
-        const helpSpan = document.createElement('span')
-        helpSpan.style.fontWeight = 'normal'
-        helpSpan.className = "ui-form-help-text"
-        helpSpan.innerHTML = `<b> Help:</b> ${input_def['help']}`
-        helpSpan.style.display = 'inline'
-        help.style.marginLeft = '10px'
-        help.style.marginBottom = '10px'
-
-        help.append( helpSpan)
-       
-        title.append(TitleSpan)
-        row.className = 'ui-form-element section-row'
-        row.id = input_def.id
-        title.style.float = 'left'
-
-        row.append(title)
-        row.append(input)
-        row.append(help)
-
-        FormParent.append(row)
-        return row
-    }
-
-    add_float (input_def, FormParent, NamePrefix){
- 
-        input_def.id = this.uid()
- 
-        const input = document.createElement('input')
-
-        input.id = `input-${input_def.id}`
-        input.name = NamePrefix+input_def['name']
-        input.value = input_def['value']
-        input.className = 'InputData'
-        const row = document.createElement('div')
-        const title = document.createElement('div')
-        title.className = 'ui-from-title'
-        const TitleSpan = document.createElement('span')
-        TitleSpan.className = "ui-form-title-text"
-        TitleSpan.textContent = input_def.label
-        TitleSpan.style.display = 'inline'
-
-        const help = document.createElement('div')
-        help.className = 'ui-from-help'
-        const helpSpan = document.createElement('span')
-        helpSpan.style.fontWeight = 'normal'
-        helpSpan.className = "ui-form-help-text"
-        helpSpan.innerHTML = `<b> Help:</b> ${input_def['help']}`
-        helpSpan.style.display = 'inline'
-        help.style.marginLeft = '10px'
-        help.style.marginBottom = '10px'
-
-        help.append( helpSpan)
-       
-        title.append(TitleSpan)
-        row.className = 'ui-form-element section-row'
-        row.id = input_def.id
-        title.style.float = 'left'
+        input.addEventListener('input', async () =>{
+            var history_id = self.el.querySelector('#history_ids').value
+            var form = self.el.querySelector('.Galaxy-form')
+            var inputs = self.get_form_data(form)
+            var refine_inputs  = await KernelSideDataObjects(`import json\nimport base64\nfrom GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.updated_form(${JSON.stringify(self.model.get('gal_instance')['url'])}, json.loads(base64.b64decode("${btoa(JSON.stringify(inputs))}")), ${JSON.stringify(self.model.get('galaxy_tool_id'))}, ${JSON.stringify(history_id)})`)
+            self.update_metadata_FormState(refine_inputs['inputs'])
+        })
 
         row.append(title)
         row.append(input)
@@ -1612,7 +1592,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 var form = self.element.querySelector('.Galaxy-form')
                 var Inputs = self.get_form_data(form)
                
-                var refine_inputs  = await KernelSideDataObjects(`import json\nfrom GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.updated_form(server=${JSON.stringify(self.model.get('gal_instance')['url'])}, tool_inputs=json.loads('${JSON.stringify(Inputs)}'), tool_id=${JSON.stringify(self.model.get('galaxy_tool_id'))}, history_id=${JSON.stringify(select.value)})`)
+                var refine_inputs  = await KernelSideDataObjects(`import json\nimport base64\nfrom GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.updated_form(server=${JSON.stringify(self.model.get('gal_instance')['url'])}, tool_inputs=json.loads(base64.b64decode("${btoa(JSON.stringify(Inputs))}")), tool_id=${JSON.stringify(self.model.get('galaxy_tool_id'))}, history_id=${JSON.stringify(select.value)})`)
 
                 var FormParent = self.el.querySelector('.Galaxy-form')    
                 self.removeAllChildNodes(FormParent)
@@ -1671,7 +1651,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             if (this.model.get('inputs')['id'] != self.model.get('gal_instance')['url']+"/GiN_data_upload_tool") {
                 var form = self.element.querySelector('.Galaxy-form')
                 var inputs = self.get_form_data(form)
-                var refine_inputs  = await KernelSideDataObjects(`import json\nfrom GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.updated_form(${JSON.stringify(self.model.get('gal_instance')['url'])}, json.loads('${JSON.stringify(inputs)}'), ${JSON.stringify(self.model.get('galaxy_tool_id'))}, ${JSON.stringify(history_id)})`)
+                var refine_inputs  = await KernelSideDataObjects(`import json\nimport base64\nfrom GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.updated_form(${JSON.stringify(self.model.get('gal_instance')['url'])}, json.loads(base64.b64decode("${btoa(JSON.stringify(inputs))}")), ${JSON.stringify(self.model.get('galaxy_tool_id'))}, ${JSON.stringify(history_id)})`)
                 var FormParent = self.el.querySelector('.Galaxy-form')    
                 self.removeAllChildNodes(FormParent)
                 var selected_index = {}
@@ -1817,13 +1797,14 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 var form = self.element.querySelector('.Galaxy-form')
                 var Inputs = self.get_form_data(form)
                
-                var refine_inputs  = await KernelSideDataObjects(`import json\nfrom GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.updated_form(server=${JSON.stringify(self.model.get('gal_instance')['url'])}, tool_inputs=json.loads('${JSON.stringify(Inputs)}'), tool_id=${JSON.stringify(self.model.get('galaxy_tool_id'))}, history_id=${JSON.stringify(history_id.value)})`)
+                var refine_inputs  = await KernelSideDataObjects(`import json\nimport base64\nfrom GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.updated_form(server=${JSON.stringify(self.model.get('gal_instance')['url'])}, tool_inputs=json.loads(base64.b64decode("${btoa(JSON.stringify(Inputs))}")), tool_id=${JSON.stringify(self.model.get('galaxy_tool_id'))}, history_id=${JSON.stringify(history_id.value)})`)
 
                 var FormParent = self.el.querySelector('.Galaxy-form')    
                 self.removeAllChildNodes(FormParent)
                 var selected_index = {}
                 selected_index['HID'] = history_id.selectedIndex
                 self.form_builder(refine_inputs['inputs'],  selected_index) 
+                self.update_metadata_FormState(refine_inputs['inputs'])
 
             });
 
@@ -1867,10 +1848,20 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         Button.addEventListener("click", async (e)=>{ 
             var Count = row.children.length
             add_internal_repeat(input_def['inputs'], Count)
+            var history_id = self.el.querySelector('#history_ids').value
+            var form = self.el.querySelector('.Galaxy-form')
+            var inputs = self.get_form_data(form)
+            var refine_inputs  = await KernelSideDataObjects(`import json\nimport base64\nfrom GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.updated_form(${JSON.stringify(self.model.get('gal_instance')['url'])}, json.loads(base64.b64decode("${btoa(JSON.stringify(inputs))}")), ${JSON.stringify(self.model.get('galaxy_tool_id'))}, ${JSON.stringify(history_id)})`)
+            self.update_metadata_FormState(refine_inputs['inputs'])
         });
 
         DeleteButton.addEventListener("click", async function(e){ 
             self.el.querySelector('.delete-button').closest('.internal-ui-repeat.section-row').remove()
+            var history_id = self.el.querySelector('#history_ids').value
+            var form = self.el.querySelector('.Galaxy-form')
+            var inputs = self.get_form_data(form)
+            var refine_inputs  = await KernelSideDataObjects(`import json\nimport base64\nfrom GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.updated_form(${JSON.stringify(self.model.get('gal_instance')['url'])}, json.loads(base64.b64decode("${btoa(JSON.stringify(inputs))}")), ${JSON.stringify(self.model.get('galaxy_tool_id'))}, ${JSON.stringify(history_id)})`)
+            self.update_metadata_FormState(refine_inputs['inputs'])
         });
 
         return row
@@ -2174,7 +2165,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 var inputs = self.get_form_data(children)
 
                 var history_id = self.el.querySelector('.galaxy-history-list').querySelector('#history_ids').value
-                var refine_inputs  = await KernelSideDataObjects(`import json\nfrom GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.updated_form(${JSON.stringify(self.model.get('gal_instance')['url'])}, json.loads('${JSON.stringify(inputs)}'), ${JSON.stringify(self.model.get('galaxy_tool_id'))}, ${JSON.stringify(history_id)})`)
+                var refine_inputs  = await KernelSideDataObjects(`import json\nimport base64\nfrom GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.updated_form(${JSON.stringify(self.model.get('gal_instance')['url'])}, json.loads(base64.b64decode("${btoa(JSON.stringify(inputs))}")), ${JSON.stringify(self.model.get('galaxy_tool_id'))}, ${JSON.stringify(history_id)})`)
 
                 var FormParent = self.el.querySelector('.Galaxy-form')
                 self.removeAllChildNodes(FormParent)
@@ -2346,7 +2337,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                     var children = self.el.querySelector('.Galaxy-form')
                     var inputs = self.get_form_data(children)
                     var history_id = self.el.querySelector('.galaxy-history-list').querySelector('#history_ids').value
-                    var refine_inputs  = await KernelSideDataObjects(`import json\nfrom GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.updated_form(${JSON.stringify(self.model.get('gal_instance')['url'])}, json.loads('${JSON.stringify(inputs)}'), ${JSON.stringify(self.model.get('galaxy_tool_id'))}, ${JSON.stringify(history_id)})`)
+                    var refine_inputs  = await KernelSideDataObjects(`import json\nimport base64\nfrom GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.updated_form(${JSON.stringify(self.model.get('gal_instance')['url'])}, json.loads(base64.b64decode("${btoa(JSON.stringify(inputs))}")), ${JSON.stringify(self.model.get('galaxy_tool_id'))}, ${JSON.stringify(history_id)})`)
                     var form_parent = self.el.querySelector('.Galaxy-form')
     
                     self.removeAllChildNodes(form_parent)
@@ -2359,6 +2350,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
     }
 
     add_boolean_field (input_def, FormParent, NamePrefix ){
+
+        var self = this
 
         input_def.id = this.uid()
 
@@ -2409,7 +2402,13 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         row.append(help)
 
 
-        select.addEventListener('change', (e) => {
+        select.addEventListener('change', async (e) => {
+
+            var history_id = self.el.querySelector('#history_ids').value
+            var form = self.el.querySelector('.Galaxy-form')
+            var inputs = self.get_form_data(form)
+            var refine_inputs  = await KernelSideDataObjects(`import json\nimport base64\nfrom GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.updated_form(${JSON.stringify(self.model.get('gal_instance')['url'])}, json.loads(base64.b64decode("${btoa(JSON.stringify(inputs))}")), ${JSON.stringify(self.model.get('galaxy_tool_id'))}, ${JSON.stringify(history_id)})`)
+            self.update_metadata_FormState(refine_inputs['inputs'])
 
         })
         
@@ -2485,30 +2484,31 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
  
         select.addEventListener("change", async () => {
 
-        var self = this
+   
 
-        var queryID = select.value
-        var form = self.element.querySelector('.Galaxy-form')
-        var inputs = self.get_form_data(form)
+            var queryID = select.value
+            var form = self.element.querySelector('.Galaxy-form')
+            var inputs = self.get_form_data(form)
 
-        self.removeAllChildNodes(ConditionalDiv)
+            self.removeAllChildNodes(ConditionalDiv)
 
-        var history_id = self.element.querySelector('#history_ids').value 
-        var refine_inputs = await KernelSideDataObjects(`import json\nfrom GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.updated_form(${JSON.stringify(self.model.get('gal_instance')['url'])}, json.loads('${JSON.stringify(inputs)}'), ${JSON.stringify(self.model.get('galaxy_tool_id'))}, ${JSON.stringify(history_id)})`)
+            var history_id = self.element.querySelector('#history_ids').value 
+            var refine_inputs = await KernelSideDataObjects(`import json\nimport base64\nfrom GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.updated_form(${JSON.stringify(self.model.get('gal_instance')['url'])}, json.loads(base64.b64decode("${btoa(JSON.stringify(inputs))}")), ${JSON.stringify(self.model.get('galaxy_tool_id'))}, ${JSON.stringify(history_id)})`)
 
-        this.conditional_name = input_def['name']
+            self.update_metadata_FormState(refine_inputs['inputs'])
 
-        var input_def1 = this.un_wrap(refine_inputs['inputs'], this.conditional_name)
+            this.conditional_name = input_def['name']
 
+            var input_def1 = this.un_wrap(refine_inputs['inputs'], this.conditional_name)
 
-            for (var l in input_def1.cases){
-                if  (input_def1.cases[l].value == queryID) {
-                    for (var j in input_def1.cases[l].inputs) {
-                        this.add(input_def1.cases[l].inputs[j], ConditionalDiv, NewNamePrefix, call_back_data),  
-                        input_def1.cases[l].inputs[j].id = this.uid()
+                for (var l in input_def1.cases){
+                    if  (input_def1.cases[l].value == queryID) {
+                        for (var j in input_def1.cases[l].inputs) {
+                            this.add(input_def1.cases[l].inputs[j], ConditionalDiv, NewNamePrefix, call_back_data),  
+                            input_def1.cases[l].inputs[j].id = this.uid()
+                        }
                     }
                 }
-            }
         });
  
         parent.append(ConditionalDiv)
@@ -2548,7 +2548,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             section()
         }
 
-        Button.addEventListener("click", function (e) {
+        Button.addEventListener("click", async (e) => {
 
             if (ConditionalDiv.childNodes.length == 0){
                 section()
@@ -2556,6 +2556,12 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 self.removeAllChildNodes(ConditionalDiv)
             }
             e.preventDefault();
+
+            var history_id = self.el.querySelector('#history_ids').value
+            var form = self.el.querySelector('.Galaxy-form')
+            var inputs = self.get_form_data(form)
+            var refine_inputs  = await KernelSideDataObjects(`import json\nimport base64\nfrom GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.updated_form(${JSON.stringify(self.model.get('gal_instance')['url'])}, json.loads(base64.b64decode("${btoa(JSON.stringify(inputs))}")), ${JSON.stringify(self.model.get('galaxy_tool_id'))}, ${JSON.stringify(history_id)})`)
+            self.update_metadata_FormState(refine_inputs['inputs'])
         });
     }
 
@@ -2925,6 +2931,10 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
            
                
                 Tbl.querySelector('.fas.fa-eye').addEventListener('click', ()=>{
+
+                    console.log(`${this.model.get('gal_instance')['url']}/datasets/${dataset['id']}/display/?preview=True&?api_key={%27x-api-key%27:%27${this.model.get('gal_instance')['api_key']}%27}`)
+
+                    var iframe_id = `${this.uid()}-iframe`
                     
                     var content = `<div class="preview"> 
                                         <div class="data-preview-header" style="width:100%; height:5%;"> 
@@ -2932,18 +2942,18 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                                             <div class="data-preview-title" style="float: left">  <p class="title"> <b>${dataset['name']} </b></p> </div>
                                         </div>
                                         <div class="data-preview-content" style="width:100%; height:95%;"> 
-                                            <iframe style="width:100%; height:100%" src = "${this.model.get('gal_instance')['url']}/datasets/${dataset['id']}/display/?preview=True"=True&?api_key=865ad23561f93ec78ed5398e815c1057" > </iframe>
+                                            <iframe  src="${this.model.get('gal_instance')['url']}/datasets/${dataset['id']}/display/?preview=True&?api_key={%27x-api-key%27:%27${this.model.get('gal_instance')['api_key']}%27}" > </iframe>
                                         </div>
                                     </div>`
-
 
                     var tb = new DOMParser().parseFromString(content, 'text/html').querySelector('.preview')
 
                     this.removeAllChildNodes(this.el.querySelector('.data-preview'))
                     this.el.querySelector('.data-preview').append(tb)
-  
+
                     this.el.querySelector('.tool-forms').style.display = "none"
                     this.preview_button_action(tb)
+
                 });
             }
         } 
@@ -3864,9 +3874,9 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             }
         }
 
-        var jobs  = await KernelSideDataObjects(`import json\nfrom GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.submit_job(gal_instance=${JSON.stringify(this.model.get('gal_instance'))}, tool_inputs=json.loads('${JSON.stringify(inputs)}'), history_id=${JSON.stringify(history_id)})`)
+        // var jobs  = await KernelSideDataObjects(`import json\nfrom GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.submit_job(gal_instance=${JSON.stringify(this.model.get('gal_instance'))}, tool_inputs=json.loads("""${JSON.stringify(inputs)}"""), history_id=${JSON.stringify(history_id)})`)
+        var jobs  = await KernelSideDataObjects(`import json\nimport base64\nfrom GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.submit_job(gal_instance=json.loads(base64.b64decode("${btoa(JSON.stringify(this.model.get('gal_instance')))}")), tool_inputs=json.loads(base64.b64decode("${btoa(JSON.stringify(inputs))}")), history_id=json.loads(base64.b64decode("${btoa(JSON.stringify(history_id))}")))`)
        
-
        if (jobs['state'] == 'job failed'){
 
         this.JobStatusTemplate(toolforms, jobs)

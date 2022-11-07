@@ -1,3 +1,5 @@
+from asyncio import constants
+from tkinter import Y
 from bioblend.galaxy.objects import GalaxyInstance
 from .display import display
 from nbtools import UIBuilder, ToolManager, NBTool, EventManager
@@ -8,6 +10,13 @@ from .taskwidget import TaskTool
 from .util import DEFAULT_COLOR, DEFAULT_LOGO, GALAXY_SERVERS
 from urllib.error import HTTPError
 from .Galaxyuibuilder import GalaxyUIBuilder
+from ipywidgets import Output
+from nbtools.uioutput import UIOutput
+from nbtools.event_manager import EventManager
+import GiN
+
+import uuid
+  
 
 REGISTER_EVENT = """
     const target = event.target;
@@ -44,12 +53,14 @@ class GalaxyAuthWidget(UIBuilder):
                 "sendto": False,
                 "optional": True,
                 "description": "Leave this field blank if login through API.",
+                "default":'jaidev53ster@gmail.com',
             },
             "password": {
                 "name": "API or Password",
                 "type": "password",
                 "sendto": False,
                 "description": "Enter API or Password.",
+                "default":"12212283.j",
             },
         },
     }
@@ -175,16 +186,21 @@ class GalaxyAuthWidget(UIBuilder):
         )
 
     def register_modules(self):
+
+        ToolManager.tool = New_tool
+       
         """Get the list available modules (currently only tools) and register widgets for them with the tool manager"""
         url = self.session._notebook_url
 
         def register_modules_callback():
             for section in self.session.tools.gi.tools.get_tool_panel():
                 if section["model_class"] == "ToolSection":
-                    for tool in section["elems"]:
+                    for t in section["elems"]:
+
+                        t['id']  = t['id']+':'+str(uuid.uuid1())
                         try:
-                            tool["gi"] = self.session.tools.gi
-                            tool = TaskTool(server_name(url), tool)
+                            t["gi"] = self.session.tools.gi
+                            tool = TaskTool(server_name(url), t)
                             ToolManager.instance().register(tool)
                         except:
                             pass
@@ -210,6 +226,79 @@ def server_name(search_url):
             return name
     return search_url
 
+
+def New_tool(id, origin):
+    """
+    Return reference to tool widget given the id and origin
+    """
+    if origin != '+':
+
+        t = {}
+        for i in ToolManager.instance().tools[origin].keys():
+            t[i.split(":")[0]] = ToolManager.instance().tools[origin][i]
+
+        ToolManager.instance().tools[origin] = t
+
+    if ToolManager.exists(id, origin):   
+        # ToolManager.instance().tools[origin][id.split(':')[0]].id  = id   
+        # print(ToolManager.instance().tools[origin][id.split(':')[0]].id, ToolManager.instance().tools[origin][id.split(':')[0]] )
+        if (origin != "+"):
+            tool = {}
+            tool['id'] = id
+            tool['name'] = ToolManager.instance().tools[origin][id.split(':')[0]].name
+            tool['description'] = ToolManager.instance().tools[origin][id.split(':')[0]].description
+            tool['gi'] = ToolManager.instance().tools[origin][id.split(':')[0]].tool['gi']
+            tool["UID"] = id.split(":")[1]
+            a = TaskTool(origin, tool)
+            return a 
+        else: 
+            return ToolManager.instance().tools[origin][id.split(':')[0]]
+
+    else:
+        # display(Output())
+        display(ToolManager.create_placeholder_widget(origin, id.split(':')[0]))
+
+def new_create_placeholder_widget( origin, id):
+
+    output = Output()  # Output widget
+    placeholder = UIOutput(
+        name="Cannot find tool", error=f"Cannot find tool: {origin} | {id}",
+        color= DEFAULT_COLOR,
+        logo= DEFAULT_LOGO,
+
+    )  # Placeholder widget
+    output.append_display_data(placeholder)
+
+    # Callback to see if the placeholder needs replaced after a new widget is registered
+    def check_registration_callback(data):
+        if (
+            "origin" in data
+            and "id" in data
+            and data["origin"] == origin
+            and data["id"] == id
+        ):
+            placeholder.close()
+            with output:
+                display(tool(id=id, origin=origin))
+
+    # Register the callback with the event manager
+    EventManager.instance().register(
+        "nbtools.register", check_registration_callback
+    )
+    return output
+
+def new_exists(id, origin):
+        """Check if a tool for the provided id and origin exists"""
+        tools = ToolManager.instance().tools
+
+        if origin in tools:
+            for i in tools[origin].keys():
+                if i.split(':')[0] == id.split(':')[0]:
+                    return True
+            return False
+        else:
+            return False
+
 class AuthenticationTool(NBTool):
     """Tool wrapper for the authentication widget"""
 
@@ -219,15 +308,10 @@ class AuthenticationTool(NBTool):
     description = "Log into a Galaxy server"
     load = lambda x: GalaxyAuthWidget()
 
-class UploadData(NBTool):
-    """Tool wrapper for the authentication widget"""
 
-    origin = "+"
-    id = "GiN_Upload_Data"
-    name = "Upload Data"
-    description = "Upload Datafilis to galaxy history"
-
-    load = lambda x: UploadData()
+ToolManager.tool = New_tool
+ToolManager.create_placeholder_widget = new_create_placeholder_widget
+ToolManager.exists = new_exists
 
 # Register the authentication widget
 ToolManager.instance().register(AuthenticationTool())

@@ -1,18 +1,7 @@
-import inspect
-import pickle
-import functools
-import warnings
-
-
-from IPython.core.display import display
-from traitlets import Unicode, List, Bool, Dict, Instance, Bytes
-from ipywidgets import widget_serialization, Output
+from traitlets import Unicode, List, Bool, Dict
 from ._frontend import module_name, module_version
-from nbtools.form import InteractiveForm
 from nbtools.basewidget import BaseWidget
-from nbtools.tool_manager import ToolManager, NBTool
-from .jobwidget import GalaxyJobWidget
-from ipywidgets import interactive
+from nbtools.tool_manager import  NBTool
 from .util import GALAXY_SERVER_NAME_BY_URL
 
 
@@ -37,6 +26,7 @@ class GalaxyUIBuilder(BaseWidget, NBTool):
     form_output = Dict().tag(sync=True)
     history_ids = List([]).tag(sync=True)
     history_data = List([]).tag(sync=True)
+
 
     UI = Dict(sync=True)
     galaxy_tool_id = Unicode(sync=True)
@@ -63,15 +53,11 @@ class GalaxyUIBuilder(BaseWidget, NBTool):
             self.description = "data upload tool"
         else:
             self.name = f"{self.gal_instance['tool_name']} ({GALAXY_SERVER_NAME_BY_URL.get(self.gal_instance['url'], self.gal_instance['url'])})"
-
             self.id = self.gal_instance["tool_id"]  # function_or_method.__qualname__
-
             # Set the description based on the docstring
             self.description = self.gal_instance["tool_description"]
-
         # Set the origin based on the package name or "Notebook"
         # self.origin = 'Notebook' if function_or_method.__module__ == '__main__' else function_or_method.__module__
-
         # register_tool and collapse are True by default
         self.register_tool = True
         self.collapse = False
