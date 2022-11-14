@@ -232,13 +232,18 @@ def New_tool(id, origin):
     Return reference to tool widget given the id and origin
     """
     if origin != '+':
-
         t = {}
-        for i in ToolManager.instance().tools[origin].keys():
-            t[i.split(":")[0]] = ToolManager.instance().tools[origin][i]
+
+        try:
+            for i in ToolManager.instance().tools[origin].keys():
+                t[i.split(":")[0]] = ToolManager.instance().tools[origin][i]
+        except:
+            display(ToolManager.create_placeholder_widget(origin, id.split(':')[0], "Tool belongs to a different origin, Toggle the Code view using gear icon at top left corner and change the origin Ex. Galaxy Local or http://127.0.0.1:8080"))
+            return
 
         ToolManager.instance().tools[origin] = t
 
+    
     if ToolManager.exists(id, origin):   
         # ToolManager.instance().tools[origin][id.split(':')[0]].id  = id   
         # print(ToolManager.instance().tools[origin][id.split(':')[0]].id, ToolManager.instance().tools[origin][id.split(':')[0]] )
@@ -258,11 +263,20 @@ def New_tool(id, origin):
         # display(Output())
         display(ToolManager.create_placeholder_widget(origin, id.split(':')[0]))
 
-def new_create_placeholder_widget( origin, id):
+def new_create_placeholder_widget( origin, id, message=None):
 
     output = Output()  # Output widget
+    
+    if message is not None:
+        error_msg = message
+        name = "Tool origin error"
+    else:
+        error_msg = f"Cannot find tool: {origin} | {id}"
+        name = "Cannot find tool"
+
     placeholder = UIOutput(
-        name="Cannot find tool", error=f"Cannot find tool: {origin} | {id}",
+        name= name, 
+        error=error_msg,
         color= DEFAULT_COLOR,
         logo= DEFAULT_LOGO,
 
