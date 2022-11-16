@@ -63,7 +63,6 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
             "tool_id": self.tool["id"],
             "tool_name": self.tool["name"],
             "tool_description": self.tool["description"],
-            "UID": self.tool['UID'],
         }
 
         history_ids = self.tool["gi"].histories.gi.histories.get_histories()

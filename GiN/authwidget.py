@@ -187,7 +187,7 @@ class GalaxyAuthWidget(UIBuilder):
 
     def register_modules(self):
 
-        ToolManager.tool = New_tool
+        # ToolManager.tool = New_tool
        
         """Get the list available modules (currently only tools) and register widgets for them with the tool manager"""
         url = self.session._notebook_url
@@ -196,8 +196,7 @@ class GalaxyAuthWidget(UIBuilder):
             for section in self.session.tools.gi.tools.get_tool_panel():
                 if section["model_class"] == "ToolSection":
                     for t in section["elems"]:
-
-                        t['id']  = t['id']+':'+str(uuid.uuid1())
+                        # t['id']  = t['id']+':'+str(uuid.uuid1())
                         try:
                             t["gi"] = self.session.tools.gi
                             tool = TaskTool(server_name(url), t)
@@ -226,42 +225,6 @@ def server_name(search_url):
             return name
     return search_url
 
-
-def New_tool(id, origin):
-    """
-    Return reference to tool widget given the id and origin
-    """
-    if origin != '+':
-        t = {}
-
-        try:
-            for i in ToolManager.instance().tools[origin].keys():
-                t[i.split(":")[0]] = ToolManager.instance().tools[origin][i]
-        except:
-            display(ToolManager.create_placeholder_widget(origin, id.split(':')[0], "Tool belongs to a different origin, Toggle the Code view using gear icon at top left corner and change the origin Ex. Galaxy Local or http://127.0.0.1:8080"))
-            return
-
-        ToolManager.instance().tools[origin] = t
-
-    
-    if ToolManager.exists(id, origin):   
-        # ToolManager.instance().tools[origin][id.split(':')[0]].id  = id   
-        # print(ToolManager.instance().tools[origin][id.split(':')[0]].id, ToolManager.instance().tools[origin][id.split(':')[0]] )
-        if (origin != "+"):
-            tool = {}
-            tool['id'] = id
-            tool['name'] = ToolManager.instance().tools[origin][id.split(':')[0]].name
-            tool['description'] = ToolManager.instance().tools[origin][id.split(':')[0]].description
-            tool['gi'] = ToolManager.instance().tools[origin][id.split(':')[0]].tool['gi']
-            tool["UID"] = id.split(":")[1]
-            a = TaskTool(origin, tool)
-            return a 
-        else: 
-            return ToolManager.instance().tools[origin][id.split(':')[0]]
-
-    else:
-        # display(Output())
-        display(ToolManager.create_placeholder_widget(origin, id.split(':')[0]))
 
 def new_create_placeholder_widget( origin, id, message=None):
 
@@ -301,18 +264,6 @@ def new_create_placeholder_widget( origin, id, message=None):
     )
     return output
 
-def new_exists(id, origin):
-        """Check if a tool for the provided id and origin exists"""
-        tools = ToolManager.instance().tools
-
-        if origin in tools:
-            for i in tools[origin].keys():
-                if i.split(':')[0] == id.split(':')[0]:
-                    return True
-            return False
-        else:
-            return False
-
 class AuthenticationTool(NBTool):
     """Tool wrapper for the authentication widget"""
 
@@ -323,9 +274,9 @@ class AuthenticationTool(NBTool):
     load = lambda x: GalaxyAuthWidget()
 
 
-ToolManager.tool = New_tool
+# ToolManager.tool = New_tool
 ToolManager.create_placeholder_widget = new_create_placeholder_widget
-ToolManager.exists = new_exists
+
 
 # Register the authentication widget
 ToolManager.instance().register(AuthenticationTool())
