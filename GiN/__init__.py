@@ -12,9 +12,8 @@ try:
 except:
     pass
 
-
 from .taskwidget import GalaxyTaskWidget
-from .jobwidget import GalaxyJobWidget
+# from .jobwidget import GalaxyJobWidget
 from .sessions import session, get_session
 
 # from .galaxyoutput import GalaxyOutputWidget
