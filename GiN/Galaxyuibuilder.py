@@ -32,7 +32,7 @@ class GalaxyUIBuilder(BaseWidget, NBTool):
     galaxy_tool_id = Unicode(sync=True)
 
     def __init__(
-        self, galaxy_tool_id, history_ids, inputs={}, gal_instance={}, history_data=[], **kwargs
+        self, galaxy_tool_id=None, history_ids=None, inputs={}, gal_instance={}, history_data=[], **kwargs
     ):
 
         self._apply_defaults()

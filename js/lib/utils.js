@@ -198,3 +198,10 @@ export async function  KernelSideDataObjects(code) {
     var system = await executePython(code);
     return system;
 }
+
+
+export function removeAllChildNodes(parent){
+    while (parent.firstChild) {
+        parent.removeChild(parent.firstChild);
+    }
+}

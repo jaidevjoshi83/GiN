@@ -256,7 +256,7 @@ def new_create_placeholder_widget( origin, id, message=None):
         ):
             placeholder.close()
             with output:
-                display(tool(id=id, origin=origin))
+                display(self.tool(id=id, origin=origin))
 
     # Register the callback with the event manager
     EventManager.instance().register(
