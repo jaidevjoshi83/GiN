@@ -217,6 +217,14 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
         status = gi4.jobs.gi.jobs.show_job(JobID, full_details=True)
         return IPython.display.JSON(status)
 
+    def ReturnSessions(server=None):
+
+        a = GiN.sessions.SessionList()
+        gi4 = a.get(server=server)
+        print(gi4)
+
+
+
     def OutPutData(server=None, JobID=None):
 
         a = GiN.sessions.SessionList()
