@@ -26,6 +26,8 @@ import {
     IExecuteResult,
 } from "@jupyterlab/nbformat";
 
+import { Toolbox } from '@g2nb/nbtools';
+
 import $ from "jquery";
 
 
@@ -69,6 +71,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
     <div class="nbtools-info" data-traitlet="info"></div>
     
     <div class="nbtools-form"> 
+       
         <div class="Galaxy-form-div" style="width: 100%; height: 100%;">
         
             <div class="data-preview" style=" float: left;">
@@ -127,12 +130,16 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         super.render();
         const inputs = this.model.get('inputs')
         //########################
-        this.add_history_list()
+        // this.add_history_list()
         //########################
         // this.form_builder(inputs['inputs'])
         this.generate_tool_form()
-        this.add_dataset_table()
+        // this.add_dataset_table()
         //########################
+        if (this.model.get('gal_instance').tool_name != 'login'){
+            this.add_dataset_table()
+            this.add_history_list()
+        }
         // // Hide the header or footer, if necessary
         this.display_header_changed();
         this.display_footer_changed();
@@ -147,9 +154,112 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         // Attach custom buttons
         this.activate_custom_buttons();
         this.AddHelpSection(inputs['help'])
-
         this.iterate_over_tool_cells()
 
+        if (this.model.get('gal_instance').tool_name == 'login'){
+
+            console.log(this.model.get('gal_instance').tool_name )
+
+            console.log("OKK")
+            this.login_button()
+        }
+    }
+
+    login_button(){
+
+        // this.el.querySelector('.Galaxy-form-div').style.display == 'none'
+
+        this.el.querySelector('.Galaxy-form-div').style.display = 'none'
+
+        var nb_form = this.el.querySelector('.nbtools-form')
+
+
+        var data_upload = `<div class="login-form"> 
+
+                                <div class="auth-error" style="display: none"> 
+                                    <h1> Authentication error </h1>
+                                </div>
+
+                                <div class="auth-successful" style="display: none">
+                                    <h1> Login Successful </h1>
+                                </div>
+
+                                <div class="login-form-div" style="display:block">
+
+                                    <div class="tab">
+                                            <button type="button" id="resumable_upload_button" class="tablinks" >With Credential</button>
+                                            <button type="button" class="tablinks">With API Key</button>
+                                    </div>
+
+                                    <!-- Tab content -->
+                                    <div id="credential-login" class="tabcontent" style="display: block;">
+
+                                        <div style="margin:10px">
+                                            <div>
+                                            <span class="ui-form-title-text"> <b>Select Galaxy Server</b> </span>
+                                            </div>
+                                            <input type="text" name="server" list="cityname">
+                                            <datalist id="cityname">
+                                                <option value="https://usegalaxy.org"> Galaxy Main </option>
+                                                <option value="https://0.0.0.0:8080"> Galaxy Local</option>
+                                                <option value="https://usegalaxy.eu"> Galaxy Europe</option>
+                                            </datalist>
+                                        </div>
+
+                                        <div style=" margin:10px">
+                                        <span class="ui-form-title-text"> <b>Email ID/User Name</b> </span>
+                                            <input class="InputData" name="email" style="display: block" >
+                                        </div>
+
+                                        <div style=" margin:10px">
+                                        <span class="ui-form-title-text"> <b>Password</b> </span>
+                                            <input class="InputData" type="password" name="password" style="display: block" >
+                                        </div>
+                                    </div>
+                            
+                                    <div id="api-login" class="tabcontent" style="display: none;">
+
+                                    <div style="margin:10px">
+                                        <div>
+                                        <span class="ui-form-title-text"> <b>Select Galaxy Server</b> </span>
+                                        </div>
+                                        <input type="text" name="server" list="cityname">
+                                        <datalist id="cityname">
+                                            <option value="https://usegalaxy.org"> Galaxy Main </option>
+                                            <option value="https://0.0.0.0:8080"> Galaxy Local</option>
+                                            <option value="https://usegalaxy.eu"> Galaxy Europe</option>
+                                        </datalist>
+                                        </div>
+
+                                        <div style=" margin:10px">
+                                        <span class="ui-form-title-text"> <b>API Key</b> </span>
+                                            <input class="InputData" name="api" style="display: block" >
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>`
+
+        const utm = new DOMParser().parseFromString(data_upload, 'text/html').querySelector('.login-form')
+
+
+        var List = utm.querySelectorAll('.tablinks')        
+
+        // utm.querySelector('#upload').style.display  = 'block'
+
+        List.forEach((button) => button.addEventListener('click', () => {
+
+            console.log("OK")
+
+            if (button.innerText  == 'With Credential') {
+                utm.querySelector('#credential-login').style.display  = 'block'
+                utm.querySelector('#api-login').style.display  = 'none'
+            } else if (button.innerText  == 'With API Key') {
+                utm.querySelector('#credential-login').style.display  = 'none'
+                utm.querySelector('#api-login').style.display  = 'block'
+            }
+        }));
+
+        nb_form.append(utm)
     }
 
     iterate_over_tool_cells() {
@@ -3866,26 +3976,62 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         var self  = this;
         this.el.querySelectorAll('.nbtools-run').forEach((button) => button.addEventListener('click', async () => {
-        var history_id = self.element.querySelector('#history_ids').value 
-        var form = self.element.querySelector('.Galaxy-form')
-        var inputs = this.get_form_data(form, 'on')
+           
 
-        // await KernelSideDataObjects(`import json\nprint(json.loads('${JSON.stringify({"True":true})}'))`)        
+            if (inputs == 'error'){
+                return
+            }
 
-        if (inputs == 'error'){
-            return
-        }
+            var toolid =  self.model.get('gal_instance')['url']+"/"+"GiN_data_upload_tool"
 
-        var toolid =  self.model.get('gal_instance')['url']+"/"+"GiN_data_upload_tool"
+            if (this.model.get('inputs')['id'] == toolid) {
+                this.dataupload_job()
+            } else if (this.model.get('gal_instance').tool_name == 'login'){
 
-        if (this.model.get('inputs')['id'] == toolid) {
-            this.dataupload_job()
-        } else {
+                this.trigger_login()
 
-        this.SubmitJob(inputs, history_id)
-        }
+            }else {
+                var form = self.element.querySelector('.Galaxy-form')
+                var inputs = this.get_form_data(form, 'on')
+                var history_id = self.element.querySelector('#history_ids').value 
+                this.SubmitJob(inputs, history_id)
+            }
         }));
     }
+
+    async trigger_login(){
+
+        var logingForm = this.el.querySelector('.login-form-div')
+
+        for(var i = 0; i < logingForm.children.length; i++) {
+            if (logingForm.children[i].style.display == 'block'){
+                if (logingForm.children[i].id == 'credential-login'){
+                    var credentials = logingForm.children[i].querySelectorAll('input')
+
+                    var jobs = await KernelSideDataObjects(`from GiN.authwidget import GalaxyAuthWidget\na  = GalaxyAuthWidget()\na.login(server=${JSON.stringify(credentials[0].value)}, email=${JSON.stringify(credentials[1].value)}, password=${JSON.stringify(credentials[2].value)})`)
+
+
+                   if (jobs != undefined){
+                        this.el.querySelector('.auth-error').style.display = 'block'
+                        this.el.querySelector('.login-form-div').style.display = "none"
+                   } else{
+                        this.el.querySelector('.auth-successful').style.display = 'block'
+                        this.el.querySelector('.login-form-div').style.display = "none"
+                   }
+
+                    // Toolbox.add_tool(origin, {"name":'Test', 'description':"Tet des"})
+
+
+                } else {
+                    var credentials = logingForm.children[i].querySelectorAll('input')
+
+                   var jobs = await KernelSideDataObjects(`from GiN.authwidget import GalaxyAuthWidget\na  = GalaxyAuthWidget()\na.login(server=${JSON.stringify(credentials[0].value)}, password=${JSON.stringify(credentials[1].value)})`)
+    
+                }
+            }
+        }
+    }
+
 
     async SubmitJob(inputs, history_id){
 

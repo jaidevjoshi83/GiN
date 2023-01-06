@@ -27,9 +27,13 @@ class GalaxyUIBuilder(BaseWidget, NBTool):
     history_ids = List([]).tag(sync=True)
     history_data = List([]).tag(sync=True)
 
-
     UI = Dict(sync=True)
     galaxy_tool_id = Unicode(sync=True)
+
+    upload_callback = None
+    display_header = None
+    buttons = None
+    parameters = None
 
     def __init__(
         self, galaxy_tool_id=None, history_ids=None, inputs={}, gal_instance={}, history_data=[], **kwargs
@@ -38,8 +42,10 @@ class GalaxyUIBuilder(BaseWidget, NBTool):
         self._apply_defaults()
         self.inputs = inputs
         self.gal_instance = gal_instance
-        self.history_ids = history_ids
-        self.galaxy_tool_id = galaxy_tool_id
+        if history_ids:
+            self.history_ids = history_ids
+        if galaxy_tool_id:
+            self.galaxy_tool_id = str(galaxy_tool_id)
         self.history_data = history_data
         
         BaseWidget.__init__(self, **kwargs)
@@ -52,13 +58,19 @@ class GalaxyUIBuilder(BaseWidget, NBTool):
             self.id = "GiN_Upload_Data"
             self.description = "data upload tool"
         else:
+            # self.name = f"{self.name} ({GALAXY_SERVER_NAME_BY_URL.get(self.origin, self.origin)})"
             self.name = f"{self.gal_instance['tool_name']} ({GALAXY_SERVER_NAME_BY_URL.get(self.gal_instance['url'], self.gal_instance['url'])})"
-            self.id = self.gal_instance["tool_id"]  # function_or_method.__qualname__
+            self.id = "galaxy_authentication"  # function_or_method.__qualname__
             # Set the description based on the docstring
-            self.description = self.gal_instance["tool_description"]
+            self.description = self.description
         # Set the origin based on the package name or "Notebook"
         # self.origin = 'Notebook' if function_or_method.__module__ == '__main__' else function_or_method.__module__
         # register_tool and collapse are True by default
         self.register_tool = True
         self.collapse = False
+
+    @staticmethod
+    def _deprecation_warnings(kwargs):
+        if 'function_import' in kwargs:
+            warnings.warn(DeprecationWarning('UI Builder specifies function_import, which is deprecated'))
 

@@ -82,10 +82,9 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
                 }
 
             else:
-                inputs = self.tool["gi"].tools.gi.tools.build(
-                    tool_id=tool["id"].split(":")[0], history_id=history_ids[0]["id"]
-                )
 
+                inputs = self.tool["gi"].tools.gi.tools.build(tool_id=self.tool["id"], history_id=history_ids[0]["id"])
+ 
             history_data = GalaxyTaskWidget.updated_form(
                 server=self.gal_instance["url"],
                 history_id=history_ids[0]["id"],
