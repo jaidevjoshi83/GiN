@@ -145,6 +145,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         this.display_footer_changed();
         this.model.on(`change:display_header`, this.display_header_changed, this);
         this.model.on(`change:display_footer`, this.display_footer_changed, this);
+
         // // Show or hide the "busy" UI
         this.busy_changed();
         this.model.on(`change:busy`, this.busy_changed, this);
@@ -157,31 +158,24 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         this.iterate_over_tool_cells()
 
         if (this.model.get('gal_instance').tool_name == 'login'){
-
-            console.log(this.model.get('gal_instance').tool_name )
-
-            console.log("OKK")
             this.login_button()
         }
     }
 
     login_button(){
 
-        // this.el.querySelector('.Galaxy-form-div').style.display == 'none'
-
         this.el.querySelector('.Galaxy-form-div').style.display = 'none'
 
         var nb_form = this.el.querySelector('.nbtools-form')
 
-
         var data_upload = `<div class="login-form"> 
 
-                                <div class="auth-error" style="display: none"> 
-                                    <h1> Authentication error </h1>
+                                <div class="auth-error" style="display: none; margin: 10px;"> 
+                                    <p> <b>Authentication error</b> </p>
                                 </div>
 
-                                <div class="auth-successful" style="display: none">
-                                    <h1> Login Successful </h1>
+                                <div class="auth-successful" style="display: none; margin: 10px;">
+                                    <p> <b>Login Successful </b></p>
                                 </div>
 
                                 <div class="login-form-div" style="display:block">
@@ -240,7 +234,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                             </div>`
 
         const utm = new DOMParser().parseFromString(data_upload, 'text/html').querySelector('.login-form')
-
 
         var List = utm.querySelectorAll('.tablinks')        
 
@@ -4002,6 +3995,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
     async trigger_login(){
 
         var logingForm = this.el.querySelector('.login-form-div')
+        this.el.querySelector('.auth-error').style.display = 'none'
 
         for(var i = 0; i < logingForm.children.length; i++) {
             if (logingForm.children[i].style.display == 'block'){
@@ -4010,13 +4004,21 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
                     var jobs = await KernelSideDataObjects(`from GiN.authwidget import GalaxyAuthWidget\na  = GalaxyAuthWidget()\na.login(server=${JSON.stringify(credentials[0].value)}, email=${JSON.stringify(credentials[1].value)}, password=${JSON.stringify(credentials[2].value)})`)
 
-
                    if (jobs != undefined){
                         this.el.querySelector('.auth-error').style.display = 'block'
-                        this.el.querySelector('.login-form-div').style.display = "none"
+                        // this.el.querySelector('.login-form-div').style.display = "none"
+                       
                    } else{
-                        this.el.querySelector('.auth-successful').style.display = 'block'
-                        this.el.querySelector('.login-form-div').style.display = "none"
+                        
+                        this.el.querySelector('.auth-successful').style.display = 'block';
+                        this.el.querySelector('.login-form-div').style.display = "none";
+                        this.el.querySelector('.nbtools-title').innerText = `Login as ${credentials[1].value}`;
+                        this.hide_run_buttons(true)
+                        this.el.querySelector('.nbtools-footer').style.display = 'none';
+                        this.el.querySelector('.nbtools-body').style.display = 'none';
+                        this.el.querySelector('.nbtools-subtitle').innerText = `${credentials[0].value}`;
+                        this.el.querySelector('.nbtools-collapse').click();
+                        // this.toggle_collapse()
                    }
 
                     // Toolbox.add_tool(origin, {"name":'Test', 'description':"Tet des"})

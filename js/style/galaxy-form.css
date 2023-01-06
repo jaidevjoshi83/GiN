@@ -222,12 +222,9 @@
 
 
 
-.galaxy-uibuilder .login-form{
-    
-    padding: 10px;
-    background-color: rgb(247,242,242);
-    
-    
+.galaxy-uibuilder .login-form-div{
+  background-color: rgb(246,246,246);
+  padding: 10px;
 }
 
 .galaxy-uibuilder .tabcontent input{
@@ -246,3 +243,23 @@
     border: 1px rgb(38,38,45) solid;
 }
   
+
+.galaxy-uibuilder .login-form .auth-successful{
+  background-color: rgb(129, 233, 130);
+  padding: 3px;
+  border-radius: 3px; 
+}
+
+.galaxy-uibuilder .login-form .auth-error{
+  background-color: rgb(241,153,153);
+  padding: 3px;
+  border-radius: 3px;
+}
+
+.galaxy-uibuilder .login-form .auth-error p {
+  margin: 10px;
+}
+
+.galaxy-uibuilder .login-form .auth-successful p {
+   margin: 10px; 
+}

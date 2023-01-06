@@ -28,12 +28,16 @@ class GalaxyAuthWidget(GalaxyUIBuilder):
     default_color = DEFAULT_COLOR
     default_logo = DEFAULT_LOGO
 
+
+
     def __init__(self, session=None, **kwargs):
         """Initialize the authentication widget"""
 
         GalaxyUIBuilder.__init__(
             self,
             name='login',
+            run_label='Login Galaxy',
+            description='Login to Galaxy instance by credenital or API Key',
             display_header=False,
             color=self.default_color,
             logo=self.default_logo,
@@ -51,26 +55,6 @@ class GalaxyAuthWidget(GalaxyUIBuilder):
             self.system_message()  # Display the system message
             self.trigger_login()  # Trigger login callbacks of job and task widgets
 
-            # Display the widget with the system message and no form
-            GalaxyUIBuilder.__init__(
-                self,
-                name=server_name(self.session._notebook_url),
-                display_header=False,
-                color=self.default_color,
-                logo=self.default_logo,
-                collapsed=True,
-                gal_instance={'name': 'login'},
-                **kwargs
-            )
-
-        # If not, prompt the user to login
-        # else:
-        #     # Apply the display spec
-        #     # for key, value in self.login_spec.items():
-        #     #     kwargs[key] = value
-
-        #     # Call the superclass constructor with the spec
-        #     GalaxyUIBuilder.__init__(self, self.login, **kwargs)
 
     def login(self, server, email, password):
         """Login to the Galaxy server"""
@@ -82,12 +66,6 @@ class GalaxyAuthWidget(GalaxyUIBuilder):
                 "name": "Upload Data",
             }
         ]
-
-        # try:
-        # if (email == "" or email == None):
-        #     self.session = GalaxyInstance(server,  api_key=password)
-        #     email = ''
-        # else:
 
         try:
             self.session = GalaxyInstance(server, email=email, password=password)
@@ -110,9 +88,24 @@ class GalaxyAuthWidget(GalaxyUIBuilder):
 
         # Register tools in their own thread so as not to block the kernel
 
-
         registration_thread = Thread(target=register_modules_callback)
         registration_thread.start()
+
+
+        # GalaxyUIBuilder.__init__(
+        #     self,
+        #     name='login as jaidev',
+        #     run_label='Login Galaxy',
+        #     description='Login to Galaxy instance by credenital or API Key',
+        #     display_header=False,
+        #     color=self.default_color,
+        #     logo=self.default_logo,
+        #     collapsed=True,
+        #     gal_instance={'tool_name': 'login', 'url': ''},
+        #     **kwargs
+        # )
+
+        self.collapse = True
 
         # except HTTPError:
         #     self.error = "Invalid username or password. Please try again."
@@ -185,34 +178,12 @@ class GalaxyAuthWidget(GalaxyUIBuilder):
                         tool = TaskTool(server_name(url), t)
                         ToolManager.instance().register(tool)
                         print("ok")
-
-                    # print(t)
-
-                    # if t['id'] == 'hifive':
-
-                    # try:
-                    # print(t)
-                        # tool = TaskTool(server_name(url), t)
-                        # ToolManager.instance().register(tool)
-                    # except:
-                    #     print('ERROR', t)
-                    #     pass
-
-                    # t['name']
-                    # tool = TaskTool(server_name(url), t)
-                    # ToolManager.instance().register(tool)
-                    # except:
-                    #     pass
- 
-        # Register tools in their own thread so as not to block the kernel
-        
-        
-
+            
+            
         # registration_thread = Thread(target=register_modules_callback)
         # registration_thread.start()
-
-        # print("@@@@@@@@@@@", ToolManager.instance().list())
         return
+       
 
     def system_message(self):
         self.info = "Successfully logged into Galaxy"
