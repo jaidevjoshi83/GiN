@@ -15,48 +15,45 @@ from nbtools.uioutput import UIOutput
 from nbtools.event_manager import EventManager
 import GiN
 import uuid
+import json
 
 import IPython
 import IPython.display
+
   
-
-
-
 class GalaxyAuthWidget(GalaxyUIBuilder):
     """A widget for authenticating with a Galaxy server"""
 
     default_color = DEFAULT_COLOR
     default_logo = DEFAULT_LOGO
-
+    new_session=None
 
 
     def __init__(self, session=None, **kwargs):
         """Initialize the authentication widget"""
 
-        GalaxyUIBuilder.__init__(
-            self,
-            name='login',
-            run_label='Login Galaxy',
-            description='Login to Galaxy instance by credenital or API Key',
-            display_header=False,
-            color=self.default_color,
-            logo=self.default_logo,
-            collapsed=False,
-            gal_instance={'tool_name': 'login', 'url': ''},
-            **kwargs
-        )
-
         self.session = session
-        # Assign the session object, lazily creating one if needed
 
         if self.validate_credentials(session):
             self.register_session()  # Register the session with the SessionList
             self.register_modules()  # Register the modules with the ToolManager
             self.system_message()  # Display the system message
-            self.trigger_login()  # Trigger login callbacks of job and task widgets
+            self.trigger_login() 
 
+        else:
+            GalaxyUIBuilder.__init__(
+                self,
+                name='login',
+                run_label='Login Galaxy',
+                description='Login to Galaxy instance by credenital or API Key',
+                display_header=False,
+                color=self.default_color,
+                logo=self.default_logo,
+                collapsed=False,
+                **kwargs
+            )
 
-    def login(self, server, email, password):
+    def login(self, server, password=None, api_key=None, email=None):
         """Login to the Galaxy server"""
 
         t = [
@@ -67,52 +64,80 @@ class GalaxyAuthWidget(GalaxyUIBuilder):
             }
         ]
 
-        try:
-            self.session = GalaxyInstance(server, email=email, password=password)
-        except:
-            return IPython.display.JSON({"error": "authentication error"})
+        tool_list =  {'tools':[]}
+    
+        if email:
+            try:
+                self.session = GalaxyInstance(server, email=email, password=password)
+                self.session._notebook_email = email
+                self.session._notebook_password = password
+                self.session._notebook_key = api_key
+            except:
+                tool_list['error'] = 'true'
+                return IPython.display.JSON(tool_list['error'])
+        else:
+            # try:
+            self.session = GalaxyInstance(server,  api_key=api_key, verify=True)
+            self.session._notebook_password = password
+            self.session._notebook_key = api_key
+            self.session._notebook_email = self.session.gi.users.get_current_user()['email']
+
+
+
+
+            # self.session._notebook_email = self.session.gi.users.get_current_user()['email']
+                
+            # except:
+            #     tool_list['error'] = 'true'
+            #     return IPython.display.JSON({"error": 'true'})
 
         self.session._notebook_url = server
-        self.session._notebook_email = email
-        self.session._notebook_password = password
-        # Validate the provided credentials
+
        
-        self.replace_widget()
+        
+        # Validate the provided credentials
 
+        # print(self.session._notebook_email)
+
+        self.register_session()
+
+        tool_list['url']  = self.session._notebook_url
+        tool_list['email'] = self.session._notebook_email
+        
+        # tool_list = {'url':[self.session._notebook_url], 'error':'', 'email':None, 'tools':[]}
+
+        # {'id': 'https://usegalaxy.org/GiN_data_upload_tool',
+        # 'description': 'Upload data files to galaxy server',
+        # 'name': 'Upload Data'}
+
+        # print(dir(self.session.gi.users.get_current_user()))
+                
+
+        for section in self.session.tools.gi.tools.get_tool_panel():
+            if section["model_class"] == "ToolSection":
+                for t in section["elems"]:
+                    tool={'id':None, 'description':None, 'name':None}
+                    if t['model_class'] == 'Tool':
+                        
+                        tool['id'] = t['id']
+                        tool['description'] = t['description']
+                        tool['name'] = t['name']
+                        tool['origin'] = self.session._notebook_url
+                        tool['email'] = self.session._notebook_email
+                        # tool['key'] = self.session.gi.key
+                        tool_list['tools'].append(tool)
+
+        return IPython.display.JSON(tool_list)
+
+    def RegisterMod(self, tool1):
+        # aDict = json.loads(tool)
+
+        tool1 = tool1
         def register_modules_callback():
-            for i in t:
-                if self.validate_credentials(self.session):
-                    i["gi"] = self.session.tools.gi
-                    tool1 = TaskTool("+", i)
-                    ToolManager.instance().register(tool1)
-
-        # Register tools in their own thread so as not to block the kernel
-
+            tool = TaskTool(self.session._notebook_url, tool1)
+            ToolManager.instance().register(tool)
         registration_thread = Thread(target=register_modules_callback)
         registration_thread.start()
-
-
-        # GalaxyUIBuilder.__init__(
-        #     self,
-        #     name='login as jaidev',
-        #     run_label='Login Galaxy',
-        #     description='Login to Galaxy instance by credenital or API Key',
-        #     display_header=False,
-        #     color=self.default_color,
-        #     logo=self.default_logo,
-        #     collapsed=True,
-        #     gal_instance={'tool_name': 'login', 'url': ''},
-        #     **kwargs
-        # )
-
-        self.collapse = True
-
-        # except HTTPError:
-        #     self.error = "Invalid username or password. Please try again."
-        # except BaseException as e:
-        #     self.error = str(e)
-
-        return IPython.display.JSON({"error": "Successful"})
 
     def has_credentials(self):
         """Test whether the session object is instantiated and whether an email and password have been provided"""
@@ -157,32 +182,23 @@ class GalaxyAuthWidget(GalaxyUIBuilder):
             self.session._notebook_url,
             self.session._notebook_email,
             self.session._notebook_password,
+            self.session._notebook_key, 
         )
+
 
     def register_modules(self):
 
-        # ToolManager.tool = New_tool
-       
-        """Get the list available modules (currently only tools) and register widgets for them with the tool manager"""
         url = self.session._notebook_url
 
-        # def register_modules_callback():
         for section in self.session.tools.gi.tools.get_tool_panel():
             if section["model_class"] == "ToolSection":
                 for t in section["elems"]:
-                    # t['id']  = t['id']+':'+str(uuid.uuid1())
-                    # try:
                     t["gi"] = self.session.tools.gi
-
                     if t['model_class'] == 'Tool':
-                        tool = TaskTool(server_name(url), t)
+                        print(url, t)
+                        # tool = TaskTool(server_name(url), t)
                         ToolManager.instance().register(tool)
-                        print("ok")
-            
-            
-        # registration_thread = Thread(target=register_modules_callback)
-        # registration_thread.start()
-        return
+    
        
 
     def system_message(self):
@@ -191,7 +207,7 @@ class GalaxyAuthWidget(GalaxyUIBuilder):
     def trigger_login(self):
         """Dispatch a login event after authentication"""
         # Trigger login callbacks of job and task widgets
-        return
+        # return
 
         EventManager.instance().dispatch("galaxy.login", self.session)
 
@@ -241,33 +257,14 @@ def new_create_placeholder_widget( origin, id, message=None):
     )
     return output
 
-# class AuthenticationTool(NBTool):
-#     """Tool wrapper for the authentication widget"""
-
-#     origin = "+"
-#     id = "galaxy_authentication"
-#     name = "Galaxy Login"
-#     description = "Log into a Galaxy server"
-#     load = lambda x: GalaxyAuthWidget()
-
-
-
 class AuthenticationTool(NBTool):
-
     """Tool wrapper for the authentication widget"""
 
-    def __init__(self):
-        
-        NBTool.__init__(self)
-        self.origin = '+'
-        self.id = "galaxy_authentication"
-        self.name = "Galaxy Login"
-        self.description = "Log into a Galaxy server"
-        self.load = lambda: GalaxyAuthWidget()
-
-
-# ToolManager.tool = New_tool
-ToolManager.create_placeholder_widget = new_create_placeholder_widget
+    origin = "+"
+    id = "galaxy_authentication"
+    name = "Galaxy Login"
+    description = "Log into a Galaxy server"
+    load = lambda x: GalaxyAuthWidget()
 
 
 # Register the authentication widget
