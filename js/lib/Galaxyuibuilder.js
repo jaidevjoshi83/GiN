@@ -156,12 +156,12 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         this.AddHelpSection(inputs['help'])
         this.iterate_over_tool_cells()
 
-        
-
         if (this.model.get('name') == 'login'){
             console.log(this.model.get('name') )
             this.login_button()
         }
+
+        // this.add_galaxy_cell_metadata()
     }
 
     login_button(){
@@ -267,6 +267,20 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         for(var i = 0; i < cells.length; i++) {
             if (cells[i]._input.node.querySelector('.lm-Widget.p-Widget.jp-InputPrompt.jp-InputArea-prompt').innerText == '[*]:'){
                 return cells[i].model.metadata.get('inputs')
+            }
+        }
+    }
+
+    add_galaxy_cell_metadata(){
+
+        console.log("@@@")
+
+        if (!ContextManager.notebook_tracker) return;               
+        if (!ContextManager.notebook_tracker.currentWidget) return; 
+        const cells = ContextManager.notebook_tracker.currentWidget.content.widgets;
+        for(var i = 0; i < cells.length; i++) {
+            if (cells[i]._input.node.querySelector('.lm-Widget.p-Widget.jp-InputPrompt.jp-InputArea-prompt').innerText == '[*]:'){
+                return cells[i].model.metadata.set('galaxy_cell', true)
             }
         }
     }
@@ -4048,8 +4062,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
                 } else {
                     var credentials = logingForm.children[i].querySelectorAll('input')
-
-                    console.log(credentials[0].value, credentials[1].value)
 
                     var jobs = await KernelSideDataObjects(`from GiN.authwidget import GalaxyAuthWidget\na  = GalaxyAuthWidget()\na.login(server=${JSON.stringify(credentials[0].value)}, api_key=${JSON.stringify(credentials[1].value)})`)
 

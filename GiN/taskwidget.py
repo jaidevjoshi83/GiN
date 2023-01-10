@@ -142,8 +142,8 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
 
         return IPython.display.JSON(datatypes_genomes)
 
-
-    def Return_api_key_and_email(server):
+  
+    def Return_api_key(server):
         a = GiN.sessions.SessionList()
         gi = a.get(server=server)
         return IPython.display.JSON({'api_key': gi.gi.key, 'email': gi.gi.email})
@@ -180,7 +180,7 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
 
         a = GiN.sessions.SessionList()
         gi4 = a.get(server=server)
-        print(gi4)
+  
 
     def OutPutData(server=None, JobID=None):
 

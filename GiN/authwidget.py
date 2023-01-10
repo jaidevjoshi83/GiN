@@ -34,24 +34,17 @@ class GalaxyAuthWidget(GalaxyUIBuilder):
 
         self.session = session
 
-        if self.validate_credentials(session):
-            self.register_session()  # Register the session with the SessionList
-            self.register_modules()  # Register the modules with the ToolManager
-            self.system_message()  # Display the system message
-            self.trigger_login() 
-
-        else:
-            GalaxyUIBuilder.__init__(
-                self,
-                name='login',
-                run_label='Login Galaxy',
-                description='Login to Galaxy instance by credenital or API Key',
-                display_header=False,
-                color=self.default_color,
-                logo=self.default_logo,
-                collapsed=False,
-                **kwargs
-            )
+        GalaxyUIBuilder.__init__(
+            self,
+            name='login',
+            run_label='Login into Galaxy',
+            description='Login to Galaxy instance by credenital or API Key',
+            display_header=False,
+            color=self.default_color,
+            logo=self.default_logo,
+            collapsed=False,
+            **kwargs
+        )
 
     def login(self, server, password=None, api_key=None, email=None):
         """Login to the Galaxy server"""
@@ -70,74 +63,51 @@ class GalaxyAuthWidget(GalaxyUIBuilder):
             try:
                 self.session = GalaxyInstance(server, email=email, password=password)
                 self.session._notebook_email = email
-                self.session._notebook_password = password
-                self.session._notebook_key = api_key
             except:
                 tool_list['error'] = 'true'
                 return IPython.display.JSON(tool_list['error'])
         else:
-            # try:
-            self.session = GalaxyInstance(server,  api_key=api_key, verify=True)
-            self.session._notebook_password = password
-            self.session._notebook_key = api_key
-            self.session._notebook_email = self.session.gi.users.get_current_user()['email']
-
-
-
-
-            # self.session._notebook_email = self.session.gi.users.get_current_user()['email']
-                
-            # except:
-            #     tool_list['error'] = 'true'
-            #     return IPython.display.JSON({"error": 'true'})
+            try:
+                self.session = GalaxyInstance(server,  api_key=api_key, verify=True)
+                self.session._notebook_email = self.session.gi.users.get_current_user()['email']
+            except:
+                tool_list['error'] = 'true'
+                return IPython.display.JSON({"error": 'true'})
 
         self.session._notebook_url = server
+        self.session._notebook_password = password
+        self.session._notebook_key = api_key
 
-       
-        
         # Validate the provided credentials
-
-        # print(self.session._notebook_email)
 
         self.register_session()
 
         tool_list['url']  = self.session._notebook_url
-        tool_list['email'] = self.session._notebook_email
-        
-        # tool_list = {'url':[self.session._notebook_url], 'error':'', 'email':None, 'tools':[]}
-
-        # {'id': 'https://usegalaxy.org/GiN_data_upload_tool',
-        # 'description': 'Upload data files to galaxy server',
-        # 'name': 'Upload Data'}
-
-        # print(dir(self.session.gi.users.get_current_user()))
-                
+        tool_list['email'] = self.session._notebook_email        
 
         for section in self.session.tools.gi.tools.get_tool_panel():
             if section["model_class"] == "ToolSection":
                 for t in section["elems"]:
                     tool={'id':None, 'description':None, 'name':None}
                     if t['model_class'] == 'Tool':
-                        
+                    
                         tool['id'] = t['id']
                         tool['description'] = t['description']
                         tool['name'] = t['name']
                         tool['origin'] = self.session._notebook_url
                         tool['email'] = self.session._notebook_email
-                        # tool['key'] = self.session.gi.key
                         tool_list['tools'].append(tool)
 
         return IPython.display.JSON(tool_list)
 
-    def RegisterMod(self, tool1):
+    def RegisterMod(self, tool):
         # aDict = json.loads(tool)
-
-        tool1 = tool1
-        def register_modules_callback():
-            tool = TaskTool(self.session._notebook_url, tool1)
-            ToolManager.instance().register(tool)
-        registration_thread = Thread(target=register_modules_callback)
-        registration_thread.start()
+        # tool1 = tool1
+        # def register_modules_callback():
+        tool = TaskTool(self.session._notebook_url, tool)
+        ToolManager.instance().register(tool)
+        # registration_thread = Thread(target=register_modules_callback)
+        # registration_thread.start()
 
     def has_credentials(self):
         """Test whether the session object is instantiated and whether an email and password have been provided"""
@@ -185,21 +155,6 @@ class GalaxyAuthWidget(GalaxyUIBuilder):
             self.session._notebook_key, 
         )
 
-
-    def register_modules(self):
-
-        url = self.session._notebook_url
-
-        for section in self.session.tools.gi.tools.get_tool_panel():
-            if section["model_class"] == "ToolSection":
-                for t in section["elems"]:
-                    t["gi"] = self.session.tools.gi
-                    if t['model_class'] == 'Tool':
-                        print(url, t)
-                        # tool = TaskTool(server_name(url), t)
-                        ToolManager.instance().register(tool)
-    
-       
 
     def system_message(self):
         self.info = "Successfully logged into Galaxy"
@@ -265,7 +220,6 @@ class AuthenticationTool(NBTool):
     name = "Galaxy Login"
     description = "Log into a Galaxy server"
     load = lambda x: GalaxyAuthWidget()
-
 
 # Register the authentication widget
 ToolManager.instance().register(AuthenticationTool())

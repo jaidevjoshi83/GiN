@@ -26,8 +26,6 @@ class SessionList:
             
         else:
             session = GalaxyInstance(server,  api_key=api_key,  verify=True)
-        
-        print(email)
             
        
         session._notebook_url = server
