@@ -166,8 +166,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
     login_button(){
 
- 
-
         this.el.querySelector('.Galaxy-form-div').style.display = 'none'
 
         var nb_form = this.el.querySelector('.nbtools-form')
@@ -296,7 +294,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
     }
 
     update_metadata_FormState(inputs, html){
-
 
         //FixMe: 
         var form_json = {'count':'', 'user_name':this.model.get('email') ,'inputs': inputs}
@@ -2654,6 +2651,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             }
 
             let formdata = form.parentNode.parentNode.parentNode.parentNode.parentNode.outerHTML
+
+            // console.log(formdata)
             let fint = JSON.stringify(formdata)
 
             // console.log(typeof JSON.parse(fint))
@@ -4025,9 +4024,17 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
     async trigger_login(){
 
+
+        this.update_metadata_FormState({}, {})
+
         var ToolBox = new Toolbox({})
 
         var logingForm = this.el.querySelector('.login-form-div')
+        var formdata = logingForm.parentNode.parentNode.parentNode.parentNode.outerHTML
+       
+        let fint = JSON.stringify(formdata)
+        this.update_metadata_FormState({}, JSON.parse(fint))
+
         this.el.querySelector('.auth-error').style.display = 'none'
 
         for(var i = 0; i < logingForm.children.length; i++) {
@@ -4048,7 +4055,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
                         KernelSideDataObjects(`from nbtools import ToolManager\na.RegisterMod(${JSON.stringify(jobs['tools'][i])})`)
                     }
-                        
                         this.el.querySelector('.auth-successful').style.display = 'block';
                         this.el.querySelector('.login-form-div').style.display = "none";
                         this.el.querySelector('.nbtools-title').innerText = `Login as ${credentials[1].value}`;
@@ -4070,7 +4076,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                         // this.el.querySelector('.login-form-div').style.display = "none"
                    } else{
 
-                   
                         for (var i = 0; i < jobs['tools'].length; i++){
                             KernelSideDataObjects(`from nbtools import ToolManager\na.RegisterMod(${JSON.stringify(jobs['tools'][i])})`)
                         }
@@ -4111,7 +4116,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         this.JobStatusTemplate(toolforms, jobs)
 
-    } else{
+    } else {
             for (var i = 0; i < jobs['jobs'].length; i++ ) {
                 this.JobStatusTemplate(toolforms, jobs['jobs'][i])
             }
@@ -4124,8 +4129,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         
             this.el.querySelector('.Galaxy-form').style.display = 'none'
             this.el.querySelector('.galaxy-history-list').style.display = 'none'
-    }
-
+        }
     }
 
     hide_run_buttons (hide){

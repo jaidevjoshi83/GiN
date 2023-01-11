@@ -117,6 +117,7 @@ const initNotebookTracker = (notebookTracker) => {
                      // console.log(cells[i].model.metadata.get('html'))
                      if(cells[i].model.metadata.get('html') != undefined){
                          console.log("OK")
+
                          removeAllChildNodes(cells[i].outputArea.node)
                          cells[i].outputArea.node.append(ReturnOutputArea(cells[i].model.metadata.get('html'), notebookTracker))
                      }
