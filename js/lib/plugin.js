@@ -12,7 +12,7 @@ import { MODULE_NAME, MODULE_VERSION } from './version';
 import { removeAllChildNodes , KernelSideDataObjects} from './utils';
 import { NotebookActions } from '@jupyterlab/notebook';
 
-import { getForcedCellsVisibleNotebookIds, getMetadata, getRanNotebookIds, hideCodeCells, runAllCells, setMetadata, showCodeCells } from './notebookActions';
+import { Private,  getRanNotebookIds} from './notebookActions';
 const module_exports = Object.assign(Object.assign(Object.assign({},  galaxyuibuilder_exports), utils_exports));
 
 const EXTENSION_ID = 'GiN:plugin';
@@ -52,10 +52,11 @@ function init_context(app, notebook_tracker) {
     ContextManager.jupyter_app = app;
     ContextManager.notebook_tracker = notebook_tracker;
     ContextManager.context();
-
-    initNotebookTracker(notebook_tracker)
     notebook_tracker
+    initNotebookTracker(notebook_tracker)
 }
+
+
 
 function ReturnOutputArea(i, notebookTracker){
     var RestorForm = `<div class="lm-Widget p-Widget lm-Panel p-Panel jp-OutputArea-child">
@@ -68,13 +69,11 @@ function ReturnOutputArea(i, notebookTracker){
     const notebook = notebookTracker.currentWidget.content
     const notebookHasBeenRan = getRanNotebookIds().includes(notebook.id)
 
-
     _.each(utm.querySelectorAll('.nbtools-run'), (e)=>{
         e.innerText = "Restore form state"
 
         e.addEventListener('click', async () => {
 
-           
 
             if ( notebookHasBeenRan === false) {
 
@@ -88,40 +87,42 @@ function ReturnOutputArea(i, notebookTracker){
                 });
                 e.parentNode.parentNode.parentNode.parentNode.parentNode.parentElement.removeChild(e.parentNode.parentNode.parentNode.parentNode.parentNode)
             }
-
-            var out = await KernelSideDataObjects(`print("Its working fine")`)
         })
     })
 
     return utm
 }
 
+
 const initNotebookTracker = (notebookTracker) => {
+
+    const notebookHasBeenRan = getRanNotebookIds()
 
     notebookTracker.currentChanged.connect((notebookTracker, notebookPanel) => {
         if (!notebookTracker.currentWidget) {
             return;
         }
-        const notebook = notebookTracker.currentWidget.content;
         const notebookContext = notebookTracker.currentWidget.context;
-        const notebookSession = notebookTracker.currentWidget.context.sessionContext;
-        // This runs every time user displays the notebook (even when swapping tabs)
+
         notebookContext.ready.then(() => {
 
-            const notebookHasBeenRan = getRanNotebookIds().includes(notebook.id);
+            const notebook = notebookTracker.currentWidget.content;
+            const notebookSession = notebookTracker.currentWidget.context.sessionContext;
+        
+            if ( notebookHasBeenRan.includes(notebook.id) === false) {
 
-            var cells = notebookTracker.currentWidget.content.widgets;
-            if ( notebookHasBeenRan === false) {
+                Private.ranNotebookIds.push(notebook.id);
+            
+                notebookTracker.currentWidget.sessionContext.ready.then(() =>
+                notebookTracker.currentWidget.revealed).then(() => {
 
-                for (var i = 0; i < cells.length; i++){
-                     // console.log(cells[i].model.metadata.get('html'))
-                     if(cells[i].model.metadata.get('html') != undefined){
-                         console.log("OK")
+                    var cells = notebookTracker.currentWidget.content.widgets;
 
-                         removeAllChildNodes(cells[i].outputArea.node)
-                         cells[i].outputArea.node.append(ReturnOutputArea(cells[i].model.metadata.get('html'), notebookTracker))
-                     }
-                 }
+                    for (var i = 0; i < cells.length; i++){
+                        notebook.activeCellIndex = i
+                        NotebookActions.run(notebook, notebookSession);
+                    }
+                });
             }
         });
     });
