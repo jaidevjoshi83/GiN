@@ -12,6 +12,8 @@ import { MODULE_NAME, MODULE_VERSION } from './version';
 import { removeAllChildNodes , KernelSideDataObjects} from './utils';
 import { NotebookActions } from '@jupyterlab/notebook';
 
+import {  Widget } from '@lumino/widgets';
+
 import { Private,  getRanNotebookIds} from './notebookActions';
 const module_exports = Object.assign(Object.assign(Object.assign({},  galaxyuibuilder_exports), utils_exports));
 
@@ -64,7 +66,7 @@ function ReturnOutputArea(i, notebookTracker){
                         <div class="lm-Widget p-Widget lm-Panel p-Panel jupyter-widgets jp-OutputArea-output">${i}</div>
                     </div>`
 
-    const utm = new DOMParser().parseFromString(RestorForm, 'text/html').querySelector('.lm-Widget.p-Widget.lm-Panel.p-Panel.jp-OutputArea-child')
+                    const utm = new DOMParser().parseFromString(RestorForm, 'text/html').querySelector('.lm-Widget.p-Widget.lm-Panel.p-Panel.jp-OutputArea-child')
     
     const notebook = notebookTracker.currentWidget.content
     const notebookHasBeenRan = getRanNotebookIds().includes(notebook.id)
@@ -73,9 +75,9 @@ function ReturnOutputArea(i, notebookTracker){
         e.innerText = "Restore form state"
 
         e.addEventListener('click', async () => {
-
-
-            if ( notebookHasBeenRan === false) {
+             
+            
+            // if ( notebookHasBeenRan === false) {
 
                 const notebookContext = notebookTracker.currentWidget.context;
                 const notebookSession = notebookTracker.currentWidget.context.sessionContext;
@@ -86,7 +88,7 @@ function ReturnOutputArea(i, notebookTracker){
                         NotebookActions.run(notebook, notebookSession);
                 });
                 e.parentNode.parentNode.parentNode.parentNode.parentNode.parentElement.removeChild(e.parentNode.parentNode.parentNode.parentNode.parentNode)
-            }
+            // }
         })
     })
 
@@ -109,7 +111,9 @@ const initNotebookTracker = (notebookTracker) => {
             const notebook = notebookTracker.currentWidget.content;
             const notebookSession = notebookTracker.currentWidget.context.sessionContext;
         
-            if ( notebookHasBeenRan.includes(notebook.id) === false) {
+            // if ( notebookHasBeenRan.includes(notebook.id) === false) {
+
+            //FixME Form Restore insteed cell run
 
                 Private.ranNotebookIds.push(notebook.id);
             
@@ -119,11 +123,23 @@ const initNotebookTracker = (notebookTracker) => {
                     var cells = notebookTracker.currentWidget.content.widgets;
 
                     for (var i = 0; i < cells.length; i++){
-                        notebook.activeCellIndex = i
-                        NotebookActions.run(notebook, notebookSession);
+
+                        // if (cells[i].model.metadata.get('html') != undefined) {
+                            // console.log(cells[i].model.metadata.get('html'))
+                            // console.log(cells[i].outputArea.node.children)
+
+                            var Node = cells[i].outputArea
+                            console.log(Node.model)
+                            // console.log(Node.parentNode())
+                            // cells[i].outputArea.node.querySelector('.lm-Widget.p-Widget.lm-Panel.p-Panel.jupyter-widgets.jp-OutputArea-output').parentNode.removeChild(cells[i].outputArea.node.querySelector('.lm-Widget.p-Widget.lm-Panel.p-Panel.jupyter-widgets.jp-OutputArea-output'))
+                            removeAllChildNodes(cells[i].outputArea.node)
+                            cells[i].outputArea.node.append(ReturnOutputArea(cells[i].model.metadata.get('html'), notebookTracker))
+                            // notebook.activeCellIndex = i
+                            // NotebookActions.run(notebook, notebookSession);
+                        // }
                     }
                 });
-            }
+            // }
         });
     });
 };
