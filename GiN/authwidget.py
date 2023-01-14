@@ -98,6 +98,10 @@ class GalaxyAuthWidget(GalaxyUIBuilder):
                         tool['email'] = self.session._notebook_email
                         tool_list['tools'].append(tool)
 
+        workflow_explorer = {'id':'work_flow_Explorer', 'name': 'workflow_explorer', 'description': 'Explore and execute available workflows', 'origin':self.session._notebook_url}
+        we = TaskTool("+", workflow_explorer )
+        ToolManager.instance().register(we)
+
         return IPython.display.JSON(tool_list)
 
     def RegisterMod(self, tool):
@@ -220,6 +224,17 @@ class AuthenticationTool(NBTool):
     name = "Galaxy Login"
     description = "Log into a Galaxy server"
     load = lambda x: GalaxyAuthWidget()
+
+
+# class UploadData(NBTool):
+#     """Tool wrapper for the authentication widget"""
+
+#     origin = "+"
+#     id = "GiN_Upload_Data"
+#     name = "Upload Data"
+#     description = "Upload Datafilis to galaxy history"
+
+#     load = lambda x: UploadData()
 
 # Register the authentication widget
 ToolManager.instance().register(AuthenticationTool())

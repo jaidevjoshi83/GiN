@@ -136,7 +136,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         this.generate_tool_form()
         // this.add_dataset_table()
         //########################
-        if (this.model.get('name') != 'login'){
+        if (this.model.get('name') != 'login' || this.model.get('galaxy_tool_id') === 'work_flow_Explorer'){
             this.add_dataset_table()
             this.add_history_list()
         }
@@ -155,17 +155,121 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         // Attach custom buttons
         this.activate_custom_buttons();
         this.AddHelpSection(inputs['help'])
-        this.iterate_over_tool_cells()
+        // this.iterate_over_tool_cells()
 
         if (this.model.get('name') == 'login'){
             // console.log(this.model.get('name') )
             this.login_form()
         }
 
+        if (this.model.get('galaxy_tool_id') === 'work_flow_Explorer'){
+            this.add_dataset_table()
+            this.workflow_explorer()
+            
+        }
+
         this.add_galaxy_cell_metadata()
     }
 
+    workflow_explorer(){
+
+        this.update_metadata_FormState('workflow', {}, '')
+
+        this.el.querySelector('.Galaxy-form-div').style.display = 'none'
+
+        var nb_form = this.el.querySelector('.nbtools-form')
+
+        var data_upload = `<div class="login-form"> 
+
+                                <div class="auth-error" style="display: none; margin: 10px;"> 
+                                    <p> <b>Authentication error</b> </p>
+                                </div>
+
+                                <div class="auth-successful" style="display: none; margin: 10px;">
+                                    <p> <b>Login Successful </b></p>
+                                </div>
+
+                                <div class="login-form-div" style="display:block">
+
+                                    <div class="tab">
+                                            <button type="button" id="resumable_upload_button" class="tablinks" >With Credential</button>
+                                            <button type="button" class="tablinks">With API Key</button>
+                                    </div>
+
+                                    <!-- Tab content -->
+                                    <div id="credential-login" class="tabcontent" style="display: block;">
+
+                                        <div style="margin:10px">
+                                            <div>
+                                            <span class="ui-form-title-text"> <b>Select Galaxy Server</b> </span>
+                                            </div>
+                                            <input type="text" name="server" list="cityname">
+                                            <datalist id="cityname">
+                                                <option value="https://usegalaxy.org"> Galaxy Main </option>
+                                                <option value="https://0.0.0.0:8080"> Galaxy Local</option>
+                                                <option value="https://usegalaxy.eu"> Galaxy Europe</option>
+                                            </datalist>
+                                        </div>
+
+                                        <div style=" margin:10px">
+                                        <span class="ui-form-title-text"> <b>Email ID/User Name</b> </span>
+                                            <input class="InputData" name="email" style="display: block" >
+                                        </div>
+
+                                        <div style=" margin:10px">
+                                        <span class="ui-form-title-text"> <b>Password</b> </span>
+                                            <input class="InputData" type="password" name="password" style="display: block" >
+                                        </div>
+                                    </div>
+                            
+                                    <div id="api-login" class="tabcontent" style="display: none;">
+
+                                    <div style="margin:10px">
+                                        <div>
+                                        <span class="ui-form-title-text"> <b>Select Galaxy Server</b> </span>
+                                        </div>
+                                        <input type="text" name="server" list="cityname">
+                                        <datalist id="cityname">
+                                            <option value="https://usegalaxy.org"> Galaxy Main </option>
+                                            <option value="https://0.0.0.0:8080"> Galaxy Local</option>
+                                            <option value="https://usegalaxy.eu"> Galaxy Europe</option>
+                                        </datalist>
+                                        </div>
+
+                                        <div style=" margin:10px">
+                                        <span class="ui-form-title-text"> <b>API Key</b> </span>
+                                            <input class="InputData" name="api" style="display: block" >
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>`
+
+        const utm = new DOMParser().parseFromString(data_upload, 'text/html').querySelector('.login-form')
+
+        var List = utm.querySelectorAll('.tablinks')        
+
+        // utm.querySelector('#upload').style.display  = 'block'
+
+        List.forEach((button) => button.addEventListener('click', () => {
+
+            console.log("OK")
+
+            if (button.innerText  == 'With Credential') {
+                utm.querySelector('#credential-login').style.display  = 'block'
+                utm.querySelector('#api-login').style.display  = 'none'
+            } else if (button.innerText  == 'With API Key') {
+                utm.querySelector('#credential-login').style.display  = 'none'
+                utm.querySelector('#api-login').style.display  = 'block'
+            }
+        }));
+
+        nb_form.append(utm)
+
+    }
+
     login_form(){
+
+        this.add_galaxy_cell_metadata()
 
         this.update_metadata_FormState('login', {}, '')
 
@@ -274,14 +378,12 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
     add_galaxy_cell_metadata(){
 
-        console.log("@@@")
         if (!ContextManager.notebook_tracker) return;               
         if (!ContextManager.notebook_tracker.currentWidget) return; 
         const cells = ContextManager.notebook_tracker.currentWidget.content.widgets;
         for(var i = 0; i < cells.length; i++) {
             if (cells[i]._input.node.querySelector('.lm-Widget.p-Widget.jp-InputPrompt.jp-InputArea-prompt').innerText == '[*]:'){
                 cells[i].model.metadata.set('galaxy_cell', true)
-                
             }
         }
     }
@@ -296,14 +398,15 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         }
     }
 
-    update_metadata_FormState(tool_name, inputs, html){
-
+    update_metadata_FormState(tool_type, inputs, html){
 
         //FixMe: 
-        var form_json = {'count':'' ,'inputs': inputs}
-        ContextManager.tool_registry.current.content.activeCell.model.metadata.set('galaxy_name', tool_name)
+        var form_json =  {'count':'', 'user_name':this.model.get('email') ,'inputs': inputs}
+        ContextManager.tool_registry.current.content.activeCell.model.metadata.set('tool_type', tool_type)
         ContextManager.tool_registry.current.content.activeCell.model.metadata.set('inputs', form_json)
         ContextManager.tool_registry.current.content.activeCell.model.metadata.set('html', html)
+        // ContextManager.tool_registry.current.content.activeCell.model.metadata.set('galaxy_tool', true)
+
     }
 
     un_wrap_repeat1(input, name){
@@ -1257,7 +1360,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
            
             var refine_inputs  = await KernelSideDataObjects(`import json\nimport base64\nfrom GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.updated_form(${JSON.stringify(self.model.get('origin'))}, json.loads(base64.b64decode("${btoa(JSON.stringify(inputs))}")), ${JSON.stringify(self.model.get('inputs')['id'])}, ${JSON.stringify(history_id)})`)
            
-            self.update_metadata_FormState(this.model.get('name'), refine_inputs['inputs'], JSON.parse(fint))
+            self.update_metadata_FormState('galaxy_tool', refine_inputs['inputs'], JSON.parse(fint))
         })
 
         Unselect.addEventListener('click', async () => {
@@ -1279,9 +1382,10 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             var form = self.el.querySelector('.Galaxy-form')
             var inputs = self.get_form_data(form)
             var refine_inputs  = await KernelSideDataObjects(`import json\nfrom GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.updated_form(${JSON.stringify(self.model.get('origin'))}, json.loads(base64.b64decode("${btoa(JSON.stringify(inputs))}")), ${JSON.stringify(self.model.get('inputs')['id'])}, ${JSON.stringify(history_id)})`)
+            
             let formdata = form.parentNode.parentNode.parentNode.parentNode.parentNode.outerHTML
             let fint = JSON.stringify(formdata)
-            self.update_metadata_FormState(this.model.get('name'), refine_inputs['inputs'], JSON.parse(fint))
+            self.update_metadata_FormState('galaxy_tool', refine_inputs['inputs'], JSON.parse(fint))
         })
 
         FormParent.append(row)
@@ -1342,7 +1446,9 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
           
             let formdata = form.parentNode.parentNode.parentNode.parentNode.parentNode.outerHTML
             let fint = JSON.stringify(formdata)
-            self.update_metadata_FormState(this.model.get('name'), refine_inputs['inputs'], JSON.parse(fint))
+
+            console.log(refine_inputs['inputs'])
+            self.update_metadata_FormState('galaxy_tool', refine_inputs['inputs'], JSON.parse(fint))
  
         })
 
@@ -1940,7 +2046,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
                 let formdata = form.parentNode.parentNode.parentNode.parentNode.parentNode.outerHTML
                 let fint = JSON.stringify(formdata)
-                self.update_metadata_FormState(this.model.get('name'), refine_inputs['inputs'], JSON.parse(fint))
+                self.update_metadata_FormState('galaxy_tool', refine_inputs['inputs'], JSON.parse(fint))
   
 
             });
@@ -1992,7 +2098,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
            
             let formdata = form.parentNode.parentNode.parentNode.parentNode.parentNode.outerHTML
             let fint = JSON.stringify(formdata)
-            self.update_metadata_FormState(this.model.get('name'), refine_inputs['inputs'], JSON.parse(fint))
+            self.update_metadata_FormState('galaxy_tool', refine_inputs['inputs'], JSON.parse(fint))
 
 
             
@@ -2007,7 +2113,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
             let formdata = form.parentNode.parentNode.parentNode.parentNode.parentNode.outerHTML
             let fint = JSON.stringify(formdata)
-            self.update_metadata_FormState(this.model.get('name'), refine_inputs['inputs'], JSON.parse(fint))
+            self.update_metadata_FormState('galaxy_tool', refine_inputs['inputs'], JSON.parse(fint))
         });
 
         return row
@@ -2386,7 +2492,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
                 let formdata = form.parentNode.parentNode.parentNode.parentNode.parentNode.outerHTML
                 let fint = JSON.stringify(formdata)
-                self.update_metadata_FormState(this.model.get('name'), refine_inputs['inputs'], JSON.parse(fint))
+                self.update_metadata_FormState('galaxy_tool', refine_inputs['inputs'], JSON.parse(fint))
             
             })
     
@@ -2402,7 +2508,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                
                 let formdata = form.parentNode.parentNode.parentNode.parentNode.parentNode.outerHTML
                 let fint = JSON.stringify(formdata)
-                self.update_metadata_FormState(this.model.get('name'), refine_inputs['inputs'], JSON.parse(fint))
+                self.update_metadata_FormState('galaxy_tool', refine_inputs['inputs'], JSON.parse(fint))
             })
 
             row.append(TitleSpan)
@@ -2434,7 +2540,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                     var refine_inputs  = await KernelSideDataObjects(`import json\nimport base64\nfrom GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.updated_form(${JSON.stringify(self.model.get('origin'))}, json.loads(base64.b64decode("${btoa(JSON.stringify(inputs))}")), ${JSON.stringify(self.model.get('inputs')['id'])}, ${JSON.stringify(history_id)})`)
                     let formdata = form.parentNode.parentNode.parentNode.parentNode.parentNode.outerHTML
                     let fint = JSON.stringify(formdata)
-                    self.update_metadata_FormState(this.model.get('name'), refine_inputs['inputs'], JSON.parse(fint))
+                    self.update_metadata_FormState('galaxy_tool', refine_inputs['inputs'], JSON.parse(fint))
                 })
 
                 CheckBoxDiv.append(CheckBoxInput)
@@ -2521,7 +2627,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                     self.form_builder(refine_inputs['inputs'])
                     let formdata = children.parentNode.parentNode.parentNode.parentNode.parentNode.outerHTML
                     let fint = JSON.stringify(formdata)
-                    self.update_metadata_FormState(this.model.get('name'), refine_inputs['inputs'], JSON.parse(fint))
+                    self.update_metadata_FormState('galaxy_tool', refine_inputs['inputs'], JSON.parse(fint))
                 }
             });
         }
@@ -2590,7 +2696,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             var refine_inputs  = await KernelSideDataObjects(`import json\nimport base64\nfrom GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.updated_form(${JSON.stringify(self.model.get('origin'))}, json.loads(base64.b64decode("${btoa(JSON.stringify(inputs))}")), ${JSON.stringify(self.model.get('inputs')['id'])}, ${JSON.stringify(history_id)})`)
             let formdata = form.parentNode.parentNode.parentNode.parentNode.parentNode.outerHTML
             let fint = JSON.stringify(formdata)
-            self.update_metadata_FormState(this.model.get('name'), refine_inputs['inputs'], JSON.parse(fint))
+            self.update_metadata_FormState('galaxy_tool', refine_inputs['inputs'], JSON.parse(fint))
 
         })
         
@@ -2694,13 +2800,11 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             let formdata = form.parentNode.parentNode.parentNode.parentNode.parentNode.outerHTML
             let fint = JSON.stringify(formdata)
 
-            // console.log(typeof JSON.parse(fint))
-
             const utm = new DOMParser().parseFromString(JSON.parse(fint), 'text/html').querySelector('.nbtools.galaxy-uibuilder.lm-Widget.p-Widget')
 
-            // this.model.set('input', refine_inputs)
+            console.log(refine_inputs['inputs'], JSON.parse(fint))
 
-            self.update_metadata_FormState(this.model.get('name'), refine_inputs['inputs'], JSON.parse(fint))
+            self.update_metadata_FormState('galaxy_tool', refine_inputs['inputs'], JSON.parse(fint))
         });
 
         parent.append(ConditionalDiv)
@@ -2757,7 +2861,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
             let formdata = children.parentNode.parentNode.parentNode.parentNode.parentNode.outerHTML
             let fint = JSON.stringify(formdata)
-            self.update_metadata_FormState(this.model.get('name'), refine_inputs['inputs'], JSON.parse(fint))
+            self.update_metadata_FormState('galaxy_tool', refine_inputs['inputs'], JSON.parse(fint))
         });
     }
  
@@ -4040,8 +4144,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
     runAllGalaxyCells() {
 
-        console.log("OKKKK")
-
         if (!ContextManager.notebook_tracker) return;               
         if (!ContextManager.notebook_tracker.currentWidget) return;
     
@@ -4051,24 +4153,18 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         const notebookSession = notebookTracker.currentWidget.context.sessionContext;
         const cells = notebook.widgets;
       
-
-    // if(cells[i].model.metadata.get('html') != ''){
-        // notebook.activeCellIndex = i
-        // console.log(notebook.activeCellIndex)
         notebookTracker.currentWidget.sessionContext.ready.then(() =>
         notebookTracker.currentWidget.revealed).then(() => {
 
             for (var i = 0; i < cells.length; i++){
-                // if(cells[i].model.metadata.get('html') != undefined){
-
-                    notebook.activeCellIndex = i
-
-                    console.log(i)
-
-                    removeAllChildNodes(cells[i].outputArea.node)
-
-                    NotebookActions.run(notebook, notebookSession);
-                // }
+                
+                if (cells[i].model.metadata.get('galaxy_cell') ){
+                    if(cells[i].model.metadata.get('tool_type') != 'login') {
+                        notebook.activeCellIndex = i
+                        removeAllChildNodes(cells[i].outputArea.node)
+                        NotebookActions.run(notebook, notebookSession);
+                    }
+                 }
             }
         });
     }
@@ -4089,8 +4185,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             } else if (this.model.get('name') == 'login'){
 
                 this.trigger_login()
-                
-                console.log( this.model.get('name'))
 
             }else {
                 var form = self.element.querySelector('.Galaxy-form')
@@ -4106,10 +4200,9 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         // this.update_metadata_FormState({}, {})
 
         var logingForm = this.el.querySelector('.login-form-div')
-        var formdata = logingForm.parentNode.parentNode.parentNode.parentNode.outerHTML
-       
+        var formdata = logingForm.parentNode.parentNode.parentNode.parentNode.outerHTML       
         let fint = JSON.stringify(formdata)
-        this.update_metadata_FormState('login', {}, JSON.parse(fint))
+        // this.update_metadata_FormState('login', {}, JSON.parse(fint))
 
         this.el.querySelector('.auth-error').style.display = 'none'
 

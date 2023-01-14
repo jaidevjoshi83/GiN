@@ -112,34 +112,32 @@ const initNotebookTracker = (notebookTracker) => {
             const notebookSession = notebookTracker.currentWidget.context.sessionContext;
         
             // if ( notebookHasBeenRan.includes(notebook.id) === false) {
-
             //FixME Form Restore insteed cell run
 
                 Private.ranNotebookIds.push(notebook.id);
             
                 notebookTracker.currentWidget.sessionContext.ready.then(() =>
-                notebookTracker.currentWidget.revealed).then(() => {
+                notebookTracker.currentWidget.revealed).then(async () => {
 
-                    var cells = notebookTracker.currentWidget.content.widgets;
+                var cells = notebookTracker.currentWidget.content.widgets;
 
-                    for (var i = 0; i < cells.length; i++){
-
-                        // if (cells[i].model.metadata.get('html') != undefined) {
-                            // console.log(cells[i].model.metadata.get('html'))
-                            // console.log(cells[i].outputArea.node.children)
-
-                            var Node = cells[i].outputArea
-                            console.log(Node.model)
-                            // console.log(Node.parentNode())
-                            // cells[i].outputArea.node.querySelector('.lm-Widget.p-Widget.lm-Panel.p-Panel.jupyter-widgets.jp-OutputArea-output').parentNode.removeChild(cells[i].outputArea.node.querySelector('.lm-Widget.p-Widget.lm-Panel.p-Panel.jupyter-widgets.jp-OutputArea-output'))
+                for (var i = 0; i < cells.length; i++){
+                   
+                    if (cells[i].model.metadata.get('galaxy_cell') ){
+                        console.log("OK")
+                        if (cells[i].model.metadata.get('html') == undefined || cells[i].model.metadata.get('html') == '') {
+                            removeAllChildNodes(cells[i].outputArea.node)
+                            notebook.activeCellIndex = i
+                            await NotebookActions.run(notebook, notebookSession);            
+                       
+                        } else{
                             removeAllChildNodes(cells[i].outputArea.node)
                             cells[i].outputArea.node.append(ReturnOutputArea(cells[i].model.metadata.get('html'), notebookTracker))
-                            // notebook.activeCellIndex = i
-                            // NotebookActions.run(notebook, notebookSession);
-                        // }
+                        }
                     }
-                });
-            // }
+                 }
+             });
+
         });
     });
 };

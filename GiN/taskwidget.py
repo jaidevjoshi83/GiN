@@ -42,13 +42,18 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
         gi = a.get(server=self.tool['origin'])
 
         history_ids = gi.gi.histories.get_histories()
-        inputs = gi.gi.tools.build(tool_id=self.tool["id"], history_id=history_ids[0]["id"])
 
-        history_data = GalaxyTaskWidget.updated_form(
-            server=self.tool['origin'],
-            history_id=history_ids[0]["id"],
-            python_side=True,
-        )
+
+        if self.tool['name'] == 'workflow_explorer':
+            inputs = {}
+            history_data=[]
+        else:
+            inputs = gi.gi.tools.build(tool_id=self.tool["id"], history_id=history_ids[0]["id"])
+            history_data = GalaxyTaskWidget.updated_form(
+                server=self.tool['origin'],
+                history_id=history_ids[0]["id"],
+                python_side=True,
+            )
 
         GalaxyUIBuilder.__init__(
             self,
