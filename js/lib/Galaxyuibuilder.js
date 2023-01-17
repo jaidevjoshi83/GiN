@@ -165,10 +165,11 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         if (this.model.get('galaxy_tool_id') === 'work_flow_Explorer'){
             this.add_dataset_table()
             this.workflow_explorer()
-            
         }
 
         this.add_galaxy_cell_metadata()
+
+        console.log(this.model.get('description'))
     }
 
     workflow_explorer(){
@@ -1564,14 +1565,16 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         FormParent.append(utm)
     }
 
-    submitPayload(payload, credentials) {
+    async submitPayload(payload, credentials) {
+
+        var apiKey = await KernelSideDataObjects(`from GiN.taskwidget  import GalaxyTaskWidget\nGalaxyTaskWidget.Return_api_key('http://localhost:8080')`)
 
         var self = this
-        axios.post(`${credentials['url']}/api/tools/fetch`, payload, {
+        axios.post(`${this.model.get('origin')}/api/tools/fetch`, payload, {
 
             headers: {
                 //FixMe
-                'x-api-key': this.model.get('gal_instance')['api_key'],
+                'x-api-key': apiKey['api_key'],
             }
         })
             .then((response) => {
@@ -1606,7 +1609,9 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         this.add_dataset(ListItem, this.data_row_list, HistoryID)
     }
  
-    NewTusUpload(data){
+    async NewTusUpload(data){
+
+        var apiKey = await KernelSideDataObjects(`from GiN.taskwidget  import GalaxyTaskWidget\nGalaxyTaskWidget.Return_api_key('http://localhost:8080')`)
 
         var self = this
         var elm = this.el.querySelector('#inputupload')
@@ -1622,11 +1627,11 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         var file = data.files[0];
 
         //FixMe
-        var credentials = this.model.get('gal_instance')
-        data['key'] =  credentials['api_key']
+        // var credentials = this.model.get('gal_instance')
+        data['key'] =  apiKey['api_key']
 
         var upload = new tus.Upload(file, {
-            endpoint: `${credentials['url']}/api/upload/resumable_upload/`,
+            endpoint: `${this.model.get('origin')}/api/upload/resumable_upload/`,
             retryDelays: [0, 3000, 5000, 10000, 20000],
             chunkSize: chunkSize,
 
@@ -1635,7 +1640,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 filetype: file.type,
             },
             headers: {
-                'x-api-key': credentials['api_key'],
+                'x-api-key': apiKey['api_key'],
             },
             
             onError: function(error) {
@@ -2099,8 +2104,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             let formdata = form.parentNode.parentNode.parentNode.parentNode.parentNode.outerHTML
             let fint = JSON.stringify(formdata)
             self.update_metadata_FormState('galaxy_tool', refine_inputs['inputs'], JSON.parse(fint))
-
-
             
         });
 
@@ -2407,17 +2410,20 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         Select.addEventListener("change", async (e) => {
 
+            console.log("ok")
+
+            var children = self.el.querySelector('.Galaxy-form')
+            var inputs = self.get_form_data(children)
+
+            var history_id = self.el.querySelector('.galaxy-history-list').querySelector('#history_ids').value
+            var refine_inputs  = await KernelSideDataObjects(`import json\nimport base64\nfrom GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.updated_form(${JSON.stringify(self.model.get('origin'))}, json.loads(base64.b64decode("${btoa(JSON.stringify(inputs))}")), ${JSON.stringify(self.model.get('inputs')['id'])}, ${JSON.stringify(history_id)})`)
+          
+            this.update_metadata_FormState('galaxy', refine_inputs['inputs'],  children)
             if (Select.multiple == true || FileManu['data-file']['batch'] == 'true'){
 
             } else{
 
                 FileManu['data-file']['id'] = JSON.parse(Select.value)
-
-                var children = self.el.querySelector('.Galaxy-form')
-                var inputs = self.get_form_data(children)
-
-                var history_id = self.el.querySelector('.galaxy-history-list').querySelector('#history_ids').value
-                var refine_inputs  = await KernelSideDataObjects(`import json\nimport base64\nfrom GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.updated_form(${JSON.stringify(self.model.get('origin'))}, json.loads(base64.b64decode("${btoa(JSON.stringify(inputs))}")), ${JSON.stringify(self.model.get('inputs')['id'])}, ${JSON.stringify(history_id)})`)
 
                 var FormParent = self.el.querySelector('.Galaxy-form')
                 self.removeAllChildNodes(FormParent)
@@ -2802,7 +2808,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
             const utm = new DOMParser().parseFromString(JSON.parse(fint), 'text/html').querySelector('.nbtools.galaxy-uibuilder.lm-Widget.p-Widget')
 
-            console.log(refine_inputs['inputs'], JSON.parse(fint))
+            console.log(refine_inputs['inputs'])
 
             self.update_metadata_FormState('galaxy_tool', refine_inputs['inputs'], JSON.parse(fint))
         });
@@ -3229,17 +3235,13 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             if (Tbl.querySelector('.primary-actions')){
                 Tbl.querySelector('.primary-actions').innerHTML = `<a class="icon-btn display-btn" title="" data-original-title="View data"><span class="fas fa-eye" style="" title="View Data" ></span></a><a class="icon-btn edit-btn" target="_blank"  href="${URL}/datasets/edit?dataset_id=${dataset['id']}" data-original-title="Edit attributes"><span class="fa fa-pencil" title="Edit data"></span></a><a class="icon-btn delete-btn" title="" href="javascript:void(0);" data-original-title="Delete"><span class="fa fa-times" style="" title="Delete" ></span></a><a class="icon-btn display-btn" title="" target="" href="javascript:void(0);" data-original-title="View data"><span class="fa fa-download" style="" title="Download data to JupyterLab Server" ></span></a><a class="icon-btn display-btn"  target="" href="javascript:void(0);" data-original-title="View data"><span class="fa fa-exchange" style="" title="Send data to available tools"></span></a>`
         
-               
                 //FixME:
 
-                Tbl.querySelector('.fas.fa-eye').addEventListener('click', ()=>{
+                Tbl.querySelector('.fas.fa-eye').addEventListener('click', async ()=>{
 
-                    console.log(`${this.model.get('origin')}/datasets/${dataset['id']}/display/?preview=True&?api_key={%27x-api-key%27:%27${this.model.get('gal_instance')['api_key']}%27}`)
+                    var apiKey = await KernelSideDataObjects(`from GiN.taskwidget  import GalaxyTaskWidget\nGalaxyTaskWidget.Return_api_key('http://localhost:8080')`)
 
                     var iframe_id = `${this.uid()}-iframe`
-
-
-                    
                     
                     var content = `<div class="preview"> 
                                         <div class="data-preview-header" style="width:100%; height:5%;"> 
@@ -3247,7 +3249,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                                             <div class="data-preview-title" style="float: left">  <p class="title"> <b>${dataset['name']} </b></p> </div>
                                         </div>
                                         <div class="data-preview-content" style="width:100%; height:95%;"> 
-                                            <iframe  src="${this.model.get('origin')}/datasets/${dataset['id']}/display/?preview=True&?api_key={%27x-api-key%27:%27${this.model.get('gal_instance')['api_key']}%27}" > </iframe>
+                                            <iframe  src="${this.model.get('origin')}/datasets/${dataset['id']}/display/?preview=True&?api_key={%27x-api-key%27:%27${apiKey['api_key']}%27}" > </iframe>
                                         </div>
                                     </div>`
 
@@ -3262,7 +3264,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 });
             }
         } 
-
 
         else if (dataset['state'] == 'paused') {
             Tbl.style.background = '#daecf8'
@@ -3381,7 +3382,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         if (g_tools) {
             g_tools.addEventListener("click", (e) => {
-
                 // var server =  Tbl.parentNode.parentNode.parentNode.parentNode.querySelector('.Galaxy-form').data
                 // var server =  Tbl.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode.querySelector('.Galaxy-form').data
                 var server =  Tbl.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode.querySelector('.Galaxy-form').data
@@ -3748,13 +3748,12 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         template.style.margin = '20px'
 
-        //FixMe:
+        var apiKey = await KernelSideDataObjects(`from GiN.taskwidget  import GalaxyTaskWidget\nGalaxyTaskWidget.Return_api_key('http://localhost:8080')`)
 
         if(job['state'] != 'job failed') {
-            template.querySelector('.footer-txt').innerHTML = `Job: <b> ${job['id']}</b> submitted by: <b> ${this.model.get('gal_instance')['email_ID']}</b> on <b>${job['create_time'].split('T')[0]}</b> at <b>${job['create_time'].split('T')[1].split('.')[0]} </b>`
+            template.querySelector('.footer-txt').innerHTML = `Job: <b> ${job['id']}</b> submitted by: <b> ${apiKey['email'] }</b> on <b>${job['create_time'].split('T')[0]}</b> at <b>${job['create_time'].split('T')[1].split('.')[0]} </b>`
             template.querySelector('.job-id').innerHTML = `Job ID: <b> ${job['id']}</b>`
         }
-
 
         var tool_form = this.el.querySelector('.tool-forms')
         var BTN = template.querySelector('.fa.fa-refresh')
@@ -4276,7 +4275,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         }
 
         // var jobs  = await KernelSideDataObjects(`import json\nfrom GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.submit_job(gal_instance=${JSON.stringify(this.model.get('gal_instance'))}, tool_inputs=json.loads("""${JSON.stringify(inputs)}"""), history_id=${JSON.stringify(history_id)})`)
-        var jobs  = await KernelSideDataObjects(`import json\nimport base64\nfrom GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.submit_job(server=json.loads(base64.b64decode("${btoa(JSON.stringify(this.model.get('origin')))}")), tool_id=json.loads(base64.b64decode("${btoa(JSON.stringify(this.model.get('tool_id')))}")), tool_inputs=json.loads(base64.b64decode("${btoa(JSON.stringify(inputs))}")), history_id=json.loads(base64.b64decode("${btoa(JSON.stringify(history_id))}")))`)
+        var jobs  = await KernelSideDataObjects(`import json\nimport base64\nfrom GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.submit_job(server=json.loads(base64.b64decode("${btoa(JSON.stringify(this.model.get('origin')))}")), tool_id=json.loads(base64.b64decode("${btoa(JSON.stringify(this.model.get('galaxy_tool_id')))}")), tool_inputs=json.loads(base64.b64decode("${btoa(JSON.stringify(inputs))}")), history_id=json.loads(base64.b64decode("${btoa(JSON.stringify(history_id))}")))`)
     
     if (jobs['state'] == 'job failed'){
 

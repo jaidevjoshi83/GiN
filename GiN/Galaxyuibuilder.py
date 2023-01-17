@@ -26,6 +26,7 @@ class GalaxyUIBuilder(BaseWidget, NBTool):
     history_ids = List([]).tag(sync=True)
     history_data = List([]).tag(sync=True)
     origin = Unicode("", sync=True)
+    description = Unicode("", sync=True)
 
     UI = Dict(sync=True)
     galaxy_tool_id = Unicode(sync=True)
@@ -36,7 +37,7 @@ class GalaxyUIBuilder(BaseWidget, NBTool):
     parameters = None
 
     def __init__(
-        self, galaxy_tool_id=None, history_ids=None, inputs={}, history_data=[], origin='', **kwargs
+        self, galaxy_tool_id=None, history_ids=None, description=None, inputs={}, history_data=[], origin='', **kwargs
     ):
 
         self._apply_defaults()
@@ -47,6 +48,7 @@ class GalaxyUIBuilder(BaseWidget, NBTool):
             self.galaxy_tool_id = str(galaxy_tool_id)
         self.history_data = history_data
         self.origin = origin
+        self.description = description
         
         BaseWidget.__init__(self, **kwargs)
 
@@ -57,7 +59,8 @@ class GalaxyUIBuilder(BaseWidget, NBTool):
         self.name = f"{self.name} ({GALAXY_SERVER_NAME_BY_URL.get(self.origin, self.origin)})"
         self.id = "galaxy_authentication"  # function_or_method.__qualname__
         # Set the description based on the docstring
-        self.description = self.description
+
+        # self.description = self.description
         # Set the origin based on the package name or "Notebook"
         # self.origin = 'Notebook' if function_or_method.__module__ == '__main__' else function_or_method.__module__
         # register_tool and collapse are True by default

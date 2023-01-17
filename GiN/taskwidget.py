@@ -61,6 +61,7 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
             id = self.tool['id'],
             name = self.tool['name']+' ('+self.tool['origin']+')',
             galaxy_tool_id=self.tool['id'],
+            description=self.tool['description'],
             history_ids=history_ids,
             history_data=history_data,
             color= self.default_color,
@@ -114,7 +115,6 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
             job = {"state": "job failed", 'error': str(e)}
 
         return IPython.display.JSON(job)
-
 
     @staticmethod
     def form_value(raw_value):
@@ -466,13 +466,12 @@ class TaskTool(NBTool):
 
     """Tool wrapper for the authentication widget"""
 
-    def __init__(self, server_name, tool1):
+    def __init__(self, server_name, tool):
         
         NBTool.__init__(self)
         self.origin = server_name
-        self.id = tool1["id"]
-        self.name = tool1["name"]
-        self.description = tool1["description"]
-        self.tool = tool1
-        self.load = lambda: GalaxyTaskWidget(tool1)
+        self.id = tool["id"]
+        self.name = tool["name"]
+        self.description = tool["description"]
+        self.load = lambda: GalaxyTaskWidget(tool)
         
