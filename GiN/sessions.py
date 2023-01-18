@@ -1,5 +1,6 @@
 # from bioblend import galaxy
 from bioblend.galaxy.objects import GalaxyInstance
+import IPython
 
 
 class SessionList:
@@ -70,6 +71,12 @@ class SessionList:
             return None
         else:
             return self.sessions[index]
+
+    def get_servers(self):
+        servers = []
+        for session in self.sessions:
+            servers.append(session._notebook_url)
+        return IPython.display.JSON(servers)
 
     def clean(self):
         """

@@ -55,6 +55,7 @@ function init_context(app, notebook_tracker) {
     ContextManager.notebook_tracker = notebook_tracker;
     ContextManager.context();
     notebook_tracker
+
     initNotebookTracker(notebook_tracker)
 }
 
@@ -75,8 +76,6 @@ function ReturnOutputArea(i, notebookTracker){
         e.innerText = "Restore form state"
 
         e.addEventListener('click', async () => {
-             
-            
             // if ( notebookHasBeenRan === false) {
 
                 const notebookContext = notebookTracker.currentWidget.context;
@@ -126,11 +125,14 @@ const initNotebookTracker = (notebookTracker) => {
                     if (cells[i].model.metadata.get('galaxy_cell') ){
                         console.log("OK")
                         if (cells[i].model.metadata.get('html') == undefined || cells[i].model.metadata.get('html') == '') {
+                           
                             removeAllChildNodes(cells[i].outputArea.node)
                             notebook.activeCellIndex = i
                             await NotebookActions.run(notebook, notebookSession);            
                        
                         } else{
+                            console.log(cells[i])
+                            // cells[i].inputArea.hide()
                             removeAllChildNodes(cells[i].outputArea.node)
                             cells[i].outputArea.node.append(ReturnOutputArea(cells[i].model.metadata.get('html'), notebookTracker))
                         }

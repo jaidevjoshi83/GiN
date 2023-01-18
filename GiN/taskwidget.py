@@ -214,9 +214,6 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
                 if list(inputs[i].keys())[0] == "values":
                     new_values = []
                     for j in inputs[i]["values"]:
-                        # print(j)
-                        # Dataset = gi.gi.datasets.gi.datasets.show_dataset(dataset_id=j)
-                        # new_values.append({'src':Dataset['hda_ldda'],'id':Dataset['id']})
                         new_values.append(j)
                     inputs[i]["values"] = new_values
         return inputs
