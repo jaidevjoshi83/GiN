@@ -30,7 +30,7 @@ import {
 import { Toolbox } from '@g2nb/nbtools';
 import $ from "jquery";
 
-import { Private,  getRanNotebookIds, getOrigins} from './notebookActions';
+import { Private,  getRanNotebookIds, getOrigins,  getIndex } from './notebookActions';
 
 
 export class GalaxyUIBuilderModel extends BaseWidgetModel{
@@ -122,6 +122,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
     this.list = []
     this.repeat_del = {'name':"", "index":""}
     this.toolregistry = {'tools':""}
+    this.select_index = null
 
     // this.section_collapse = {'expanded':false, 'name':''}
     // <iframe src="http://localhost:8080/datasets/fa70ae9fc8539e18/display/?preview=True&?api_key=865ad23561f93ec78ed5398e815c1057" title="W3Schools Free Online Web Tutorials"></iframe>
@@ -165,12 +166,17 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         this.add_galaxy_cell_metadata()
 
         if (this.model.get('name') != 'login' ) {
-            this.add_tool_migration_button()
+
+            this.add_tool_migration_button(getIndex())
         }
         
     }
 
-    async add_tool_migration_button(){
+    async add_tool_migration_button(index){
+
+        console.log(index)
+
+        
 
         var servers  = await KernelSideDataObjects(`import GiN\na = GiN.sessions.SessionList()\na.get_servers()`)
         
@@ -193,13 +199,30 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             div.style.marginRight = '150px'
 
             for (var i = 0; i < servers.length; i++){
+
                 var opt = document.createElement('option')
                 opt.value  = servers[i]
                 opt.textContent  = servers[i]
+                // if (index == getIndex()){
+                //     console.log(getIndex())
+                //     opt.selected = true
+                // }
                 Select.appendChild(opt)
             }
 
+            if(index){
+                Select.selectedIndex = index
+            }
+
+
+
             Select.addEventListener('change', (e) => {
+
+                Private.Index = Select.selectedIndex
+
+                // this.select_index = Select.selectedIndex
+
+                console.log(getIndex())
 
                 if (!ContextManager.notebook_tracker) return;               
                 if (!ContextManager.notebook_tracker.currentWidget) return;
@@ -214,8 +237,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 const regex = /http[^\s']+/i;
                 notebook.activeCell.model.value.text = p.replace(regex, Select.value)
 
-                console.log(Select.value)
-                console.log(notebook.activeCell.model.value.text)
                 NotebookActions.run(notebook, notebookSession);
             })
 
@@ -3803,7 +3824,11 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         template.style.margin = '20px'
 
-        var apiKey = await KernelSideDataObjects(`from GiN.taskwidget  import GalaxyTaskWidget\nGalaxyTaskWidget.Return_api_key('http://localhost:8080')`)
+        console.log(this.model.get('origin'))
+
+        var apiKey = await KernelSideDataObjects(`from GiN.taskwidget  import GalaxyTaskWidget\nGalaxyTaskWidget.Return_api_key('${this.model.get('origin')}')`)
+
+        console.log(apiKey)
 
         if(job['state'] != 'job failed') {
             template.querySelector('.footer-txt').innerHTML = `Job: <b> ${job['id']}</b> submitted by: <b> ${apiKey['email'] }</b> on <b>${job['create_time'].split('T')[0]}</b> at <b>${job['create_time'].split('T')[1].split('.')[0]} </b>`
