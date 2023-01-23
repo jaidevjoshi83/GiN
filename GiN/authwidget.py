@@ -65,7 +65,7 @@ class GalaxyAuthWidget(GalaxyUIBuilder):
                 self.session._notebook_email = email
             except:
                 tool_list['error'] = 'true'
-                return IPython.display.JSON(tool_list['error'])
+                return IPython.display.JSON(tool_list)
         else:
             try:
                 self.session = GalaxyInstance(server,  api_key=api_key, verify=True)

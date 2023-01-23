@@ -19,18 +19,7 @@ import axios from "axios";
 import { Data } from '@g2nb/nbtools/lib/dataregistry';
 import { ContextManager } from '@g2nb/nbtools';
 import { NotebookActions } from '@jupyterlab/notebook';
-import {
-    isExecuteResult,
-    isStream,
-    isError,
-    IError,
-    IExecuteResult,
-} from "@jupyterlab/nbformat";
-
-import { Toolbox } from '@g2nb/nbtools';
-import $ from "jquery";
-
-import { Private,  getRanNotebookIds, getOrigins,  getIndex } from './notebookActions';
+import { Private,  getRanNotebookIds, getIndex } from './notebookActions';
 
 
 export class GalaxyUIBuilderModel extends BaseWidgetModel{
@@ -136,7 +125,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         this.add_history_list()
         //########################
         // this.form_builder(inputs['inputs'])
-        this.generate_tool_form()
+        
          if (this.model.get('name') != 'login' || this.model.get('galaxy_tool_id') == 'work_flow_Explorer'){
             this.add_dataset_table()
          }
@@ -166,24 +155,35 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         this.add_galaxy_cell_metadata()
 
         if (this.model.get('name') != 'login' ) {
-
+            this.generate_tool_form()
             this.add_tool_migration_button(getIndex())
+            console.log(this.model.get('inputs')['inputs'])
+            // this.update_metadata_FormState('galaxy_tool', this.model.get('inputs')['inputs'], '')
         }
-        
+    }
+
+    refresh_cells(){
+
+        if (!ContextManager.notebook_tracker) return;               
+        if (!ContextManager.notebook_tracker.currentWidget) return; 
+        const cells = ContextManager.notebook_tracker.currentWidget.content.widgets;
+
+        for (var i = 0; i < cells.length; i++){
+            if(cells[i].model.metadata.get('galaxy_cell') &&  cells[i].model.metadata.get('tool_type') != 'login'){
+                console.log(cells[i].model.metadata)
+            }
+        }
     }
 
     async add_tool_migration_button(index){
 
-        console.log(index)
-
+        var servers   = await KernelSideDataObjects(`import GiN\na = GiN.sessions.SessionList()\na.get_servers()`)
         
-
-        var servers  = await KernelSideDataObjects(`import GiN\na = GiN.sessions.SessionList()\na.get_servers()`)
-        
-        if (servers.length > 1) {
+        if (servers.length > 0) {
 
             var nbtools = this.el.querySelector('.nbtools-buttons')
             var Select = document.createElement('select')
+            Select.className = 'tool-migration-select'
 
             var div = document.createElement('div')
             div.className = 'form-restore-div'
@@ -203,26 +203,16 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 var opt = document.createElement('option')
                 opt.value  = servers[i]
                 opt.textContent  = servers[i]
-                // if (index == getIndex()){
-                //     console.log(getIndex())
-                //     opt.selected = true
-                // }
                 Select.appendChild(opt)
             }
 
-            if(index){
+            if (index){
                 Select.selectedIndex = index
             }
-
-
 
             Select.addEventListener('change', (e) => {
 
                 Private.Index = Select.selectedIndex
-
-                // this.select_index = Select.selectedIndex
-
-                console.log(getIndex())
 
                 if (!ContextManager.notebook_tracker) return;               
                 if (!ContextManager.notebook_tracker.currentWidget) return;
@@ -248,7 +238,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
     workflow_explorer(){
 
-        this.update_metadata_FormState('workflow', {}, '')
+        // this.update_metadata_FormState('workflow', {}, '')
 
         this.el.querySelector('.Galaxy-form-div').style.display = 'none'
 
@@ -455,7 +445,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         const cells = ContextManager.notebook_tracker.currentWidget.content.widgets;
         for(var i = 0; i < cells.length; i++) {
             if (cells[i]._input.node.querySelector('.lm-Widget.p-Widget.jp-InputPrompt.jp-InputArea-prompt').innerText == '[*]:'){
-                return cells[i].model.metadata.get('inputs')
+                return cells[i].model.metadata.get('input_params')
             }
         }
     }
@@ -474,8 +464,11 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
     generate_tool_form(){
         var inp = this.iterate_over_tool_cells()
-        if (inp != undefined){
-            this.form_builder(inp['inputs'])
+
+        console.log(inp)
+
+        if (inp != undefined){       
+            this.form_builder(inp)
         } else{
             const inputs = this.model.get('inputs')
             this.form_builder(inputs['inputs'])
@@ -484,12 +477,9 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
     update_metadata_FormState(tool_type, inputs, html){
 
-        //FixMe: 
-        var form_json =  {'count':'', 'user_name':this.model.get('email') ,'inputs': inputs}
         ContextManager.tool_registry.current.content.activeCell.model.metadata.set('tool_type', tool_type)
-        ContextManager.tool_registry.current.content.activeCell.model.metadata.set('inputs', form_json)
+        ContextManager.tool_registry.current.content.activeCell.model.metadata.set('input_params', inputs)
         ContextManager.tool_registry.current.content.activeCell.model.metadata.set('html', html)
-        // ContextManager.tool_registry.current.content.activeCell.model.metadata.set('galaxy_tool', true)
 
     }
 
@@ -4262,7 +4252,10 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 this.dataupload_job()
             } else if (this.model.get('name') == 'login'){
 
-                this.trigger_login()
+               var a = await this.trigger_login()
+
+               console.log('ok')
+
 
             }else {
                 var form = self.element.querySelector('.Galaxy-form')
@@ -4276,8 +4269,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
     async trigger_login(){
 
         // this.update_metadata_FormState({}, {})
-
-        
 
         var logingForm = this.el.querySelector('.login-form-div')
         var formdata = logingForm.parentNode.parentNode.parentNode.parentNode.outerHTML       
@@ -4295,7 +4286,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                         this.el.querySelector('.auth-error').style.display = 'block'
                    } else{
 
-                        if (this.el.querySelector('#form-restore').checked){
+                        if (this.el.querySelector('#form-restore').checked ){
 
                             if (!ContextManager.notebook_tracker) return;               
                             if (!ContextManager.notebook_tracker.currentWidget) return;
@@ -4304,15 +4295,13 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                             const notebook = notebookTracker.currentWidget.content
                             const notebookHasBeenRan = getRanNotebookIds().includes(notebook.id)
 
-                            console.log(notebookHasBeenRan)
-
-                            if(!notebookHasBeenRan) {
+                            // if(!notebookHasBeenRan) {
                                 this.runAllGalaxyCells()
-                            }
+                            // }
                         }
 
-                        for (var i = 0; i < jobs['tools'].length; i++){
-                            KernelSideDataObjects(`from nbtools import ToolManager\na.RegisterMod(${JSON.stringify(jobs['tools'][i])})`)
+                        for (var i = 0; i < jobs['tools'].length; i++) {
+                           KernelSideDataObjects(`from nbtools import ToolManager\na.RegisterMod(${JSON.stringify(jobs['tools'][i])})`)
                         }
                             this.el.querySelector('.auth-successful').style.display = 'block';
                             this.el.querySelector('.login-form-div').style.display = "none";

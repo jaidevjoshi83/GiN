@@ -74,9 +74,13 @@ class SessionList:
 
     def get_servers(self):
         servers = []
-        for session in self.sessions:
-            servers.append(session._notebook_url)
-        return IPython.display.JSON(servers)
+
+        if(self.sessions):
+            for session in self.sessions:
+                servers.append(session._notebook_url)
+            return IPython.display.JSON(servers)
+        else:
+            return IPython.display.JSON([])
 
     def clean(self):
         """

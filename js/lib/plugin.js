@@ -11,6 +11,7 @@ import * as utils_exports from './utils'
 import { MODULE_NAME, MODULE_VERSION } from './version';
 import { removeAllChildNodes , KernelSideDataObjects} from './utils';
 import { NotebookActions } from '@jupyterlab/notebook';
+// import {refresh_cells} from './Galaxyuibuilder';
 
 import {  Widget } from '@lumino/widgets';
 
@@ -57,6 +58,7 @@ function init_context(app, notebook_tracker) {
     notebook_tracker
 
     initNotebookTracker(notebook_tracker)
+    
 }
 
 
@@ -110,7 +112,7 @@ const initNotebookTracker = (notebookTracker) => {
             const notebook = notebookTracker.currentWidget.content;
             const notebookSession = notebookTracker.currentWidget.context.sessionContext;
         
-            // if ( notebookHasBeenRan.includes(notebook.id) === false) {
+            if ( notebookHasBeenRan.includes(notebook.id) === false) {
             //FixME Form Restore insteed cell run
 
                 Private.ranNotebookIds.push(notebook.id);
@@ -121,25 +123,22 @@ const initNotebookTracker = (notebookTracker) => {
                 var cells = notebookTracker.currentWidget.content.widgets;
 
                 for (var i = 0; i < cells.length; i++){
-                   
                     if (cells[i].model.metadata.get('galaxy_cell') ){
-                        console.log("OK")
                         if (cells[i].model.metadata.get('html') == undefined || cells[i].model.metadata.get('html') == '') {
-                           
                             removeAllChildNodes(cells[i].outputArea.node)
                             notebook.activeCellIndex = i
                             await NotebookActions.run(notebook, notebookSession);            
                        
                         } else{
-                            console.log(cells[i])
                             // cells[i].inputArea.hide()
                             removeAllChildNodes(cells[i].outputArea.node)
                             cells[i].outputArea.node.append(ReturnOutputArea(cells[i].model.metadata.get('html'), notebookTracker))
                         }
                     }
                  }
-             });
+            });
 
+            }
         });
     });
 };

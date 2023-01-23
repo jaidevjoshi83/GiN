@@ -218,6 +218,14 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
                     inputs[i]["values"] = new_values
         return inputs
 
+    def return_session_list():
+
+        try:
+            a = GiN.sessions.SessionList()
+            return a.get_servers()
+        except:
+             Python.display.JSON([])
+
     def updated_form(
         server=None,
         tool_inputs=None,
