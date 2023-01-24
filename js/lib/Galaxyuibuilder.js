@@ -164,6 +164,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         }
 
         if (this.model.get('galaxy_tool_id') == 'GiN_data_upload_tool') {
+            // this.add_history_list()
             console.log(this.model.get('galaxy_tool_id'))
             this.data_upload_tool()
         }
@@ -1567,9 +1568,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
  
     async data_upload_tool() {
 
-        var nb_form = this.el.querySelector('.Galaxy-form-div')
-
-        this.removeAllChildNodes(nb_form)
+        var nb_form = this.el.querySelector('.tool-forms')
+        // this.removeAllChildNodes(nb_form)
 
         // nb_form.querySelector('.Galaxy-form-div').style.style = 'none'
 
