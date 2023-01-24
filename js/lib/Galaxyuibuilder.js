@@ -159,8 +159,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         if (this.model.get('name') != 'login') {
             this.generate_tool_form()
-            this.add_tool_migration_button(getIndex())
-            // this.update_metadata_FormState('galaxy_tool', this.model.get('inputs')['inputs'], '')
+            this.add_tool_migration_button(this.model.get('origin'))
         }
 
         if (this.model.get('galaxy_tool_id') == 'GiN_data_upload_tool') {
@@ -210,15 +209,13 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             div.style.marginRight = '150px'
 
             for (var i = 0; i < servers.length; i++){
-
                 var opt = document.createElement('option')
                 opt.value  = servers[i]
+                if(servers[i] == index){
+                    opt.selected = true
+                }
                 opt.textContent  = servers[i]
                 Select.appendChild(opt)
-            }
-
-            if (index){
-                Select.selectedIndex = index
             }
 
             Select.addEventListener('change', (e) => {
@@ -377,7 +374,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         this.el.querySelector('.nbtools-description').append(div)
 
-        this.update_metadata_FormState('login', {}, '')
+        this.update_metadata_FormState('login', [], '')
 
         this.el.querySelector('.Galaxy-form-div').style.display = 'none'
 
@@ -494,20 +491,36 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
     generate_tool_form(){
         var inp = this.iterate_over_tool_cells()
-        if (inp != undefined){    
-            this.form_builder(inp)
+
+        if (inp != undefined){   
+            if (inp.length == 0 && inp != {}) {
+                const inputs = this.model.get('inputs')
+                this.form_builder(inputs['inputs'])
+            } else{
+                this.form_builder(inp)
+                console.log(inp)
+            }
+            
         } else{
             const inputs = this.model.get('inputs')
             this.form_builder(inputs['inputs'])
+
+            var form_parent = this.el.querySelector('.Galaxy-form')
+            let form = form_parent.parentNode.parentNode.parentNode.parentNode.parentNode.outerHTML
+            let fint = JSON.stringify(form)
+            this.update_metadata_FormState('galaxy_tool', inputs['inputs'], JSON.parse(fint))
+            
         }
     }
 
     update_metadata_FormState(tool_type, inputs, html){
 
+        console.log(inputs)
+        console.log(this.model.get('inputs'))
+
         ContextManager.tool_registry.current.content.activeCell.model.metadata.set('tool_type', tool_type)
         ContextManager.tool_registry.current.content.activeCell.model.metadata.set('input_params', inputs)
         ContextManager.tool_registry.current.content.activeCell.model.metadata.set('html', html)
-
     }
 
     un_wrap_repeat1(input, name){
@@ -636,6 +649,10 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         });
 
         tool_form.append(form_parent)
+        
+        // let formdata = tool_form.parentNode.parentNode.parentNode.parentNode.outerHTML
+        // let fint = JSON.stringify(formdata)
+        // self.update_metadata_FormState('galaxy_tool', inputs, JSON.parse(fint))
     }
  
     uid(){
