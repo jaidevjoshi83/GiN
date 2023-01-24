@@ -49,13 +49,7 @@ class GalaxyAuthWidget(GalaxyUIBuilder):
     def login(self, server, password=None, api_key=None, email=None):
         """Login to the Galaxy server"""
 
-        t = [
-            {
-                "id": server+'/GiN_data_upload_tool',
-                "description": "Upload data files to galaxy server",
-                "name": "Upload Data",
-            }
-        ]
+   
 
         tool_list =  {'tools':[]}
     
@@ -99,8 +93,13 @@ class GalaxyAuthWidget(GalaxyUIBuilder):
                         tool_list['tools'].append(tool)
 
         workflow_explorer = {'id':'work_flow_Explorer', 'name': 'workflow_explorer', 'description': 'Explore and execute available workflows', 'origin':self.session._notebook_url}
+        t = {"id": 'GiN_data_upload_tool',  "description": "Upload data files to galaxy server", "name": "Upload Data", 'origin': self.session._notebook_url, 'inputs': [{'type': 'data_upload'}]}
+
         we = TaskTool("+", workflow_explorer )
+        up = TaskTool('+', t)
+
         ToolManager.instance().register(we)
+        ToolManager.instance().register(up)
 
         return IPython.display.JSON(tool_list)
 

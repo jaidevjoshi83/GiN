@@ -122,7 +122,10 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         super.render();
         const inputs = this.model.get('inputs')
         //########################
-        this.add_history_list()
+
+        if (this.model.get('name') != 'Upload Data'){
+            this.add_history_list()
+        }
         //########################
         // this.form_builder(inputs['inputs'])
         
@@ -154,11 +157,15 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         }
         this.add_galaxy_cell_metadata()
 
-        if (this.model.get('name') != 'login' ) {
+        if (this.model.get('name') != 'login' != 'Upload Data' ) {
             this.generate_tool_form()
             this.add_tool_migration_button(getIndex())
-            console.log(this.model.get('inputs')['inputs'])
             // this.update_metadata_FormState('galaxy_tool', this.model.get('inputs')['inputs'], '')
+        }
+
+        if (this.model.get('galaxy_tool_id') == 'GiN_data_upload_tool') {
+            console.log(this.model.get('galaxy_tool_id'))
+            this.data_upload_tool()
         }
     }
 
@@ -170,7 +177,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         for (var i = 0; i < cells.length; i++){
             if(cells[i].model.metadata.get('galaxy_cell') &&  cells[i].model.metadata.get('tool_type') != 'login'){
-                console.log(cells[i].model.metadata)
             }
         }
     }
@@ -180,6 +186,11 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         var servers   = await KernelSideDataObjects(`import GiN\na = GiN.sessions.SessionList()\na.get_servers()`)
         
         if (servers.length > 0) {
+
+            var refresh_i = document.querySelector('i')
+            refresh_i.className = "fa fa-refresh"
+            refresh_i.style.marginRight = '5px'
+            refresh_i.title = "Refresh server list"
 
             var nbtools = this.el.querySelector('.nbtools-buttons')
             var Select = document.createElement('select')
@@ -194,6 +205,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             Label.style.marginRight =  '20px'
 
             div.append(Label)
+            div.append(refresh_i)
 
             div.style.float = 'left'
             div.style.marginRight = '150px'
@@ -228,6 +240,26 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 notebook.activeCell.model.value.text = p.replace(regex, Select.value)
 
                 NotebookActions.run(notebook, notebookSession);
+            })
+
+            refresh_i.addEventListener('click', async () => {
+
+                var servers   = await KernelSideDataObjects(`import GiN\na = GiN.sessions.SessionList()\na.get_servers()`)
+
+                removeAllChildNodes(Select)
+
+                for (var i = 0; i < servers.length; i++){
+
+                    var opt = document.createElement('option')
+                    opt.value  = servers[i]
+                    opt.textContent  = servers[i]
+                    Select.appendChild(opt)
+                }
+    
+                if (index){
+                    Select.selectedIndex = index
+                }
+               
             })
 
             div.append(Select)
@@ -464,10 +496,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
     generate_tool_form(){
         var inp = this.iterate_over_tool_cells()
-
-        console.log(inp)
-
-        if (inp != undefined){       
+        if (inp != undefined){    
             this.form_builder(inp)
         } else{
             const inputs = this.model.get('inputs')
@@ -618,6 +647,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
  
     add(input, form_parent, name_prefix, data={}){ 
 
+        console.log(input)
+
         var input_def = input;
 
         if (input_def.id == 'undefined') {
@@ -656,6 +687,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 this.add_drill_down_section(input_def, form_parent, name_prefix)
                 break
             // case "data_upload":
+            //     console.log('data_upload')
             //     this.data_upload_tool(form_parent)
             //     break
         }
@@ -1533,17 +1565,21 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         return row
     }
  
-    async data_upload_tool(FormParent) {
+    async data_upload_tool() {
+
+        var nb_form = this.el.querySelector('.Galaxy-form-div')
+
+        this.removeAllChildNodes(nb_form)
+
+        // nb_form.querySelector('.Galaxy-form-div').style.style = 'none'
 
         var data_upload = `
                         <div class="upload_tab">
-                        
-                        <div class="tab">
-                                <button type="button" id="resumable_upload_button" class="tablinks" >Upload</button>
-                                <button type="button" class="tablinks">From URL</button>
-                                <button type="button" class="tablinks">Create data</button>
-                        </div>
-
+                            <div class="tab">
+                                    <button type="button" id="resumable_upload_button" class="tablinks" >Upload</button>
+                                    <button type="button" class="tablinks">From URL</button>
+                                    <button type="button" class="tablinks">Create data</button>
+                            </div>
 
                             <!-- Tab content -->
                             <div id="upload" class="tabcontent">
@@ -1634,7 +1670,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         utm.append(genomes_title)
         utm.append(genomeSelect)
 
-        FormParent.append(utm)
+        nb_form.append(utm)
     }
 
     async submitPayload(payload, credentials) {
@@ -3814,13 +3850,9 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         template.style.margin = '20px'
 
-        console.log(this.model.get('origin'))
-
         var apiKey = await KernelSideDataObjects(`from GiN.taskwidget  import GalaxyTaskWidget\nGalaxyTaskWidget.Return_api_key('${this.model.get('origin')}')`)
 
-        console.log(apiKey)
-
-        if(job['state'] != 'job failed') {
+        if (job['state'] != 'job failed') {
             template.querySelector('.footer-txt').innerHTML = `Job: <b> ${job['id']}</b> submitted by: <b> ${apiKey['email'] }</b> on <b>${job['create_time'].split('T')[0]}</b> at <b>${job['create_time'].split('T')[1].split('.')[0]} </b>`
             template.querySelector('.job-id').innerHTML = `Job ID: <b> ${job['id']}</b>`
         }
@@ -4251,12 +4283,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             if (this.model.get('inputs')['id'] == toolid) {
                 this.dataupload_job()
             } else if (this.model.get('name') == 'login'){
-
                var a = await this.trigger_login()
-
-               console.log('ok')
-
-
             }else {
                 var form = self.element.querySelector('.Galaxy-form')
                 var inputs = this.get_form_data(form, 'on')

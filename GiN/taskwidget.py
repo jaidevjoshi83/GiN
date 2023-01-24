@@ -44,7 +44,7 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
         history_ids = gi.gi.histories.get_histories()
 
 
-        if self.tool['name'] == 'workflow_explorer':
+        if self.tool['name'] == 'workflow_explorer' or self.tool['name'] == 'Upload Data' :
             inputs = {}
             history_data=[]
         else:
