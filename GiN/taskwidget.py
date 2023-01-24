@@ -152,7 +152,7 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
     def Return_api_key(server):
         a = GiN.sessions.SessionList()
         gi = a.get(server=server)
-        return IPython.display.JSON({'api_key': gi.gi.key, 'email': gi.gi.email})
+        return IPython.display.JSON({'api_key': gi.gi.key, 'email': gi.gi.users.get_current_user()['email']})
 
     def upload_dataset(
         file_path, upload_method, datatype, genome, server=None, HistoryID=None

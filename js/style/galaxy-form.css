@@ -206,21 +206,16 @@
   background: rgb(218,217,215);
 }
 
-
 .galaxy-uibuilder .input-file-type{
   margin-left: 30px;
   margin-bottom: 10px;
 }
-
-
 .galaxy-uibuilder .fa.fa-times-circle{
   color: red;
   font-size: 15px;
   background-color: white;
   border-radius: 9px;
   }
-
-
 
 .galaxy-uibuilder .login-form-div{
   background-color: rgb(246,246,246);
@@ -234,8 +229,6 @@
     border: 1px;
 }
     
-    
-   
 .galaxy-uibuilder .tabcontent input:hover{
     
     width: 100%;
@@ -243,7 +236,6 @@
     border: 1px rgb(38,38,45) solid;
 }
   
-
 .galaxy-uibuilder .login-form .auth-successful{
   background-color: rgb(129, 233, 130);
   padding: 3px;
@@ -262,4 +254,10 @@
 
 .galaxy-uibuilder .login-form .auth-successful p {
    margin: 10px; 
+}
+
+.upload_tab input{
+    
+  height: 100px;
+  
 }

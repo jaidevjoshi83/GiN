@@ -157,15 +157,13 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         }
         this.add_galaxy_cell_metadata()
 
-        if (this.model.get('name') != 'login' != 'Upload Data' ) {
+        if (this.model.get('name') != 'login') {
             this.generate_tool_form()
             this.add_tool_migration_button(getIndex())
             // this.update_metadata_FormState('galaxy_tool', this.model.get('inputs')['inputs'], '')
         }
 
         if (this.model.get('galaxy_tool_id') == 'GiN_data_upload_tool') {
-            // this.add_history_list()
-            console.log(this.model.get('galaxy_tool_id'))
             this.data_upload_tool()
         }
     }
@@ -265,7 +263,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
             div.append(Select)
             nbtools.prepend(div)
-
         }
     }
 
@@ -304,7 +301,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                                             <input type="text" name="server" list="cityname">
                                             <datalist id="cityname">
                                                 <option value="https://usegalaxy.org"> Galaxy Main </option>
-                                                <option value="https://0.0.0.0:8080"> Galaxy Local</option>
+                                                <option value="https://localhost:8080"> Galaxy Local</option>
                                                 <option value="https://usegalaxy.eu"> Galaxy Europe</option>
                                             </datalist>
                                         </div>
@@ -648,8 +645,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
  
     add(input, form_parent, name_prefix, data={}){ 
 
-        console.log(input)
-
         var input_def = input;
 
         if (input_def.id == 'undefined') {
@@ -687,10 +682,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             case "drill_down":
                 this.add_drill_down_section(input_def, form_parent, name_prefix)
                 break
-            // case "data_upload":
-            //     console.log('data_upload')
-            //     this.data_upload_tool(form_parent)
-            //     break
         }
     }
      // remove() {
@@ -1568,7 +1559,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
  
     async data_upload_tool() {
 
-        var nb_form = this.el.querySelector('.tool-forms')
+        var nb_form = this.el.querySelector('.Galaxy-form')
         // this.removeAllChildNodes(nb_form)
 
         // nb_form.querySelector('.Galaxy-form-div').style.style = 'none'
@@ -4278,9 +4269,9 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 return
             }
 
-            var toolid =  self.model.get('origin')+"/"+"GiN_data_upload_tool"
+            var toolid =  "GiN_data_upload_tool"
 
-            if (this.model.get('inputs')['id'] == toolid) {
+            if (this.model.get('galaxy_tool_id') == toolid) {
                 this.dataupload_job()
             } else if (this.model.get('name') == 'login'){
                var a = await this.trigger_login()

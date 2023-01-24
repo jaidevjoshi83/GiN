@@ -3,7 +3,7 @@ Useful things across modules.
 """
 
 DEFAULT_COLOR = "#2c3143"
-DEFAULT_LOGO = "https://usegalaxy.org/static/favicon.png"
+DEFAULT_LOGO = "https://usegalaxy.org/static/favicon.svg"
 
 GALAXY_SERVERS = {
     "Galaxy Main": "https://usegalaxy.org",
