@@ -256,8 +256,11 @@
    margin: 10px; 
 }
 
-.upload_tab input{
-    
-  height: 100px;
-  
+.galaxy-uibuilder #upload{
+
+  height: 200px;
+}
+
+.galaxy-uibuilder #inputupload {
+  height: 50px;
 }
