@@ -248,13 +248,16 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
                     var opt = document.createElement('option')
                     opt.value  = servers[i]
+                    if(servers[i] == index){
+                        opt.selected = true
+                    }
                     opt.textContent  = servers[i]
                     Select.appendChild(opt)
                 }
     
-                if (index){
-                    Select.selectedIndex = index
-                }
+                // if (index){
+                //     Select.selectedIndex = index
+                // }
                
             })
 
@@ -268,7 +271,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         // this.update_metadata_FormState('workflow', {}, '')
 
         this.el.querySelector('.Galaxy-form-div').style.display = 'none'
-
         var nb_form = this.el.querySelector('.nbtools-form')
 
         var data_upload = `<div class="login-form"> 
@@ -493,12 +495,12 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         var inp = this.iterate_over_tool_cells()
 
         if (inp != undefined){   
-            if (inp.length == 0 && inp != {}) {
+            console.log(inp)
+            if (inp.length == 0 ) {
                 const inputs = this.model.get('inputs')
                 this.form_builder(inputs['inputs'])
             } else{
                 this.form_builder(inp)
-                console.log(inp)
             }
             
         } else{
@@ -509,14 +511,10 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             let form = form_parent.parentNode.parentNode.parentNode.parentNode.parentNode.outerHTML
             let fint = JSON.stringify(form)
             this.update_metadata_FormState('galaxy_tool', inputs['inputs'], JSON.parse(fint))
-            
         }
     }
 
     update_metadata_FormState(tool_type, inputs, html){
-
-        console.log(inputs)
-        console.log(this.model.get('inputs'))
 
         ContextManager.tool_registry.current.content.activeCell.model.metadata.set('tool_type', tool_type)
         ContextManager.tool_registry.current.content.activeCell.model.metadata.set('input_params', inputs)
@@ -673,6 +671,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 this.add_conditional_section(input_def, form_parent, name_prefix, data);
                 break;
             case "data":
+            case "data_collection":
                 this.add_input_data(input_def, form_parent, name_prefix, data)
                 break
             case "integer" :
@@ -687,9 +686,9 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             case "select":
                 this.add_select_field(input_def, form_parent, name_prefix)
                 break
-            case "data_collection":
-                this.add_input_data(input_def, form_parent, name_prefix, data)
-                break
+            // case "data_collection":
+            //     this.add_input_data(input_def, form_parent, name_prefix, data)
+            //     break
             case "repeat": 
                 this.add_repeat_section(input_def, form_parent, name_prefix) 
                 break
@@ -2333,7 +2332,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         }
 
         Select.name = NamePrefix+input_def['name']
-
         Select.value = input_def.value
 
         var options = input_def.options
