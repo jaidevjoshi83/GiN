@@ -415,3 +415,40 @@ select#History_IDs.InputData{
 .job-status-footer {
   margin-top: 2px;
 }
+
+.preview{
+  float: left;
+  height: 800px;
+  padding: 15px;
+  width: 95%;
+}
+
+.data-preview-header{
+  background: rgb(39,35,35) 
+}
+
+
+.data-preview-header-icon{
+    margin: 6px;
+    font-size: 20px;
+}
+
+.data-preview-title .title {
+  color: white;
+  margin-left: 20px;
+  font-size: 15px;
+  margin-top: 10px;
+}
+
+.data-preview-title{
+    height: 100%;    
+}
+
+
+.data-preview{
+    
+  width: 70%;
+  float: left;
+     
+ }
+ 

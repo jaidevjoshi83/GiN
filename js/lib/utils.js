@@ -114,19 +114,25 @@ export function show(elem) {
  *
  * @param {HTMLElement} elem
  */
-export function hide(elem) {
-    elem.classList.add('nbtools-toggle');
-    // Give the element a height to change from
-    elem.style.height = elem.scrollHeight + 'px';
-    // Set the height back to 0
-    setTimeout(function () {
-        elem.style.height = '0';
-    }, 10);
-    // When the transition is complete, hide it
-    setTimeout(function () {
-        elem.classList.add('nbtools-hidden');
-    }, 350);
-}
+// export function hide(elem) {
+
+//     if (elem)  {
+//         elem.classList.add('nbtools-toggle');
+//         // Give the element a height to change from
+//         elem.style.height = elem.scrollHeight + 'px';
+//         // Set the height back to 0
+//         setTimeout(function () {
+//             elem.style.height = '0';
+//         }, 10);
+//         // When the transition is complete, hide it
+//         setTimeout(function () {
+//             elem.classList.add('nbtools-hidden');
+//         }, 350);
+// }
+
+//     }
+
+
 /**
  * Toggle element visibility
  *
@@ -197,4 +203,11 @@ export async function executePython(pythonCode, isExpectingOutput){
 export async function  KernelSideDataObjects(code) {
     var system = await executePython(code);
     return system;
+}
+
+
+export function removeAllChildNodes(parent){
+    while (parent.firstChild) {
+        parent.removeChild(parent.firstChild);
+    }
 }

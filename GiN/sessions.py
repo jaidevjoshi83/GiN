@@ -1,5 +1,6 @@
 # from bioblend import galaxy
 from bioblend.galaxy.objects import GalaxyInstance
+import IPython
 
 
 class SessionList:
@@ -9,7 +10,7 @@ class SessionList:
 
     sessions = []
 
-    def register(self, server, email, password):
+    def register(self, server, email=None, password=None, api_key=None):
         """
         Register a new Galaxy  server session for the provided
         server, email and password. Return the session.
@@ -20,14 +21,17 @@ class SessionList:
         """
 
         # Create the session
-        if (email==""):
-            session = GalaxyInstance(server,  api_key=password,  verify=True)
+        if (password):
+            session = GalaxyInstance(server, email=email, password=password, verify=True) 
+            session._notebook_password = password
+            
         else:
-            session = GalaxyInstance(server, email=email, password=password, verify=True)
+            session = GalaxyInstance(server,  api_key=api_key,  verify=True)
+            
        
         session._notebook_url = server
         session._notebook_email = email
-        session._notebook_password = password
+        
 
         # Validate email if not empty
         valid_email = email is not None
@@ -67,6 +71,16 @@ class SessionList:
             return None
         else:
             return self.sessions[index]
+
+    def get_servers(self):
+        servers = []
+
+        if(self.sessions):
+            for session in self.sessions:
+                servers.append(session._notebook_url)
+            return IPython.display.JSON(servers)
+        else:
+            return IPython.display.JSON([])
 
     def clean(self):
         """
