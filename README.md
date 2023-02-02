@@ -89,7 +89,7 @@ docker run --rm -p 8888:8888 jayadevjoshi12/gin:latest
 
 ## Login
 
-![alt text](https://github.com/jaidevjoshi83/GiN/blob/repeat/GiN_Screenshot/login.png)
+![alt text](https://github.com/jaidevjoshi83/GiN/blob/master/GiN_Screenshot/login_widget.png)
 
 ## Galaxy tool form
 
