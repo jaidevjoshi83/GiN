@@ -11,20 +11,20 @@ conda create -n GiN python=3.9 jupyterlab=3.4 ipywidgets=7.5.1 nodejs=14.15.1  -
 
 ### Installing dependencies
 
--- [yarn](https://www.npmjs.com/package/yarn)
+[yarn](https://www.npmjs.com/package/yarn)
 
 ```
 npm install -g yarn
 ```
 
--- [ipyuploads](https://github.com/g2nb/ipyuploads.git) 
+[ipyuploads](https://github.com/g2nb/ipyuploads.git) 
 
 ```
 git clone https://github.com/g2nb/ipyuploads.git && \
     cd ipyuploads && pip install .
 ```
 
--- [nbtools](https://github.com/g2nb/nbtools.git)
+[nbtools](https://github.com/g2nb/nbtools.git)
 
 ```
 git clone -b lab https://github.com/g2nb/nbtools.git
@@ -38,7 +38,7 @@ jupyter nbextension install --py nbtools --sys-prefix
 jupyter nbextension enable --py nbtools --sys-prefix
 ```
 
--- [bioblend](https://github.com/galaxyproject/bioblend.git)
+[bioblend](https://github.com/galaxyproject/bioblend.git)
 
 ```
 pip install bioblend
