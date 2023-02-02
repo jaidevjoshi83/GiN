@@ -30,6 +30,7 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
     """A widget for representing the status of a Galaxy job"""
 
     # default_color = 'rgba(10, 45, 105, 0.80)'
+    
     default_color = DEFAULT_COLOR
     default_logo = DEFAULT_LOGO
     tool = None
@@ -37,11 +38,12 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
     def __init__(self, tool=None, **kwargs):
        
         self.tool = tool
-
+        
         a = GiN.sessions.SessionList()
         gi = a.get(server=self.tool['origin'])
 
         history_ids = gi.gi.histories.get_histories()
+        # history_ids = []
 
         if self.tool['name'] == 'workflow_explorer' or self.tool['name'] == 'Upload Data' :
             inputs = {'inpus':[]}
@@ -77,7 +79,8 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
         self.display_header = False
         self.display_footer = False
         self.error = error_message
-    
+
+    @staticmethod
     def RetrivParm(inputs, prefix=""):
 
         OutDict = {}
@@ -98,8 +101,8 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
                 OutDict = dict(list(OutDict.items()) + list(Dict3.items()))
 
         return OutDict
-
-    def submit_job(server, tool_id, tool_inputs=None, history_id=None):
+    @staticmethod
+    def submit_job( server, tool_id, tool_inputs=None, history_id=None):
 
         a = GiN.sessions.SessionList()
         gi1 = a.get(server=server)
@@ -116,7 +119,7 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
         return IPython.display.JSON(job)
 
     @staticmethod
-    def form_value(raw_value):
+    def form_value( raw_value):
 
         """Give the default parameter value in format the UI Builder expects"""
         if raw_value is not None:
@@ -124,7 +127,9 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
         else:
             return ""
 
-    def show_job(server, job_id):
+    
+    @staticmethod
+    def show_job( server, job_id):
 
         a = GiN.sessions.SessionList()
         gi1 = a.get(server=server)
@@ -133,7 +138,7 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
         return IPython.display.JSON(job)
     
     @staticmethod
-    def get_data_type_and_genomes(server=None):
+    def get_data_type_and_genomes( server=None):
 
         a = GiN.sessions.SessionList()
         gi2 = a.get(server=server)
@@ -147,14 +152,15 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
 
         return IPython.display.JSON(datatypes_genomes)
 
-  
-    def Return_api_key(server):
+    @staticmethod
+    def Return_api_key( server):
         a = GiN.sessions.SessionList()
         gi = a.get(server=server)
         return IPython.display.JSON({'api_key': gi.gi.key, 'email': gi.gi.users.get_current_user()['email']})
-
+    
+    @staticmethod
     def upload_dataset(
-        file_path, upload_method, datatype, genome, server=None, HistoryID=None
+         file_path, upload_method, datatype, genome, server=None, HistoryID=None
     ):
 
         a = GiN.sessions.SessionList()
@@ -172,8 +178,8 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
             return IPython.display.JSON(job)
 
         # return IPython.display.JSON(job)
-
-    def TestOut(server=None, JobID=None):
+    @staticmethod
+    def TestOut( server=None, JobID=None):
 
         a = GiN.sessions.SessionList()
         gi4 = a.get(server=server)
@@ -181,12 +187,14 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
         status = gi4.jobs.gi.jobs.show_job(JobID, full_details=True)
         return IPython.display.JSON(status)
 
-    def ReturnSessions(server=None):
+    @staticmethod
+    def ReturnSessions( server=None):
 
         a = GiN.sessions.SessionList()
         gi4 = a.get(server=server)
-  
-    def OutPutData(server=None, JobID=None):
+
+    @staticmethod
+    def OutPutData( server=None, JobID=None):
 
         a = GiN.sessions.SessionList()
         gi5 = a.get(server=server)
@@ -205,7 +213,8 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
 
         return IPython.display.JSON(DataList)
 
-    def RefinedInputs(inputs, gi):
+    @staticmethod
+    def RefinedInputs( inputs, gi):
 
         for i in inputs.keys():
             if type(inputs[i]) == dict:
@@ -216,6 +225,8 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
                     inputs[i]["values"] = new_values
         return inputs
 
+
+    @staticmethod
     def return_session_list():
 
         try:
@@ -223,7 +234,7 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
             return a.get_servers()
         except:
              Python.display.JSON([])
-
+    @staticmethod
     def updated_form(
         server=None,
         tool_inputs=None,
@@ -267,8 +278,8 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
                 return history_data
             else:
                 return IPython.display.JSON(data=history_data)
-
-    def history_data_list(server=None, history_id=None):
+    @staticmethod
+    def history_data_list( server=None, history_id=None):
 
         try:
             a = GiN.sessions.SessionList()
@@ -284,6 +295,7 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
         except:
             return IPython.display.JSON([])
 
+    @staticmethod
     def show_data_set(server=None, dataset_id=None):
 
         a = GiN.sessions.SessionList()
@@ -292,6 +304,7 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
         show_dataset = gi8.gi.datasets.gi.datasets.show_dataset(dataset_id=dataset_id)
         return IPython.display.JSON(show_dataset)
 
+    @staticmethod
     def delete_dataset(server=None, history_id=None, dataset_id=None):
 
         a = GiN.sessions.SessionList()
@@ -300,9 +313,9 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
         gi9.gi.histories.gi.histories.delete_dataset(
             history_id=history_id, dataset_id=dataset_id, purge=True
         )
-
+    @staticmethod
     def delete_dataset_collection(
-        server=None, history_id=None, dataset_collection_id=None
+         server=None, history_id=None, dataset_collection_id=None
     ):
 
         a = GiN.sessions.SessionList()
@@ -313,8 +326,8 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
             dataset_collection_id=dataset_collection_id,
             # purge=True,
         )
-
-    def show_dataset_collection(server=None, dataset_id=None):
+    @staticmethod
+    def show_dataset_collection( server=None, dataset_id=None):
 
         a = GiN.sessions.SessionList()
         gi11 = a.get(server=server)
@@ -323,7 +336,7 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
             dataset_collection_id=dataset_id
         )
         return IPython.display.JSON(show_dataset)
-
+    @staticmethod
     def download_file_to_jupyter_server(
         server=None,
         data_type="dataset",
@@ -350,7 +363,7 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
             gi12.gi.datasets.download_dataset(
                 dataset_id=collection_id, file_path=galaxy_data
             )
-
+    @staticmethod
     def CORS_fallback_upload(
         file_name,
         data, 
@@ -375,6 +388,7 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
         out = gi.tools.gi.tools.upload_file(path=path, history_id=history_id)
         return IPython.display.JSON(out)
 
+    @staticmethod
     def send_data_to_galaxy_tool(
         server_d=None,
         server_u=None,
@@ -409,7 +423,7 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
         # if not os.path.exists(galaxy_data):
         #     os.mkdir(galaxy_data)
         #     gi.gi.datasets.download_dataset(dataset_id=collection_id, file_path=galaxy_data)
-
+    @staticmethod
     def upload_fallback(
         server_u=None,
         file_name=None,
@@ -421,6 +435,7 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
 
         return IPython.display.JSON(out)
 
+    @staticmethod
     def send_data_to_gp_server(file_name, tool_id, dataset_id, server, ext):
 
         temp_dir = os.path.join(os.getcwd(), "temp1")
@@ -449,6 +464,7 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
         #####################
         return IPython.display.JSON({"uri": uri.uri})
 
+    @staticmethod
     def return_job_status(server=None, job_id=None):
 
         a = GiN.sessions.SessionList()
@@ -457,7 +473,8 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
 
         return IPython.display.JSON(job_state)
 
-    def return_job_state(server=None, job_id=None):
+    @staticmethod
+    def return_job_state( server=None, job_id=None):
 
         a = GiN.sessions.SessionList()
         gi16 = a.get(server=server)

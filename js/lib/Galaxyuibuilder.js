@@ -774,8 +774,11 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 } else {
 
                         e.target.parentNode.parentNode.querySelector('.fas.fa-spinner.fa-spin').style.display = 'block'
-                        uri = await KernelSideDataObjects(`from GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.send_data_to_gp_server(file_name=${JSON.stringify(dataset['name'])}, tool_id=${JSON.stringify(tool_id)}, dataset_id=${JSON.stringify(dataset['id'])}, server=${JSON.stringify(this.model.get('origin'))}, ext=${JSON.stringify(dataset['file_ext'])})`)
 
+                        console.log(dataset)
+
+                        uri = await KernelSideDataObjects(`from GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.send_data_to_gp_server(file_name=${JSON.stringify(dataset['name'])}, tool_id=${JSON.stringify(tool_id)}, dataset_id=${JSON.stringify(dataset['id'])}, server=${JSON.stringify(this.model.get('origin'))}, ext=${JSON.stringify(dataset['extension'])})`)
+                         
                         e.target.parentNode.parentNode.querySelector('.fas.fa-spinner.fa-spin').style.display = 'none'
                         e.target.parentNode.parentNode.querySelector('.fas.fa-solid.fa-check').style.display = 'block'
 
@@ -1291,8 +1294,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                                             const el = document.createElement("option");
 
                                             el.textContent = dataset['name'];
-                                            el.value = out['id']
-                                            el.data = {'id': out['id'], 'src':out['hda_ldda']}
+                                            el.value = dataset['id']
+                                            el.data = {'id': dataset['id'], 'src':dataset['hda_ldda']}
                                             el.selected = true
                                             el.dispatchEvent(new Event('change', { bubbles: true }))
                             
@@ -1584,9 +1587,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         var nb_form = this.el.querySelector('.Galaxy-form')
         // this.removeAllChildNodes(nb_form)
-
         // nb_form.querySelector('.Galaxy-form-div').style.style = 'none'
-
         var data_upload = `
                         <div class="upload_tab">
                             <div class="tab">
@@ -4315,6 +4316,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         var logingForm = this.el.querySelector('.login-form-div')
         var formdata = logingForm.parentNode.parentNode.parentNode.parentNode.outerHTML       
         let fint = JSON.stringify(formdata)
+
+        this.el.querySelector('.auth-error').style.display = 'none'
 
         for(var i = 0; i < logingForm.children.length; i++) {
             if (logingForm.children[i].style.display == 'block'){

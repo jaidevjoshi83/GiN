@@ -13,21 +13,21 @@ from .Galaxyuibuilder import GalaxyUIBuilder
 from ipywidgets import Output
 from nbtools.uioutput import UIOutput
 from nbtools.event_manager import EventManager
-import GiN
-import uuid
-import json
+# import GiN
+# import uuid
+# import json
+
+print("import 1")
 
 import IPython
 import IPython.display
 
-  
 class GalaxyAuthWidget(GalaxyUIBuilder):
     """A widget for authenticating with a Galaxy server"""
 
     default_color = DEFAULT_COLOR
     default_logo = DEFAULT_LOGO
     new_session=None
-
 
     def __init__(self, session=None, **kwargs):
         """Initialize the authentication widget"""
@@ -48,8 +48,6 @@ class GalaxyAuthWidget(GalaxyUIBuilder):
 
     def login(self, server, password=None, api_key=None, email=None):
         """Login to the Galaxy server"""
-
-   
 
         tool_list =  {'tools':[]}
     
@@ -176,7 +174,6 @@ def server_name(search_url):
             return name
     return search_url
 
-
 def new_create_placeholder_widget( origin, id, message=None):
 
     output = Output()  # Output widget
@@ -225,15 +222,8 @@ class AuthenticationTool(NBTool):
     load = lambda x: GalaxyAuthWidget()
 
 
-# class UploadData(NBTool):
-#     """Tool wrapper for the authentication widget"""
-
-#     origin = "+"
-#     id = "GiN_Upload_Data"
-#     name = "Upload Data"
-#     description = "Upload Datafilis to galaxy history"
-
-#     load = lambda x: UploadData()
-
-# Register the authentication widget
-ToolManager.instance().register(AuthenticationTool())
+# preventing  "jupyter nbextension install", imports need to be fixed 
+try:
+    ToolManager.instance().register(AuthenticationTool())
+except:
+    pass

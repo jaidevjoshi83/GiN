@@ -75,7 +75,7 @@ function ReturnOutputArea(i, notebookTracker){
     const notebookHasBeenRan = getRanNotebookIds().includes(notebook.id)
 
     _.each(utm.querySelectorAll('.nbtools-run'), (e)=>{
-        e.innerText = "Restore form state"
+        e.innerText = "Update form for current user"
 
         e.addEventListener('click', async () => {
             // if ( notebookHasBeenRan === false) {
