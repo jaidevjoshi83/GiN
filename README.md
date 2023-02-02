@@ -51,9 +51,6 @@ A Custom Jupyter Widget Library
 
 Installation
 ------------
-
-For a development installation (requires [Node.js](https://nodejs.org) and [Yarn version 1](https://classic.yarnpkg.com/)),
-
     $ git clone https://github.com/jaidevjoshi83/GiN.git 
     $ cd GiN
     $ npm install @g2nb/nbtools
@@ -65,7 +62,9 @@ When actively developing your extension for JupyterLab, run the command:
 
     $ cd GiN
     $ npm install @g2nb/nbtools
-    $ pip install .
+    $ pip install -e .
+    $ jupyter nbextension install --py --symlink --overwrite --sys-prefix GiN
+    $ jupyter nbextension enable --py --sys-prefix GiN
     $ jupyter labextension develop --overwrite GiN
     
 Then you need to rebuild the JS when you make a code change:
