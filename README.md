@@ -9,22 +9,22 @@ conda create -n GiN python=3.9 jupyterlab=3.4 ipywidgets=7.5.1 nodejs=14.15.1  -
 
 ```
 
-### Install dependencies
+### Installing dependencies
 
--- Install yarn
+-- [yarn](https://www.npmjs.com/package/yarn)
 
 ```
 npm install -g yarn
 ```
 
--- Install ipyuploads
+-- [ipyuploads](https://github.com/g2nb/ipyuploads.git) 
 
 ```
 git clone https://github.com/g2nb/ipyuploads.git && \
     cd ipyuploads && pip install .
 ```
 
--- Install nbtools
+-- [nbtools](git clone https://github.com/g2nb/nbtools.git)
 
     ```
     git clone -b lab https://github.com/g2nb/nbtools.git
@@ -39,7 +39,7 @@ git clone https://github.com/g2nb/ipyuploads.git && \
 
     ```
 
--- Install bioblend
+-- [bioblend](https://github.com/galaxyproject/bioblend.git)
 
    ```
    pip install bioblend
@@ -52,7 +52,6 @@ A Custom Jupyter Widget Library
 
 Installation
 ------------
-
 
 For a development installation (requires [Node.js](https://nodejs.org) and [Yarn version 1](https://classic.yarnpkg.com/)),
 
@@ -86,7 +85,6 @@ A Docker image with GiN and the full JupyterLab stack is available through Docke
 docker pull jayadevjoshi12/gin:latest
 docker run --rm -p 8888:8888 jayadevjoshi12/gin:latest
 ```
-
 ---
 
 # Screenshots..
