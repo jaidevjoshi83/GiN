@@ -47,7 +47,6 @@ pip install bioblend
 GiN installation
 ===============================
 
-A Custom Jupyter Widget Library
 
 Installation
 ------------
@@ -58,6 +57,9 @@ Installation
     $ jupyter nbextension install --py --symlink --overwrite --sys-prefix GiN
     $ jupyter nbextension enable --py --sys-prefix GiN
     
+
+For a development installation (requires [Node.js](https://nodejs.org) and [Yarn version 1](https://classic.yarnpkg.com/)),
+
 When actively developing your extension for JupyterLab, run the command:
 
     $ cd GiN
