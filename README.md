@@ -1,6 +1,4 @@
-############################## Installation ########################
-
-# GiN
+# GiN: Installation
 
 ### Create conda env
 
