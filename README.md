@@ -59,6 +59,7 @@ Installation
     
 
 For a development installation (requires [Node.js](https://nodejs.org) and [Yarn version 1](https://classic.yarnpkg.com/)),
+------------
 
 When actively developing your extension for JupyterLab, run the command:
 
