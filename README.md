@@ -26,24 +26,23 @@ git clone https://github.com/g2nb/ipyuploads.git && \
 
 -- [nbtools](https://github.com/g2nb/nbtools.git)
 
-    ```
-    git clone -b lab https://github.com/g2nb/nbtools.git
- 
-    cd nbtools/
+```
+git clone -b lab https://github.com/g2nb/nbtools.git
 
-    pip install .
+cd nbtools/
 
-    jupyter labextension install . 
-    jupyter nbextension install --py nbtools --sys-prefix 
-    jupyter nbextension enable --py nbtools --sys-prefix
+pip install .
 
-    ```
+jupyter labextension install . 
+jupyter nbextension install --py nbtools --sys-prefix 
+jupyter nbextension enable --py nbtools --sys-prefix
+```
 
 -- [bioblend](https://github.com/galaxyproject/bioblend.git)
 
-   ```
-   pip install bioblend
-   ```
+```
+pip install bioblend
+```
 
 GiN installation
 ===============================
