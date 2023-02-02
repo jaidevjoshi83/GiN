@@ -24,7 +24,7 @@ git clone https://github.com/g2nb/ipyuploads.git && \
     cd ipyuploads && pip install .
 ```
 
--- [nbtools](git clone https://github.com/g2nb/nbtools.git)
+-- [nbtools](https://github.com/g2nb/nbtools.git)
 
     ```
     git clone -b lab https://github.com/g2nb/nbtools.git
