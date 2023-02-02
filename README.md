@@ -46,7 +46,7 @@ pip install bioblend
 ===============================
 
 
-Installation
+Installation for a user
 ------------
     $ git clone https://github.com/jaidevjoshi83/GiN.git 
     $ cd GiN
