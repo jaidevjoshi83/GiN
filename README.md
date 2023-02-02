@@ -42,7 +42,7 @@ jupyter nbextension enable --py nbtools --sys-prefix
 pip install bioblend
 ```
 
-GiN installation
+[GiN](https://github.com/jaidevjoshi83/GiN)
 ===============================
 
 
