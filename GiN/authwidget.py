@@ -13,11 +13,7 @@ from .Galaxyuibuilder import GalaxyUIBuilder
 from ipywidgets import Output
 from nbtools.uioutput import UIOutput
 from nbtools.event_manager import EventManager
-# import GiN
-# import uuid
-# import json
 
-print("import 1")
 
 import IPython
 import IPython.display
@@ -89,23 +85,25 @@ class GalaxyAuthWidget(GalaxyUIBuilder):
                         tool['origin'] = self.session._notebook_url
                         tool['email'] = self.session._notebook_email
                         tool_list['tools'].append(tool)
+                        # GalaxyAuthWidget.RegisterMod(tool_list['tools'])
+ 
 
-        workflow_explorer = {'id':'work_flow_Explorer', 'name': 'workflow_explorer', 'description': 'Explore and execute available workflows', 'origin':self.session._notebook_url}
         t = {"id": 'GiN_data_upload_tool',  "description": "Upload data files to galaxy server", "name": "Upload Data", 'origin': self.session._notebook_url, 'inputs': [{'type': 'data_upload'}]}
+       
+        for i in tool_list['tools']:
+            GalaxyAuthWidget().RegisterMod(i)
 
-        we = TaskTool("+", workflow_explorer )
-        up = TaskTool('+', t)
-
-        ToolManager.instance().register(we)
-        ToolManager.instance().register(up)
+        t = TaskTool('+', t )
+        ToolManager.instance().register(t)
 
         return IPython.display.JSON(tool_list)
-
+   
     def RegisterMod(self, tool):
         # aDict = json.loads(tool)
         # tool1 = tool1
         # def register_modules_callback():
-        tool = TaskTool(self.session._notebook_url, tool)
+        
+        tool = TaskTool(tool['origin'], tool)
         ToolManager.instance().register(tool)
         # registration_thread = Thread(target=register_modules_callback)
         # registration_thread.start()
@@ -156,7 +154,6 @@ class GalaxyAuthWidget(GalaxyUIBuilder):
             self.session._notebook_key, 
         )
 
-
     def system_message(self):
         self.info = "Successfully logged into Galaxy"
 
@@ -174,7 +171,6 @@ def server_name(search_url):
             return name
     return search_url
 
-def new_create_placeholder_widget( origin, id, message=None):
 
     output = Output()  # Output widget
     
