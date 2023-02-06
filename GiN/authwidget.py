@@ -52,15 +52,15 @@ class GalaxyAuthWidget(GalaxyUIBuilder):
                 self.session = GalaxyInstance(server, email=email, password=password)
                 self.session._notebook_email = email
             except:
-                tool_list['error'] = 'true'
-                return IPython.display.JSON(tool_list)
+                # tool_list['state'] = 'error'
+                return IPython.display.JSON({'state': 'error'})
         else:
             try:
                 self.session = GalaxyInstance(server,  api_key=api_key, verify=True)
                 self.session._notebook_email = self.session.gi.users.get_current_user()['email']
             except:
-                tool_list['error'] = 'true'
-                return IPython.display.JSON({"error": 'true'})
+                # tool_list['state'] = 'error'
+                return IPython.display.JSON({'state': 'error'})
 
         self.session._notebook_url = server
         self.session._notebook_password = password
@@ -87,27 +87,35 @@ class GalaxyAuthWidget(GalaxyUIBuilder):
                         tool_list['tools'].append(tool)
                         # GalaxyAuthWidget.RegisterMod(tool_list['tools'])
  
-
         t = {"id": 'GiN_data_upload_tool',  "description": "Upload data files to galaxy server", "name": "Upload Data", 'origin': self.session._notebook_url, 'inputs': [{'type': 'data_upload'}]}
        
-        for i in tool_list['tools']:
-            GalaxyAuthWidget().RegisterMod(i)
 
         t = TaskTool('+', t )
         ToolManager.instance().register(t)
 
-        return IPython.display.JSON(tool_list)
-   
-    def RegisterMod(self, tool):
-        # aDict = json.loads(tool)
-        # tool1 = tool1
         # def register_modules_callback():
-        
-        tool = TaskTool(tool['origin'], tool)
-        ToolManager.instance().register(tool)
+        for i in tool_list['tools']:
+            GalaxyAuthWidget().RegisterMod(i)
+
         # registration_thread = Thread(target=register_modules_callback)
         # registration_thread.start()
 
+        # print(GalaxyAuthWidget().RegisterMod(tool_list['tools']))
+
+        return IPython.display.JSON({'state':'success'})
+   
+    def RegisterMod(self, tool):
+
+        # def register_modules_callback():
+        #     for i in tools:
+        #         # GalaxyAuthWidget().RegisterMod(i)
+        tool = TaskTool(tool['origin'], tool)
+        ToolManager.instance().register(tool)
+
+        # registration_thread = Thread(target=register_modules_callback)
+        # registration_thread.start()
+        # return "OK"
+        
     def has_credentials(self):
         """Test whether the session object is instantiated and whether an email and password have been provided"""
         if type(self.session) is not GalaxyInstance:

@@ -382,6 +382,10 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                                     <p> <b>Login Successful </b></p>
                                 </div>
 
+                                <div class="auth-waiting" style="display: none; margin: 10px;">
+                                    <i class="fa fa-spinner fa-spin" style="font-size:40px"></i>
+                                </div>
+
                                 <div id="refresh-galaxy-cells" style="display: none; margin: 10px;">
                                     <button id="refresh-button" type="button" class="tablinks" style="width: 200px;"> Refresh Galaxy Cells </button>
                                 </div>
@@ -510,7 +514,9 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             form_parent.data = this.model.get('origin')
             let form = form_parent.parentNode.parentNode.parentNode.parentNode.parentNode.outerHTML
             let fint = JSON.stringify(form)
-            // this.update_metadata_FormState('galaxy_tool', inputs['inputs'], JSON.parse(fint))
+            if (this.model.get('galaxy_tool_id') != "GiN_data_upload_tool") {
+                this.update_metadata_FormState('galaxy_tool', inputs['inputs'], JSON.parse(fint))
+            }
         }
     }
 
@@ -1476,8 +1482,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             let fint = JSON.stringify(formdata)
 
             var inputs = self.get_form_data(form)
-
-           
             var refine_inputs  = await KernelSideDataObjects(`import json\nimport base64\nfrom GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.updated_form(${JSON.stringify(self.model.get('origin'))}, json.loads(base64.b64decode("${btoa(JSON.stringify(inputs))}")), ${JSON.stringify(self.model.get('inputs')['id'])}, ${JSON.stringify(history_id)})`)
            
             self.update_metadata_FormState('galaxy_tool', refine_inputs['inputs'], JSON.parse(fint))
@@ -4308,77 +4312,111 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
     async trigger_login(){
 
+        console.log("OKKKKK")
+
         // this.update_metadata_FormState({}, {})
 
         var logingForm = this.el.querySelector('.login-form-div')
         var formdata = logingForm.parentNode.parentNode.parentNode.parentNode.outerHTML       
         let fint = JSON.stringify(formdata)
+        this.el.querySelector('#refresh-galaxy-cells').style.display = 'none'
 
         this.el.querySelector('.auth-error').style.display = 'none'
+        // this.el.querySelector('.login-form-div').style.display = "none";
+        this.el.querySelector('.auth-waiting').style.display = 'block';
+        // this.el.querySelector('.auth-successful').style.display = 'block';
 
         for(var i = 0; i < logingForm.children.length; i++) {
             if (logingForm.children[i].style.display == 'block'){
                 if (logingForm.children[i].id == 'credential-login'){
                     var credentials = logingForm.children[i].querySelectorAll('input')
-                    var jobs = await KernelSideDataObjects(`from GiN.authwidget import GalaxyAuthWidget\na  = GalaxyAuthWidget()\na.login(server=${JSON.stringify(credentials[0].value)}, password=${JSON.stringify(credentials[2].value)}, email=${JSON.stringify(credentials[1].value)})`)
-                    Private.origins.push(credentials[0].value);
 
-                   if (jobs['error'] == 'true'){
-                        this.el.querySelector('.auth-error').style.display = 'block'
-                   } else{
+                    for (let i = 0; i < Infinity; ++i) {
 
-                        if (this.el.querySelector('#form-restore').checked ){
+                        var jobs = await KernelSideDataObjects(`from GiN.authwidget import GalaxyAuthWidget\na  = GalaxyAuthWidget()\na.login(server=${JSON.stringify(credentials[0].value)}, password=${JSON.stringify(credentials[2].value)}, email=${JSON.stringify(credentials[1].value)})`)
+                        console.log(jobs)
+                        await this.waitforme(3000);
 
-                            if (!ContextManager.notebook_tracker) return;               
-                            if (!ContextManager.notebook_tracker.currentWidget) return;
-                            var notebookTracker = ContextManager.notebook_tracker
+                        if (jobs.state === 'error' ) {
 
-                            const notebook = notebookTracker.currentWidget.content
-                            const notebookHasBeenRan = getRanNotebookIds().includes(notebook.id)
-                            // if(!notebookHasBeenRan) {
-                                this.runAllGalaxyCells()
-                            // }
-                        }
+                            this.el.querySelector('.auth-error').style.display = 'block'
+                            // this.el.querySelector('.login-form-div').style.display = "none";
+                            this.el.querySelector('.auth-waiting').style.display = 'none';
+                            this.el.querySelector('.auth-successful').style.display = 'none';
 
-                        // for (var i = 0; i < jobs['tools'].length; i++) {
-                        //    KernelSideDataObjects(`from nbtools import ToolManager\na.RegisterMod(${JSON.stringify(jobs['tools'][i])})`)
-                        // }    
-                            this.el.querySelector('#refresh-galaxy-cells').style.display = "block"
+                            break;
+                        } else if (jobs.state === 'success'){
                             this.el.querySelector('.auth-successful').style.display = 'block';
                             this.el.querySelector('.login-form-div').style.display = "none";
-                            this.el.querySelector('.nbtools-title').innerText = `Login as ${credentials[1].value}`;
-                            this.hide_run_buttons(true)
-                            this.el.querySelector('.nbtools-footer').style.display = 'none';
-                            // this.el.querySelector('.nbtools-body').style.display = 'none';
-                            this.el.querySelector('.nbtools-subtitle').innerText = `${credentials[0].value}`;
-                            // this.el.querySelector('.nbtools-collapse').click();
-                            this.el.querySelector('.form-restore-div').style.display = 'none'
-                   }
+                            this.el.querySelector('.auth-waiting').style.display = 'none';
+                            this.el.querySelector('.auth-error').style.display = 'none'
+                            this.el.querySelector('#refresh-galaxy-cells').style.display = 'block'
+                            this.hide_run_buttons()
+
+                            if (this.el.querySelector('#form-restore').checked ){
+
+                                if (!ContextManager.notebook_tracker) return;               
+                                if (!ContextManager.notebook_tracker.currentWidget) return;
+                                var notebookTracker = ContextManager.notebook_tracker
+    
+                                const notebook = notebookTracker.currentWidget.content
+                                const notebookHasBeenRan = getRanNotebookIds().includes(notebook.id)
+                                // if(!notebookHasBeenRan) {
+                                    this.runAllGalaxyCells()
+                                // }
+                            }
+
+                            break;
+                        }
+                    }
+                  
+                    Private.origins.push(credentials[0].value);
+
 
                 } else {
                     var credentials = logingForm.children[i].querySelectorAll('input')
 
-                    var jobs = await KernelSideDataObjects(`from GiN.authwidget import GalaxyAuthWidget\na  = GalaxyAuthWidget()\na.login(server=${JSON.stringify(credentials[0].value)}, api_key=${JSON.stringify(credentials[1].value)})`)
+                    for (let i = 0; i < Infinity; ++i) {
 
-                    if (jobs['error'] == 'true'){
-                        this.el.querySelector('.auth-error').style.display = 'block'
-                        // this.el.querySelector('.login-form-div').style.display = "none"
-                   } else{
+                        var jobs = await KernelSideDataObjects(`from GiN.authwidget import GalaxyAuthWidget\na  = GalaxyAuthWidget()\na.login(server=${JSON.stringify(credentials[0].value)}, api_key=${JSON.stringify(credentials[1].value)})`)
+                        console.log(jobs)
+                        await this.waitforme(3000);
 
-                        // for (var i = 0; i < jobs['tools'].length; i++){
-                        //     KernelSideDataObjects(`from nbtools import ToolManager\na.RegisterMod(${JSON.stringify(jobs['tools'][i])})`)
-                        // }
-                             
-                        this.el.querySelector('.auth-successful').style.display = 'block';
-                        this.el.querySelector('.login-form-div').style.display = "none";
-                        this.el.querySelector('.nbtools-title').innerText = `Login as ${jobs['email']}`;
-                        this.hide_run_buttons(true)
-                        this.el.querySelector('.nbtools-footer').style.display = 'none';
-                        // this.el.querySelector('.nbtools-body').style.display = 'none';
-                        this.el.querySelector('.nbtools-subtitle').innerText = `${credentials[0].value}`;
-                        // this.el.querySelector('.nbtools-collapse').click();
-                        this.el.querySelector('.form-restore-div').style.display = 'none'
+                        if (jobs.state === 'error' ) {
+
+                            this.el.querySelector('.auth-error').style.display = 'block'
+                            // this.el.querySelector('.login-form-div').style.display = "none";
+                            this.el.querySelector('.auth-waiting').style.display = 'none';
+                            this.el.querySelector('.auth-successful').style.display = 'none';
+
+                            break;
+                        } else if (jobs.state === 'success'){
+                            this.el.querySelector('.auth-successful').style.display = 'block';
+                            this.el.querySelector('.login-form-div').style.display = "none";
+                            this.el.querySelector('.auth-waiting').style.display = 'none';
+                            this.el.querySelector('.auth-error').style.display = 'none'
+                            this.el.querySelector('#refresh-galaxy-cells').style.display = 'block'
+                            this.hide_run_buttons()
+
+                            if (this.el.querySelector('#form-restore').checked ){
+
+                                if (!ContextManager.notebook_tracker) return;               
+                                if (!ContextManager.notebook_tracker.currentWidget) return;
+                                var notebookTracker = ContextManager.notebook_tracker
+    
+                                const notebook = notebookTracker.currentWidget.content
+                                const notebookHasBeenRan = getRanNotebookIds().includes(notebook.id)
+                                // if(!notebookHasBeenRan) {
+                                    this.runAllGalaxyCells()
+                                // }
+                            }
+
+
+
+                            break;
+                        }
                     }
+
                 }
             }
         }
