@@ -13,11 +13,7 @@ from .Galaxyuibuilder import GalaxyUIBuilder
 from ipywidgets import Output
 from nbtools.uioutput import UIOutput
 from nbtools.event_manager import EventManager
-# import GiN
-# import uuid
-# import json
 
-print("import 1")
 
 import IPython
 import IPython.display
@@ -56,15 +52,15 @@ class GalaxyAuthWidget(GalaxyUIBuilder):
                 self.session = GalaxyInstance(server, email=email, password=password)
                 self.session._notebook_email = email
             except:
-                tool_list['error'] = 'true'
-                return IPython.display.JSON(tool_list)
+                # tool_list['state'] = 'error'
+                return IPython.display.JSON({'state': 'error'})
         else:
             try:
                 self.session = GalaxyInstance(server,  api_key=api_key, verify=True)
                 self.session._notebook_email = self.session.gi.users.get_current_user()['email']
             except:
-                tool_list['error'] = 'true'
-                return IPython.display.JSON({"error": 'true'})
+                # tool_list['state'] = 'error'
+                return IPython.display.JSON({'state': 'error'})
 
         self.session._notebook_url = server
         self.session._notebook_password = password
@@ -89,27 +85,37 @@ class GalaxyAuthWidget(GalaxyUIBuilder):
                         tool['origin'] = self.session._notebook_url
                         tool['email'] = self.session._notebook_email
                         tool_list['tools'].append(tool)
-
-        workflow_explorer = {'id':'work_flow_Explorer', 'name': 'workflow_explorer', 'description': 'Explore and execute available workflows', 'origin':self.session._notebook_url}
+                        # GalaxyAuthWidget.RegisterMod(tool_list['tools'])
+ 
         t = {"id": 'GiN_data_upload_tool',  "description": "Upload data files to galaxy server", "name": "Upload Data", 'origin': self.session._notebook_url, 'inputs': [{'type': 'data_upload'}]}
+       
 
-        we = TaskTool("+", workflow_explorer )
-        up = TaskTool('+', t)
+        t = TaskTool('+', t )
+        ToolManager.instance().register(t)
 
-        ToolManager.instance().register(we)
-        ToolManager.instance().register(up)
-
-        return IPython.display.JSON(tool_list)
-
-    def RegisterMod(self, tool):
-        # aDict = json.loads(tool)
-        # tool1 = tool1
         # def register_modules_callback():
-        tool = TaskTool(self.session._notebook_url, tool)
-        ToolManager.instance().register(tool)
+        for i in tool_list['tools']:
+            GalaxyAuthWidget().RegisterMod(i)
+
         # registration_thread = Thread(target=register_modules_callback)
         # registration_thread.start()
 
+        # print(GalaxyAuthWidget().RegisterMod(tool_list['tools']))
+
+        return IPython.display.JSON({'state':'success'})
+   
+    def RegisterMod(self, tool):
+
+        # def register_modules_callback():
+        #     for i in tools:
+        #         # GalaxyAuthWidget().RegisterMod(i)
+        tool = TaskTool(tool['origin'], tool)
+        ToolManager.instance().register(tool)
+
+        # registration_thread = Thread(target=register_modules_callback)
+        # registration_thread.start()
+        # return "OK"
+        
     def has_credentials(self):
         """Test whether the session object is instantiated and whether an email and password have been provided"""
         if type(self.session) is not GalaxyInstance:
@@ -156,7 +162,6 @@ class GalaxyAuthWidget(GalaxyUIBuilder):
             self.session._notebook_key, 
         )
 
-
     def system_message(self):
         self.info = "Successfully logged into Galaxy"
 
@@ -174,7 +179,6 @@ def server_name(search_url):
             return name
     return search_url
 
-def new_create_placeholder_widget( origin, id, message=None):
 
     output = Output()  # Output widget
     

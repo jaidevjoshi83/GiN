@@ -122,16 +122,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         super.render();
         const inputs = this.model.get('inputs')
         //########################
-
-        if (this.model.get('name') != 'Upload Data'){
-            this.add_history_list()
-        }
         //########################
         // this.form_builder(inputs['inputs'])
-        
-         if (this.model.get('name') != 'login' || this.model.get('galaxy_tool_id') == 'work_flow_Explorer'){
-            this.add_dataset_table()
-         }
         //########################
 
         // // Hide the header or footer, if necessary
@@ -155,16 +147,20 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             // console.log(this.model.get('name') )
             this.login_form()
         }
-        this.add_galaxy_cell_metadata()
+        
+        if (this.model.get('name') != 'login' && 'GiN_data_upload_tool') {
 
-        if (this.model.get('name') != 'login') {
             this.generate_tool_form()
             this.add_tool_migration_button(this.model.get('origin'))
+            this.add_dataset_table()
+            this.add_history_list()
+            this.add_galaxy_cell_metadata()
         }
 
         if (this.model.get('galaxy_tool_id') == 'GiN_data_upload_tool') {
             this.data_upload_tool()
         }
+
     }
 
     refresh_cells(){
@@ -370,7 +366,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         this.el.querySelector('.nbtools-description').append(div)
 
-        this.update_metadata_FormState('login', [], '')
+        // this.update_metadata_FormState('login', [], '')
 
         this.el.querySelector('.Galaxy-form-div').style.display = 'none'
 
@@ -384,6 +380,10 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
                                 <div class="auth-successful" style="display: none; margin: 10px;">
                                     <p> <b>Login Successful </b></p>
+                                </div>
+
+                                <div class="auth-waiting" style="display: none; margin: 10px;">
+                                    <i class="fa fa-spinner fa-spin" style="font-size:40px"></i>
                                 </div>
 
                                 <div id="refresh-galaxy-cells" style="display: none; margin: 10px;">
@@ -514,7 +514,9 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             form_parent.data = this.model.get('origin')
             let form = form_parent.parentNode.parentNode.parentNode.parentNode.parentNode.outerHTML
             let fint = JSON.stringify(form)
-            this.update_metadata_FormState('galaxy_tool', inputs['inputs'], JSON.parse(fint))
+            if (this.model.get('galaxy_tool_id') != "GiN_data_upload_tool") {
+                this.update_metadata_FormState('galaxy_tool', inputs['inputs'], JSON.parse(fint))
+            }
         }
     }
 
@@ -1480,8 +1482,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             let fint = JSON.stringify(formdata)
 
             var inputs = self.get_form_data(form)
-
-           
             var refine_inputs  = await KernelSideDataObjects(`import json\nimport base64\nfrom GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.updated_form(${JSON.stringify(self.model.get('origin'))}, json.loads(base64.b64decode("${btoa(JSON.stringify(inputs))}")), ${JSON.stringify(self.model.get('inputs')['id'])}, ${JSON.stringify(history_id)})`)
            
             self.update_metadata_FormState('galaxy_tool', refine_inputs['inputs'], JSON.parse(fint))
@@ -1953,12 +1953,12 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         select.addEventListener("change", async () => {
 
-            if (this.model.get('inputs')['id'] != self.model.get('origin')+"/GiN_data_upload_tool"){
+            if (this.model.get('galaxy_tool_id') != "GiN_data_upload_tool"){
 
                 var form = self.element.querySelector('.Galaxy-form')
                 var Inputs = self.get_form_data(form)
-            
-                var refine_inputs  = await KernelSideDataObjects(`import json\nimport base64\nfrom GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.updated_form(server=${JSON.stringify(self.model.get('origin'))}, tool_inputs=json.loads(base64.b64decode("${btoa(JSON.stringify(Inputs))}")), tool_id=${JSON.stringify(self.model.get('inputs')['id'])}, history_id=${JSON.stringify(select.value)})`)
+
+                var refine_inputs  = await KernelSideDataObjects(`import json\nimport base64\nfrom GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.updated_form(server=${JSON.stringify(self.model.get('origin'))}, tool_inputs=json.loads(base64.b64decode("${btoa(JSON.stringify(Inputs))}")), tool_id=${JSON.stringify(self.model.get('galaxy_tool_id'))}, history_id=${JSON.stringify(select.value)})`)
 
                 var FormParent = self.el.querySelector('.Galaxy-form')    
                 self.removeAllChildNodes(FormParent)
@@ -2014,10 +2014,11 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
             var history_id = select.value
 
-            if (this.model.get('inputs')['id'] != self.model.get('origin')+"/GiN_data_upload_tool") {
+            if (this.model.get('galaxy_tool_id') != "GiN_data_upload_tool") {
                 var form = self.element.querySelector('.Galaxy-form')
                 var inputs = self.get_form_data(form)
-                var refine_inputs  = await KernelSideDataObjects(`import json\nimport base64\nfrom GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.updated_form(${JSON.stringify(self.model.get('origin'))}, json.loads(base64.b64decode("${btoa(JSON.stringify(inputs))}")), ${JSON.stringify(self.model.get('inputs')['id'])}, ${JSON.stringify(history_id)})`)
+
+                var refine_inputs  = await KernelSideDataObjects(`import json\nimport base64\nfrom GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.updated_form(${JSON.stringify(self.model.get('origin'))}, json.loads(base64.b64decode("${btoa(JSON.stringify(inputs))}")), ${JSON.stringify(self.model.get('galaxy_tool_id'))}, ${JSON.stringify(history_id)})`)
                 var FormParent = self.el.querySelector('.Galaxy-form')    
                 self.removeAllChildNodes(FormParent)
                 var selected_index = {}
@@ -4317,72 +4318,100 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         var formdata = logingForm.parentNode.parentNode.parentNode.parentNode.outerHTML       
         let fint = JSON.stringify(formdata)
 
+        this.el.querySelector('#refresh-galaxy-cells').style.display = 'none'
         this.el.querySelector('.auth-error').style.display = 'none'
+        this.el.querySelector('.auth-waiting').style.display = 'block';
 
         for(var i = 0; i < logingForm.children.length; i++) {
             if (logingForm.children[i].style.display == 'block'){
                 if (logingForm.children[i].id == 'credential-login'){
                     var credentials = logingForm.children[i].querySelectorAll('input')
 
-                    var jobs = await KernelSideDataObjects(`from GiN.authwidget import GalaxyAuthWidget\na  = GalaxyAuthWidget()\na.login(server=${JSON.stringify(credentials[0].value)}, password=${JSON.stringify(credentials[2].value)}, email=${JSON.stringify(credentials[1].value)})`)
-                    Private.origins.push(credentials[0].value);
+                    for (let i = 0; i < Infinity; ++i) {
 
-                   if (jobs['error'] == 'true'){
-                        this.el.querySelector('.auth-error').style.display = 'block'
-                   } else{
+                        var jobs = await KernelSideDataObjects(`from GiN.authwidget import GalaxyAuthWidget\na  = GalaxyAuthWidget()\na.login(server=${JSON.stringify(credentials[0].value)}, password=${JSON.stringify(credentials[2].value)}, email=${JSON.stringify(credentials[1].value)})`)
+                
+                        await this.waitforme(3000);
 
-                        if (this.el.querySelector('#form-restore').checked ){
+                        if (jobs.state === 'error' ) {
 
-                            if (!ContextManager.notebook_tracker) return;               
-                            if (!ContextManager.notebook_tracker.currentWidget) return;
-                            var notebookTracker = ContextManager.notebook_tracker
+                            this.el.querySelector('.auth-error').style.display = 'block'
+                            // this.el.querySelector('.login-form-div').style.display = "none";
+                            this.el.querySelector('.auth-waiting').style.display = 'none';
+                            this.el.querySelector('.auth-successful').style.display = 'none';
 
-                            const notebook = notebookTracker.currentWidget.content
-                            const notebookHasBeenRan = getRanNotebookIds().includes(notebook.id)
-                            // if(!notebookHasBeenRan) {
-                                this.runAllGalaxyCells()
-                            // }
-                        }
-
-                        for (var i = 0; i < jobs['tools'].length; i++) {
-                           KernelSideDataObjects(`from nbtools import ToolManager\na.RegisterMod(${JSON.stringify(jobs['tools'][i])})`)
-                        }    
-                            this.el.querySelector('#refresh-galaxy-cells').style.display = "block"
+                            break;
+                        } else if (jobs.state === 'success'){
                             this.el.querySelector('.auth-successful').style.display = 'block';
                             this.el.querySelector('.login-form-div').style.display = "none";
-                            this.el.querySelector('.nbtools-title').innerText = `Login as ${credentials[1].value}`;
-                            this.hide_run_buttons(true)
-                            this.el.querySelector('.nbtools-footer').style.display = 'none';
-                            // this.el.querySelector('.nbtools-body').style.display = 'none';
-                            this.el.querySelector('.nbtools-subtitle').innerText = `${credentials[0].value}`;
-                            // this.el.querySelector('.nbtools-collapse').click();
-                            this.el.querySelector('.form-restore-div').style.display = 'none'
-                   }
+                            this.el.querySelector('.auth-waiting').style.display = 'none';
+                            this.el.querySelector('.auth-error').style.display = 'none'
+                            this.el.querySelector('#refresh-galaxy-cells').style.display = 'block'
+                            this.hide_run_buttons()
+
+                            if (this.el.querySelector('#form-restore').checked ){
+
+                                if (!ContextManager.notebook_tracker) return;               
+                                if (!ContextManager.notebook_tracker.currentWidget) return;
+                                var notebookTracker = ContextManager.notebook_tracker
+    
+                                const notebook = notebookTracker.currentWidget.content
+                                const notebookHasBeenRan = getRanNotebookIds().includes(notebook.id)
+                                // if(!notebookHasBeenRan) {
+                                    this.runAllGalaxyCells()
+                                // }
+                            }
+
+                            break;
+                        }
+                    }
+                  
+                    Private.origins.push(credentials[0].value);
+
 
                 } else {
                     var credentials = logingForm.children[i].querySelectorAll('input')
 
-                    var jobs = await KernelSideDataObjects(`from GiN.authwidget import GalaxyAuthWidget\na  = GalaxyAuthWidget()\na.login(server=${JSON.stringify(credentials[0].value)}, api_key=${JSON.stringify(credentials[1].value)})`)
+                    for (let i = 0; i < Infinity; ++i) {
+                        var jobs = await KernelSideDataObjects(`from GiN.authwidget import GalaxyAuthWidget\na  = GalaxyAuthWidget()\na.login(server=${JSON.stringify(credentials[0].value)}, api_key=${JSON.stringify(credentials[1].value)})`)
+               
+                        await this.waitforme(3000);
 
-                    if (jobs['error'] == 'true'){
-                        this.el.querySelector('.auth-error').style.display = 'block'
-                        // this.el.querySelector('.login-form-div').style.display = "none"
-                   } else{
+                        if (jobs.state === 'error' ) {
 
-                        for (var i = 0; i < jobs['tools'].length; i++){
-                            KernelSideDataObjects(`from nbtools import ToolManager\na.RegisterMod(${JSON.stringify(jobs['tools'][i])})`)
+                            this.el.querySelector('.auth-error').style.display = 'block'
+                            // this.el.querySelector('.login-form-div').style.display = "none";
+                            this.el.querySelector('.auth-waiting').style.display = 'none';
+                            this.el.querySelector('.auth-successful').style.display = 'none';
+
+                            break;
+                        } else if (jobs.state === 'success'){
+                            this.el.querySelector('.auth-successful').style.display = 'block';
+                            this.el.querySelector('.login-form-div').style.display = "none";
+                            this.el.querySelector('.auth-waiting').style.display = 'none';
+                            this.el.querySelector('.auth-error').style.display = 'none'
+                            this.el.querySelector('#refresh-galaxy-cells').style.display = 'block'
+                            this.hide_run_buttons()
+
+                            if (this.el.querySelector('#form-restore').checked ){
+
+                                if (!ContextManager.notebook_tracker) return;               
+                                if (!ContextManager.notebook_tracker.currentWidget) return;
+                                var notebookTracker = ContextManager.notebook_tracker
+    
+                                const notebook = notebookTracker.currentWidget.content
+                                const notebookHasBeenRan = getRanNotebookIds().includes(notebook.id)
+                                // if(!notebookHasBeenRan) {
+                                    this.runAllGalaxyCells()
+                                // }
+                            }
+
+
+
+                            break;
                         }
-                             
-                        this.el.querySelector('.auth-successful').style.display = 'block';
-                        this.el.querySelector('.login-form-div').style.display = "none";
-                        this.el.querySelector('.nbtools-title').innerText = `Login as ${jobs['email']}`;
-                        this.hide_run_buttons(true)
-                        this.el.querySelector('.nbtools-footer').style.display = 'none';
-                        // this.el.querySelector('.nbtools-body').style.display = 'none';
-                        this.el.querySelector('.nbtools-subtitle').innerText = `${credentials[0].value}`;
-                        // this.el.querySelector('.nbtools-collapse').click();
-                        this.el.querySelector('.form-restore-div').style.display = 'none'
                     }
+
                 }
             }
         }

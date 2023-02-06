@@ -38,12 +38,10 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
     def __init__(self, tool=None, **kwargs):
        
         self.tool = tool
-        
+
         a = GiN.sessions.SessionList()
         gi = a.get(server=self.tool['origin'])
-
         history_ids = gi.gi.histories.get_histories()
-        # history_ids = []
 
         if self.tool['name'] == 'workflow_explorer' or self.tool['name'] == 'Upload Data' :
             inputs = {'inpus':[]}
