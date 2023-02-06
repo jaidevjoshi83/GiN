@@ -4312,19 +4312,15 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
     async trigger_login(){
 
-        console.log("OKKKKK")
-
         // this.update_metadata_FormState({}, {})
 
         var logingForm = this.el.querySelector('.login-form-div')
         var formdata = logingForm.parentNode.parentNode.parentNode.parentNode.outerHTML       
         let fint = JSON.stringify(formdata)
-        this.el.querySelector('#refresh-galaxy-cells').style.display = 'none'
 
+        this.el.querySelector('#refresh-galaxy-cells').style.display = 'none'
         this.el.querySelector('.auth-error').style.display = 'none'
-        // this.el.querySelector('.login-form-div').style.display = "none";
         this.el.querySelector('.auth-waiting').style.display = 'block';
-        // this.el.querySelector('.auth-successful').style.display = 'block';
 
         for(var i = 0; i < logingForm.children.length; i++) {
             if (logingForm.children[i].style.display == 'block'){
@@ -4334,7 +4330,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                     for (let i = 0; i < Infinity; ++i) {
 
                         var jobs = await KernelSideDataObjects(`from GiN.authwidget import GalaxyAuthWidget\na  = GalaxyAuthWidget()\na.login(server=${JSON.stringify(credentials[0].value)}, password=${JSON.stringify(credentials[2].value)}, email=${JSON.stringify(credentials[1].value)})`)
-                        console.log(jobs)
+                
                         await this.waitforme(3000);
 
                         if (jobs.state === 'error' ) {
@@ -4377,9 +4373,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                     var credentials = logingForm.children[i].querySelectorAll('input')
 
                     for (let i = 0; i < Infinity; ++i) {
-
                         var jobs = await KernelSideDataObjects(`from GiN.authwidget import GalaxyAuthWidget\na  = GalaxyAuthWidget()\na.login(server=${JSON.stringify(credentials[0].value)}, api_key=${JSON.stringify(credentials[1].value)})`)
-                        console.log(jobs)
+               
                         await this.waitforme(3000);
 
                         if (jobs.state === 'error' ) {
