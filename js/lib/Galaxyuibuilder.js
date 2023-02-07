@@ -178,34 +178,71 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         var servers   = await KernelSideDataObjects(`import GiN\na = GiN.sessions.SessionList()\na.get_servers()`)
         
-        if (servers.length > 0) {
+        // if (servers.length > 0) {
 
-            var refresh_i = document.querySelector('i')
-            refresh_i.className = "fa fa-refresh"
-            refresh_i.style.fontSize = '14'
-            refresh_i.style.marginRight = '5px'
-            refresh_i.title = "Refresh server list"
-            refresh_i.id = "migration-tool-button"
+        var refresh_i = document.querySelector('i')
+        refresh_i.className = "fa fa-refresh"
+        refresh_i.style.fontSize = '14'
+        refresh_i.style.marginRight = '5px'
+        refresh_i.title = "Refresh server list"
+        refresh_i.id = "migration-tool-button"
 
-            var nbtools = this.el.querySelector('.nbtools-buttons')
-            var Select = document.createElement('select')
-            Select.className = 'tool-migration-select'
+        var nbtools = this.el.querySelector('.nbtools-buttons')
+        var Select = document.createElement('select')
+        Select.className = 'tool-migration-select'
 
-            var div = document.createElement('div')
-            div.className = 'form-restore-div'
+        var div = document.createElement('div')
+        div.className = 'form-restore-div'
 
-            var Label = document.createElement('label')
-            Label.htmlFor = 'form-restore-div'
-            Label.innerHTML = '<b>Migrate the tool to a different server</b>'
-            Label.style.marginRight =  '20px'
+        var Label = document.createElement('label')
+        Label.htmlFor = 'form-restore-div'
+        Label.innerHTML = '<b>Migrate the tool to a different server</b>'
+        Label.style.marginRight =  '20px'
 
-            div.append(Label)
-            div.append(refresh_i)
+        div.append(Label)
+        div.append(refresh_i)
 
-            div.style.float = 'left'
-            div.style.marginRight = '150px'
+        div.style.float = 'left'
+        div.style.marginRight = '150px'
+
+        for (var i = 0; i < servers.length; i++){
+            var opt = document.createElement('option')
+            opt.value  = servers[i]
+            if(servers[i] == index){
+                opt.selected = true
+            }
+            opt.textContent  = servers[i]
+            Select.appendChild(opt)
+        }
+
+        Select.addEventListener('change', (e) => {
+
+            Private.Index = Select.selectedIndex
+
+            if (!ContextManager.notebook_tracker) return;               
+            if (!ContextManager.notebook_tracker.currentWidget) return;
+        
+            var notebookTracker = ContextManager.notebook_tracker
+        
+            const notebook = notebookTracker.currentWidget.content
+            const notebookSession = notebookTracker.currentWidget.context.sessionContext;
+            const cells = notebook.widgets;
+            
+            const p = notebook.activeCell.model.value.text;
+            const regex = /http[^\s']+/i;
+            notebook.activeCell.model.value.text = p.replace(regex, Select.value)
+
+            NotebookActions.run(notebook, notebookSession);
+        })
+
+        refresh_i.addEventListener('click', async () => {
+
+            var servers   = await KernelSideDataObjects(`import GiN\na = GiN.sessions.SessionList()\na.get_servers()`)
+
+            removeAllChildNodes(Select)
 
             for (var i = 0; i < servers.length; i++){
+
                 var opt = document.createElement('option')
                 opt.value  = servers[i]
                 if(servers[i] == index){
@@ -214,48 +251,11 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 opt.textContent  = servers[i]
                 Select.appendChild(opt)
             }
+        })
 
-            Select.addEventListener('change', (e) => {
-
-                Private.Index = Select.selectedIndex
-
-                if (!ContextManager.notebook_tracker) return;               
-                if (!ContextManager.notebook_tracker.currentWidget) return;
-            
-                var notebookTracker = ContextManager.notebook_tracker
-            
-                const notebook = notebookTracker.currentWidget.content
-                const notebookSession = notebookTracker.currentWidget.context.sessionContext;
-                const cells = notebook.widgets;
-                
-                const p = notebook.activeCell.model.value.text;
-                const regex = /http[^\s']+/i;
-                notebook.activeCell.model.value.text = p.replace(regex, Select.value)
-
-                NotebookActions.run(notebook, notebookSession);
-            })
-
-            refresh_i.addEventListener('click', async () => {
-
-                var servers   = await KernelSideDataObjects(`import GiN\na = GiN.sessions.SessionList()\na.get_servers()`)
-
-                removeAllChildNodes(Select)
-
-                for (var i = 0; i < servers.length; i++){
-
-                    var opt = document.createElement('option')
-                    opt.value  = servers[i]
-                    if(servers[i] == index){
-                        opt.selected = true
-                    }
-                    opt.textContent  = servers[i]
-                    Select.appendChild(opt)
-                }
-            })
-
-            div.append(Select)
-            nbtools.prepend(div)
-        }
+        div.append(Select)
+        nbtools.prepend(div)
+        // }
     }
 
     workflow_explorer(){
@@ -4352,7 +4352,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                             this.el.querySelector('.auth-waiting').style.display = 'none';
                             this.el.querySelector('.auth-error').style.display = 'none'
                             this.el.querySelector('#refresh-galaxy-cells').style.display = 'block'
-                            this.hide_run_buttons()
+                            this.hide_run_buttons(true)
 
                             if (this.el.querySelector('#form-restore').checked ){
 
@@ -4397,7 +4397,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                             this.el.querySelector('.auth-waiting').style.display = 'none';
                             this.el.querySelector('.auth-error').style.display = 'none'
                             this.el.querySelector('#refresh-galaxy-cells').style.display = 'block'
-                            this.hide_run_buttons()
+                            this.hide_run_buttons(true)
 
                             if (this.el.querySelector('#form-restore').checked ){
 
@@ -4455,6 +4455,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
     }
 
     hide_run_buttons (hide){
+
+        console.log("OK")
         var self  = this;
         this.el.querySelectorAll('.nbtools-run').forEach((button) =>{
             if (hide == true){
