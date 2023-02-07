@@ -160,7 +160,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         if (this.model.get('galaxy_tool_id') == 'GiN_data_upload_tool') {
             this.data_upload_tool()
         }
-
     }
 
     refresh_cells(){
@@ -183,8 +182,10 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
             var refresh_i = document.querySelector('i')
             refresh_i.className = "fa fa-refresh"
+            refresh_i.style.fontSize = '14'
             refresh_i.style.marginRight = '5px'
             refresh_i.title = "Refresh server list"
+            refresh_i.id = "migration-tool-button"
 
             var nbtools = this.el.querySelector('.nbtools-buttons')
             var Select = document.createElement('select')
@@ -353,7 +354,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
     login_form(){
 
-        this.add_galaxy_cell_metadata()
+        // this.add_galaxy_cell_metadata()
 
         var div = document.createElement('div')
         div.className = 'form-restore-div'
@@ -514,7 +515,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             form_parent.data = this.model.get('origin')
             let form = form_parent.parentNode.parentNode.parentNode.parentNode.parentNode.outerHTML
             let fint = JSON.stringify(form)
-            if (this.model.get('galaxy_tool_id') != "GiN_data_upload_tool") {
+            if (this.model.get('galaxy_tool_id') != "GiN_data_upload_tool" ) {
                 this.update_metadata_FormState('galaxy_tool', inputs['inputs'], JSON.parse(fint))
             }
         }
@@ -4275,11 +4276,14 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         notebookTracker.currentWidget.revealed).then(() => {
 
             for (var i = 0; i < cells.length; i++){
-                if (cells[i].model.metadata.get('galaxy_cell') ){
-                    if(cells[i].model.metadata.get('tool_type') != 'login') {
-                        notebook.activeCellIndex = i
-                        removeAllChildNodes(cells[i].outputArea.node)
-                        NotebookActions.run(notebook, notebookSession);
+                if (cells[i].model.metadata.get('galaxy_cell')){
+                    console.log(cells[i])
+                    if(cells[i].model.metadata.get('tool_type') !=  undefined) {
+                        if(cells[i].model.metadata.get('tool_type') != 'login' ) {
+                            notebook.activeCellIndex = i
+                            removeAllChildNodes(cells[i].outputArea.node)
+                            NotebookActions.run(notebook, notebookSession);
+                        }
                     }
                 }
             }
@@ -4342,6 +4346,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
                             break;
                         } else if (jobs.state === 'success'){
+                            this.el.querySelector('.nbtools-subtitle').innerText = credentials[0].value
                             this.el.querySelector('.auth-successful').style.display = 'block';
                             this.el.querySelector('.login-form-div').style.display = "none";
                             this.el.querySelector('.auth-waiting').style.display = 'none';
@@ -4386,6 +4391,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
                             break;
                         } else if (jobs.state === 'success'){
+                            this.el.querySelector('.nbtools-subtitle').innerText = credentials[0].value
                             this.el.querySelector('.auth-successful').style.display = 'block';
                             this.el.querySelector('.login-form-div').style.display = "none";
                             this.el.querySelector('.auth-waiting').style.display = 'none';
@@ -4405,9 +4411,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                                     this.runAllGalaxyCells()
                                 // }
                             }
-
-
-
                             break;
                         }
                     }

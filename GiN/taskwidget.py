@@ -61,6 +61,7 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
             name = self.tool['name']+' ('+self.tool['origin']+')',
             galaxy_tool_id=self.tool['id'],
             description=self.tool['description'],
+            subtitle=self.tool['origin'],
             history_ids=history_ids,
             history_data=history_data,
             color= self.default_color,
