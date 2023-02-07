@@ -89,7 +89,6 @@ class GalaxyAuthWidget(GalaxyUIBuilder):
  
         t = {"id": 'GiN_data_upload_tool',  "description": "Upload data files to galaxy server", "name": "Upload Data", 'origin': self.session._notebook_url, 'inputs': [{'type': 'data_upload'}]}
        
-
         t = TaskTool('+', t )
         ToolManager.instance().register(t)
 
