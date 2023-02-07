@@ -1,46 +1,69 @@
-# Pull the latest known good scipy notebook image from the official Jupyter stacks
 FROM jupyter/scipy-notebook:2022-02-17
 
-MAINTAINER Jayadev Joshi <jayadev.joshi12@gmail.com>
 EXPOSE 8888
+
+#############################################
+##  ROOT                                   ##
+##      Install npm                        ##
+#############################################
 
 USER root
 
 RUN apt-get update && apt-get install -y npm
 
+#############################################
+##  $NB_USER                               ##
+##      Install python libraries           ##
+#############################################
+
 USER $NB_USER
 
-RUN conda install -c conda-forge JupyterLab=3.1 ipywidgets nodejs yarn -y 
+#RUN conda create -n GINT python=3.9 install -c conda-forge jupyterlab=3.4 nodejs  npm install -g yarn
 
-RUN git clone -b lab https://github.com/g2nb/nbtools.git 
-RUN git clone -b  build_function https://github.com/jaidevjoshi83/bioblend.git 
-RUN git clone https://github.com/jaidevjoshi83/GiN.git
-RUN git clone -b lab https://github.com/genepattern/genepattern-notebook.git && \
-	cd genepattern-notebook && \
-	pip install .
+RUN conda install -c conda-forge jupyterlab=3.4 nodejs=14.15.1 && \
+    npm install -g yarn
 
-RUN npm install -g yalc
- 
-RUN cd nbtools &&  \
-    npm install rimraf && \
-    git checkout b6e90bd00accd43e0091aafdb0fe13e1d4d702fa && \
-    pip install . && \
-	jupyter nbextension enable --py widgetsnbextension && \
-	jupyter labextension install @jupyter-widgets/jupyterlab-manager && \
-	jupyter labextension develop . --overwrite && \
-	jupyter nbextension install --py nbtools --symlink --user &&\
-	jupyter nbextension enable nbtools --py && \
-	yalc publish
+#############################################
+##  $NB_USER                               ##
+##      Clone & install ipyuploads repo    ##
+#############################################
 
-RUN cd bioblend/ && \
-	pip install .
+RUN git clone https://github.com/g2nb/ipyuploads.git && \
+    cd ipyuploads && pip install .
 
-RUN cd GiN/js && yalc add @g2nb/nbtools && npm install 
+#############################################
+##  $NB_USER                               ##
+##      Clone the nbtools repo             ##
+#############################################
 
-RUN cd GiN && \
-    pip install . && \
+RUN git clone https://github.com/g2nb/nbtools.git
+
+#############################################
+##  $NB_USER                               ##
+##      Build and install nbtools          ##
+#############################################
+
+RUN cd nbtools && pip install . && \
+    jupyter labextension install . && \
+    jupyter nbextension install --py nbtools --sys-prefix && \
+    jupyter nbextension enable --py nbtools --sys-prefix
+
+#############################################
+##  $NB_USER                               ##
+##      Install GalaxyLab                  ##
+#############################################
+
+RUN pip install bioblend && \
+    git clone https://github.com/jaidevjoshi83/GiN.git && \
+    cd GiN && npm install @g2nb/nbtools && pip install . && \
     jupyter nbextension install --py --symlink --overwrite --sys-prefix GiN && \
-    jupyter nbextension enable --py --sys-prefix GiN && cd .. 
-   
+    jupyter nbextension enable --py --sys-prefix GiN
+
+
+#############################################
+##  $NB_USER                               ##
+##      Launch lab by default              ##
+#############################################
+
 ENV JUPYTER_ENABLE_LAB="true"
 ENV TERM xterm
