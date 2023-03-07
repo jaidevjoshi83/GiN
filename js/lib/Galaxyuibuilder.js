@@ -146,7 +146,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         // this.iterate_over_tool_cells()
 
         if (this.model.get('name') == 'login'){
-            // console.log(this.model.get('name') )
             this.login_form()
         }
         
@@ -240,12 +239,11 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 NotebookActions.run(notebook, notebookSession);
 
             } else{
-                console.log(Select.value)
+
                 var DataList = self.el.querySelector('.history-dataset-list')
                 var history = self.el.querySelector('#history-list')
                 self.removeAllChildNodes(history)
                 self.removeAllChildNodes(DataList)
-                // console.log(self.add_dataset_table(Select.value))
                 self.add_dataset_table(Select.value)
             }
         })
@@ -708,15 +706,10 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             case "select":
                 this.add_select_field(input_def, form_parent, name_prefix)
                 break
-            // case "data_collection":
-            //     this.add_input_data(input_def, form_parent, name_prefix, data)
-            //     break
             case "repeat": 
                 this.add_repeat_section(input_def, form_parent, name_prefix) 
                 break
             case "section":
-                // console.log(input_def)
-                // this.section[input_def['name']] = input_def['expanded'] 
                 this.add_section(input_def, form_parent, name_prefix) 
                 break
             case "drill_down":
@@ -793,8 +786,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 } else {
 
                         e.target.parentNode.parentNode.querySelector('.fas.fa-spinner.fa-spin').style.display = 'block'
-
-                        console.log(dataset)
 
                         uri = await KernelSideDataObjects(`from GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.send_data_to_gp_server(file_name=${JSON.stringify(dataset['name'])}, tool_id=${JSON.stringify(tool_id)}, dataset_id=${JSON.stringify(dataset['id'])}, server=${JSON.stringify(this.model.get('origin'))}, ext=${JSON.stringify(dataset['extension'])})`)
                          
@@ -1959,9 +1950,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             origin = this.model.get('origin')
         }
 
-
-        console.log(origin)
-
         var self = this
 
         const options =  this.model.get('history_ids')
@@ -1980,10 +1968,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             el.value =  `${options[i]['id']}`;
             select.appendChild(el);
         }
-
-        // if (selected_value !== 'default') {
-        // select.selectedIndex = selected_value
-        // }
 
         select.addEventListener("change", async () => {
 
@@ -3001,8 +2985,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
  
         UpperDiv.append(SectionDiv)
         parent.append(UpperDiv)
-
-        console.log(this.section[input_def['name']])
  
         function section(){
             for (var j in input_def['inputs']){
@@ -3010,15 +2992,9 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             }
         }
 
-        // if(this.section[input_def['name']]) {
-        //     if (this.section[input_def['name']]){
-        //         section()
-        //     }
-        // } else{
         if(input_def['expanded']) {
             section()
         }
-        // }
  
         Button.addEventListener("click", async (e) => {
 
@@ -3041,7 +3017,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             let fint = JSON.stringify(formdata)
             self.update_metadata_FormState('galaxy_tool', refine_inputs['inputs'], JSON.parse(fint))
 
-            console.log(this.section[input_def['name']])
         });
     }
  
@@ -4330,7 +4305,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
             for (var i = 0; i < cells.length; i++){
                 if (cells[i].model.metadata.get('galaxy_cell')){
-                    console.log(cells[i])
                     if(cells[i].model.metadata.get('tool_type') !=  undefined) {
                         if(cells[i].model.metadata.get('tool_type') != 'login' ) {
                             notebook.activeCellIndex = i
@@ -4361,7 +4335,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             }else {
                 var form = self.element.querySelector('.Galaxy-form')
                 var inputs = this.get_form_data(form, 'on')
-                console.log(inputs)
                 var history_id = self.element.querySelector('#history_ids').value 
                 this.SubmitJob(inputs, history_id)
                 this.hide_run_buttons(true)
@@ -4510,7 +4483,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
     hide_run_buttons (hide){
 
-        console.log("OK")
         var self  = this;
         this.el.querySelectorAll('.nbtools-run').forEach((button) =>{
             if (hide == true){
