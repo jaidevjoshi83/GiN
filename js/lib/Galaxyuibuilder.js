@@ -1739,7 +1739,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             }
         }
         
-        DataListdiv.append(await this.data_row_list(this.model.get('origin'), HistoryID ))
+        DataListdiv.append(await this.data_row_list( HistoryID ))
         var ListItem =  this.el.querySelector('.list-item')
         data['type_id'] =`dataset-${data['id']}` 
         this.add_dataset(ListItem, this.data_row_list, HistoryID)
@@ -1856,7 +1856,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             var data_list_div = this.el.querySelector('.history-dataset-list');
             var e = this.el.querySelector('.list-item')
             e.parentElement.removeChild(e)
-            data_list_div.append(await this.data_row_list(origin, hi))
+            data_list_div.append(await this.data_row_list( hi))
 
             var hl = this.el.querySelector('#dataset-history-list')
 
@@ -1943,7 +1943,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
                     var e = this.el.querySelector('.list-item')
                     e.parentElement.removeChild(e)
-                    DataListdiv.append(await this.data_row_list(this.model.get('origin'), history_id ))
+                    DataListdiv.append(await this.data_row_list( history_id ))
 
                     var ListItem =  DataListdiv.querySelector('.list-item')
                     var data = await KernelSideDataObjects(`from GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.OutPutData(server=${JSON.stringify(this.model.get('origin'))}, JobID=${JSON.stringify(InitialData['jobs'][0]['id'])} )`);
@@ -1980,7 +1980,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         if(DataListdiv.children.length > 0 ){
             self.removeAllChildNodes(DataListdiv)
         }
-        DataListdiv.append(await this.data_row_list(origin, options[0]['id']))
+        DataListdiv.append(await this.data_row_list( options[0]['id']))
     
         for(var i = 0; i < options.length; i++) {
             const opt = `${i+1}: ${options[i]['name']}`;
@@ -2006,7 +2006,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 self.form_builder(refine_inputs['inputs'],  selected_index) 
             } else {
                 self.removeAllChildNodes(DataListdiv )
-                DataListdiv.append(await this.data_row_list(origin, select.value))
+                DataListdiv.append(await this.data_row_list(select.value))
             }
 
             var history_id = select.value
@@ -2014,17 +2014,21 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             var e = self.el.querySelector('.list-item')
             e.parentElement.removeChild(e)
 
-            DataListdiv.append(await this.data_row_list(origin, history_id))
+            DataListdiv.append(await this.data_row_list( history_id))
         });
 
         var update = self.element.querySelector('#dataset-update-label')
 
         update.addEventListener('click', async() => {
 
-            self.removeAllChildNodes(DataListdiv)
-            var history_id = select.value
+            // self.removeAllChildNodes(DataListdiv)
+            // var history_id = select.value
+            if(DataListdiv.querySelector('.list-item')) {
+                DataListdiv.querySelector('.list-item').parentNode.removeChild(DataListdiv.querySelector('.list-item'))
+            }
 
-            DataListdiv.append(await this.data_row_list(origin, history_id))
+            DataListdiv.append(await this.data_row_list( this.el.querySelector('#dataset-history-list').value))
+            // console.log(await this.data_row_list( history_id))
         })
 
         var DataList = this.el.querySelector('#history-list')
@@ -2034,7 +2038,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
     async add_history_list(){
 
         var self = this
-
 
         if(this.el.querySelector('.tool-migration-select')){
             var origin = this.el.querySelector('.tool-migration-select').value
@@ -3048,8 +3051,13 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         })
     }
  
-    async data_row_list (server, history_id){
-        console.log(server)
+    async data_row_list ( history_id){
+
+        if(this.el.querySelector('.tool-migration-select')){
+            var server = this.el.querySelector('.tool-migration-select').value
+        }  else{
+            var server = this.model.get('origin')
+        }
         var data_list = document.createElement('ul')
         data_list.className = 'list-item'
         data_list.style.overflow = 'auto'
@@ -4521,7 +4529,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             var e = this.el.querySelector('.list-item')
             e.parentElement.removeChild(e)
 
-            data_list_div.append(await this.data_row_list(this.model.get('origin'), history_id))
+            data_list_div.append(await this.data_row_list( history_id))
         
             this.el.querySelector('.Galaxy-form').style.display = 'none'
             this.el.querySelector('.galaxy-history-list').style.display = 'none'
