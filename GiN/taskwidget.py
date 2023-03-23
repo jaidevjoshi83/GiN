@@ -160,7 +160,8 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
     @staticmethod
     def upload_dataset(
          file_path, upload_method, datatype, genome, server=None, HistoryID=None
-    ):
+          
+    ):  
 
         a = GiN.sessions.SessionList()
         gi3 = a.get(server=server)
@@ -335,6 +336,18 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
             dataset_collection_id=dataset_id
         )
         return IPython.display.JSON(show_dataset)
+
+
+    @staticmethod
+    def get_histories( server):
+
+        a = GiN.sessions.SessionList()
+        gi12 = a.get(server=server)
+
+        histories = gi12.gi.histories.gi.histories.get_histories()
+
+        return IPython.display.JSON(histories)
+
     @staticmethod
     def download_file_to_jupyter_server(
         server=None,
