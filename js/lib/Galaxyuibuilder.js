@@ -1653,9 +1653,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         var datatypes_genomes = await KernelSideDataObjects(`from GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.get_data_type_and_genomes(server=${JSON.stringify(this.model.get('origin'))})`)
         var Input = utm.querySelector('#inputupload')
 
-
-        console.log(Input.files.length)
-
         if (Input.files.length > 0){
             Input.addEventListener('change', ()=>{
                 this.Upload_callback(Input)
@@ -2021,14 +2018,12 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         update.addEventListener('click', async() => {
 
-            // self.removeAllChildNodes(DataListdiv)
-            // var history_id = select.value
-            if(DataListdiv.querySelector('.list-item')) {
+            if (DataListdiv.querySelector('.list-item')) {
                 DataListdiv.querySelector('.list-item').parentNode.removeChild(DataListdiv.querySelector('.list-item'))
             }
 
             DataListdiv.append(await this.data_row_list( this.el.querySelector('#dataset-history-list').value))
-            // console.log(await this.data_row_list( history_id))
+
         })
 
         var DataList = this.el.querySelector('#history-list')
