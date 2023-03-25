@@ -81,8 +81,10 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             </div>
 
             <div class="dataset-list">
+
+   
+                
                 <label id="dataset-history-label" for="history-list">Select History</label>
-                <label id="dataset-update-label" for="history-list"> Update <i class="fa fa-refresh" aria-hidden="true"></i></label>
 
                 <div id='history-list' class="history-list">
                 </div>
@@ -241,8 +243,11 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             } else{
 
                 this.el.querySelector('#history_ids').parentNode.removeChild(this.el.querySelector('#history_ids'))
-                this.add_dataset_table()
                 this.add_history_list()
+
+                this.el.querySelector('#dataset-update-label').parentNode.removeChild(this.el.querySelector('#dataset-update-label'))
+
+                this.add_dataset_table()
             }
         })
 
@@ -1955,6 +1960,13 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
     async add_dataset_table(){
 
+        var UpdateButton = document.createElement('label')
+        UpdateButton.id = 'dataset-update-label'
+        UpdateButton.for = 'history-list'
+        UpdateButton.innerHTML = 'Update <i class="fa fa-refresh" aria-hidden="true"></i>'
+
+        this.el.querySelector('.dataset-list').prepend(UpdateButton)
+
         if(this.el.querySelector('.tool-migration-select')){
             var origin = this.el.querySelector('.tool-migration-select').value
         }  else{
@@ -2014,21 +2026,24 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             DataListdiv.append(await this.data_row_list( history_id))
         });
 
-        var update = self.element.querySelector('#dataset-update-label')
+        var update = this.el.querySelector('#dataset-update-label')
 
-        update.addEventListener('click', async() => {
+        update.addEventListener('click', async () => {
 
-            if (DataListdiv.querySelector('.list-item')) {
-                DataListdiv.querySelector('.list-item').parentNode.removeChild(DataListdiv.querySelector('.list-item'))
-            }
+            console.log("OK")
 
+            self.removeAllChildNodes(DataListdiv)
+        
+            console.log(await this.data_row_list( this.el.querySelector('#dataset-history-list').value))
+    
             DataListdiv.append(await this.data_row_list( this.el.querySelector('#dataset-history-list').value))
-
+    
         })
 
         var DataList = this.el.querySelector('#history-list')
         DataList.append(select)
     }
+
 
     async add_history_list(){
 
