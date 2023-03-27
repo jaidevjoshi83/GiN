@@ -192,7 +192,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         refresh_i.title = "Refresh server list"
         refresh_i.id = "migration-tool-button"
 
-        var nbtools = this.el.querySelector('.nbtools-buttons')
+        var nbtools = this.el.querySelector('.nbtools-form')
         var Select = document.createElement('select')
         Select.className = 'tool-migration-select'
 
@@ -246,7 +246,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 this.add_history_list()
 
                 this.el.querySelector('#dataset-update-label').parentNode.removeChild(this.el.querySelector('#dataset-update-label'))
-
                 this.add_dataset_table()
             }
         })
