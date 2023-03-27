@@ -81,8 +81,10 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             </div>
 
             <div class="dataset-list">
+
+   
+                
                 <label id="dataset-history-label" for="history-list">Select History</label>
-                <label id="dataset-update-label" for="history-list"> Update <i class="fa fa-refresh" aria-hidden="true"></i></label>
 
                 <div id='history-list' class="history-list">
                 </div>
@@ -240,11 +242,12 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
             } else{
 
-                var DataList = self.el.querySelector('.history-dataset-list')
-                var history = self.el.querySelector('#history-list')
-                self.removeAllChildNodes(history)
-                self.removeAllChildNodes(DataList)
-                self.add_dataset_table(Select.value)
+                this.el.querySelector('#history_ids').parentNode.removeChild(this.el.querySelector('#history_ids'))
+                this.add_history_list()
+
+                this.el.querySelector('#dataset-update-label').parentNode.removeChild(this.el.querySelector('#dataset-update-label'))
+
+                this.add_dataset_table()
             }
         })
 
@@ -1608,7 +1611,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                             <div id="upload" class="tabcontent">
                                 <div style="margin-top:10px"><div style="float: left;"><p class="resumable-upload-title"><b>Upload file to the Galaxy server.</b></p></div><div class="upload-status-icon" style="float:left; margin-top:5px; margin-left:5px; display: none;"><i class="fa fa-spinner fa-spin" style="font-size:10px; float:left;"></i></div></div>
                                 <input id="inputupload" class="input_upload" type="file" style="display: block" >
-                                <div class="resumable-upload-warning" style="display: none;"> <b>Warning:</b> CORS error, file uploaded through bioblend API..</div>
+                                <div class="resumable-upload-warning" style="display: none;"> <b>Warning:</b> CORS error, file uploaded through bioblend API.</div>
                             </div>
                     
                             <div id="from_url" class="tabcontent" style="display: none;">
@@ -1627,8 +1630,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                         </div>`
 
         const utm = new DOMParser().parseFromString(data_upload, 'text/html').querySelector('.upload_tab')
-        var List = utm.querySelectorAll('.tablinks')        
-
+        var List = utm.querySelectorAll('.tablinks')    
+        
         utm.querySelector('#upload').style.display  = 'block'
 
         List.forEach((button) => button.addEventListener('click', () => {
@@ -1656,7 +1659,9 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         var Input = utm.querySelector('#inputupload')
 
         if (Input.files.length > 0){
-            this.Upload_callback(Input)
+            Input.addEventListener('change', ()=>{
+                this.Upload_callback(Input)
+            })
         }
 
         var datatypeSelect = document.createElement('select')
@@ -1665,6 +1670,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         var auto_opt = document.createElement("option");
         auto_opt.textContent = auto_opt.value = 'auto';
         datatypeSelect.appendChild(auto_opt);
+
         for(var i = 0; i < datatypes_genomes['datatypes'].length; i++) {
             const opt = datatypes_genomes['datatypes'][i];
             const el = document.createElement("option");
@@ -1700,7 +1706,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
     async submitPayload(payload, credentials) {
 
-        var apiKey = await KernelSideDataObjects(`from GiN.taskwidget  import GalaxyTaskWidget\nGalaxyTaskWidget.Return_api_key('http://localhost:8080')`)
+        var apiKey = await KernelSideDataObjects(`from GiN.taskwidget  import GalaxyTaskWidget\nGalaxyTaskWidget.Return_api_key(${JSON.stringify(this.model.get('origin'))})`)
 
         var self = this
         axios.post(`${this.model.get('origin')}/api/tools/fetch`, payload, {
@@ -1735,7 +1741,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             }
         }
         
-        DataListdiv.append(await this.data_row_list(this.model.get('origin'), HistoryID ))
+        DataListdiv.append(await this.data_row_list( HistoryID ))
         var ListItem =  this.el.querySelector('.list-item')
         data['type_id'] =`dataset-${data['id']}` 
         this.add_dataset(ListItem, this.data_row_list, HistoryID)
@@ -1743,7 +1749,9 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
  
     async NewTusUpload(data){
 
-        var apiKey = await KernelSideDataObjects(`from GiN.taskwidget  import GalaxyTaskWidget\nGalaxyTaskWidget.Return_api_key('http://localhost:8080')`)
+        var origin = this.el.querySelector('.tool-migration-select').value
+
+        var apiKey = await KernelSideDataObjects(`from GiN.taskwidget  import GalaxyTaskWidget\nGalaxyTaskWidget.Return_api_key(${JSON.stringify(origin)})`)
 
         var self = this
         var elm = this.el.querySelector('#inputupload')
@@ -1831,6 +1839,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
     readFile() {
 
+        var origin = this.el.querySelector('.tool-migration-select').value
+
         this.el.querySelector('.resumable-upload-warning').style.display = 'block'
         this.el.querySelector('.resumable-upload-warning').style.color = 'red'
 
@@ -1842,23 +1852,23 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         
         reader.onload = async () => {
 
-        var out  = await KernelSideDataObjects(`from GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.CORS_fallback_upload(file_name=${JSON.stringify(file['name'])}, data=${JSON.stringify(reader.result)}, server=${JSON.stringify(this.model.get('origin'))}, history_id=${JSON.stringify(hi)})`);
-        this.el.querySelector('#inputupload').value = null
+            var out  = await KernelSideDataObjects(`from GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.CORS_fallback_upload(file_name=${JSON.stringify(file['name'])}, data=${JSON.stringify(reader.result)}, server=${JSON.stringify(origin)}, history_id=${JSON.stringify(hi)})`);
+            this.el.querySelector('#inputupload').value = null
 
-        var data_list_div = this.el.querySelector('.history-dataset-list');
-        var e = this.el.querySelector('.list-item')
-        e.parentElement.removeChild(e)
-        data_list_div.append(await this.data_row_list(this.model.get('origin'), hi))
+            var data_list_div = this.el.querySelector('.history-dataset-list');
+            var e = this.el.querySelector('.list-item')
+            e.parentElement.removeChild(e)
+            data_list_div.append(await this.data_row_list( hi))
 
-        var hl = this.el.querySelector('#dataset-history-list')
+            var hl = this.el.querySelector('#dataset-history-list')
 
-        for (var i = 0; i <  hl.options.length; i++ ){
-            if (hl[i].value == hi) {
-                hl.selectedIndex = i
+            for (var i = 0; i <  hl.options.length; i++ ){
+                if (hl[i].value == hi) {
+                    hl.selectedIndex = i
+                }
             }
-        }
 
-        this.el.querySelector('.upload-status-icon').style.display = 'none'
+            this.el.querySelector('.upload-status-icon').style.display = 'none'
         }
         reader.readAsText(file);
     }
@@ -1868,98 +1878,118 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         var self  = this
         var children = this.element.querySelector('.Galaxy-form')
 
-        this.el.querySelectorAll('.nbtools-run').forEach((button) => button.addEventListener('click', () => {
+        // this.el.querySelectorAll('.nbtools-run').forEach((button) => button.addEventListener('click', () => {
     
-            this.el.querySelector('.resumable-upload-warning').style.display = 'none'
-            this.el.querySelector('.upload-status-icon').style.display = 'block'
-            
-            var cnf = {};
+        this.el.querySelector('.resumable-upload-warning').style.display = 'none'
+        this.el.querySelector('.upload-status-icon').style.display = 'block'
+        
+        var cnf = {};
 
-            var data = {
-                "history_id": self.element.querySelector('#history_ids').value,
-                "targets": [
-                    {
-                        "destination": {
-                            "type": "hdas"
-                        },
-                        "elements": [
-                            {
-                                "src": "files",
-                                "name":  input.files[0]['name'],
-                                "dbkey": children.querySelector('.genomes_options').value,
-                                "ext": children.querySelector('.datatypes_options').value,
-                            }
-                        ]
-                    }
-                ],
-                'files': input.files,
-            }
-            self.NewTusUpload(data)
-        }));
-
+        var data = {
+            "history_id": self.element.querySelector('#history_ids').value,
+            "targets": [
+                {
+                    "destination": {
+                        "type": "hdas"
+                    },
+                    "elements": [
+                        {
+                            "src": "files",
+                            "name":  input.files[0]['name'],
+                            "dbkey": children.querySelector('.genomes_options').value,
+                            "ext": children.querySelector('.datatypes_options').value,
+                        }
+                    ]
+                }
+            ],
+            'files': input.files,
+        }
+        self.NewTusUpload(data)
+        // }))
     }
  
     async dataupload_job( uplood_status='', HistoryID='' ) {
-        // this.hide_run_buttons(true)
+
+        this.hide_run_buttons(true)
+
         var children = this.element.querySelector('.Galaxy-form')
         var upload_link 
         var upload_method
 
-        for (var i = 0; i < children.querySelectorAll('.tabcontent').length; i++ ) {
-            if (children.querySelectorAll('.tabcontent')[i].style.display == 'block') {
-                upload_link = children.querySelectorAll('.tabcontent')[i].querySelector('.input_upload').value
-                upload_method = children.querySelectorAll('.tabcontent')[i].querySelector('.input_upload').type
-                children.querySelectorAll('.tabcontent')[i].querySelector('.input_upload').value = ''
-            }
-        }
+        var upload_method = children.querySelectorAll('.tabcontent')
 
         var datatype = children.querySelector('.datatypes_options').value
         var genome = children.querySelector('.genomes_options').value
         var history_id = this.el.querySelector('#history_ids').value
 
-        
+        for (var i = 0; i < upload_method.length; i++ )  {
+            if (upload_method[i].style.display ==  'block'){
+                if (upload_method[i].querySelector('.input_upload').type == 'file') {
+                    this.Upload_callback(upload_method[i].querySelector('.input_upload'))
 
-        var InitialData = await KernelSideDataObjects(`from GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.upload_dataset(file_path=${JSON.stringify(upload_link)}, upload_method=${JSON.stringify(upload_method)}, datatype=${JSON.stringify(datatype)}, genome=${JSON.stringify(genome)}, server=${JSON.stringify(this.el.querySelector(".tool-migration-select").value)}, HistoryID=${JSON.stringify(history_id)} )`);
-    
-        var DHL = this.el.querySelector('#dataset-history-list')
-        var DataListdiv = this.el.querySelector('.history-dataset-list');
-        
-        for (var i = 0; i <  DHL.options.length; i++ ){
-                if (DHL[i].value == history_id) {
-                    DHL.selectedIndex = i
+                } else{
+                    upload_link = children.querySelectorAll('.tabcontent')[i].querySelector('.input_upload').value
+                    upload_method = children.querySelectorAll('.tabcontent')[i].querySelector('.input_upload').type
+                    children.querySelectorAll('.tabcontent')[i].querySelector('.input_upload').value = ''
+
+                    var InitialData = await KernelSideDataObjects(`from GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.upload_dataset(file_path=${JSON.stringify(upload_link)}, upload_method=${JSON.stringify(upload_method)}, datatype=${JSON.stringify(datatype)}, genome=${JSON.stringify(genome)}, server=${JSON.stringify(this.el.querySelector(".tool-migration-select").value)}, HistoryID=${JSON.stringify(history_id)} )`);
+                
+                    var DHL = this.el.querySelector('#dataset-history-list')
+                    var DataListdiv = this.el.querySelector('.history-dataset-list');
+                    
+                    for (var i = 0; i <  DHL.options.length; i++ ){
+                        if (DHL[i].value == history_id) {
+                            DHL.selectedIndex = i
+                        }
+                    }
+
+                    var e = this.el.querySelector('.list-item')
+                    e.parentElement.removeChild(e)
+                    DataListdiv.append(await this.data_row_list( history_id ))
+
+                    var ListItem =  DataListdiv.querySelector('.list-item')
+                    var data = await KernelSideDataObjects(`from GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.OutPutData(server=${JSON.stringify(this.model.get('origin'))}, JobID=${JSON.stringify(InitialData['jobs'][0]['id'])} )`);
+                
+                    await this.dataset_row_ok_state(ListItem, data[0],  history_id)
                 }
-        }
+            }  
+        } 
 
-        var e = this.el.querySelector('.list-item')
-        e.parentElement.removeChild(e)
-        DataListdiv.append(await this.data_row_list(this.model.get('origin'), history_id ))
-
-        var ListItem =  DataListdiv.querySelector('.list-item')
-        var data = await KernelSideDataObjects(`from GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.OutPutData(server=${JSON.stringify(this.model.get('origin'))}, JobID=${JSON.stringify(InitialData['jobs'][0]['id'])} )`);
-    
-        await this.dataset_row_ok_state(ListItem, data[0],  history_id)
+        this.hide_run_buttons(false)
     }
 
-    async add_dataset_table(server){
+    async add_dataset_table(){
 
-        var  origin 
+        var UpdateButton = document.createElement('label')
+        UpdateButton.id = 'dataset-update-label'
+        UpdateButton.for = 'history-list'
+        UpdateButton.innerHTML = 'Update <i class="fa fa-refresh" aria-hidden="true"></i>'
 
-        if (server){
-              origin = server
-        } else {
-            origin = this.model.get('origin')
+        this.el.querySelector('.dataset-list').prepend(UpdateButton)
+
+        if(this.el.querySelector('.tool-migration-select')){
+            var origin = this.el.querySelector('.tool-migration-select').value
+        }  else{
+            var origin = this.model.get('origin')
         }
-
         var self = this
 
-        const options =  this.model.get('history_ids')
+        const options =  await KernelSideDataObjects(`import json\nimport base64\nfrom GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.get_histories(server=${JSON.stringify(origin)})`)
         const select = document.createElement('select')
+
+        if(this.el.querySelector(`#dataset-history-list`)){
+            this.el.querySelector(`#dataset-history-list`).parentNode.removeChild(this.el.querySelector(`#dataset-history-list`))
+        }
 
         select.id = `dataset-history-list`  
         select.className = 'InputData'   
 
         var DataListdiv = this.el.querySelector('.history-dataset-list');
-        DataListdiv.append(await this.data_row_list(origin, options[0]['id']))
+
+        if(DataListdiv.children.length > 0 ){
+            self.removeAllChildNodes(DataListdiv)
+        }
+        DataListdiv.append(await this.data_row_list( options[0]['id']))
     
         for(var i = 0; i < options.length; i++) {
             const opt = `${i+1}: ${options[i]['name']}`;
@@ -1983,6 +2013,9 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 var selected_index = {}
                 selected_index['HID'] = select.selectedIndex
                 self.form_builder(refine_inputs['inputs'],  selected_index) 
+            } else {
+                self.removeAllChildNodes(DataListdiv )
+                DataListdiv.append(await this.data_row_list(select.value))
             }
 
             var history_id = select.value
@@ -1990,37 +2023,41 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             var e = self.el.querySelector('.list-item')
             e.parentElement.removeChild(e)
 
-            DataListdiv.append(await this.data_row_list(origin, history_id))
+            DataListdiv.append(await this.data_row_list( history_id))
         });
 
-        var update = self.element.querySelector('#dataset-update-label')
+        var update = this.el.querySelector('#dataset-update-label')
 
-        update.addEventListener('click', async() => {
+        update.addEventListener('click', async () => {
+
+            console.log("OK")
 
             self.removeAllChildNodes(DataListdiv)
-            var history_id = select.value
-
-            DataListdiv.append(await this.data_row_list(origin, history_id))
+        
+            console.log(await this.data_row_list( this.el.querySelector('#dataset-history-list').value))
+    
+            DataListdiv.append(await this.data_row_list( this.el.querySelector('#dataset-history-list').value))
+    
         })
 
         var DataList = this.el.querySelector('#history-list')
         DataList.append(select)
     }
 
-    add_history_list(server){
 
-        var  origin 
-
-        if (server){
-              origin = server
-        } else {
-            origin = this.model.get('origin')
-        }
-
+    async add_history_list(){
 
         var self = this
 
-        const options =  this.model.get('history_ids')
+        if(this.el.querySelector('.tool-migration-select')){
+            var origin = this.el.querySelector('.tool-migration-select').value
+        }  else{
+            var origin = this.model.get('origin')
+        }
+
+        var histories = await KernelSideDataObjects(`import json\nimport base64\nfrom GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.get_histories(server=${JSON.stringify(origin)})`)
+
+        const options =  histories
         const select = document.createElement('select')
         select.id = `history_ids`  
         select.className = 'InputData'   
@@ -2033,10 +2070,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             select.appendChild(el);
         }
 
-       
         // select.selectedIndex = selected_value
         
-
         select.addEventListener("change", async () => {
 
             var history_id = select.value
@@ -3026,7 +3061,13 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         })
     }
  
-    async data_row_list (server, history_id){
+    async data_row_list ( history_id){
+
+        if(this.el.querySelector('.tool-migration-select')){
+            var server = this.el.querySelector('.tool-migration-select').value
+        }  else{
+            var server = this.model.get('origin')
+        }
         var data_list = document.createElement('ul')
         data_list.className = 'list-item'
         data_list.style.overflow = 'auto'
@@ -3046,7 +3087,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         }
         return data_list
     }
- 
  
     async dataset_collection_row_state (dataset, history_id){
 
@@ -3339,7 +3379,11 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
     async add_dataset(parent, dataset, history_id){
 
-        var URL = this.model.get('origin')
+        if(this.el.querySelector('.tool-migration-select')){
+            var URL = this.el.querySelector('.tool-migration-select').value
+        }  else{
+            var URL = this.model.get('origin')
+        }
 
         var row = `<div id="${dataset['type_id']}"   class="list-item ${dataset['history_content_type']} history-content state-${dataset['state']}" >
                         <div class="warnings"></div>
@@ -3388,7 +3432,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
                 Tbl.querySelector('.fas.fa-eye').addEventListener('click', async ()=>{
 
-                    var apiKey = await KernelSideDataObjects(`from GiN.taskwidget  import GalaxyTaskWidget\nGalaxyTaskWidget.Return_api_key('http://localhost:8080')`)
+                    var apiKey = await KernelSideDataObjects(`from GiN.taskwidget  import GalaxyTaskWidget\nGalaxyTaskWidget.Return_api_key(${JSON.stringify(URL)})`)
 
                     var iframe_id = `${this.uid()}-iframe`
                     
@@ -3398,7 +3442,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                                             <div class="data-preview-title" style="float: left">  <p class="title"> <b>${dataset['name']} </b></p> </div>
                                         </div>
                                         <div class="data-preview-content" style="width:100%; height:95%;"> 
-                                            <iframe  src="${this.model.get('origin')}/datasets/${dataset['id']}/display/?preview=True&?api_key={%27x-api-key%27:%27${apiKey['api_key']}%27}" > </iframe>
+                                            <iframe  src="${URL}/datasets/${dataset['id']}/display/?preview=True&?api_key={%27x-api-key%27:%27${apiKey['api_key']}%27}" > </iframe>
                                         </div>
                                     </div>`
 
@@ -3450,7 +3494,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
             for (let i = 0; i < Infinity; ++i) {
 
-                var data = await KernelSideDataObjects(`from GiN.taskwidget  import GalaxyTaskWidget\nGalaxyTaskWidget.show_data_set(server=${JSON.stringify(this.model.get('origin'))}, dataset_id=${JSON.stringify(dataset['id'])} )`)
+                var data = await KernelSideDataObjects(`from GiN.taskwidget  import GalaxyTaskWidget\nGalaxyTaskWidget.show_data_set(server=${JSON.stringify(URL)}, dataset_id=${JSON.stringify(dataset['id'])} )`)
 
                 if ( data['state'] == 'new'  ){
                     Tbl.className = `list-item ${dataset['history_content_type']} history-content state-new`
@@ -3573,7 +3617,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         if (exch) {
             exch.addEventListener("click", async (event) => { 
-                var show_dataset = await KernelSideDataObjects(`from GiN.taskwidget  import GalaxyTaskWidget\nGalaxyTaskWidget.show_data_set(server=${JSON.stringify(this.model.get('origin'))}, dataset_id=${JSON.stringify(dataset['id'])} )`)
+                var show_dataset = await KernelSideDataObjects(`from GiN.taskwidget  import GalaxyTaskWidget\nGalaxyTaskWidget.show_data_set(server=${JSON.stringify(URL)}, dataset_id=${JSON.stringify(dataset['id'])} )`)
     
                 if (Tbl.querySelector('#add_data_share_menu').style.display == 'block') {
                     Tbl.querySelector('#add_data_share_menu').style.display = 'none'
@@ -3587,7 +3631,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         title.addEventListener('click', async (e) => {
 
             if (Tbl.querySelector('.details') == null ){
-                var show_dataset = await KernelSideDataObjects(`from GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.show_data_set(server=${JSON.stringify(this.model.get('origin'))}, dataset_id=${JSON.stringify(dataset['id'])} )`) 
+                var show_dataset = await KernelSideDataObjects(`from GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.show_data_set(server=${JSON.stringify(URL)}, dataset_id=${JSON.stringify(dataset['id'])} )`) 
                 var ok_details = await this.dataset_ok_details(show_dataset)
                 Tbl.append(ok_details)
             }
@@ -3611,7 +3655,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         if (download_button) {
             download_button.addEventListener('click', async (event) => {
-                KernelSideDataObjects(`from GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.download_file_to_jupyter_server(collection_id=${JSON.stringify(dataset['id'])}, server=${JSON.stringify(this.model.get('origin'))} )`);
+                KernelSideDataObjects(`from GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.download_file_to_jupyter_server(collection_id=${JSON.stringify(dataset['id'])}, server=${JSON.stringify(URL)} )`);
             })
         }
 
@@ -3622,7 +3666,11 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
      
     async dataset_row_ok_state (dataset, history_id){
 
-        var URL = this.model.get('origin')
+        if(this.el.querySelector('.tool-migration-select')){
+            var URL = this.el.querySelector('.tool-migration-select').value
+        }  else{
+            var URL = this.model.get('origin')
+        }
 
         var row = `<div id="${dataset['type_id']}"   class="list-item ${dataset['history_content_type']} history-content state-ok" >
                     <div class="warnings"></div>
@@ -3701,7 +3749,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         })
 
         exch.addEventListener("click", async (event) =>{ 
-            var show_dataset = await KernelSideDataObjects(`from GiN.taskwidget  import GalaxyTaskWidget\nGalaxyTaskWidget.show_data_set(server=${JSON.stringify(this.model.get('origin'))}, dataset_id=${JSON.stringify(dataset['id'])} )`)
+            var show_dataset = await KernelSideDataObjects(`from GiN.taskwidget  import GalaxyTaskWidget\nGalaxyTaskWidget.show_data_set(server=${JSON.stringify(URL)}, dataset_id=${JSON.stringify(dataset['id'])} )`)
 
             if (Tbl.querySelector('#add_data_share_menu').style.display == 'block') {
                 Tbl.querySelector('#add_data_share_menu').style.display = 'none'
@@ -3714,7 +3762,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         title.addEventListener('click', async (e) => {
 
             if (Tbl.querySelector('.details') == null ){
-                var show_dataset = await KernelSideDataObjects(`from GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.show_data_set(server=${JSON.stringify(this.model.get('origin'))}, dataset_id=${JSON.stringify(dataset['id'])} )`) 
+                var show_dataset = await KernelSideDataObjects(`from GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.show_data_set(server=${JSON.stringify(URL)}, dataset_id=${JSON.stringify(dataset['id'])} )`) 
                 var ok_details = await this.dataset_ok_details(show_dataset)
                 Tbl.append(ok_details)
             }
@@ -3737,7 +3785,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         var download_button = Tbl.querySelector('.fa.fa-download')
 
         download_button.addEventListener('click', async (event) => {
-            KernelSideDataObjects(`from GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.download_file_to_jupyter_server(collection_id=${JSON.stringify(dataset['id'])}, server=${JSON.stringify(this.model.get('origin'))} )`);
+            KernelSideDataObjects(`from GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.download_file_to_jupyter_server(collection_id=${JSON.stringify(dataset['id'])}, server=${JSON.stringify(URL)} )`);
         })
 
         this.delete_dataset(Tbl, dataset['id'],  history_id)
@@ -3747,7 +3795,11 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
      
     async dataset_error_details (dataset){
 
-        var URL = this.model.get('origin')
+        if(this.el.querySelector('.tool-migration-select')){
+            var URL = this.el.querySelector('.tool-migration-select').value
+        }  else{
+            var URL = this.model.get('origin')
+        }
 
         var details =  `<div class="details" style="display: none;">
                             <div class="summary">
@@ -3770,7 +3822,11 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
  
     async dataset_ok_details (dataset){
 
-        var URL = this.model.get('origin')
+        if(this.el.querySelector('.tool-migration-select')){
+            var URL= this.el.querySelector('.tool-migration-select').value
+        }  else{
+            var URL = this.model.get('origin')
+        }
 
         var details =  ` <div class="details" style="display: none;">
                             <div class="summary">
@@ -3824,16 +3880,23 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
  
     delete_dataset (row, dataset_id,  history_id, datatype='dataset'){
 
+
+        if(this.el.querySelector('.tool-migration-select')){
+            var URL = this.el.querySelector('.tool-migration-select').value
+        }  else{
+            var URL = this.model.get('origin')
+        }
+
         var delete_button = row.querySelector('.fa.fa-times')
 
         if (delete_button != null){
             delete_button.addEventListener('click',  (e) => {
                 delete_button.parentNode.parentNode.parentNode.parentNode.removeChild(delete_button.parentNode.parentNode.parentNode)
                 if (datatype == 'dataset') {
-                KernelSideDataObjects(`from GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.delete_dataset(server=${JSON.stringify(this.model.get('origin'))}, history_id=${JSON.stringify(history_id)}, dataset_id=${JSON.stringify(dataset_id)})`)
+                KernelSideDataObjects(`from GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.delete_dataset(server=${JSON.stringify(URL)}, history_id=${JSON.stringify(history_id)}, dataset_id=${JSON.stringify(dataset_id)})`)
                 } 
                 else if (datatype == 'collection') {
-                    KernelSideDataObjects(`from GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.delete_dataset_collection(server=${JSON.stringify(this.model.get('origin'))}, history_id=${JSON.stringify(history_id)}, dataset_collection_id=${JSON.stringify(dataset_id)})`)
+                    KernelSideDataObjects(`from GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.delete_dataset_collection(server=${JSON.stringify(URL)}, history_id=${JSON.stringify(history_id)}, dataset_collection_id=${JSON.stringify(dataset_id)})`)
                 }    
             });
         }
@@ -4329,7 +4392,9 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             var toolid =  "GiN_data_upload_tool"
 
             if (this.model.get('galaxy_tool_id') == toolid) {
+
                 this.dataupload_job()
+
             } else if (this.model.get('name') == 'login'){
                var a = await this.trigger_login()
             }else {
@@ -4474,7 +4539,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             var e = this.el.querySelector('.list-item')
             e.parentElement.removeChild(e)
 
-            data_list_div.append(await this.data_row_list(this.model.get('origin'), history_id))
+            data_list_div.append(await this.data_row_list( history_id))
         
             this.el.querySelector('.Galaxy-form').style.display = 'none'
             this.el.querySelector('.galaxy-history-list').style.display = 'none'
