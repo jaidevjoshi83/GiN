@@ -264,3 +264,25 @@
 .galaxy-uibuilder #inputupload {
   height: 50px;
 }
+
+
+
+.galaxy-uibuilder  .form-restore-div{
+  background: rgb(23,20,82);
+  padding-left: 10px;
+  width: 70%;
+  float: right;
+  color: white;
+}
+
+.galaxy-uibuilder .tool-migration-select{
+  width: 60%;
+  height: 40px;
+  margin: 1px;
+  float: right
+}
+
+
+.galaxy-uibuilder .form-restore-div label{
+  margin-top:  10px
+}
