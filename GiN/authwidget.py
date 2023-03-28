@@ -33,7 +33,7 @@ class GalaxyAuthWidget(GalaxyUIBuilder):
         GalaxyUIBuilder.__init__(
             self,
             name='login',
-            run_label='Login into Galaxy',
+            run_label='Login',
             description='Login to Galaxy instance by credenital or API Key',
             # display_header=False,
             color=self.default_color,

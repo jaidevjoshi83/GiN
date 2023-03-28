@@ -264,3 +264,46 @@
 .galaxy-uibuilder #inputupload {
   height: 50px;
 }
+
+
+
+.galaxy-uibuilder  .form-restore-div{
+  background: rgb(100,99,116);
+  padding-left: 10px;
+  width: 70%;
+  float: right;
+  color: white;
+}
+
+.galaxy-uibuilder .tool-migration-select{
+  width: 60%;
+  height: 40px;
+  margin: 1px;
+  float: right
+}
+
+
+.galaxy-uibuilder .form-restore-div label{
+  margin-top:  10px
+}
+
+.galaxy-uibuilder .form-restore-div .fa-refresh {
+    
+  float: right;
+  padding:  10px;
+  padding-top: 10px;
+  padding-right: 15px;
+  font-size: 20px;
+  
+}
+
+
+.galaxy-uibuilder .job-status-footer div {
+  overflow: auto;
+}
+.galaxy-uibuilder .job-status-footer {
+  overflow: auto;
+}
+.galaxy-uibuilder .job-header {
+   overflow: auto;
+}
