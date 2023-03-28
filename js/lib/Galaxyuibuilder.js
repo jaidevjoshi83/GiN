@@ -201,7 +201,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         var Label = document.createElement('label')
         Label.htmlFor = 'form-restore-div'
-        Label.innerHTML = '<b>Migrate the tool to a different server</b>'
+        Label.innerHTML = '<b>Select Server</b>'
         Label.style.marginRight =  '20px'
 
         div.append(Label)
@@ -3987,7 +3987,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
  
     async JobStatusTemplate (parent, job){
 
-
         if(this.el.querySelector('.tool-migration-select')){
             var origin = this.el.querySelector('.tool-migration-select').value
         }  else{
@@ -3998,7 +3997,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         var job_status = `<div class="job-status-widget">
                             <div class="job-header">
-                                <div class="indicator">
+                                <div class="indicator" style="float:left;">
                                     <div class="gear-rotate-icon">
                                         <i class="fas fa-cog fa-spin" ></i>
                                     </div>
@@ -4009,19 +4008,13 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                                         <i class="fa fa-times-circle" style="font-size: 25px; margin-top: 5px; border-radius: 22px"></i>
                                     </div>
                                 </div>
-                                <div class="job-done-text" style="width:30%;">
-                                    <div class="job-state-text">
+                                <div class="job-done-text" style="width:80%; float:left;">
+                                    <div class="job-state-text" style="float:left;">
                                         Job queued                                        
                                     </div>
                                 </div> 
                                 
-                                <div class="job-status" style="width:50%">
-                                    <div class="job-id">
-                                    
-                                    </div>
-                                </div>
-
-                                <div class="job-status-buttons" style="margin-top:2px; float:right;" >
+                                <div class="job-status-buttons" style="margin-top:3px; float:right;" >
                                     <a class="icon-btn display-btn" title=""  data-original-title="View data"><span class="fas fa-eye" style="" title="View job details" ></span></a><a class="icon-btn display-btn" title=""  data-original-title="View data"><span class="fa fa-refresh" style="" title="Reset tool form" ></span></a>
                                 </div>
                             </div>
@@ -4030,9 +4023,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
                             </div>
 
-                            <div class="job-status-footer" style="width:100%; height: 30px;" >
-                                <p class="footer-txt" style="color; white" >
-                                </p>
+                            <div class="job-status-footer" style="width:100%; height: 30px; color:white;" >
+                           
                             </div>
 
                         </div>`
@@ -4044,8 +4036,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         var apiKey = await KernelSideDataObjects(`from GiN.taskwidget  import GalaxyTaskWidget\nGalaxyTaskWidget.Return_api_key('${origin}')`)
 
         if (job['state'] != 'job failed') {
-            template.querySelector('.footer-txt').innerHTML = `Job: <b> ${job['id']}</b> submitted by: <b> ${apiKey['email'] }</b> on <b>${job['create_time'].split('T')[0]}</b> at <b>${job['create_time'].split('T')[1].split('.')[0]} </b>`
-            template.querySelector('.job-id').innerHTML = `Job ID: <b> ${job['id']}</b>`
+            template.querySelector('.job-status-footer').innerHTML = `<div style="padding:10px; font-size:15px;">Submitted by: <b> ${apiKey['email'] }</b> on <b>${job['create_time'].split('T')[0]}</b> at <b>${job['create_time'].split('T')[1].split('.')[0]}</div></b>`
+            // template.querySelector('.job-id').innerHTML = `Job ID: <b> ${job['id']}</b>`
         }
 
         var tool_form = this.el.querySelector('.tool-forms')
@@ -4221,7 +4213,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 gear_rotate.style.display = 'block'
 
                 var job_done_text = parent.querySelector(".job-state-text")
-                job_done_text.innerText = 'Job Running'
+                job_done_text.innerText = `Job running, Job ID: ${job['id']}` 
                 job_done_text.style.color = '#F5A207'
 
                 var StdError  = parent.querySelector('.donemessagelarge')
@@ -4230,7 +4222,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
             else if (['queued', 'new'].includes(job_state)) {
                 var job_done_text = parent.querySelector(".job-state-text")
-                job_done_text.innerText = 'Job queued'
+                job_done_text.innerText = `Job queued Job ID: ${job['id']}` 
 
                 var StdError  = parent.querySelector('.donemessagelarge')
                 StdError.style.background = '#7d959d70'
@@ -4238,7 +4230,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
             else if (job_state == 'ok'){
                 var job_done_text = parent.querySelector(".job-state-text")
-                job_done_text.innerText = 'Job complete'
+                job_done_text.innerText = `Job complete, Job ID: ${job['id']}`  
 
                 var gear_rotate = parent.querySelector('.gear-rotate-icon')
                 gear_rotate.style.display = 'none'
@@ -4249,13 +4241,13 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 var StdError  =  parent.querySelector('.donemessagelarge')
                 StdError.style.background = '#c2ebc2' 
 
-                parent.querySelector('.job-id').style.color = "rgb(81,219,81)"
+                // parent.querySelector('.job-id').style.color = "rgb(81,219,81)"
             } 
 
             else if (job_state == 'error'){
 
                 var job_done_text = parent.querySelector(".job-state-text")
-                job_done_text.innerText = 'Fatal Error'
+                job_done_text.innerText = `Fatal Error Job ID: ${job['id']}`  
                 job_done_text.style.color = 'white'
 
                 var gear_rotate = parent.querySelector('.gear-rotate-icon')
@@ -4267,7 +4259,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 var StdError  = parent.querySelector('.donemessagelarge')
                 StdError.style.background = '#f4a3a5'
 
-                parent.querySelector('.job-id').style.color = "red"
+                // parent.querySelector('.job-id').style.color = "red"
 
             }
 
