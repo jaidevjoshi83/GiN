@@ -2172,6 +2172,13 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
  
     add_repeat_section(input_def, FormParent, NamePrefix){
 
+        if(this.el.querySelector('.tool-migration-select')){
+            var origin = this.el.querySelector('.tool-migration-select').value
+        }  else{
+            var origin = this.model.get('origin')
+        }
+
+
         var self = this
         input_def.id = this.uid()
 
@@ -2229,10 +2236,10 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         function add_internal_repeat(inputs, count){
 
-            if(this.el.querySelector('.tool-migration-select')){
-                var origin = this.el.querySelector('.tool-migration-select').value
+            if(self.el.querySelector('.tool-migration-select')){
+                var origin = self.el.querySelector('.tool-migration-select').value
             }  else{
-                var origin = this.model.get('origin')
+                var origin = self.model.get('origin')
             }
 
             const row1 = document.createElement('div')
