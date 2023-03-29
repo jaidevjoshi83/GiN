@@ -149,6 +149,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         if (this.model.get('name') == 'login'){
             this.login_form()
+            this._submit_keypress()
         }
         
         if (this.model.get('name') != 'login' && 'GiN_data_upload_tool') {
@@ -2066,15 +2067,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         var update = this.el.querySelector('#dataset-update-label')
 
         update.addEventListener('click', async () => {
-
-            console.log("OK")
-
-            self.removeAllChildNodes(DataListdiv)
-        
-            console.log(await this.data_row_list( this.el.querySelector('#dataset-history-list').value))
-    
+            self.removeAllChildNodes(DataListdiv)    
             DataListdiv.append(await this.data_row_list( this.el.querySelector('#dataset-history-list').value))
-    
         })
 
         var DataList = this.el.querySelector('#history-list')
@@ -2961,7 +2955,12 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
     async add_conditional_section(input_def, parent, NamePrefix, call_back_data={}){
 
-        
+        if (this.el.querySelector('.tool-migration-select')){
+            var origin = this.el.querySelector('.tool-migration-select').value
+        }  else{
+            var origin = this.model.get('origin')
+        }
+
         // ########################################################
         input_def.id = this.uid()
         var self = this
@@ -4133,7 +4132,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             var gear_rotate = template.querySelector('.job-error-icon')
             gear_rotate.style.display = 'block'
 
-            template.querySelector('.footer-txt').innerHTML = `<b> Job failed at submission</b> for more details view job details`
+            // template.querySelector('.footer-txt').innerHTML = `<b> Job failed at submission</b> for more details view job details`
         }
 
         parent.append(template)
@@ -4484,17 +4483,12 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             var toolid =  "GiN_data_upload_tool"
 
             if (this.model.get('galaxy_tool_id') == toolid) {
-
                 this.dataupload_job()
-
             } else if (this.model.get('name') == 'login'){
                var a = await this.trigger_login()
             }else {
                 var form = self.element.querySelector('.Galaxy-form')
                 var inputs = this.get_form_data(form, 'on')
-
-                console.log(inputs)
-
                 var history_id = self.element.querySelector('#history_ids').value 
                 this.SubmitJob(inputs, history_id)
                 this.hide_run_buttons(true)
@@ -4601,7 +4595,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                             break;
                         }
                     }
-
                 }
             }
         }
@@ -4609,11 +4602,11 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
     async SubmitJob(inputs, history_id){
 
-        // if(this.el.querySelector('.tool-migration-select')){
+        if(this.el.querySelector('.tool-migration-select')){
         var origin = this.el.querySelector('.tool-migration-select').value
-        // }  else{
-        //     var origin = this.model.get('origin')
-        // }
+        }  else{
+            var origin = this.model.get('origin')
+        }
 
         var toolforms = this.el.querySelector('.tool-forms') 
         var hl = this.el.querySelector('#dataset-history-list')
@@ -4623,11 +4616,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 hl.selectedIndex = i
             }
         }
-
-        console.log(this.model.get('galaxy_tool_id'))
-        console.log(inputs)
-        console.log(history_id)
-
         // var jobs  = await KernelSideDataObjects(`import json\nfrom GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.submit_job(gal_instance=${JSON.stringify(this.model.get('gal_instance'))}, tool_inputs=json.loads("""${JSON.stringify(inputs)}"""), history_id=${JSON.stringify(history_id)})`)
         var jobs  = await KernelSideDataObjects(`import json\nimport base64\nfrom GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.submit_job(server=json.loads(base64.b64decode("${btoa(JSON.stringify(origin))}")), tool_id=json.loads(base64.b64decode("${btoa(JSON.stringify(this.model.get('galaxy_tool_id')))}")), tool_inputs=json.loads(base64.b64decode("${btoa(JSON.stringify(inputs))}")), history_id=json.loads(base64.b64decode("${btoa(JSON.stringify(history_id))}")))`)
     
@@ -4703,5 +4691,17 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             }
         }
         return display_apps
-    }   
+    }  
+    
+    _submit_keypress() {
+
+        console.log(this.el.querySelectorAll('.nbtools-form input, .nbtools-form select'))
+        // this.el.querySelectorAll('.nbtools-form input, .nbtools-form select').forEach((element) => {
+        //     element.addEventListener("keydown", (event) => {
+        //         if (event.keyCode === 13) {
+        //             this.el.querySelector('.nbtools-run').click();
+        //         }
+        //     });
+        // });
+    }
  }
