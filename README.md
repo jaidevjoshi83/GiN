@@ -91,16 +91,16 @@ docker run --rm -p 8888:8888 jayadevjoshi12/gin:latest
 
 ## Galaxy tool form
 
-![alt text](https://github.com/jaidevjoshi83/GiN/blob/repeat/GiN_Screenshot/tool_form1.png)
+![alt text](https://github.com/jaidevjoshi83/GiN/blob/master/GiN_Screenshot/tool_form1.png)
 
 ## Job status 
 
-![alt text](https://github.com/jaidevjoshi83/GiN/blob/repeat/GiN_Screenshot/Job_Status.png)
+![alt text](https://github.com/jaidevjoshi83/GiN/blob/master/GiN_Screenshot/Job_Status.png)
 
 ## History Data
 
-![alt text](https://github.com/jaidevjoshi83/GiN/blob/repeat/GiN_Screenshot/History_Data.png)
+![alt text](https://github.com/jaidevjoshi83/GiN/blob/master/GiN_Screenshot/History_Data.png)
 
 ## Data sharing widget
 
-![alt text](https://github.com/jaidevjoshi83/GiN/blob/repeat/GiN_Screenshot/data_sharing_widget.png)
+![alt text](https://github.com/jaidevjoshi83/GiN/blob/master/GiN_Screenshot/data_sharing_widget.png)
