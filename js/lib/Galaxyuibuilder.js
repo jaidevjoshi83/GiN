@@ -149,7 +149,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         if (this.model.get('name') == 'login'){
             this.login_form()
-            this._submit_keypress()
+            // this._submit_keypress()
             this.register_button()
         }
         
@@ -2107,6 +2107,12 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         select.addEventListener("change", async () => {
 
             var history_id = select.value
+
+            if(this.el.querySelector('.tool-migration-select')){
+                var server = this.el.querySelector('.tool-migration-select').value
+            }  else{
+                var server = this.model.get('origin')
+            }
 
             if (this.model.get('galaxy_tool_id') != "GiN_data_upload_tool") {
                 var form = self.element.querySelector('.Galaxy-form')
