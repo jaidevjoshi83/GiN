@@ -34,11 +34,14 @@ class GalaxyAuthWidget(GalaxyUIBuilder):
             self,
             name='login',
             run_label='Login',
-            description='Login to Galaxy instance by credenital or API Key',
+            description='Login to Galaxy instance by credentials or API Key',
             # display_header=False,
             color=self.default_color,
             logo=self.default_logo,
             collapsed=False,
+            buttons={
+                    'Register an Account': '',
+            },
             **kwargs
         )
 
@@ -177,7 +180,6 @@ def server_name(search_url):
         if url == search_url:
             return name
     return search_url
-
 
     output = Output()  # Output widget
     

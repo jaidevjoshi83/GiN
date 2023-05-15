@@ -27,13 +27,14 @@ class GalaxyUIBuilder(BaseWidget, NBTool):
     history_data = List([]).tag(sync=True)
     origin = Unicode("", sync=True)
     description = Unicode("", sync=True)
+    buttons = Dict(sync=True)
 
     UI = Dict(sync=True)
     galaxy_tool_id = Unicode(sync=True)
 
     upload_callback = None
     display_header = None
-    buttons = None
+    
     parameters = None
 
     def __init__(

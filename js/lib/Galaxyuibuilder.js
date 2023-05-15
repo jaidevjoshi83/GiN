@@ -150,6 +150,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         if (this.model.get('name') == 'login'){
             this.login_form()
             this._submit_keypress()
+            this.register_button()
         }
         
         if (this.model.get('name') != 'login' && 'GiN_data_upload_tool') {
@@ -4506,7 +4507,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
     async trigger_login(){
 
         // this.update_metadata_FormState({}, {})
-
         var logingForm = this.el.querySelector('.login-form-div')
         var formdata = logingForm.parentNode.parentNode.parentNode.parentNode.outerHTML       
         let fint = JSON.stringify(formdata)
@@ -4521,9 +4521,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                     var credentials = logingForm.children[i].querySelectorAll('input')
 
                     for (let i = 0; i < Infinity; ++i) {
-
                         var jobs = await KernelSideDataObjects(`from GiN.authwidget import GalaxyAuthWidget\na  = GalaxyAuthWidget()\na.login(server=${JSON.stringify(credentials[0].value)}, password=${JSON.stringify(credentials[2].value)}, email=${JSON.stringify(credentials[1].value)})`)
-                
                         await this.waitforme(3000);
 
                         if (jobs.state === 'error' ) {
@@ -4699,16 +4697,16 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         }
         return display_apps
     }  
+
+
+    register_button() {
+
+        this.el.querySelector('.nbtools-buttons').querySelector('button').addEventListener('click', ()=>{
+            window.open('https://usegalaxy.org/login/start?redirect=None', '_blank');
+        })
+    }
     
     _submit_keypress() {
-
         console.log(this.el.querySelectorAll('.nbtools-form input, .nbtools-form select'))
-        // this.el.querySelectorAll('.nbtools-form input, .nbtools-form select').forEach((element) => {
-        //     element.addEventListener("keydown", (event) => {
-        //         if (event.keyCode === 13) {
-        //             this.el.querySelector('.nbtools-run').click();
-        //         }
-        //     });
-        // });
     }
  }
