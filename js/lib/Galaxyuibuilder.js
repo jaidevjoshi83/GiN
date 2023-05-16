@@ -82,8 +82,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
             <div class="dataset-list">
 
-   
-                
                 <label id="dataset-history-label" for="history-list">Select History</label>
 
                 <div id='history-list' class="history-list">
@@ -149,7 +147,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         if (this.model.get('name') == 'login'){
             this.login_form()
-            // this._submit_keypress()
+            this._submit_keypress()
             this.register_button()
         }
         
@@ -250,6 +248,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 this.add_history_list()
 
                 this.el.querySelector('#dataset-update-label').parentNode.removeChild(this.el.querySelector('#dataset-update-label'))
+
                 this.add_dataset_table()
             }
         })
@@ -683,6 +682,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
  
     add(input, form_parent, name_prefix, data={}){ 
 
+
         var input_def = input;
 
         if (input_def.id == 'undefined') {
@@ -1071,9 +1071,13 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 
                 out[form.querySelector('.InputDataFile').name] = input_data 
 
+
                 if (input_files.length == 1 && input_files[0]['id'] == ''){
                     out[form.querySelector('.InputDataFile').name] = null
-                } else{
+                } else if (input_files.length == 0 ) {
+                    out[form.querySelector('.InputDataFile').name] = {}
+                }
+                else{
                     input_data['values'] = input_files
                     out[form.querySelector('.InputDataFile').name] = input_data
                 }
@@ -2133,7 +2137,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
  
     AddHelpSection(help){
 
-
         if(this.el.querySelector('.tool-migration-select')){
             var origin = this.el.querySelector('.tool-migration-select').value
         }  else{
@@ -3158,6 +3161,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         data_list.style.overflowY = 'scroll'
     
         var datasets = await KernelSideDataObjects(`from GiN.taskwidget  import GalaxyTaskWidget\nGalaxyTaskWidget.history_data_list(server=${JSON.stringify(server)}, history_id=${JSON.stringify(history_id)} )`) 
+
+
 
         for (var i = 0; i < datasets.length; i++){
             if (datasets[i]['history_content_type'] == 'dataset') {
@@ -4713,6 +4718,10 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
     }
     
     _submit_keypress() {
-        console.log(this.el.querySelectorAll('.nbtools-form input, .nbtools-form select'))
+
+
+
+
+       
     }
  }

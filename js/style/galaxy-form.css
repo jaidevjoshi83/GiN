@@ -279,22 +279,18 @@
   width: 60%;
   height: 40px;
   margin: 1px;
-  float: right
-}
-
-
-.galaxy-uibuilder .form-restore-div label{
-  margin-top:  10px
-}
-
-.galaxy-uibuilder .form-restore-div .fa-refresh {
-    
   float: right;
-  padding:  10px;
-  padding-top: 10px;
-  padding-right: 15px;
+}
+
+
+/* .galaxy-uibuilder .form-restore-div label{
+  margin-top:  10px
+} */
+
+.galaxy-uibuilder .form-restore-div .fa-refresh {  
+  float: right;
   font-size: 20px;
-  
+  margin: 5px
 }
 
 
@@ -306,4 +302,26 @@
 }
 .galaxy-uibuilder .job-header {
    overflow: auto;
+}
+
+.galaxy-uibuilder .jp-mod-selected .form-restore-div {
+  background: rgb(15, 16, 20);
+}
+.galaxy-uibuilder .form-restore-div {
+  height: 30px;
+}
+.galaxy-uibuilder .tool-migration-select {
+  height: 26px;
+}
+.galaxy-uibuilder .form-restore-div .fa-refresh {
+  color: rgb(233, 233, 246);
+  font-size: 1px;
+}
+.galaxy-uibuilder .form-restore-div .fa-refresh {
+  font-size: 20px;
+  margin: 5px;
+}
+
+.galaxy-uibuilder .form-restore-div label{
+margin-top:  5px;
 }

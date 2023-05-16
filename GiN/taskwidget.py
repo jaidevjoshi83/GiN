@@ -126,7 +126,6 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
         else:
             return ""
 
-    
     @staticmethod
     def show_job( server, job_id):
 
@@ -248,7 +247,6 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
         gi6 = a.get(server=server)
 
         if (tool_inputs) and (tool_id):
-
             inputs = gi6.tools.gi.tools.build(
                 tool_id=tool_id, inputs=tool_inputs, history_id=history_id
             )

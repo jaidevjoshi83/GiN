@@ -61,8 +61,6 @@ function init_context(app, notebook_tracker) {
     
 }
 
-
-
 function ReturnOutputArea(i, notebookTracker){
     var RestorForm = `<div class="lm-Widget p-Widget lm-Panel p-Panel jp-OutputArea-child">
                         <div class="lm-Widget p-Widget jp-OutputPrompt jp-OutputArea-prompt"></div>
@@ -79,6 +77,8 @@ function ReturnOutputArea(i, notebookTracker){
 
         e.addEventListener('click', async () => {
             // if ( notebookHasBeenRan === false) {
+
+                console.log("OK")
 
                 const notebookContext = notebookTracker.currentWidget.context;
                 const notebookSession = notebookTracker.currentWidget.context.sessionContext;
