@@ -200,10 +200,23 @@ export async function executePython(pythonCode, isExpectingOutput){
     });	
 }
 
-export async function  KernelSideDataObjects(code) {
-    var system = await executePython(code);
-    return system;
-}
+// export async function  KernelSideDataObjects(code) {
+//     var system = await executePython(code);
+//     return system;
+// }
+
+
+export async function KernelSideDataObjects(code) {
+    try {
+      var system = await executePython(code);
+      return system;
+    } catch (error) {
+      // Handle the error
+      console.error("An error occurred:", error);
+      // Return an appropriate value or rethrow the error if needed
+      return {'value': 'error'};
+    }
+  }
 
 
 export function removeAllChildNodes(parent){

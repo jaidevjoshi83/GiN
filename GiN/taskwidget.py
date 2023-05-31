@@ -9,6 +9,10 @@ import IPython.display
 import glob
 from nbtools import UIBuilder
 
+import os
+import re
+
+
 log = logging.getLogger(__name__)
 
 try:
@@ -134,6 +138,7 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
         job = gi1.jobs.gi.jobs.show_job(job_id=job_id)
 
         return IPython.display.JSON(job)
+
     
     @staticmethod
     def get_data_type_and_genomes( server=None):
@@ -227,12 +232,13 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
 
     @staticmethod
     def return_session_list():
-
         try:
             a = GiN.sessions.SessionList()
             return a.get_servers()
         except:
              Python.display.JSON([])
+
+
     @staticmethod
     def updated_form(
         server=None,

@@ -70,19 +70,18 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             </div>
 
             <div class="tool-forms"> 
-                <label id="dataset-history-label" for="history-list">Select History</label><br>
+                <label id="dataset-history-label" for="history-list">Select History</label>
                 <div class="galaxy-history-list">
                     
                 </div>
 
                 <form class="Galaxy-form">
                 </form>
-
             </div>
 
             <div class="dataset-list">
 
-                <label id="dataset-history-label" for="history-list">Select History</label>
+                <label  id="dataset-history-label" for="history-list">Select History</label>
 
                 <div id='history-list' class="history-list">
                 </div>
@@ -94,13 +93,11 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             <div class="help-section">
             </div>
         </div>
-    
     </div>
     
     <div class="nbtools-footer"></div>
     <div class="nbtools-buttons">
         <button class="nbtools-run" type="button" data-traitlet="run_label"></button>
-
     </div>`;
 
     this.dragged = '';
@@ -1550,6 +1547,26 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         return row
     }
 
+
+    add_variable_widget(tbl){
+
+        tbl.querySelector('h3').innerText = "Error in variable name.."
+
+        tbl.querySelector('#var-button').addEventListener('click', async (e)=>{
+            e.preventDefault()
+            var input = tbl.querySelector("#lname");
+            var value = input.value;
+            var refine = await KernelSideDataObjects(`import IPython.display\nIPython.display.JSON({'value':globals()['${value}']})`)
+            
+            if (refine['value'] == 'error'){
+                tbl.querySelector('h3').innerText = "Error in variable name.."
+            } else{
+                tbl.querySelector('h3').innerText = "Enter a variable."
+                tbl.parentNode.querySelector('.InputData').value = refine['value']
+            }
+        })
+    }
+
     add_input_value (input_def, FormParent, NamePrefix){
 
         if(this.el.querySelector('.tool-migration-select')){
@@ -1566,7 +1583,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         input.type = input_def.type
 
-        if(input.type == 'color'){
+        if (input.type == 'color'){
             input.style.height = '40px'
             input.style.padding= '1px'
         }
@@ -1576,8 +1593,35 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         input.value = input_def['value']
         input.className = 'InputData'
         const row = document.createElement('div')
+
         const title = document.createElement('div')
         title.className = 'ui-from-title'
+
+        var row1 = `<table>
+                        <tr>
+                            <td id="float-menu" ><a class="icon-btn display-btn" target="" href="" data-original-title="View data"><span class="fa fa-exchange" style="" title="Get value from a variable"></span></a>
+                            <input type="checkbox" >
+                            <div class="div-to-display">
+                                <div>
+                                    <div id="variable-title"> 
+                                        <h3 style="margin-left:10px;">Enter a variable.</h3>
+                                    </div>
+                                    <div>
+                                        <input type="text" id="lname" name="lname" >
+                                        <button  id="var-button"> Get Variable</button>
+                                    </div>
+                                </div>
+                            <div>
+                            </td>
+                        </tr>
+                    </table>`
+
+        const Tbl = new DOMParser().parseFromString(row1, 'text/html').querySelector('table')
+
+        title.append(Tbl)
+
+        this.add_variable_widget(title)
+
         const TitleSpan = document.createElement('span')
         TitleSpan.className = "ui-form-title-text"
         TitleSpan.textContent = input_def.label
@@ -1613,7 +1657,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
             self.update_metadata_FormState('galaxy_tool', refine_inputs['inputs'], JSON.parse(fint))
  
-        })
+        })        
 
         row.append(title)
         row.append(input)
@@ -2015,6 +2059,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         }  else{
             var origin = this.model.get('origin')
         }
+
         var self = this
 
         const options =  await KernelSideDataObjects(`import json\nimport base64\nfrom GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.get_histories(server=${JSON.stringify(origin)})`)
@@ -2032,6 +2077,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         if(DataListdiv.children.length > 0 ){
             self.removeAllChildNodes(DataListdiv)
         }
+
         DataListdiv.append(await this.data_row_list( options[0]['id']))
     
         for(var i = 0; i < options.length; i++) {
@@ -2043,6 +2089,11 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         }
 
         select.addEventListener("change", async () => {
+
+
+     
+            self.removeAllChildNodes(DataListdiv)
+         
 
             if (this.model.get('galaxy_tool_id') != "GiN_data_upload_tool"){
 
@@ -2062,24 +2113,26 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             }
 
             var history_id = select.value
-
-            var e = self.el.querySelector('.list-item')
-            e.parentElement.removeChild(e)
-
+            
             DataListdiv.append(await this.data_row_list( history_id))
         });
 
         var update = this.el.querySelector('#dataset-update-label')
+        update.style.marginLeft = '5px'
 
         update.addEventListener('click', async () => {
+
+            update.style.display = 'none'
             self.removeAllChildNodes(DataListdiv)    
             DataListdiv.append(await this.data_row_list( this.el.querySelector('#dataset-history-list').value))
+            update.style.display = 'block';
+            update.style.float = 'left';
+            update.style.marginTop = '5px';
         })
 
         var DataList = this.el.querySelector('#history-list')
         DataList.append(select)
     }
-
 
     async add_history_list(){
 
@@ -2856,8 +2909,26 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             row.className = 'ui-form-element section-row'
             row.id = input_def.id
 
+            // var var_input =  document.createElement('input')
+            // var_input.type = 'checkbox'
+            // var_input.className = 'variable-checkbox'
+    
+            // var_input.style.marginRight = '5px;'
+    
+            // const title_1 = document.createElement('div')
+            // title_1.className = 'ui-from-title'
+            // const TitleSpan_1 = document.createElement('span')
+            // TitleSpan_1.className = "variable-ui-form-title-text"
+    
+            // TitleSpan_1.textContent = 'Get value from local variable'
+            // TitleSpan_1.style.marginLeft = "10px;"
+    
+            // title_1.append(var_input)
+            // title_1.append(TitleSpan_1)
+
             row.append(title)
             row.append(select)
+            // row.append(title_1)
 
             const help = document.createElement('div')
             help.className = 'ui-from-help'
@@ -3163,7 +3234,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         var datasets = await KernelSideDataObjects(`from GiN.taskwidget  import GalaxyTaskWidget\nGalaxyTaskWidget.history_data_list(server=${JSON.stringify(server)}, history_id=${JSON.stringify(history_id)} )`) 
 
 
-
         for (var i = 0; i < datasets.length; i++){
             if (datasets[i]['history_content_type'] == 'dataset') {
                 this.add_dataset(data_list, datasets[i], history_id)
@@ -3172,6 +3242,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 data_list.append( await this.dataset_collection_row_state (datasets[i], history_id))
             }
         }
+
         return data_list
     }
  
@@ -3267,8 +3338,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                         Tbl.className = `list-item ${dataset['history_content_type']} history-content state-ok`
                         
                         if (Tbl.querySelector('.primary-actions')){
-                            Tbl.querySelector('.primary-actions').innerHTML = `<a class="icon-btn display-btn" title="" target="_blank" href="${URL}/datasets/${dataset['id']}/display/?preview=True" data-original-title="View data"><span class="fas fa-eye" style="" title="View Data" ></span></a><a class="icon-btn edit-btn" target="_blank"  href="${URL}/datasets/edit?dataset_id=${dataset['id']}" data-original-title="Edit attributes"><span class="fa fa-pencil" title="Edit data"></span></a><a class="icon-btn delete-btn" title="" href="javascript:void(0);" data-original-title="Delete"><span class="fa fa-times" style="" title="Delete" ></span></a><a class="icon-btn display-btn" title="" target="" href="javascript:void(0);" data-original-title="View data"><span class="fa fa-download" style="" title="Download data to JupyterLab Server" ></span></a><a class="icon-btn display-btn"  target="" href="javascript:void(0);" data-original-title="View data"><span class="fa fa-exchange" style="" title="Send data to available tools"></span></a>`
-                        }
+                            Tbl.querySelector('.primary-actions').innerHTML = `<a class="icon-btn display-btn" title="" target="_blank" href="${URL}/datasets/${dataset['id']}/preview" data-original-title="View data"><span class="fas fa-eye" style="" title="View Data" ></span></a><a class="icon-btn edit-btn" target="_blank"  href="${URL}/datasets/${dataset['id']}/edit" data-original-title="Edit attributes"><span class="fa fa-pencil" title="Edit data"></span></a><a class="icon-btn delete-btn" title="" href="javascript:void(0);" data-original-title="Delete"><span class="fa fa-times" style="" title="Delete" ></span></a><a class="icon-btn display-btn" title="" target="" href="javascript:void(0);" data-original-title="View data"><span class="fa fa-download" style="" title="Download data to JupyterLab Server" ></span></a><a class="icon-btn display-btn"  target="" href="javascript:void(0);" data-original-title="View data"><span class="fa fa-exchange" style="" title="Send data to available tools"></span></a>`
+                        }                                                                                         
                         break;
                     }  
                     
@@ -3277,7 +3348,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                         Tbl.className = `list-item ${dataset['history_content_type']} history-content state-error`
                     
                         if (Tbl.querySelector('.primary-actions')){
-                            Tbl.querySelector('.primary-actions').innerHTML = `<a class="icon-btn display-btn" title="" target="_blank" href="${URL}/datasets/${dataset['id']}/display/?preview=True" data-original-title="View data"><span class="fas fa-eye" style="" title="View Data" ></span></a><a class="icon-btn edit-btn" target="_blank"  href="${URL}/datasets/edit?dataset_id=${dataset['id']}" data-original-title="Edit attributes"><span class="fa fa-pencil" title="Edit data"></span></a><a class="icon-btn delete-btn" title="" href="javascript:void(0);" data-original-title="Delete"><span class="fa fa-times" style="" title="Delete" ></span></a>`
+                            Tbl.querySelector('.primary-actions').innerHTML = `<a class="icon-btn display-btn" title="" target="_blank" href="${URL}/datasets/${dataset['id']}/preview" data-original-title="View data"><span class="fas fa-eye" style="" title="View Data" ></span></a><a class="icon-btn edit-btn" target="_blank"  href="${URL}/datasets/${dataset['id']}/edit" data-original-title="Edit attributes"><span class="fa fa-pencil" title="Edit data"></span></a><a class="icon-btn delete-btn" title="" href="javascript:void(0);" data-original-title="Delete"><span class="fa fa-times" style="" title="Delete" ></span></a>`
                         }
                         break;
                     }     
@@ -3509,7 +3580,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         if (dataset['state'] == 'error'){
             if (Tbl.querySelector('.primary-actions')){
-            Tbl.querySelector('.primary-actions').innerHTML = `<a class="icon-btn display-btn" title="" target="_blank" href="${URL}/datasets/${dataset['id']}/display/?preview=True" data-original-title="View data"><span class="fas fa-eye" style="" title="View Data" ></span></a><a class="icon-btn edit-btn" target="_blank"  href="${URL}/datasets/edit?dataset_id=${dataset['id']}" data-original-title="Edit attributes"><span class="fa fa-pencil" title="Edit data"></span></a><a class="icon-btn delete-btn" title="" href="javascript:void(0);" data-original-title="Delete"><span class="fa fa-times" style="" title="Delete" ></span></a>`
+            Tbl.querySelector('.primary-actions').innerHTML = `<a class="icon-btn display-btn" title="" target="_blank" href="${URL}/datasets/${dataset['id']}/preview" data-original-title="View data"><span class="fas fa-eye" style="" title="View Data" ></span></a><a class="icon-btn edit-btn" target="_blank"  href="${URL}/datasets/${dataset['id']}/edit" data-original-title="Edit attributes"><span class="fa fa-pencil" title="Edit data"></span></a><a class="icon-btn delete-btn" title="" href="javascript:void(0);" data-original-title="Delete"><span class="fa fa-times" style="" title="Delete" ></span></a>`
             
             var spn = document.createElement('li')
             spn.className =  "fa fa-times-circle"
@@ -3519,7 +3590,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         } else if (dataset['state'] == 'ok') {
             if (Tbl.querySelector('.primary-actions')){
-                Tbl.querySelector('.primary-actions').innerHTML = `<a class="icon-btn display-btn" title="" data-original-title="View data"><span class="fas fa-eye" style="" title="View Data" ></span></a><a class="icon-btn edit-btn" target="_blank"  href="${URL}/datasets/edit?dataset_id=${dataset['id']}" data-original-title="Edit attributes"><span class="fa fa-pencil" title="Edit data"></span></a><a class="icon-btn delete-btn" title="" href="javascript:void(0);" data-original-title="Delete"><span class="fa fa-times" style="" title="Delete" ></span></a><a class="icon-btn display-btn" title="" target="" href="javascript:void(0);" data-original-title="View data"><span class="fa fa-download" style="" title="Download data to JupyterLab Server" ></span></a><a class="icon-btn display-btn"  target="" href="javascript:void(0);" data-original-title="View data"><span class="fa fa-exchange" style="" title="Send data to available tools"></span></a>`
+                Tbl.querySelector('.primary-actions').innerHTML = `<a class="icon-btn display-btn" title="" data-original-title="View data"><span class="fas fa-eye" style="" title="View Data" ></span></a><a class="icon-btn edit-btn" target="_blank"  href="${URL}/datasets/${dataset['id']}/edit" data-original-title="Edit attributes"><span class="fa fa-pencil" title="Edit data"></span></a><a class="icon-btn delete-btn" title="" href="javascript:void(0);" data-original-title="Delete"><span class="fa fa-times" style="" title="Delete" ></span></a><a class="icon-btn display-btn" title="" target="" href="javascript:void(0);" data-original-title="View data"><span class="fa fa-download" style="" title="Download data to JupyterLab Server" ></span></a><a class="icon-btn display-btn"  target="" href="javascript:void(0);" data-original-title="View data"><span class="fa fa-exchange" style="" title="Send data to available tools"></span></a>`
         
                 //FixME:
 
@@ -3534,8 +3605,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                                             <div class="data-preview-header-icon" style="float: left" ><a class="icon-btn delete-btn" title="" href="javascript:void(0);" data-original-title="Delete"><span class="fa fa-times" style="" title="Delete" ></span></a></div>
                                             <div class="data-preview-title" style="float: left">  <p class="title"> <b>${dataset['name']} </b></p> </div>
                                         </div>
-                                        <div class="data-preview-content" style="width:100%; height:95%;"> 
-                                            <iframe  src="${URL}/datasets/${dataset['id']}/display/?preview=True&?api_key={%27x-api-key%27:%27${apiKey['api_key']}%27}" > </iframe>
+                                        <div class="data-preview-content" style="width: 100%; height:100%;"> 
+                                            <iframe  src="${URL}/datasets/${dataset['id']}/display/?preview=True&?api_key={%27x-api-key%27:%27${apiKey['api_key']}%27}" style="width: 100%; height:100%;" > </iframe>
                                         </div>
                                     </div>`
 
@@ -3555,7 +3626,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             Tbl.style.background = '#daecf8'
             // Tbl.className = `list-item ${dataset['history_content_type']} history-content state-paused`
             if (Tbl.querySelector('.primary-actions')){
-                Tbl.querySelector('.primary-actions').innerHTML = `<a class="icon-btn display-btn" title="" target="_blank" href="${URL}/datasets/${dataset['id']}/display/?preview=True" data-original-title="View data"><span class="fas fa-eye" style="" title="View Data" ></span></a><a class="icon-btn edit-btn" target="_blank"  href="${URL}/datasets/edit?dataset_id=${dataset['id']}" data-original-title="Edit attributes"><span class="fa fa-pencil" title="Edit data"></span></a><a class="icon-btn delete-btn" title="" href="" data-original-title="Delete"><span class="fa fa-times" style="" title="Delete" ></span></a>`
+                Tbl.querySelector('.primary-actions').innerHTML = `<a class="icon-btn display-btn" title="" target="_blank" href="${URL}/datasets/${dataset['id']}/preview" data-original-title="View data"><span class="fas fa-eye" style="" title="View Data" ></span></a><a class="icon-btn edit-btn" target="_blank"  href="${URL}/datasets/${dataset['id']}/edit" data-original-title="Edit attributes"><span class="fa fa-pencil" title="Edit data"></span></a><a class="icon-btn delete-btn" title="" href="" data-original-title="Delete"><span class="fa fa-times" style="" title="Delete" ></span></a>`
             }
         }
 
@@ -3617,7 +3688,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                     Tbl.querySelector('.fas.fa-spinner.fa-spin').parentElement.removeChild(Tbl.querySelector('.fas.fa-spinner.fa-spin'))
                     
                     if (Tbl.querySelector('.primary-actions')){
-                        Tbl.querySelector('.primary-actions').innerHTML = `<a class="icon-btn display-btn" title="" target="_blank" href="${URL}/datasets/${dataset['id']}/display/?preview=True" data-original-title="View data"><span class="fas fa-eye" style="" title="View Data" ></span></a><a class="icon-btn edit-btn" target="_blank"  href="${URL}/datasets/edit?dataset_id=${dataset['id']}" data-original-title="Edit attributes"><span class="fa fa-pencil" title="Edit data"></span></a><a class="icon-btn delete-btn" title="" href="javascript:void(0);" data-original-title="Delete"><span class="fa fa-times" style="" title="Delete" ></span></a><a class="icon-btn display-btn" title="" target="" href="javascript:void(0);" data-original-title="View data"><span class="fa fa-download" style="" title="Download data to JupyterLab Server" ></span></a><a class="icon-btn display-btn"  target="" href="javascript:void(0);" data-original-title="View data"><span class="fa fa-exchange" style="" title="Send data to available tools"></span></a>`
+                        Tbl.querySelector('.primary-actions').innerHTML = `<a class="icon-btn display-btn" title="" target="_blank" href="${URL}/datasets/${dataset['id']}/preview" data-original-title="View data"><span class="fas fa-eye" style="" title="View Data" ></span></a><a class="icon-btn edit-btn" target="_blank"  href="${URL}/datasets/${dataset['id']}/edit" data-original-title="Edit attributes"><span class="fa fa-pencil" title="Edit data"></span></a><a class="icon-btn delete-btn" title="" href="javascript:void(0);" data-original-title="Delete"><span class="fa fa-times" style="" title="Delete" ></span></a><a class="icon-btn display-btn" title="" target="" href="javascript:void(0);" data-original-title="View data"><span class="fa fa-download" style="" title="Download data to JupyterLab Server" ></span></a><a class="icon-btn display-btn"  target="" href="javascript:void(0);" data-original-title="View data"><span class="fa fa-exchange" style="" title="Send data to available tools"></span></a>`
                     }
                     break;
                 }  
@@ -3635,7 +3706,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                     }
                 
                     if (Tbl.querySelector('.primary-actions')){
-                        Tbl.querySelector('.primary-actions').innerHTML = `<a class="icon-btn display-btn" title="" target="_blank" href="${URL}/datasets/${dataset['id']}/display/?preview=True" data-original-title="View data"><span class="fas fa-eye" style="" title="View Data" ></span></a><a class="icon-btn edit-btn" target="_blank"  href="${URL}/datasets/edit?dataset_id=${dataset['id']}" data-original-title="Edit attributes"><span class="fa fa-pencil" title="Edit data"></span></a><a class="icon-btn delete-btn" title="" href="javascript:void(0);" data-original-title="Delete"><span class="fa fa-times" style="" title="Delete" ></span></a>`
+                        Tbl.querySelector('.primary-actions').innerHTML = `<a class="icon-btn display-btn" title="" target="_blank" href="${URL}/datasets/${dataset['id']}/preview" data-original-title="View data"><span class="fas fa-eye" style="" title="View Data" ></span></a><a class="icon-btn edit-btn" target="_blank"  href="${URL}/datasets/${dataset['id']}/edit" data-original-title="Edit attributes"><span class="fa fa-pencil" title="Edit data"></span></a><a class="icon-btn delete-btn" title="" href="javascript:void(0);" data-original-title="Delete"><span class="fa fa-times" style="" title="Delete" ></span></a>`
                     }
 
                     
@@ -3768,7 +3839,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         var row = `<div id="${dataset['type_id']}"   class="list-item ${dataset['history_content_type']} history-content state-ok" >
                     <div class="warnings"></div>
                     <div class="selector"><span class="fa fa-2x fa-square-o"></span></div>
-                    <div class="primary-actions"><a class="icon-btn display-btn" title="" target="_blank" href="${URL}/datasets/${dataset['id']}/display/?preview=True" data-original-title="View data"><span class="fas fa-eye" style="" title="View Data" ></span></a><a class="icon-btn edit-btn" target="_blank"  href="${URL}/datasets/edit?dataset_id=${dataset['id']}" data-original-title="Edit attributes"><span class="fa fa-pencil" title="Edit data"></span></a><a class="icon-btn delete-btn" title="" href="javascript:void(0);" data-original-title="Delete"><span class="fa fa-times" style="" title="Delete" ></span></a><a class="icon-btn display-btn" title="" target="" href="javascript:void(0);" data-original-title="View data"><span class="fa fa-download" style="" title="Download data to JupyterLab Server" ></span></a><a class="icon-btn display-btn"  target="" href="javascript:void(0);" data-original-title="View data"><span class="fa fa-exchange" style="" title="Send data to available tools"></span></a></div>
+                    <div class="primary-actions"><a class="icon-btn display-btn" title="" target="_blank" href="${URL}/datasets/${dataset['id']}/preview" data-original-title="View data"><span class="fas fa-eye" style="" title="View Data" ></span></a><a class="icon-btn edit-btn" target="_blank"  href="${URL}/datasets/${dataset['id']}/edit" data-original-title="Edit attributes"><span class="fa fa-pencil" title="Edit data"></span></a><a class="icon-btn delete-btn" title="" href="javascript:void(0);" data-original-title="Delete"><span class="fa fa-times" style="" title="Delete" ></span></a><a class="icon-btn display-btn" title="" target="" href="javascript:void(0);" data-original-title="View data"><span class="fa fa-download" style="" title="Download data to JupyterLab Server" ></span></a><a class="icon-btn display-btn"  target="" href="javascript:void(0);" data-original-title="View data"><span class="fa fa-exchange" style="" title="Send data to available tools"></span></a></div>
                     <div class="title-bar clear"  tabindex="0" draggable="true" ondragstart="event.dataTransfer.setData('text/plain',null) > 
                     <span class="state-icon"></span>
 
@@ -3935,7 +4006,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                             </div>
                             <div class="actions clear">
                                 <div class="left">
-                                    <a class="download-btn icon-btn"  href="${URL}/datasets/${dataset['id']}/display?to_ext=${dataset['extension']}" title="" data-original-title="Download"> <span class="fa fa-save" title="Download data"></span> </a><a class="icon-btn" title=""  href="javascript:void(0);" data-original-title="Copy link"><span class="fa fa-chain" style="" title="Copy link"></span></a><a class="icon-btn params-btn" title="" target="_blank" href="${URL}/datasets/${dataset['id']}/show_params" data-original-title="View details"><span class="fa fa-info-circle" style="" title="Dataset details"></span></a><a class="icon-btn visualization-link" title="" target="_blank" href="${URL}/visualizations?dataset_id=${dataset['dataset_id']}" data-original-title="Visualize this data"><span class="fa fa-bar-chart" style="" title="Visualize"></span></a>
+                                    <a class="download-btn icon-btn"  href="${URL}/datasets/${dataset['id']}/display?to_ext=${dataset['extension']}" title="" data-original-title="Download"> <span class="fa fa-save" title="Download data"></span> </a><a class="icon-btn" title=""  href="${URL}/api/datasets/${dataset['id']}/display?to_ext=${dataset['name']}" data-original-title="Copy link"><span class="fa fa-chain" style="" title="Copy link"></span></a><a class="icon-btn params-btn" title="" target=""_blank" href="${URL}/datasets/${dataset['id']}/show_params" data-original-title="View details"><span class="fa fa-info-circle" style="" title="Dataset details"></span></a><a class="icon-btn visualization-link" title="" target="_blank" href="${URL}/visualizations?dataset_id=${dataset['dataset_id']}" data-original-title="Visualize this data"><span class="fa fa-bar-chart" style="" title="Visualize"></span></a>
                                 </div>
                             </div>
 
@@ -3999,6 +4070,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         var chain_button = ok_details_html.querySelector('.fa.fa-chain')
 
         chain_button.addEventListener('click', (e) => {
+
+            console.log("Ok1")
       
         });
     }
@@ -4327,7 +4400,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         var line = `<div id="dataset-${dataset['dataset_id']}" class="list-item dataset history-content state-running" style="display: none;">
                         <div class="warnings"></div>
                         <div class="selector"><span class="fa fa-2x fa-square-o"></span></div>
-                        <div class="primary-actions"><a class="icon-btn display-btn" title="" target="galaxy_main" href="${URL}/datasets/${dataset['dataset_id']}/display/?preview=True" data-original-title="View data"><span class="fa fa-eye" style=""></span></a><a class="icon-btn edit-btn" title="" href="${URL}/datasets/edit?dataset_id=${dataset['dataset_id']}" data-original-title="Edit attributes"><span class="fa fa-pencil" style=""></span></a><a class="icon-btn delete-btn" title="" href="javascript:void(0);" data-original-title="Delete"><span class="fa fa-times" style=""></span></a><a class="icon-btn display-btn" title="" target="galaxy_main" href="${URL}/datasets/${dataset['dataset_id']}/display/?preview=True" data-original-title="View data"><span class="fa fa-eye" style=""></span></a></div>
+                        <div class="primary-actions"><a class="icon-btn display-btn" title="" target="galaxy_main" href="${URL}/datasets/${dataset['id']}/preview" data-original-title="View data"><span class="fa fa-eye" style=""></span></a><a class="icon-btn edit-btn" title="" href="${URL}/datasets/${dataset['id']}/edit" data-original-title="Edit attributes"><span class="fa fa-pencil" style=""></span></a><a class="icon-btn delete-btn" title="" href="javascript:void(0);" data-original-title="Delete"><span class="fa fa-times" style=""></span></a><a class="icon-btn display-btn" title="" target="galaxy_main" href="${URL}/datasets/${dataset['dataset_id']}/display/?preview=True" data-original-title="View data"><span class="fa fa-eye" style=""></span></a></div>
                         <div class="title-bar clear" tabindex="0" draggable="true"> <span class="state-icon"></span>
                             <div class="title"> <span class="hid">${dataset['hid']}</span> <span class="name">${dataset['name']}/span> </div>
                             <br>
@@ -4339,7 +4412,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                                 <div>This job is currently running</div>
                             </div>
                             <div class="actions clear">
-                                <div class="left"><a class="icon-btn params-btn" title="" target="galaxy_main" href="${URL}/datasets/${dataset['dataset_id']}show_params" data-original-title="View details"><span class="fa fa-info-circle" style=""></span></a><a class="icon-btn rerun-btn" title="" target="galaxy_main" href="${URL}/tool_runner/rerun?id=${dataset['dataset_id']}" data-original-title="Run this job again"><span class="fa fa-refresh" style=""></span></a><a class="icon-btn icon-btn" title="" href="#" data-original-title="Tool Help"><span class="fa fa-question" style=""></span></a></div>
+                                <div class="left"><a class="icon-btn params-btn" title="" target="galaxy_main" href="${URL}/datasets/${dataset['id']}/show_params" data-original-title="View details"><span class="fa fa-info-circle" style=""></span></a><a class="icon-btn rerun-btn" title="" target="galaxy_main" href="${URL}/tool_runner/rerun?id=${dataset['dataset_id']}" data-original-title="Run this job again"><span class="fa fa-refresh" style=""></span></a><a class="icon-btn icon-btn" title="" href="#" data-original-title="Tool Help"><span class="fa fa-question" style=""></span></a></div>
                                 <div class="right"><a class="icon-btn tag-btn" title="" href="" data-original-title="Edit dataset tags"><span class="fa fa-tags" style=""></span></a><a class="icon-btn annotate-btn" title="" href="" data-original-title="Edit dataset annotation"><span class="fa fa-comment" style=""></span></a></div>
                             </div>
                             <div class="annotation-display"></div>
@@ -4709,7 +4782,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         return display_apps
     }  
 
-
     register_button() {
 
         this.el.querySelector('.nbtools-buttons').querySelector('button').addEventListener('click', ()=>{
@@ -4718,10 +4790,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
     }
     
     _submit_keypress() {
-
-
-
-
        
     }
  }

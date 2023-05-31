@@ -313,11 +313,9 @@
 .galaxy-uibuilder .tool-migration-select {
   height: 26px;
 }
+
 .galaxy-uibuilder .form-restore-div .fa-refresh {
   color: rgb(233, 233, 246);
-  font-size: 1px;
-}
-.galaxy-uibuilder .form-restore-div .fa-refresh {
   font-size: 20px;
   margin: 5px;
 }

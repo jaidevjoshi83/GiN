@@ -452,3 +452,54 @@ select#History_IDs.InputData{
      
  }
  
+ .div-to-display {
+  display: none;
+  position: absolute;
+  top: -300%;
+  left: 100%;
+  /* border: 1px solid red; */
+  background-color: #eee;
+  z-index: 100;
+  
+}
+#float-menu {
+  position: relative;
+}
+#float-menu:hover > .div-to-display {
+  display: block
+}
+
+#var-button {
+
+  background-color: #322c61; 
+  color: white;
+  float: left;
+  width: 80px;
+  height: 36px;
+  border: none;
+}
+
+.div-to-display {
+  background: rgb(198,195,195);
+  width: 350px;
+  height: 100px;
+}
+
+#lname{
+  float: left;
+  height: 40px;
+  width: 225px;
+  margin-left: 5px;
+  margin-right: 5px;
+  margin-top: 0px;
+}
+
+#var-button:hover{
+  background-color: #49465c; 
+  color: white;
+  float: left;
+  width: 100px;
+  height: 38px;
+  border: none;
+  
+}
