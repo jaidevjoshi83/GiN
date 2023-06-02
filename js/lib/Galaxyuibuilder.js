@@ -20,6 +20,7 @@ import { Data } from '@g2nb/nbtools/lib/dataregistry';
 import { ContextManager } from '@g2nb/nbtools';
 import { NotebookActions } from '@jupyterlab/notebook';
 import { Private,  getRanNotebookIds, getIndex } from './notebookActions';
+import $ from 'jquery'
 
 
 export class GalaxyUIBuilderModel extends BaseWidgetModel{
@@ -299,13 +300,13 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                                     </div>
 
                                     <!-- Tab content -->
-                                    <div id="credential-login" class="tabcontent" style="display: block;">
+                                    <div id="credential-login" class="login-form-div" style="display: block;">
 
                                         <div style="margin:10px">
                                             <div>
                                             <span class="ui-form-title-text"> <b>Select Galaxy Server</b> </span>
                                             </div>
-                                            <input type="text" name="server" list="cityname">
+                                            <input type="text" name="server" value="https://usegalaxy.org" list="cityname">
                                             <datalist id="cityname">
                                                 <option value="https://usegalaxy.org"> Galaxy Main </option>
                                                 <option value="https://localhost:8080"> Galaxy Local</option>
@@ -324,22 +325,22 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                                         </div>
                                     </div>
                             
-                                    <div id="api-login" class="tabcontent" style="display: none;">
+                                    <div id="api-login" class="login-form-div" style="display: none;">
 
-                                    <div style="margin:10px">
-                                        <div>
-                                        <span class="ui-form-title-text"> <b>Select Galaxy Server</b> </span>
-                                        </div>
-                                        <input type="text" name="server" list="cityname">
-                                        <datalist id="cityname">
-                                            <option value="https://usegalaxy.org"> Galaxy Main </option>
-                                            <option value="https://0.0.0.0:8080"> Galaxy Local</option>
-                                            <option value="https://usegalaxy.eu"> Galaxy Europe</option>
-                                        </datalist>
+                                        <div style="margin:10px">
+                                            <div>
+                                                <span class="ui-form-title-text"> <b>Select Galaxy Server</b> </span>
+                                            </div>
+                                            <input type="text" class="InputData" name="server" value="https://usegalaxy.org" list="server-name">
+                                            <datalist id="server-name">
+                                                <option value="https://usegalaxy.org"> Galaxy Main </option>
+                                                <option value="https://0.0.0.0:8080"> Galaxy Local</option>
+                                                <option value="https://usegalaxy.eu"> Galaxy Europe</option>
+                                            </datalist>
                                         </div>
 
                                         <div style=" margin:10px">
-                                        <span class="ui-form-title-text"> <b>API Key</b> </span>
+                                            <span class="ui-form-title-text"> <b>API Key</b> </span>
                                             <input class="InputData" name="api" style="display: block" >
                                         </div>
                                     </div>
@@ -421,8 +422,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                                             </div>
                                             <input type="text" name="server" list="cityname">
                                             <datalist id="cityname">
-                                                <option value="https://usegalaxy.org"> Galaxy Main </option>
-                                                <option value="https://0.0.0.0:8080"> Galaxy Local</option>
+                                                <option value="https://usegalaxy.org" selected="selected"> Galaxy Main </option>
+                                                <option value="https://localhost:8080"> Galaxy Local</option>
                                                 <option value="https://usegalaxy.eu"> Galaxy Europe</option>
                                             </datalist>
                                         </div>
@@ -440,20 +441,20 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                             
                                     <div id="api-login" class="tabcontent" style="display: none;">
 
-                                    <div style="margin:10px">
-                                        <div>
-                                        <span class="ui-form-title-text"> <b>Select Galaxy Server</b> </span>
-                                        </div>
-                                        <input type="text" name="server" list="cityname">
-                                        <datalist id="cityname">
-                                            <option value="https://usegalaxy.org"> Galaxy Main </option>
-                                            <option value="https://0.0.0.0:8080"> Galaxy Local</option>
-                                            <option value="https://usegalaxy.eu"> Galaxy Europe</option>
-                                        </datalist>
+                                        <div style="margin:10px">
+                                            <div>
+                                                <span class="ui-form-title-text"> <b>Select Galaxy Server</b> </span>
+                                            </div>
+                                            <input type="text" name="server" list="cityname">
+                                            <datalist id="cityname">
+                                                <option value="https://usegalaxy.org" selected="selected"> Galaxy Main </option>
+                                                <option value="https://localhost:8080"> Galaxy Local</option>
+                                                <option value="https://usegalaxy.eu"> Galaxy Europe</option>
+                                            </datalist>
                                         </div>
 
                                         <div style=" margin:10px">
-                                        <span class="ui-form-title-text"> <b>API Key</b> </span>
+                                            <span class="ui-form-title-text"> <b>API Key</b> </span>
                                             <input class="InputData" name="api" style="display: block" >
                                         </div>
                                     </div>
@@ -922,7 +923,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 self.removeAllChildNodes(form_parent)
                 self.form_builder(refine_inputs['inputs'])
             }
-
         });
     
         FormParent.append(row)
@@ -1433,7 +1433,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
     add_drill_down_section(input_def, FormParent, NamePrefix){
 
-
         if(this.el.querySelector('.tool-migration-select')){
             var origin = this.el.querySelector('.tool-migration-select').value
         }  else{
@@ -1597,30 +1596,30 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         const title = document.createElement('div')
         title.className = 'ui-from-title'
 
-        var row1 = `<table>
-                        <tr>
-                            <td id="float-menu" ><a class="icon-btn display-btn" target="" href="" data-original-title="View data"><span class="fa fa-exchange" style="" title="Get value from a variable"></span></a>
-                            <input type="checkbox" >
-                            <div class="div-to-display">
-                                <div>
-                                    <div id="variable-title"> 
-                                        <h3 style="margin-left:10px;">Enter a variable.</h3>
-                                    </div>
-                                    <div>
-                                        <input type="text" id="lname" name="lname" >
-                                        <button  id="var-button"> Get Variable</button>
-                                    </div>
-                                </div>
-                            <div>
-                            </td>
-                        </tr>
-                    </table>`
+        // var row1 = `<table>
+        //                 <tr>
+        //                     <td id="float-menu" ><a class="icon-btn display-btn" target="" href="" data-original-title="View data"><span class="fa fa-exchange" style="" title="Get value from a variable"></span></a>
+        //                     <input type="checkbox" >
+        //                     <div class="div-to-display">
+        //                         <div>
+        //                             <div id="variable-title"> 
+        //                                 <h3 style="margin-left:10px;">Enter a variable.</h3>
+        //                             </div>
+        //                             <div>
+        //                                 <input type="text" id="lname" name="lname" >
+        //                                 <button  id="var-button"> Get Variable</button>
+        //                             </div>
+        //                         </div>
+        //                     <div>
+        //                     </td>
+        //                 </tr>
+        //             </table>`
 
-        const Tbl = new DOMParser().parseFromString(row1, 'text/html').querySelector('table')
+        // const Tbl = new DOMParser().parseFromString(row1, 'text/html').querySelector('table')
 
-        title.append(Tbl)
+        // title.append(Tbl)
 
-        this.add_variable_widget(title)
+        // this.add_variable_widget(title)
 
         const TitleSpan = document.createElement('span')
         TitleSpan.className = "ui-form-title-text"
@@ -3068,7 +3067,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         select.id = `select-${input_def.id}`    
         select.className = 'InputData' 
     
-        for(var i = 0; i < options.length; i++) {
+        for (var i = 0; i < options.length; i++) {
             const opt = options[i][0];
             const el = document.createElement("option");
             el.textContent = opt;
@@ -3076,8 +3075,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             select.appendChild(el);
         }
 
-        for(var i, j = 0; i = select.options[j]; j++) {
-            if(i.value == input_def.test_param.value) {
+        for (var i, j = 0; i = select.options[j]; j++) {
+            if (i.value == input_def.test_param.value) {
                 select.selectedIndex = j;
                 break;
             }
@@ -4599,94 +4598,65 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         this.el.querySelector('.auth-error').style.display = 'none'
         this.el.querySelector('.auth-waiting').style.display = 'block';
 
-        for(var i = 0; i < logingForm.children.length; i++) {
-            if (logingForm.children[i].style.display == 'block'){
-                if (logingForm.children[i].id == 'credential-login'){
-                    var credentials = logingForm.children[i].querySelectorAll('input')
+        var credentials = { 'server':null, 'email':null, 'password':null,  'api_key': null }  
+ 
+        var inputs = this.$(".tabcontent:visible")[0].querySelectorAll('input')
 
-                    for (let i = 0; i < Infinity; ++i) {
-                        var jobs = await KernelSideDataObjects(`from GiN.authwidget import GalaxyAuthWidget\na  = GalaxyAuthWidget()\na.login(server=${JSON.stringify(credentials[0].value)}, password=${JSON.stringify(credentials[2].value)}, email=${JSON.stringify(credentials[1].value)})`)
-                        await this.waitforme(3000);
-
-                        if (jobs.state === 'error' ) {
-
-                            this.el.querySelector('.auth-error').style.display = 'block'
-                            // this.el.querySelector('.login-form-div').style.display = "none";
-                            this.el.querySelector('.auth-waiting').style.display = 'none';
-                            this.el.querySelector('.auth-successful').style.display = 'none';
-
-                            break;
-                        } else if (jobs.state === 'success'){
-                            this.el.querySelector('.nbtools-subtitle').innerText = credentials[0].value
-                            this.el.querySelector('.auth-successful').style.display = 'block';
-                            this.el.querySelector('.login-form-div').style.display = "none";
-                            this.el.querySelector('.auth-waiting').style.display = 'none';
-                            this.el.querySelector('.auth-error').style.display = 'none'
-                            this.el.querySelector('#refresh-galaxy-cells').style.display = 'block'
-                            this.hide_run_buttons(true)
-
-                            if (this.el.querySelector('#form-restore').checked ){
-
-                                if (!ContextManager.notebook_tracker) return;               
-                                if (!ContextManager.notebook_tracker.currentWidget) return;
-                                var notebookTracker = ContextManager.notebook_tracker
-    
-                                const notebook = notebookTracker.currentWidget.content
-                                const notebookHasBeenRan = getRanNotebookIds().includes(notebook.id)
-                                // if(!notebookHasBeenRan) {
-                                    this.runAllGalaxyCells()
-                                // }
-                            }
-
-                            break;
-                        }
-                    }
-                  
-                    Private.origins.push(credentials[0].value);
-
-                } else {
-                    var credentials = logingForm.children[i].querySelectorAll('input')
-
-                    for (let i = 0; i < Infinity; ++i) {
-                        var jobs = await KernelSideDataObjects(`from GiN.authwidget import GalaxyAuthWidget\na  = GalaxyAuthWidget()\na.login(server=${JSON.stringify(credentials[0].value)}, api_key=${JSON.stringify(credentials[1].value)})`)
-               
-                        await this.waitforme(3000);
-
-                        if (jobs.state === 'error' ) {
-
-                            this.el.querySelector('.auth-error').style.display = 'block'
-                            // this.el.querySelector('.login-form-div').style.display = "none";
-                            this.el.querySelector('.auth-waiting').style.display = 'none';
-                            this.el.querySelector('.auth-successful').style.display = 'none';
-
-                            break;
-                        } else if (jobs.state === 'success'){
-                            this.el.querySelector('.nbtools-subtitle').innerText = credentials[0].value
-                            this.el.querySelector('.auth-successful').style.display = 'block';
-                            this.el.querySelector('.login-form-div').style.display = "none";
-                            this.el.querySelector('.auth-waiting').style.display = 'none';
-                            this.el.querySelector('.auth-error').style.display = 'none'
-                            this.el.querySelector('#refresh-galaxy-cells').style.display = 'block'
-                            this.hide_run_buttons(true)
-
-                            if (this.el.querySelector('#form-restore').checked ){
-
-                                if (!ContextManager.notebook_tracker) return;               
-                                if (!ContextManager.notebook_tracker.currentWidget) return;
-                                var notebookTracker = ContextManager.notebook_tracker
-    
-                                const notebook = notebookTracker.currentWidget.content
-                                const notebookHasBeenRan = getRanNotebookIds().includes(notebook.id)
-                                // if(!notebookHasBeenRan) {
-                                    this.runAllGalaxyCells()
-                                // }
-                            }
-                            break;
-                        }
-                    }
-                }
+        for (var i = 0; i < inputs.length; i++){
+            if (inputs[i].value == ''){
+                inputs[i].style.background = 'pink'
+                return 
+            }else{
+                inputs[i].style.background = 'white'
             }
         }
+
+        if (inputs.length == 3){
+            credentials['server'] = inputs[0].value
+            credentials['email'] =  inputs[1].value
+            credentials['password'] = inputs[2].value
+        } else{
+            credentials['server'] = inputs[0].value
+            credentials['api_key'] = inputs[1].value
+        }
+      
+        var jobs = await KernelSideDataObjects(`import json\nimport base64\nfrom GiN.authwidget import GalaxyAuthWidget\na  = GalaxyAuthWidget()\na.login(json.loads(base64.b64decode("${btoa(JSON.stringify(credentials))}")))`)
+            
+        if (jobs.state === 'error' ) {
+
+            console.log("error")
+
+            this.el.querySelector('.auth-error').style.display = 'block'
+            // this.el.querySelector('.login-form-div').style.display = "none";
+            this.el.querySelector('.auth-waiting').style.display = 'none';
+            this.el.querySelector('.auth-successful').style.display = 'none';
+
+        } else if (jobs.state === 'success'){
+
+            console.log("success")
+            this.el.querySelector('.nbtools-subtitle').innerText = credentials['server']
+            this.el.querySelector('.auth-successful').style.display = 'block';
+            this.el.querySelector('.login-form-div').style.display = "none";
+            this.el.querySelector('.auth-waiting').style.display = 'none';
+            this.el.querySelector('.auth-error').style.display = 'none'
+            this.el.querySelector('#refresh-galaxy-cells').style.display = 'block'
+            this.hide_run_buttons(true)
+
+            if (this.el.querySelector('#form-restore').checked ){
+
+                if (!ContextManager.notebook_tracker) return;               
+                if (!ContextManager.notebook_tracker.currentWidget) return;
+                var notebookTracker = ContextManager.notebook_tracker
+
+                const notebook = notebookTracker.currentWidget.content
+                const notebookHasBeenRan = getRanNotebookIds().includes(notebook.id)
+                // if(!notebookHasBeenRan) {
+                    this.runAllGalaxyCells()
+                // }
+            }
+        }
+        
+        Private.origins.push(credentials['server']); 
     }
 
     async SubmitJob(inputs, history_id){
