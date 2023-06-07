@@ -689,7 +689,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         switch (input_def.type) {
             case "conditional":  
-                this.add_conditional_section(input_def, form_parent, name_prefix, data);
+                this.add_conditional_section_1(input_def, form_parent, name_prefix, data);
                 break;
             case "data":
             case "data_collection":
@@ -958,6 +958,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         }
     }
  
+
     get_form_data(form, checking){
 
         var self = this
@@ -1143,8 +1144,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         var input_list = this.extract_input_dom(form)
 
-        for(var i = 0; i < input_list.length; i++) {
-
+        for (var i = 0; i < input_list.length; i++) {
             if (identifier == input_list[i]['element_name']) {
                 return input_list[i]
             }
@@ -3042,6 +3042,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
     async add_conditional_section(input_def, parent, NamePrefix, call_back_data={}){
 
+        
+
         if (this.el.querySelector('.tool-migration-select')){
             var origin = this.el.querySelector('.tool-migration-select').value
         }  else{
@@ -3144,6 +3146,106 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         });
 
         parent.append(ConditionalDiv)
+    }
+
+    add_conditional_section_1(input_def, parent, NamePrefix, call_back_data={}){
+
+        if (this.el.querySelector('.tool-migration-select')){
+            var origin = this.el.querySelector('.tool-migration-select').value
+        }  else{
+            var origin = this.model.get('origin')
+        }
+
+        // // // ########################################################
+        input_def.id = this.uid()
+        var self = this
+
+        var options = []
+
+        if(input_def['test_param']['type'] == "boolean" ){
+            options =  [['Yes', true ],
+                    ['No',  false]]
+        }else{
+            options =  input_def['test_param']['options']
+        }
+
+        const select = document.createElement('select')
+        select.name = NamePrefix+input_def['name']+"|"+input_def['test_param']['name']
+
+        select.id = `select-${input_def.id}`    
+        select.className = 'InputData' 
+
+        var options_list = []
+    
+        for (var i = 0; i < options.length; i++) {
+
+            var div_uid = this.uid()
+            options_list.push(div_uid )
+
+            const opt = options[i][0];
+            const el = document.createElement("option");
+            el.textContent = opt;
+            // el.value = div_uid;
+            el.value = options[i][1];
+            select.appendChild(el);
+        }
+
+        for (var i, j = 0; i = select.options[j]; j++) {
+            if (i.value == input_def.test_param.value) {
+                select.selectedIndex = j;
+                break;
+            }
+        }
+    
+        const row = document.createElement('div')
+        const title = document.createElement('div')
+        title.className = 'ui-from-title'
+        const TitleSpan = document.createElement('span')
+        TitleSpan.className = "ui-form-title-text"
+        TitleSpan.textContent = input_def['test_param']['label']
+
+        TitleSpan.style.display = 'inline'
+        title.append(TitleSpan)
+        row.className = 'ui-form-element section-row conditional'
+        row.id = input_def.id
+        row.append(title)
+        row.append(select)
+        parent.append(row)
+
+        var NewNamePrefix = NamePrefix+input_def['name']+"|"
+        input_def.id = this.uid()
+
+        for( var i = 0; i < options.length; i++ ) {
+          
+            var ConditionalDiv = document.createElement('div')
+            ConditionalDiv.className = 'ui-form-element section-row pl-2'
+            ConditionalDiv.id = options_list[i]
+
+            if (input_def['test_param'].value == input_def['cases'][i]['value']) {
+                    ConditionalDiv.style.display = 'block'
+            }
+            else{
+                ConditionalDiv.style.display = 'none'
+            }
+
+            for (var j in input_def.cases[i].inputs) {
+                this.add(input_def.cases[i].inputs[j], ConditionalDiv, NewNamePrefix, call_back_data)
+                input_def.cases[i].inputs[j].id = this.uid()
+            }
+            
+            parent.append(ConditionalDiv)
+        }
+
+        select.addEventListener("change", (e) => {
+
+            for (var i = 0; i <  options_list.length; i++){
+                if (e.target.value == input_def['cases'][i]['value'] ){
+                    self.el.querySelector(`#${options_list[i]}`).style.display = 'block'
+                } else{
+                    self.el.querySelector(`#${options_list[i]}`).style.display = 'none'
+                }
+            }
+        });
     }
   
     add_section (input_def, parent, NamePrefix){
@@ -4619,12 +4721,12 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             credentials['server'] = inputs[0].value
             credentials['api_key'] = inputs[1].value
         }
-      
-        var jobs = await KernelSideDataObjects(`import json\nimport base64\nfrom GiN.authwidget import GalaxyAuthWidget\na  = GalaxyAuthWidget()\na.login(json.loads(base64.b64decode("${btoa(JSON.stringify(credentials))}")))`)
-            
-        if (jobs.state === 'error' ) {
 
-            console.log("error")
+        var jobs = await KernelSideDataObjects(`import json\nimport base64\nfrom GiN.authwidget import GalaxyAuthWidget\na  = GalaxyAuthWidget()\na.login(json.loads(base64.b64decode("${btoa(JSON.stringify(credentials))}")))`)
+           
+        console.log(jobs)
+
+        if (jobs.state === 'error' ) {
 
             this.el.querySelector('.auth-error').style.display = 'block'
             // this.el.querySelector('.login-form-div').style.display = "none";
@@ -4662,7 +4764,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
     async SubmitJob(inputs, history_id){
 
         if(this.el.querySelector('.tool-migration-select')){
-        var origin = this.el.querySelector('.tool-migration-select').value
+            var origin = this.el.querySelector('.tool-migration-select').value
         }  else{
             var origin = this.model.get('origin')
         }
@@ -4675,16 +4777,19 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 hl.selectedIndex = i
             }
         }
+
+        console.log("####", inputs)
         // var jobs  = await KernelSideDataObjects(`import json\nfrom GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.submit_job(gal_instance=${JSON.stringify(this.model.get('gal_instance'))}, tool_inputs=json.loads("""${JSON.stringify(inputs)}"""), history_id=${JSON.stringify(history_id)})`)
         var jobs  = await KernelSideDataObjects(`import json\nimport base64\nfrom GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.submit_job(server=json.loads(base64.b64decode("${btoa(JSON.stringify(origin))}")), tool_id=json.loads(base64.b64decode("${btoa(JSON.stringify(this.model.get('galaxy_tool_id')))}")), tool_inputs=json.loads(base64.b64decode("${btoa(JSON.stringify(inputs))}")), history_id=json.loads(base64.b64decode("${btoa(JSON.stringify(history_id))}")))`)
     
+
     if (jobs['state'] == 'job failed'){
 
         this.JobStatusTemplate(toolforms, jobs)
 
     } else {
             for (var i = 0; i < jobs['jobs'].length; i++ ) {
-                this.JobStatusTemplate(toolforms, jobs['jobs'][i])
+                // this.JobStatusTemplate(toolforms, jobs['jobs'][i])
             }
             
             var data_list_div = this.el.querySelector('.history-dataset-list');

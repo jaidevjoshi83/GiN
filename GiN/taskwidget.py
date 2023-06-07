@@ -107,6 +107,8 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
     @staticmethod
     def submit_job( server, tool_id, tool_inputs=None, history_id=None):
 
+        print("Submit Job", tool_inputs)
+
         a = GiN.sessions.SessionList()
         gi1 = a.get(server=server)
         # tool_inputs = json5.loads(tool_inputs)
@@ -220,6 +222,8 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
     @staticmethod
     def RefinedInputs( inputs, gi):
 
+        print("#####", inputs )
+
         for i in inputs.keys():
             if type(inputs[i]) == dict:
                 if list(inputs[i].keys())[0] == "values":
@@ -252,7 +256,10 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
         a = GiN.sessions.SessionList()
         gi6 = a.get(server=server)
 
+        print(tool_inputs)
+
         if (tool_inputs) and (tool_id):
+
             inputs = gi6.tools.gi.tools.build(
                 tool_id=tool_id, inputs=tool_inputs, history_id=history_id
             )
