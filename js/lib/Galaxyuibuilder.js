@@ -988,6 +988,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                     }
         
                     if (checking == 'on' && opt == false){
+
                         if (form.children[i].querySelector('.InputData').value == "") {
                             form.children[i].querySelector('.InputData').style.backgroundColor = 'pink'
                             return 'error'
@@ -1164,6 +1165,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         if (form.className == 'Galaxy-form' || form.className.includes('ui-portlet-section') || form.className == 'ui-form-element section-row visible pl-2' || form.className.includes('visible pl-2')  || form.className.includes('sections')) {
            
             // console.log(form)
+
 
             for (var j = 0; j < form.children.length; j++){
                 if (self.get_form_data(form.children[j], checking) == 'error') {
@@ -3055,6 +3057,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                     var inputs = self.get_form_data(form)
 
 
+
                     console.log(inputs)
 
                    
@@ -3062,9 +3065,13 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                     
                     console.log(refine_inputs)
 
-                     // let formdata = form.parentNode.parentNode.parentNode.parentNode.parentNode.outerHTML
-                    // let fint = JSON.stringify(formdata)
-                    // self.update_metadata_FormState('galaxy_tool', refine_inputs['inputs'], JSON.parse(fint))
+                    var refine_inputs  = await KernelSideDataObjects(`import json\nimport base64\nfrom GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.updated_form(${JSON.stringify(origin)}, json.loads(base64.b64decode("${btoa(JSON.stringify(inputs))}")), ${JSON.stringify(self.model.get('inputs')['id'])}, ${JSON.stringify(history_id)})`)
+                    let formdata = form.parentNode.parentNode.parentNode.parentNode.parentNode.outerHTML
+                    let fint = JSON.stringify(formdata)
+                    self.update_metadata_FormState('galaxy_tool', refine_inputs['inputs'], JSON.parse(fint))
+                   
+                     var refine_inputs  = await KernelSideDataObjects(`import json\nimport base64\nfrom GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.updated_form(${JSON.stringify(origin)}, json.loads(base64.b64decode("${btoa(JSON.stringify(inputs))}")), ${JSON.stringify(self.model.get('inputs')['id'])}, ${JSON.stringify(history_id)})`)
+
                 })
 
                 CheckBoxDiv.append(CheckBoxInput)
@@ -3164,6 +3171,10 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                     var history_id = self.el.querySelector('.galaxy-history-list').querySelector('#history_ids').value
                     var refine_inputs  = await KernelSideDataObjects(`import json\nimport base64\nfrom GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.updated_form(${JSON.stringify(origin)}, json.loads(base64.b64decode("${btoa(JSON.stringify(inputs))}")), ${JSON.stringify(self.model.get('inputs')['id'])}, ${JSON.stringify(history_id)})`)
                     var form_parent = self.el.querySelector('.Galaxy-form')
+
+
+                    console.log(inputs)
+                    console.log(refine_inputs)
     
                     self.removeAllChildNodes(form_parent)
                     self.form_builder(refine_inputs['inputs'])
@@ -4899,8 +4910,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
  
     activate_run_buttons (){
 
-        console.log("OK")
-
         var self  = this;
         this.el.querySelectorAll('.nbtools-run').forEach((button) => button.addEventListener('click', async () => {
             
@@ -4917,6 +4926,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             }else {
                 var form = self.element.querySelector('.Galaxy-form')
                 var inputs = this.get_form_data(form, 'on')
+
+                console.log(inputs)
                 var history_id = self.element.querySelector('#history_ids').value 
                 this.SubmitJob(inputs, history_id)
                 this.hide_run_buttons(true)
@@ -5012,7 +5023,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             }
         }
 
-        console.log("####", inputs)
         // var jobs  = await KernelSideDataObjects(`import json\nfrom GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.submit_job(gal_instance=${JSON.stringify(this.model.get('gal_instance'))}, tool_inputs=json.loads("""${JSON.stringify(inputs)}"""), history_id=${JSON.stringify(history_id)})`)
         var jobs  = await KernelSideDataObjects(`import json\nimport base64\nfrom GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.submit_job(server=json.loads(base64.b64decode("${btoa(JSON.stringify(origin))}")), tool_id=json.loads(base64.b64decode("${btoa(JSON.stringify(this.model.get('galaxy_tool_id')))}")), tool_inputs=json.loads(base64.b64decode("${btoa(JSON.stringify(inputs))}")), history_id=json.loads(base64.b64decode("${btoa(JSON.stringify(history_id))}")))`)
         
