@@ -1139,7 +1139,11 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                             out[form.children[i].querySelector('.data_collection').name] = form.children[i].querySelector('.data_collection').parentElement['data-file']
                         }
                 }
-            } 
+            } else if (form.children[i].className == 'ui-form-element section-row conditional'){
+                if (form.children[i].querySelector('.InputData')){
+                    out[form.children[i].querySelector('.InputData').name] = form.children[i].querySelector('.InputData').value
+                }
+            }
         }
 
         // if (Object.keys(out).length > 0){
