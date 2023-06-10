@@ -712,7 +712,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 this.add_repeat_section(input_def, form_parent, name_prefix) 
                 break
             case "section":
-                // console.log(input_def)
                 this.add_section(input_def, form_parent, name_prefix) 
                 break
             case "drill_down":
@@ -964,19 +963,21 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         return divElement.offsetWidth > 0 && divElement.offsetHeight > 0;
       }
  
-
-
-
     get_form_data(form, checking){
 
         var self = this
         var out = {}
+
+        // var Check = checking
         
         for (var i = 0; i < form.children.length; i++){
             if ((form.children[i].className.includes('pl-2') &&  form.children[i].style.display == 'block' && form.children[i].children.length > 0) ||  form.children[i].className.includes('ui-portlet-section') || form.children[i].className.includes('ui-repeat')  || form.children[i].className.includes('sections')){
-                // console.log(form.children[i])
-                Object.assign(out, self.get_form_data(form.children[i]))
-            //} else if (form.children[i].style.display != 'none' &&  form.children[i].children.length > 0 &&  form.children[i].className != 'ui-form-element section-row conditional') {
+
+                if (self.get_form_data(form.children[i], checking) == 'error') {
+                    return 'error'
+                } else{
+                    Object.assign(out,  self.get_form_data(form.children[i], checking))
+                }
             } else if (form.children[i].className == 'ui-form-element section-row') {
         
                 if (form.children[i].querySelector('.InputData')){
@@ -986,7 +987,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                     if (form.children[i].querySelector('.InputData')['data-value']){
                         opt = form.children[i].querySelector('.InputData')['data-value']
                     }
-        
+            
                     if (checking == 'on' && opt == false){
 
                         if (form.children[i].querySelector('.InputData').value == "") {
@@ -997,14 +998,9 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                             out[form.children[i].querySelector('.InputData').name] =  form.children[i].querySelector('.InputData').value
                         }
                     } else {
-                        // if (form.querySelector('.InputData').value == 'false') {
-                        //     out[form.querySelector('.InputData').name] = false
-                        // } else if (form.querySelector('.InputData').value == 'true'){
-                        //     out[form.querySelector('.InputData').name] = true
-                        // } else{
-                        out[form.children[i].querySelector('.InputData').name] =  form.children[i].querySelector('.InputData').value
-                        // }
 
+                        out[form.children[i].querySelector('.InputData').name] =  form.children[i].querySelector('.InputData').value
+                   
                     }
                 
                 } else if (form.children[i].querySelector('.outer-checkbox-div')){
@@ -1036,12 +1032,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                     }
 
                 } else if (form.children[i].querySelector('.InputDataFile')){
-                    // var out
-        
-                    // form.children[i].querySelector('.InputDataFile').style.backgroundColor = ''
 
                     if (checking == 'on') {
-
                         if (form.querySelector('.InputDataFile').options.length  == 0 ){
                             form.querySelector('.InputDataFile').style.backgroundColor = 'pink'
                             return 'error'
@@ -1082,7 +1074,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                         
                         out[form.children[i].querySelector('.InputDataFile').name] = input_data 
 
-
                         if (input_files.length == 1 && input_files[0]['id'] == ''){
                             out[form.children[i].querySelector('.InputDataFile').name] = null
                         } else if (input_files.length == 0 ) {
@@ -1093,8 +1084,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                             out[form.children[i].querySelector('.InputDataFile').name] = input_data
                         }
                     }
-
-
 
                 } else if(form.children[i].querySelector('.drill-down.container')) {
 
@@ -1151,192 +1140,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         // }
     }
 
-
-    get_form_data2(form, checking){
-
-        var self = this
-        var out = {}
-
-        // for (var j = 0; j < form.children.length; j++){
-        //     if ($(form.children[j]).is(':visible') ){
-
-        //         console.log(form.children[j])
-        //         // console.log(this.isDivVisible(form.children[j]))
-        //     }
-
-        // }
-
-        if (form.className == 'Galaxy-form' || form.className.includes('ui-portlet-section') || form.className == 'ui-form-element section-row visible pl-2' || form.className.includes('visible pl-2')  || form.className.includes('sections')) {
-           
-            // console.log(form)
-
-
-            for (var j = 0; j < form.children.length; j++){
-                if (self.get_form_data(form.children[j], checking) == 'error') {
-                    return 'error'
-                } else{
-                    Object.assign(out,  self.get_form_data(form.children[j], checking))
-                }
-            }
-        } else if (form.querySelector('.InputData')){
-
-            var opt
-
-            if (form.querySelector('.InputData')['data-value']){
-                opt = form.querySelector('.InputData')['data-value']
-                console.log(opt)
-            }
-
-            if (checking == 'on' && opt == false){
-                if (form.querySelector('.InputData').value == "") {
-                    form.querySelector('.InputData').style.backgroundColor = 'pink'
-                    return 'error'
-                } else {
-                    form.querySelector('.InputData').style.backgroundColor = ''
-                    out[form.querySelector('.InputData').name] =  form.querySelector('.InputData').value
-                }
-            } else {
-                // if (form.querySelector('.InputData').value == 'false') {
-                //     out[form.querySelector('.InputData').name] = false
-                // } else if (form.querySelector('.InputData').value == 'true'){
-                //     out[form.querySelector('.InputData').name] = true
-                // } else{
-                out[form.querySelector('.InputData').name] =  form.querySelector('.InputData').value
-                // }
-            }
-        
-        } else if (form.querySelector('.outer-checkbox-div')){
-
-            var select_list = []
-
-            if (JSON.parse(form.querySelector('.outer-checkbox-div')['data-value'])["optional"] == true ) {
-
-
-                for (var k = 0; k < form.querySelector('.outer-checkbox-div').children.length; k++ ) {
-                    if (form.querySelector('.outer-checkbox-div').children[k].querySelector('.InputDataCheckbox').checked) {
-                        select_list.push(form.querySelector('.outer-checkbox-div').children[k].querySelector('.InputDataCheckbox').value)
-                    }
-                }
-
-                if (select_list.length == 0){
-                    out[form.querySelector('.outer-checkbox-div').querySelector('.InputDataCheckbox').name] = null
-                }  else{
-                    out[form.querySelector('.outer-checkbox-div').querySelector('.InputDataCheckbox').name] = select_list
-                }
-
-            }  else if ((JSON.parse(form.querySelector('.outer-checkbox-div')['data-value'])["optional"] == false )){
-                    if (select_list.length == 0){
-                        form.querySelector('.outer-checkbox-div').children[0].querySelector('.InputDataCheckbox').parentNode.style.backgroundColor = 'pink'
-
-                    } else if (select_list.length > 0 ){
-                        form.querySelector('.outer-checkbox-div').children[0].querySelector('.InputDataCheckbox').parentNode.style.backgroundColor = ''
-                        out[form.querySelector('.outer-checkbox-div').querySelector('.InputDataCheckbox').name] = select_list
-                    }
-        }
-
-        } else if (form.querySelector('.InputDataFile')){
-
-            if (checking == 'on') {
-
-                if (form.querySelector('.InputDataFile').options.length  == 0 ){
-                    form.querySelector('.InputDataFile').style.backgroundColor = 'pink'
-                    return 'error'
-                } else{
-                    form.querySelector('.InputDataFile').style.backgroundColor = ''
-
-                    var input_data = form.querySelector('.InputDataFile').parentElement['data-file']
-                    var input_files = []
-        
-                    for (var i = 0; i < form.querySelector('.InputDataFile').options.length; i++) {
-                        if (form.querySelector('.InputDataFile').options[i].selected == true) {
-                            input_files.push(JSON.parse(form.querySelector('.InputDataFile').options[i].value))
-                        }
-                    }
-                    
-                    out[form.querySelector('.InputDataFile').name] = input_data 
-    
-                    if (input_files.length == 1 && input_files[0]['id'] == ''){
-                        out[form.querySelector('.InputDataFile').name] = null
-                    } else{
-                        input_data['values'] = input_files
-                        out[form.querySelector('.InputDataFile').name] = input_data
-                    }
-                }
-
-            } else {
-
-                var input_data = form.querySelector('.InputDataFile').parentElement['data-file']
-                var input_files = []
-    
-                for (var i = 0; i < form.querySelector('.InputDataFile').options.length; i++) {
-                    if (form.querySelector('.InputDataFile').options[i].selected == true) {
-                        input_files.push(JSON.parse(form.querySelector('.InputDataFile').options[i].value))
-                    }
-                }
-                
-                out[form.querySelector('.InputDataFile').name] = input_data 
-
-
-                if (input_files.length == 1 && input_files[0]['id'] == ''){
-                    out[form.querySelector('.InputDataFile').name] = null
-                } else if (input_files.length == 0 ) {
-                    out[form.querySelector('.InputDataFile').name] = {}
-                }
-                else{
-                    input_data['values'] = input_files
-                    out[form.querySelector('.InputDataFile').name] = input_data
-                }
-            }
-
-        } else if(form.querySelector('.drill-down.container')) {
-
-        var drill_down_inputs = []
-
-            for(var n = 0; n < form.querySelector('.drill-down.container').querySelectorAll('input').length; n++) {
-                if (form.querySelector('.drill-down.container').querySelectorAll('input')[n].checked) {
-                    drill_down_inputs.push(form.querySelector('.drill-down.container').querySelectorAll('input')[n].value)
-                }
-            }
-            out[form.querySelector('.drill-down.container').name] =  drill_down_inputs
-
-        } else if (form.querySelector('.data_collection')){
-        
-            var input_files = []  
-
-            out[form.querySelector('.data_collection').name] = input_files  
-
-            for (var i = 0; i < form.querySelector('.data_collection').options.length; i++) {
-                if (form.querySelector('.data_collection').options[i].selected == true) {
-                    input_files.push(form.querySelector('.data_collection').options[i].data)
-                }
-            }
-
-            if (checking == 'on') {
-                if (out[form.querySelector('.data_collection').name].length < 1 ){
-                    form.querySelector('.data_collection').style.backgroundColor = 'pink'
-                    return 'error'
-                }
-                else {
-                    form.querySelector('.data_collection').style.backgroundColor = ''
-                    out[form.querySelector('.data_collection').name] = input_files
-                    form.querySelector('.data_collection').parentElement['data-file']['values'] = input_files
-                    out[form.querySelector('.data_collection').name] = form.querySelector('.data_collection').parentElement['data-file']
-                }
-            } else {
-                if (input_files.length == 0){
-                    form.querySelector('.data_collection').parentElement['data-file']['values'] = [{}]
-                } else{
-                    form.querySelector('.data_collection').parentElement['data-file']['values'] = input_files
-                }
-                out[form.querySelector('.data_collection').name] = form.querySelector('.data_collection').parentElement['data-file']
-            }
-        }
-
-        if (Object.keys(out).length > 0){
-            return out  
-        }
-    }
-    
 
     galaxy_data_verify(file_cache, id) {
 
@@ -3037,6 +2840,17 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             row.append(select_lable)
             row.append(OuterDiv)
 
+            if (input_def.value && input_def.value.length > 0){
+                for (var k = 0; k < input_def.options.length; k++){
+                    for(var l = 0; l < input_def.value.length; l++){
+                        if(input_def.value[l] == input_def.options[k][1]){
+                            input_def.options[k][2] = true 
+                            
+                        }
+                    }
+                }
+            }
+
             for(var i = 0; i < input_def.options.length; i++) {
 
                 const CheckBoxDiv = document.createElement('div')
@@ -3055,19 +2869,14 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 CheckBoxInput.type = 'checkbox'
                 CheckBoxInput.name = NamePrefix+input_def['name']
 
+                CheckBoxInput.checked = input_def.options[i][2]
+
                 CheckBoxInput.addEventListener('change', async () => {
                     var history_id = self.el.querySelector('#history_ids').value
                     var form = self.el.querySelector('.Galaxy-form')
                     var inputs = self.get_form_data(form)
 
-
-
-                    console.log(inputs)
-
-                   
-                     var refine_inputs  = await KernelSideDataObjects(`import json\nimport base64\nfrom GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.updated_form(${JSON.stringify(origin)}, json.loads(base64.b64decode("${btoa(JSON.stringify(inputs))}")), ${JSON.stringify(self.model.get('inputs')['id'])}, ${JSON.stringify(history_id)})`)
-                    
-                    console.log(refine_inputs)
+                    var refine_inputs  = await KernelSideDataObjects(`import json\nimport base64\nfrom GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.updated_form(${JSON.stringify(origin)}, json.loads(base64.b64decode("${btoa(JSON.stringify(inputs))}")), ${JSON.stringify(self.model.get('inputs')['id'])}, ${JSON.stringify(history_id)})`)
 
                     var refine_inputs  = await KernelSideDataObjects(`import json\nimport base64\nfrom GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.updated_form(${JSON.stringify(origin)}, json.loads(base64.b64decode("${btoa(JSON.stringify(inputs))}")), ${JSON.stringify(self.model.get('inputs')['id'])}, ${JSON.stringify(history_id)})`)
                     let formdata = form.parentNode.parentNode.parentNode.parentNode.parentNode.outerHTML
@@ -3082,6 +2891,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 CheckBoxDiv.append(CheckboxLabel)
                 OuterDiv.append(CheckBoxDiv)
             }
+
         } 
         else {
             var options 
@@ -3175,10 +2985,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                     var history_id = self.el.querySelector('.galaxy-history-list').querySelector('#history_ids').value
                     var refine_inputs  = await KernelSideDataObjects(`import json\nimport base64\nfrom GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.updated_form(${JSON.stringify(origin)}, json.loads(base64.b64decode("${btoa(JSON.stringify(inputs))}")), ${JSON.stringify(self.model.get('inputs')['id'])}, ${JSON.stringify(history_id)})`)
                     var form_parent = self.el.querySelector('.Galaxy-form')
-
-
-                    console.log(inputs)
-                    console.log(refine_inputs)
     
                     self.removeAllChildNodes(form_parent)
                     self.form_builder(refine_inputs['inputs'])
@@ -3459,8 +3265,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             }
 
             for (var j in input_def.cases[i].inputs) {
-
-                // console.log(input_def.cases[i].inputs)
 
                 this.add(input_def.cases[i].inputs[j], ConditionalDiv, NewNamePrefix, call_back_data)
                 input_def.cases[i].inputs[j].id = this.uid()
@@ -4420,7 +4224,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         chain_button.addEventListener('click', (e) => {
 
-            console.log("Ok1")
       
         });
     }
@@ -4931,7 +4734,10 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 var form = self.element.querySelector('.Galaxy-form')
                 var inputs = this.get_form_data(form, 'on')
 
-                console.log(inputs)
+                if (inputs == 'error'){
+                    return 
+                }
+
                 var history_id = self.element.querySelector('#history_ids').value 
                 this.SubmitJob(inputs, history_id)
                 this.hide_run_buttons(true)
