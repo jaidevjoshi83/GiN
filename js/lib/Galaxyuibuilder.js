@@ -81,26 +81,33 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             </div>
 
             <div class="tool-forms"> 
-
                 <form class="Galaxy-form">
                 </form>
             </div>
 
             <div class="dataset-list">
+                <div id="datalist-update" style="width: 100%;" >
 
-                <div>
-                    <div style="float:left; margin-left:10px; margin-top:20px;"><span> <b> Select History <b/> </span></div><br>
-                    <div id="history-update-label" style="float:right; margin-right:20px;">  <i class="fa fa-refresh" aria-hidden="true"  title=="Refresh History" style="float:right; margin-left:10px;"></i> <i class="fas fa-spinner fa-pulse" aria-hidden="true" style="float:right; margin-left:10px; display:none;"></i></div> 
+                    <div style="float:left; width:55%; margin-top:5px; margin-left:10px;"><span class="ui-form-title-text"><b> Select History</b> </span> </div>
+
+                    <div id="dataset-status-text" style="float:left; width: 20%; margin-top:5px;"><span class="ui-form-title-text"><b style="display:none;"> Loading.. </b> </span> </div>
+
+                    <div style="float:right; width:10%; height: 30px; display:block; "> 
+                        <i class="fa fa-refresh" aria-hidden="true"  title="Refresh History" style="float:right; font-size: 20px; margin-right: 8px; margin-top: 5px"></i>
+                        <i class="fas fa-spinner fa-pulse" aria-hidden="true" style="float:right; font-size: 20px; margin-right: 8px; margin-top: 5px; display:none;"></i>
+                    </div>
+
+
                 </div>
+                <div id="history-list" style="width: 100%" >
 
-                <div id='history-list' class="history-list">
                 </div>
-
                 <div  class="history-dataset-list">
+
                 </div>
             </div> 
 
-            <div class="help-section">
+            <div class="help-section" style="width: 100%">
             </div>
         </div>
     </div>
@@ -398,6 +405,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         var nb_form = this.el.querySelector('.nbtools-form')
 
         var data_upload = `<div class="login-form"> 
+                               
 
                                 <div class="auth-error" style="display: none; margin: 10px;"> 
                                     <p> <b>Authentication error</b> </p>
@@ -426,47 +434,27 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                                     <div id="credential-login" class="tabcontent" style="display: block;">
 
         
-                                        <div style="margin:10px">
-                                            <div>
-                                            <span class="ui-form-title-text"> <b>Select Galaxy Server</b> </span>
-                                            </div>
-                                            <input type="text" name="server" list="cityname">
-                                            <datalist id="cityname">
-                                                <option value="https://usegalaxy.org" selected="selected"> Galaxy Main </option>
-                                                <option value="https://localhost:8080"> Galaxy Local</option>
-                                                <option value="https://usegalaxy.eu"> Galaxy Europe</option>
-                                            </datalist>
+                                    <div class="combo-box"> 
+                                        <div class="input-wrapper">
+                                            <span class="ui-form-title-text"> <b> Select Galaxy Server</b> </span>
+                                            <input type="text" class="InputData" name="server" value="https://usegalaxy.org" autocomplete="off">
                                         </div>
-
-                                        <div style=" margin:10px">
-                                        <span class="ui-form-title-text"> <b>Email ID/User Name</b> </span>
-                                            <input class="InputData" name="email" style="display: block" >
-                                        </div>
-
-                                        <div style=" margin:10px">
-                                        <span class="ui-form-title-text"> <b>Password</b> </span>
-                                            <input class="InputData" type="password" name="password" style="display: block" >
-                                        </div>
+                                        <ul class="ul-login">
+                                            <li data-value="https://usegalaxy.org" >  <div class="server-name"> Main </div> </li>
+                                            <li data-value="https://usegalaxy.eu">  <div class="server-name"> Europe </div>  </li>
+                                            <li data-value="https://localhost:8080" > <div class="server-name"> Local Server </div></li>
+                                        </ul>
                                     </div>
-                            
-                                    <div id="api-login" class="tabcontent" style="display: none;">
 
-                                        <div style="margin:10px">
-                                            <div>
-                                                <span class="ui-form-title-text"> <b>Select Galaxy Server</b> </span>
-                                            </div>
-                                            <input type="text" name="server" list="cityname">
-                                            <datalist id="cityname">
-                                                <option value="https://usegalaxy.org" selected="selected"> Galaxy Main </option>
-                                                <option value="https://localhost:8080"> Galaxy Local</option>
-                                                <option value="https://usegalaxy.eu"> Galaxy Europe</option>
-                                            </datalist>
-                                        </div>
+                                    <div id="login-email" style=" margin:10px">
+                                        <span class="ui-form-title-text"> <b>Email ID/User Name</b> </span>
+                                        <input class="InputData" name="email" style="display: block" >
+                                    </div>
 
-                                        <div style=" margin:10px">
-                                            <span class="ui-form-title-text"> <b>API Key</b> </span>
-                                            <input class="InputData" name="api" style="display: block" >
-                                        </div>
+                                    <div id="login-password" style=" margin:10px">
+                                        <span class="ui-form-title-text"> <b>Password</b> </span>
+                                        <input class="InputData" type="password" name="password" style="display: block" >
+                                    </div>
                                     </div>
                                 </div>
                             </div>`
@@ -474,18 +462,28 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         const utm = new DOMParser().parseFromString(data_upload, 'text/html').querySelector('.login-form')
 
         var List = utm.querySelectorAll('.tablinks')    
+        var cb = utm.querySelector('.combo-box') 
+
+        this.login_server_list(cb)
         
-
-        // utm.querySelector('#upload').style.display  = 'block'
-
         List.forEach((button) => button.addEventListener('click', () => {
 
             if (button.innerText  == 'With Credential') {
-                utm.querySelector('#credential-login').style.display  = 'block'
-                utm.querySelector('#api-login').style.display  = 'none'
-            } else if (button.innerText  == 'With API Key') {
-                utm.querySelector('#credential-login').style.display  = 'none'
-                utm.querySelector('#api-login').style.display  = 'block'
+                utm.querySelector('#login-email').style.display  = 'block'
+                utm.querySelector('#login-password').querySelector('span').innerHTML= "<b>Password</b>"
+                utm.querySelector('#login-email').querySelector('input').style.display = 'block'
+                utm.querySelector('#login-password').querySelector('input').value = ''
+                utm.querySelector('#login-email').querySelector('input').value = ''
+                utm.querySelector('#login-password').querySelector('input').style.background = ''
+                utm.querySelector('#login-email').querySelector('input').style.background = ''
+            } 
+            
+            else if (button.innerText  == 'With API Key') {
+                utm.querySelector('#login-email').querySelector('input').style.display = 'none'
+                utm.querySelector('#login-email').style.display  = 'none'
+                utm.querySelector('#login-password').querySelector('span').innerHTML= "<b>API Key</b>"
+                utm.querySelector('#login-email').querySelector('input').value = ''
+                utm.querySelector('#login-password').querySelector('input').style.background = ''
             }
         }));
 
@@ -499,6 +497,41 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         nb_form.append(utm)
     }
 
+
+    login_server_list(cb){
+
+        var inp = cb.querySelector('.InputData')
+
+        inp.addEventListener("mouseenter", ()=>{
+            cb.querySelector('.ul-login').style.display = 'block'
+        })
+        
+        inp.addEventListener("mouseleave", ()=>{
+            cb.querySelector('.ul-login').style.display = 'none'        
+        });
+        
+        cb.querySelectorAll('li').forEach(function(el) {
+            el.addEventListener('click', ()=>{        
+                cb.querySelector('.InputData').value = el.dataset.value
+                cb.querySelector('.ul-login').style.display = 'none'
+            })
+          });
+        
+        var ul = cb.querySelector('.ul-login')
+        
+        ul.addEventListener("mouseenter", ()=>{
+            cb.querySelector('.ul-login').style.display = 'block'
+        });
+        
+        ul.addEventListener("mouseleave", ()=>{
+            cb.querySelector('.ul-login').style.display = 'none'
+        });
+        
+        cb.querySelector('.InputData').addEventListener("click", ()=>{
+            cb.querySelector('.ul-login').style.display = 'none'
+        });
+    }
+
     iterate_over_tool_cells() {
 
         if (!ContextManager.notebook_tracker) return;               
@@ -510,6 +543,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             }
         }
     }
+
 
     add_galaxy_cell_metadata(){
 
@@ -928,7 +962,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
                 var children = self.el.querySelector('.Galaxy-form')
                 var inputs = self.get_form_data(children)
-                var history_id = self.el.querySelector('.galaxy-history-list').querySelector('#history_ids').value
+                var history_id = self.el.querySelector('.galaxy-history-list').querySelector('#dataset-history-list').value
                 var refine_inputs  = await KernelSideDataObjects(`import json\nimport base64\nfrom GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.updated_form(${JSON.stringify(origin)}, json.loads(base64.b64decode("${btoa(JSON.stringify(inputs))}")), ${JSON.stringify(self.model.get('inputs')['id'])}, ${JSON.stringify(history_id)})`)
                 var form_parent = self.el.querySelector('.Galaxy-form')
 
@@ -1296,7 +1330,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                                     }
 
                                     var form = document.querySelector(`#${e.target.parentNode.parentNode.parentNode.id.replace('g-tool-','')}`)
-                                    var hi = form.parentNode.querySelector('#history_ids').value
+                                    var hi = form.parentNode.querySelector('#dataset-history-list').value
 
                                     var uri = await KernelSideDataObjects(`from GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.send_data_to_galaxy_tool(server_d=${JSON.stringify(server)}, server_u=${JSON.stringify(e.target.data)}, dataset_id=${JSON.stringify(dataset['id'])}, ext=${JSON.stringify(dataset['extension'])}, history_id=${JSON.stringify(hi)})`)
 
@@ -1527,7 +1561,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 Div2.querySelectorAll('span')[i].className = 'icon fa mr-1 fa-minus'
             }
 
-            var history_id = self.el.querySelector('#history_ids').value
+            var history_id = self.el.querySelector('#dataset-history-list').value
             var form = self.el.querySelector('.Galaxy-form')
 
             let formdata = form.parentNode.parentNode.parentNode.parentNode.parentNode.outerHTML
@@ -1711,7 +1745,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                             <div id="upload" class="tabcontent">
                                 <div style="margin-top:10px"><div style="float: left;"><p class="resumable-upload-title"><b>Upload file to the Galaxy server.</b></p></div><div class="upload-status-icon" style="float:left; margin-top:5px; margin-left:5px; display: none;"><i class="fa fa-spinner fa-spin" style="font-size:10px; float:left;"></i></div></div>
                                 <input id="inputupload" class="input_upload" type="file" style="display: block" >
-                                <div class="resumable-upload-warning" style="display: none;"> <b>Warning:</b> CORS error, file uploaded through bioblend API.</div>
+                                <div class="resumable-upload-warning" style="display: none;"> <b>Warning:</b> The upload will take longer than expected due to CORS error.</div>
                             </div>
                     
                             <div id="from_url" class="tabcontent" style="display: none;">
@@ -1941,7 +1975,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         var origin = this.el.querySelector('.tool-migration-select').value
 
         this.el.querySelector('.resumable-upload-warning').style.display = 'block'
-        this.el.querySelector('.resumable-upload-warning').style.color = 'red'
+        this.el.querySelector('.resumable-upload-warning').style.color = 'orange'
 
         var elm = this.el.querySelector('#inputupload')
         var hi =  this.el.querySelector('#dataset-history-list').value
@@ -2115,21 +2149,25 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             DataListdiv.append(await this.data_row_list( history_id))
         });
 
-        var update = this.el.querySelector('#history-update-label').querySelector('.fa.fa-refresh')
-        var spn = this.el.querySelector('#history-update-label').querySelector('.fas.fa-spinner.fa-pulse')
+        var update = this.el.querySelector('#datalist-update').querySelector('.fa.fa-refresh')
+        var spn = this.el.querySelector('#datalist-update').querySelector('.fas.fa-spinner.fa-pulse')
 
         update.addEventListener('click', async () => {
             update.style.display = 'none'
             spn.style.display = 'block'
+            this.el.querySelector('#dataset-status-text').querySelector('b').style.display = 'block'
 
             self.removeAllChildNodes(DataListdiv)    
             DataListdiv.append(await this.data_row_list( this.el.querySelector('#dataset-history-list').value))
             // await self.add_dataset_table()
             update.style.display = 'block'
             spn.style.display = 'none'
+
+            this.el.querySelector('#dataset-status-text').querySelector('b').style.display = 'none'
         })
 
         var DataList = this.el.querySelector('#history-list')
+
         DataList.append(select)
     }
 
@@ -3853,7 +3891,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                         Tbl.querySelector('.primary-actions').innerHTML = `<a class="icon-btn display-btn" title="" target="_blank" href="${URL}/datasets/${dataset['id']}/preview" data-original-title="View data"><span class="fas fa-eye" style="" title="View Data" ></span></a><a class="icon-btn edit-btn" target="_blank"  href="${URL}/datasets/${dataset['id']}/edit" data-original-title="Edit attributes"><span class="fa fa-pencil" title="Edit data"></span></a><a class="icon-btn delete-btn" title="" href="javascript:void(0);" data-original-title="Delete"><span class="fa fa-times" style="" title="Delete" ></span></a>`
                     }
 
-                    
                     break;
                 }     
 
@@ -4728,7 +4765,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                     return 
                 }
 
-                var history_id = self.element.querySelector('#history_ids').value 
+                var history_id = self.element.querySelector('#dataset-history-list').value 
                 this.SubmitJob(inputs, history_id)
                 this.hide_run_buttons(true)
             }
@@ -4741,36 +4778,35 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         var logingForm = this.el.querySelector('.login-form-div')
         var formdata = logingForm.parentNode.parentNode.parentNode.parentNode.outerHTML       
         let fint = JSON.stringify(formdata)
-
         this.el.querySelector('#refresh-galaxy-cells').style.display = 'none'
         this.el.querySelector('.auth-error').style.display = 'none'
-        this.el.querySelector('.auth-waiting').style.display = 'block';
+        this.el.querySelector('.auth-waiting').style.display = 'none';
 
         var credentials = { 'server':null, 'email':null, 'password':null,  'api_key': null }  
- 
         var inputs = this.$(".tabcontent:visible")[0].querySelectorAll('input')
 
         for (var i = 0; i < inputs.length; i++){
-            if (inputs[i].value == ''){
+            if (inputs[i].value == '' && inputs[i].style.display == 'block'){
                 inputs[i].style.background = 'pink'
                 return 
-            }else{
-                inputs[i].style.background = 'white'
+            }else if (inputs[i].value != '' && inputs[i].style.display == 'block'){
+                inputs[i].style.background = ''
             }
         }
 
-        if (inputs.length == 3){
+        this.el.querySelector('.auth-waiting').style.display = 'block';
+
+        if (inputs[1].style.display == 'none'){
+            credentials['server'] = inputs[0].value
+            credentials['api_key'] = inputs[2].value
+        }else if (inputs[1].style.display == 'block'){
             credentials['server'] = inputs[0].value
             credentials['email'] =  inputs[1].value
             credentials['password'] = inputs[2].value
-        } else{
-            credentials['server'] = inputs[0].value
-            credentials['api_key'] = inputs[1].value
         }
 
         var jobs = await KernelSideDataObjects(`import json\nimport base64\nfrom GiN.authwidget import GalaxyAuthWidget\na  = GalaxyAuthWidget()\na.login(json.loads(base64.b64decode("${btoa(JSON.stringify(credentials))}")))`)
            
-
         if (jobs.state === 'error' ) {
 
             this.el.querySelector('.auth-error').style.display = 'block'
@@ -4806,7 +4842,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
     }
 
     async SubmitJob(inputs, history_id){
-
 
         if(this.el.querySelector('.tool-migration-select')){
             var origin = this.el.querySelector('.tool-migration-select').value

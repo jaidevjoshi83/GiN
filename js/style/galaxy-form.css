@@ -323,3 +323,123 @@
 .galaxy-uibuilder .form-restore-div label{
 margin-top:  5px;
 }
+
+
+.galaxy-uibuilder .combo-box .fa {
+  /* background: rgb(222, 225, 222); */
+  /* padding: 5px; */
+  margin: 0px;
+  /* float: right; */
+  /* width: 5%; */
+}
+
+.galaxy-uibuilder .combo-box .InputData::-webkit-inner-spin-button {
+  margin: 0px;
+  border: none;
+  width: 98%;
+  opacity: 1
+ 
+
+}
+
+.galaxy-uibuilder .combo-box .login-input-div{
+  border: 1px rgb(157, 147, 147) solid;
+  width: 100%;
+}
+
+.galaxy-uibuilder .combo-box .InputData:focus {
+  outline: none; /* Remove outline when input is focused */
+}
+
+
+.galaxy-uibuilder .combo-box .InputData:hover {
+  border: none;
+  width: 100%;
+  border: solid 1px black;
+}
+
+
+
+.galaxy-uibuilder .combo-box li{
+  background: rgb(27, 24, 24);
+  width: 100%;
+  color: rgb(244, 244, 244);
+  height: 20px;
+  padding: 1px;
+}
+
+.galaxy-uibuilder .combo-box li:hover{
+  background: rgb(48, 46, 46);
+  color: rgb(255, 246, 246);
+  width: 100%;
+  height: 20px;
+  padding: 1px;
+}
+
+.galaxy-uibuilder .combo-box ul{
+  background: rgb(13, 12, 12);
+  list-style: none;
+  display: none;
+  margin-left: 10px;
+  width: 98%;
+  /* border: solid 1px red; */
+  position: relative; /* or absolute or fixed */
+  z-index: 1; 
+  padding: 0; /* Remove padding */
+  height: 100px;
+  overflow-y: auto; 
+  overflow-x: hidden; 
+  
+}
+
+.galaxy-uibuilder .combo-box {
+  width: 100%;
+  height: 60px;
+}
+
+.combo-box  .input-wrapper {
+  position: relative;
+  display: inline-block;
+  margin-top: 10px;
+  margin-left: 10px;
+  width: 98.5%;
+  height: 30px;
+}
+
+.combo-box  .input-wrapper::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  right: 8px;
+  transform: translateY(200%);
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 8px 6px 0 6px;
+  border-color: rgb(26, 24, 24) transparent transparent transparent;
+  pointer-events: none;
+}
+
+
+.combo-box  .InputData {
+  width: 100%;
+  height: 100%;
+}
+
+
+.galaxy-uibuilder .combo-box .server-name{
+  margin-left: 10px;
+  size: 12px;
+  padding-top:  0px;
+  font-weight: bold;
+  margin: 2px;
+  
+}
+
+
+.galaxy-uibuilder #datalist-update{
+    
+  background: rgb(228, 220, 220);
+  width: 100px;
+  height: 30px;
+}
