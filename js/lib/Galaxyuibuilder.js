@@ -22,15 +22,7 @@ import { NotebookActions } from '@jupyterlab/notebook';
 import { Private,  getRanNotebookIds, getIndex } from './notebookActions';
 import $ from 'jquery'
 
-import {
-	Combobox,
-	ComboboxInput,
-	ComboboxPopover,
-	ComboboxList,
-	ComboboxOption,
-	ComboboxOptionText,
-} from "@reach/combobox";
-import "@reach/combobox/styles.css";
+
 
 
 export class GalaxyUIBuilderModel extends BaseWidgetModel{
