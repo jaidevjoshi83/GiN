@@ -107,8 +107,6 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
     @staticmethod
     def submit_job( server, tool_id, tool_inputs=None, history_id=None):
 
-        print("Submit Job", tool_inputs)
-
         a = GiN.sessions.SessionList()
         gi1 = a.get(server=server)
         # tool_inputs = json5.loads(tool_inputs)
@@ -222,8 +220,6 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
     @staticmethod
     def RefinedInputs( inputs, gi):
 
-        print("#####", inputs )
-
         for i in inputs.keys():
             if type(inputs[i]) == dict:
                 if list(inputs[i].keys())[0] == "values":
@@ -255,8 +251,6 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
 
         a = GiN.sessions.SessionList()
         gi6 = a.get(server=server)
-
-        print(tool_inputs)
 
         if (tool_inputs) and (tool_id):
 
@@ -418,6 +412,7 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
         file_name=None,
         dataset_id=None,
         ext="zip",
+        dataset_name=None,
         history_id=None,
     ):
 
@@ -437,7 +432,9 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
             dataset_id=dataset_id, file_path=temp_dir, require_ok_state=False
         )
 
-        file_name = glob.glob(temp_dir + "/*.*")
+        file_name = glob.glob(temp_dir + "/*.*") 
+
+        # file_name = os.path.join(temp_dir, dataset_name)
 
         out = gi14.tools.gi.tools.upload_file(path=file_name[0], history_id=history_id)
 
