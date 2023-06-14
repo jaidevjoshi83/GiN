@@ -4871,7 +4871,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             data_list_div.append(await this.data_row_list( history_id))
         
             this.el.querySelector('.Galaxy-form').style.display = 'none'
-            this.el.querySelector('.galaxy-history-list').style.display = 'none'
+            // this.el.querySelector('.galaxy-history-list').style.display = 'none'
         }
     }
 
