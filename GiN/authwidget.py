@@ -13,6 +13,7 @@ from .Galaxyuibuilder import GalaxyUIBuilder
 from ipywidgets import Output
 from nbtools.uioutput import UIOutput
 from nbtools.event_manager import EventManager
+import json
 
 
 import IPython
@@ -45,29 +46,31 @@ class GalaxyAuthWidget(GalaxyUIBuilder):
             **kwargs
         )
 
-    def login(self, server, password=None, api_key=None, email=None):
+    def login(self, credentials):
+    #def login(self, server, password=None, api_key=None, email=None):
+
         """Login to the Galaxy server"""
 
         tool_list =  {'tools':[]}
     
-        if email:
+        if credentials['email']:
             try:
-                self.session = GalaxyInstance(server, email=email, password=password)
-                self.session._notebook_email = email
+                self.session = GalaxyInstance(credentials['server'], email=credentials['email'], password=credentials['password'])
+                self.session._notebook_email = credentials['email']
             except:
                 # tool_list['state'] = 'error'
                 return IPython.display.JSON({'state': 'error'})
         else:
             try:
-                self.session = GalaxyInstance(server,  api_key=api_key, verify=True)
+                self.session = GalaxyInstance(credentials['server'],  api_key=credentials['api_key'], verify=True)
                 self.session._notebook_email = self.session.gi.users.get_current_user()['email']
             except:
                 # tool_list['state'] = 'error'
                 return IPython.display.JSON({'state': 'error'})
 
-        self.session._notebook_url = server
-        self.session._notebook_password = password
-        self.session._notebook_key = api_key
+        self.session._notebook_url = credentials['server']
+        self.session._notebook_password = credentials['password']
+        self.session._notebook_key = credentials['api_key']
 
         # Validate the provided credentials
 
@@ -84,7 +87,7 @@ class GalaxyAuthWidget(GalaxyUIBuilder):
                     
                         tool['id'] = t['id']
                         tool['description'] = t['description']
-                        tool['name'] = t['name']
+                        tool['name'] = t['name']+" ("+t['version']+")"
                         tool['origin'] = self.session._notebook_url
                         tool['email'] = self.session._notebook_email
                         tool_list['tools'].append(tool)

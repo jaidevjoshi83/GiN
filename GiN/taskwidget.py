@@ -9,6 +9,10 @@ import IPython.display
 import glob
 from nbtools import UIBuilder
 
+import os
+import re
+
+
 log = logging.getLogger(__name__)
 
 try:
@@ -134,6 +138,7 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
         job = gi1.jobs.gi.jobs.show_job(job_id=job_id)
 
         return IPython.display.JSON(job)
+
     
     @staticmethod
     def get_data_type_and_genomes( server=None):
@@ -227,12 +232,13 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
 
     @staticmethod
     def return_session_list():
-
         try:
             a = GiN.sessions.SessionList()
             return a.get_servers()
         except:
              Python.display.JSON([])
+
+
     @staticmethod
     def updated_form(
         server=None,
@@ -247,6 +253,7 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
         gi6 = a.get(server=server)
 
         if (tool_inputs) and (tool_id):
+
             inputs = gi6.tools.gi.tools.build(
                 tool_id=tool_id, inputs=tool_inputs, history_id=history_id
             )
@@ -405,6 +412,7 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
         file_name=None,
         dataset_id=None,
         ext="zip",
+        dataset_name=None,
         history_id=None,
     ):
 
@@ -424,7 +432,9 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
             dataset_id=dataset_id, file_path=temp_dir, require_ok_state=False
         )
 
-        file_name = glob.glob(temp_dir + "/*.*")
+        file_name = glob.glob(temp_dir + "/*.*") 
+
+        # file_name = os.path.join(temp_dir, dataset_name)
 
         out = gi14.tools.gi.tools.upload_file(path=file_name[0], history_id=history_id)
 

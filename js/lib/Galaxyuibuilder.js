@@ -20,6 +20,9 @@ import { Data } from '@g2nb/nbtools/lib/dataregistry';
 import { ContextManager } from '@g2nb/nbtools';
 import { NotebookActions } from '@jupyterlab/notebook';
 import { Private,  getRanNotebookIds, getIndex } from './notebookActions';
+import $ from 'jquery'
+
+
 
 
 export class GalaxyUIBuilderModel extends BaseWidgetModel{
@@ -70,37 +73,40 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             </div>
 
             <div class="tool-forms"> 
-                <label id="dataset-history-label" for="history-list">Select History</label><br>
-                <div class="galaxy-history-list">
-                    
-                </div>
-
                 <form class="Galaxy-form">
                 </form>
-
             </div>
 
             <div class="dataset-list">
+                <div id="datalist-update" style="width: 100%;" >
 
-                <label id="dataset-history-label" for="history-list">Select History</label>
+                    <div style="float:left; width:55%; margin-top:5px; margin-left:10px;"><span class="ui-form-title-text"><b> Select History</b> </span> </div>
 
-                <div id='history-list' class="history-list">
+                    <div id="dataset-status-text" style="float:left; width: 20%; margin-top:5px;"><span class="ui-form-title-text"><b style="display:none;"> Loading.. </b> </span> </div>
+
+                    <div style="float:right; width:10%; height: 30px; display:block; "> 
+                        <i class="fa fa-refresh" aria-hidden="true"  title="Refresh History" style="float:right; font-size: 20px; margin-right: 8px; margin-top: 5px"></i>
+                        <i class="fas fa-spinner fa-pulse" aria-hidden="true" style="float:right; font-size: 20px; margin-right: 8px; margin-top: 5px; display:none;"></i>
+                    </div>
+
+
                 </div>
+                <div id="history-list" style="width: 100%" >
 
+                </div>
                 <div  class="history-dataset-list">
+
                 </div>
             </div> 
 
-            <div class="help-section">
+            <div class="help-section" style="width: 100%">
             </div>
         </div>
-    
     </div>
     
     <div class="nbtools-footer"></div>
     <div class="nbtools-buttons">
         <button class="nbtools-run" type="button" data-traitlet="run_label"></button>
-
     </div>`;
 
     this.dragged = '';
@@ -156,7 +162,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             this.generate_tool_form()
             this.add_tool_migration_button(this.model.get('origin'))
             this.add_dataset_table()
-            this.add_history_list()
+            // this.add_history_list()
             this.add_galaxy_cell_metadata()
         }
 
@@ -244,10 +250,10 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
             } else{
 
-                this.el.querySelector('#history_ids').parentNode.removeChild(this.el.querySelector('#history_ids'))
-                this.add_history_list()
+                // this.el.querySelector('#history_ids').parentNode.removeChild(this.el.querySelector('#dataset-history-list'))
+                // this.add_history_list()
 
-                this.el.querySelector('#dataset-update-label').parentNode.removeChild(this.el.querySelector('#dataset-update-label'))
+                // this.el.querySelector('#dataset-update-label').parentNode.removeChild(this.el.querySelector('#dataset-update-label'))
 
                 this.add_dataset_table()
             }
@@ -302,13 +308,13 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                                     </div>
 
                                     <!-- Tab content -->
-                                    <div id="credential-login" class="tabcontent" style="display: block;">
+                                    <div id="credential-login" class="login-form-div" style="display: block;">
 
                                         <div style="margin:10px">
                                             <div>
                                             <span class="ui-form-title-text"> <b>Select Galaxy Server</b> </span>
                                             </div>
-                                            <input type="text" name="server" list="cityname">
+                                            <input type="text" name="server" value="https://usegalaxy.org" list="cityname">
                                             <datalist id="cityname">
                                                 <option value="https://usegalaxy.org"> Galaxy Main </option>
                                                 <option value="https://localhost:8080"> Galaxy Local</option>
@@ -327,22 +333,22 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                                         </div>
                                     </div>
                             
-                                    <div id="api-login" class="tabcontent" style="display: none;">
+                                    <div id="api-login" class="login-form-div" style="display: none;">
 
-                                    <div style="margin:10px">
-                                        <div>
-                                        <span class="ui-form-title-text"> <b>Select Galaxy Server</b> </span>
-                                        </div>
-                                        <input type="text" name="server" list="cityname">
-                                        <datalist id="cityname">
-                                            <option value="https://usegalaxy.org"> Galaxy Main </option>
-                                            <option value="https://0.0.0.0:8080"> Galaxy Local</option>
-                                            <option value="https://usegalaxy.eu"> Galaxy Europe</option>
-                                        </datalist>
+                                        <div style="margin:10px">
+                                            <div>
+                                                <span class="ui-form-title-text"> <b>Select Galaxy Server</b> </span>
+                                            </div>
+                                            <input type="text" class="InputData" name="server" value="https://usegalaxy.org" list="server-name">
+                                            <datalist id="server-name">
+                                                <option value="https://usegalaxy.org"> Galaxy Main </option>
+                                                <option value="https://0.0.0.0:8080"> Galaxy Local</option>
+                                                <option value="https://usegalaxy.eu"> Galaxy Europe</option>
+                                            </datalist>
                                         </div>
 
                                         <div style=" margin:10px">
-                                        <span class="ui-form-title-text"> <b>API Key</b> </span>
+                                            <span class="ui-form-title-text"> <b>API Key</b> </span>
                                             <input class="InputData" name="api" style="display: block" >
                                         </div>
                                     </div>
@@ -391,6 +397,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         var nb_form = this.el.querySelector('.nbtools-form')
 
         var data_upload = `<div class="login-form"> 
+                               
 
                                 <div class="auth-error" style="display: none; margin: 10px;"> 
                                     <p> <b>Authentication error</b> </p>
@@ -411,72 +418,64 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                                 <div class="login-form-div" style="display:block">
 
                                     <div class="tab">
-                                            <button type="button" id="resumable_upload_button" class="tablinks" >With Credential</button>
-                                            <button type="button" class="tablinks">With API Key</button>
+                                        <button type="button" id="resumable_upload_button" class="tablinks" >With Credential</button>
+                                        <button type="button" class="tablinks">With API Key</button>
                                     </div>
 
                                     <!-- Tab content -->
                                     <div id="credential-login" class="tabcontent" style="display: block;">
 
-                                        <div style="margin:10px">
-                                            <div>
-                                            <span class="ui-form-title-text"> <b>Select Galaxy Server</b> </span>
-                                            </div>
-                                            <input type="text" name="server" list="cityname">
-                                            <datalist id="cityname">
-                                                <option value="https://usegalaxy.org"> Galaxy Main </option>
-                                                <option value="https://0.0.0.0:8080"> Galaxy Local</option>
-                                                <option value="https://usegalaxy.eu"> Galaxy Europe</option>
-                                            </datalist>
+        
+                                    <div class="combo-box"> 
+                                        <div class="input-wrapper">
+                                            <span class="ui-form-title-text"> <b> Select Galaxy Server</b> </span>
+                                            <input type="text" class="InputData" name="server" value="https://usegalaxy.org" autocomplete="off">
                                         </div>
-
-                                        <div style=" margin:10px">
-                                        <span class="ui-form-title-text"> <b>Email ID/User Name</b> </span>
-                                            <input class="InputData" name="email" style="display: block" >
-                                        </div>
-
-                                        <div style=" margin:10px">
-                                        <span class="ui-form-title-text"> <b>Password</b> </span>
-                                            <input class="InputData" type="password" name="password" style="display: block" >
-                                        </div>
+                                        <ul class="ul-login">
+                                            <li data-value="https://usegalaxy.org" >  <div class="server-name"> Main </div> </li>
+                                            <li data-value="https://usegalaxy.eu">  <div class="server-name"> Europe </div>  </li>
+                                            <li data-value="https://localhost:8080" > <div class="server-name"> Local Server </div></li>
+                                        </ul>
                                     </div>
-                            
-                                    <div id="api-login" class="tabcontent" style="display: none;">
 
-                                    <div style="margin:10px">
-                                        <div>
-                                        <span class="ui-form-title-text"> <b>Select Galaxy Server</b> </span>
-                                        </div>
-                                        <input type="text" name="server" list="cityname">
-                                        <datalist id="cityname">
-                                            <option value="https://usegalaxy.org"> Galaxy Main </option>
-                                            <option value="https://0.0.0.0:8080"> Galaxy Local</option>
-                                            <option value="https://usegalaxy.eu"> Galaxy Europe</option>
-                                        </datalist>
-                                        </div>
+                                    <div id="login-email" style=" margin:10px">
+                                        <span class="ui-form-title-text"> <b>Email ID/User Name</b> </span>
+                                        <input class="InputData" name="email" style="display: block" >
+                                    </div>
 
-                                        <div style=" margin:10px">
-                                        <span class="ui-form-title-text"> <b>API Key</b> </span>
-                                            <input class="InputData" name="api" style="display: block" >
-                                        </div>
+                                    <div id="login-password" style=" margin:10px">
+                                        <span class="ui-form-title-text"> <b>Password</b> </span>
+                                        <input class="InputData" type="password" name="password" style="display: block" >
+                                    </div>
                                     </div>
                                 </div>
                             </div>`
 
         const utm = new DOMParser().parseFromString(data_upload, 'text/html').querySelector('.login-form')
 
-        var List = utm.querySelectorAll('.tablinks')        
+        var List = utm.querySelectorAll('.tablinks')    
+        var cb = utm.querySelector('.combo-box') 
 
-        // utm.querySelector('#upload').style.display  = 'block'
-
+        this.login_server_list(cb)
+        
         List.forEach((button) => button.addEventListener('click', () => {
 
             if (button.innerText  == 'With Credential') {
-                utm.querySelector('#credential-login').style.display  = 'block'
-                utm.querySelector('#api-login').style.display  = 'none'
-            } else if (button.innerText  == 'With API Key') {
-                utm.querySelector('#credential-login').style.display  = 'none'
-                utm.querySelector('#api-login').style.display  = 'block'
+                utm.querySelector('#login-email').style.display  = 'block'
+                utm.querySelector('#login-password').querySelector('span').innerHTML= "<b>Password</b>"
+                utm.querySelector('#login-email').querySelector('input').style.display = 'block'
+                utm.querySelector('#login-password').querySelector('input').value = ''
+                utm.querySelector('#login-email').querySelector('input').value = ''
+                utm.querySelector('#login-password').querySelector('input').style.background = ''
+                utm.querySelector('#login-email').querySelector('input').style.background = ''
+            } 
+            
+            else if (button.innerText  == 'With API Key') {
+                utm.querySelector('#login-email').querySelector('input').style.display = 'none'
+                utm.querySelector('#login-email').style.display  = 'none'
+                utm.querySelector('#login-password').querySelector('span').innerHTML= "<b>API Key</b>"
+                utm.querySelector('#login-email').querySelector('input').value = ''
+                utm.querySelector('#login-password').querySelector('input').style.background = ''
             }
         }));
 
@@ -490,6 +489,41 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         nb_form.append(utm)
     }
 
+
+    login_server_list(cb){
+
+        var inp = cb.querySelector('.InputData')
+
+        inp.addEventListener("mouseenter", ()=>{
+            cb.querySelector('.ul-login').style.display = 'block'
+        })
+        
+        inp.addEventListener("mouseleave", ()=>{
+            cb.querySelector('.ul-login').style.display = 'none'        
+        });
+        
+        cb.querySelectorAll('li').forEach(function(el) {
+            el.addEventListener('click', ()=>{        
+                cb.querySelector('.InputData').value = el.dataset.value
+                cb.querySelector('.ul-login').style.display = 'none'
+            })
+          });
+        
+        var ul = cb.querySelector('.ul-login')
+        
+        ul.addEventListener("mouseenter", ()=>{
+            cb.querySelector('.ul-login').style.display = 'block'
+        });
+        
+        ul.addEventListener("mouseleave", ()=>{
+            cb.querySelector('.ul-login').style.display = 'none'
+        });
+        
+        cb.querySelector('.InputData').addEventListener("click", ()=>{
+            cb.querySelector('.ul-login').style.display = 'none'
+        });
+    }
+
     iterate_over_tool_cells() {
 
         if (!ContextManager.notebook_tracker) return;               
@@ -501,6 +535,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             }
         }
     }
+
 
     add_galaxy_cell_metadata(){
 
@@ -691,10 +726,11 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         switch (input_def.type) {
             case "conditional":  
-                this.add_conditional_section(input_def, form_parent, name_prefix, data);
+                this.add_conditional_section_1(input_def, form_parent, name_prefix, data);
                 break;
             case "data":
             case "data_collection":
+
                 this.add_input_data(input_def, form_parent, name_prefix, data)
                 break
             case "integer" :
@@ -918,14 +954,13 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
                 var children = self.el.querySelector('.Galaxy-form')
                 var inputs = self.get_form_data(children)
-                var history_id = self.el.querySelector('.galaxy-history-list').querySelector('#history_ids').value
+                var history_id = self.el.querySelector('.galaxy-history-list').querySelector('#dataset-history-list').value
                 var refine_inputs  = await KernelSideDataObjects(`import json\nimport base64\nfrom GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.updated_form(${JSON.stringify(origin)}, json.loads(base64.b64decode("${btoa(JSON.stringify(inputs))}")), ${JSON.stringify(self.model.get('inputs')['id'])}, ${JSON.stringify(history_id)})`)
                 var form_parent = self.el.querySelector('.Galaxy-form')
 
                 self.removeAllChildNodes(form_parent)
                 self.form_builder(refine_inputs['inputs'])
             }
-
         });
     
         FormParent.append(row)
@@ -960,177 +995,188 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             return input_list
         }
     }
+
+    isDivVisible(divElement) {
+        return divElement.offsetWidth > 0 && divElement.offsetHeight > 0;
+      }
  
     get_form_data(form, checking){
 
         var self = this
         var out = {}
 
-        if (form.className == 'Galaxy-form' || form.className.includes('ui-portlet-section') || form.className.includes('ui-repeat') || form.className.includes('pl-2') || form.className.includes('sections')) {
-            for (var j = 0; j < form.children.length; j++){
-                if (self.get_form_data(form.children[j], checking) == 'error') {
+        // var Check = checking
+        
+        for (var i = 0; i < form.children.length; i++){
+            if ((form.children[i].className.includes('pl-2') &&  form.children[i].style.display == 'block' && form.children[i].children.length > 0) ||  form.children[i].className.includes('ui-portlet-section') || form.children[i].className.includes('ui-repeat')  || form.children[i].className.includes('sections')){
+
+                if (self.get_form_data(form.children[i], checking) == 'error') {
                     return 'error'
                 } else{
-                    Object.assign(out,  self.get_form_data(form.children[j], checking))
+                    Object.assign(out,  self.get_form_data(form.children[i], checking))
                 }
-            }
-        } else if (form.querySelector('.InputData')){
-
-            var opt
-
-            if (form.querySelector('.InputData')['data-value']){
-                opt = form.querySelector('.InputData')['data-value']
-            }
-
-            if (checking == 'on' && opt == false){
-                if (form.querySelector('.InputData').value == "") {
-                    form.querySelector('.InputData').style.backgroundColor = 'pink'
-                    return 'error'
-                } else {
-                    form.querySelector('.InputData').style.backgroundColor = ''
-                    out[form.querySelector('.InputData').name] =  form.querySelector('.InputData').value
-                }
-            } else {
-                // if (form.querySelector('.InputData').value == 'false') {
-                //     out[form.querySelector('.InputData').name] = false
-                // } else if (form.querySelector('.InputData').value == 'true'){
-                //     out[form.querySelector('.InputData').name] = true
-                // } else{
-                out[form.querySelector('.InputData').name] =  form.querySelector('.InputData').value
-                // }
-            }
+            } else if (form.children[i].className == 'ui-form-element section-row') {
         
-        } else if (form.querySelector('.outer-checkbox-div')){
+                if (form.children[i].querySelector('.InputData')){
 
-            var select_list = []
-
-            if (JSON.parse(form.querySelector('.outer-checkbox-div')['data-value'])["optional"] == true ) {
-
-
-                for (var k = 0; k < form.querySelector('.outer-checkbox-div').children.length; k++ ) {
-                    if (form.querySelector('.outer-checkbox-div').children[k].querySelector('.InputDataCheckbox').checked) {
-                        select_list.push(form.querySelector('.outer-checkbox-div').children[k].querySelector('.InputDataCheckbox').value)
-                    }
-                }
-
-                if (select_list.length == 0){
-                    out[form.querySelector('.outer-checkbox-div').querySelector('.InputDataCheckbox').name] = null
-                }  else{
-                    out[form.querySelector('.outer-checkbox-div').querySelector('.InputDataCheckbox').name] = select_list
-                }
-
-            }  else if ((JSON.parse(form.querySelector('.outer-checkbox-div')['data-value'])["optional"] == false )){
-                    if (select_list.length == 0){
-                        form.querySelector('.outer-checkbox-div').children[0].querySelector('.InputDataCheckbox').parentNode.style.backgroundColor = 'pink'
-
-                    } else if (select_list.length > 0 ){
-                        form.querySelector('.outer-checkbox-div').children[0].querySelector('.InputDataCheckbox').parentNode.style.backgroundColor = ''
-                        out[form.querySelector('.outer-checkbox-div').querySelector('.InputDataCheckbox').name] = select_list
-                    }
-        }
-
-        } else if (form.querySelector('.InputDataFile')){
-
-            if (checking == 'on') {
-
-                if (form.querySelector('.InputDataFile').options.length  == 0 ){
-                    form.querySelector('.InputDataFile').style.backgroundColor = 'pink'
-                    return 'error'
-                } else{
-                    form.querySelector('.InputDataFile').style.backgroundColor = ''
-
-                    var input_data = form.querySelector('.InputDataFile').parentElement['data-file']
-                    var input_files = []
+                    var opt
         
-                    for (var i = 0; i < form.querySelector('.InputDataFile').options.length; i++) {
-                        if (form.querySelector('.InputDataFile').options[i].selected == true) {
-                            input_files.push(JSON.parse(form.querySelector('.InputDataFile').options[i].value))
+                    if (form.children[i].querySelector('.InputData')['data-value']){
+                        opt = form.children[i].querySelector('.InputData')['data-value']
+                    }
+            
+                    if (checking == 'on' && opt == false){
+
+                        if (form.children[i].querySelector('.InputData').value == "") {
+                            form.children[i].querySelector('.InputData').style.backgroundColor = 'pink'
+                            return 'error'
+                        } else {
+                            form.children[i].querySelector('.InputData').style.backgroundColor = ''
+                            out[form.children[i].querySelector('.InputData').name] =  form.children[i].querySelector('.InputData').value
+                        }
+                    } else {
+
+                        out[form.children[i].querySelector('.InputData').name] =  form.children[i].querySelector('.InputData').value
+                   
+                    }
+                
+                } else if (form.children[i].querySelector('.outer-checkbox-div')){
+
+                    var select_list = []
+        
+                    if (JSON.parse(form.children[i].querySelector('.outer-checkbox-div')['data-value'])["optional"] == true ) {
+        
+                        for (var k = 0; k < form.children[i].querySelector('.outer-checkbox-div').children.length; k++ ) {
+                            if (form.children[i].querySelector('.outer-checkbox-div').children[k].querySelector('.InputDataCheckbox').checked) {
+                                select_list.push(form.children[i].querySelector('.outer-checkbox-div').children[k].querySelector('.InputDataCheckbox').value)
+                            }
+                        }
+        
+                        if (select_list.length == 0){
+                            out[form.children[i].querySelector('.outer-checkbox-div').querySelector('.InputDataCheckbox').name] = null
+                        }  else{
+                            out[form.children[i].querySelector('.outer-checkbox-div').querySelector('.InputDataCheckbox').name] = select_list
+                        }
+        
+                    }  else if ((JSON.parse(form.children[i].querySelector('.outer-checkbox-div')['data-value'])["optional"] == false )){
+                            if (select_list.length == 0){
+                                form.children[i].querySelector('.outer-checkbox-div').children[0].querySelector('.InputDataCheckbox').parentNode.style.backgroundColor = 'pink'
+        
+                            } else if (select_list.length > 0 ){
+                                form.children[i].querySelector('.outer-checkbox-div').children[0].querySelector('.InputDataCheckbox').parentNode.style.backgroundColor = ''
+                                out[form.children[i].querySelector('.outer-checkbox-div').querySelector('.InputDataCheckbox').name] = select_list
+                            }
+                    }
+
+                } else if (form.children[i].querySelector('.InputDataFile')){
+
+                    if (checking == 'on') {
+                        if (form.querySelector('.InputDataFile').options.length  == 0 ){
+                            form.querySelector('.InputDataFile').style.backgroundColor = 'pink'
+                            return 'error'
+                        } else{
+                            form.querySelector('.InputDataFile').style.backgroundColor = ''
+        
+                            var input_data = form.querySelector('.InputDataFile').parentElement['data-file']
+                            var input_files = []
+                
+                            for (var i = 0; i < form.querySelector('.InputDataFile').options.length; i++) {
+                                if (form.querySelector('.InputDataFile').options[i].selected == true) {
+                                    input_files.push(JSON.parse(form.querySelector('.InputDataFile').options[i].value))
+                                }
+                            }
+                            
+                            out[form.querySelector('.InputDataFile').name] = input_data 
+            
+                            if (input_files.length == 1 && input_files[0]['id'] == ''){
+                                out[form.querySelector('.InputDataFile').name] = null
+                            } else{
+                                input_data['values'] = input_files
+                                out[form.querySelector('.InputDataFile').name] = input_data
+                            }
+                        }
+        
+                    } else{
+
+                        var input_data = form.children[i].querySelector('.InputDataFile').parentElement['data-file']
+                        var input_files = []
+    
+                        var opts = form.children[i].querySelector('.InputDataFile').options
+    
+                        for (var n = 0; n < opts.length ; n++){
+                            if (opts[n].selected == true){
+                                input_files.push(JSON.parse(opts[n].value))
+                            }
+                        }
+                        
+                        out[form.children[i].querySelector('.InputDataFile').name] = input_data 
+
+                        if (input_files.length == 1 && input_files[0]['id'] == ''){
+                            out[form.children[i].querySelector('.InputDataFile').name] = null
+                        } else if (input_files.length == 0 ) {
+                            out[form.children[i].querySelector('.InputDataFile').name] = {}
+                        }
+                        else{
+                            input_data['values'] = input_files
+                            out[form.children[i].querySelector('.InputDataFile').name] = input_data
                         }
                     }
+
+                } else if(form.children[i].querySelector('.drill-down.container')) {
+
+                    var drill_down_inputs = []
+            
+                        for(var n = 0; n < form.children[i].querySelector('.drill-down.container').querySelectorAll('input').length; n++) {
+                            if (form.children[i].querySelector('.drill-down.container').querySelectorAll('input')[n].checked) {
+                                drill_down_inputs.push(form.children[i].querySelector('.drill-down.container').querySelectorAll('input')[n].value)
+                            }
+                        }
+                        out[form.children[i].querySelector('.drill-down.container').name] =  drill_down_inputs
+            
+                } else if (form.children[i].querySelector('.data_collection')){
                     
-                    out[form.querySelector('.InputDataFile').name] = input_data 
-    
-                    if (input_files.length == 1 && input_files[0]['id'] == ''){
-                        out[form.querySelector('.InputDataFile').name] = null
-                    } else{
-                        input_data['values'] = input_files
-                        out[form.querySelector('.InputDataFile').name] = input_data
-                    }
+                        var input_files = []  
+            
+                        out[form.children[i].querySelector('.data_collection').name] = input_files  
+            
+                        for (var i = 0; i < form.children[i].querySelector('.data_collection').options.length; i++) {
+                            if (form.children[i].querySelector('.data_collection').options[i].selected == true) {
+                                input_files.push(form.children[i].querySelector('.data_collection').options[i].data)
+                            }
+                        }
+
+                        if (checking == 'on') {
+                            if (out[form.children[i].querySelector('.data_collection').name].length < 1 ){
+                                fform.children[i].querySelector('.data_collection').style.backgroundColor = 'pink'
+                                return 'error'
+                            }
+                            else {
+                                form.children[i].querySelector('.data_collection').style.backgroundColor = ''
+                                out[form.children[i].querySelector('.data_collection').name] = input_files
+                                form.children[i].querySelector('.data_collection').parentElement['data-file']['values'] = input_files
+                                out[form.children[i].querySelector('.data_collection').name] = form.children[i].querySelector('.data_collection').parentElement['data-file']
+                            }
+                        } else {
+                            if (input_files.length == 0){
+                                form.children[i].querySelector('.data_collection').parentElement['data-file']['values'] = [{}]
+                            } else{
+                                form.children[i].querySelector('.data_collection').parentElement['data-file']['values'] = input_files
+                            }
+                            out[form.children[i].querySelector('.data_collection').name] = form.children[i].querySelector('.data_collection').parentElement['data-file']
+                        }
                 }
-
-            } else {
-
-                var input_data = form.querySelector('.InputDataFile').parentElement['data-file']
-                var input_files = []
-    
-                for (var i = 0; i < form.querySelector('.InputDataFile').options.length; i++) {
-                    if (form.querySelector('.InputDataFile').options[i].selected == true) {
-                        input_files.push(JSON.parse(form.querySelector('.InputDataFile').options[i].value))
-                    }
+            } else if (form.children[i].className == 'ui-form-element section-row conditional'){
+                if (form.children[i].querySelector('.InputData')){
+                    out[form.children[i].querySelector('.InputData').name] = form.children[i].querySelector('.InputData').value
                 }
-                
-                out[form.querySelector('.InputDataFile').name] = input_data 
-
-
-                if (input_files.length == 1 && input_files[0]['id'] == ''){
-                    out[form.querySelector('.InputDataFile').name] = null
-                } else if (input_files.length == 0 ) {
-                    out[form.querySelector('.InputDataFile').name] = {}
-                }
-                else{
-                    input_data['values'] = input_files
-                    out[form.querySelector('.InputDataFile').name] = input_data
-                }
-            }
-
-        } else if(form.querySelector('.drill-down.container')) {
-
-        var drill_down_inputs = []
-
-            for(var n = 0; n < form.querySelector('.drill-down.container').querySelectorAll('input').length; n++) {
-                if (form.querySelector('.drill-down.container').querySelectorAll('input')[n].checked) {
-                    drill_down_inputs.push(form.querySelector('.drill-down.container').querySelectorAll('input')[n].value)
-                }
-            }
-            out[form.querySelector('.drill-down.container').name] =  drill_down_inputs
-
-        } else if (form.querySelector('.data_collection')){
-        
-            var input_files = []  
-
-            out[form.querySelector('.data_collection').name] = input_files  
-
-            for (var i = 0; i < form.querySelector('.data_collection').options.length; i++) {
-                if (form.querySelector('.data_collection').options[i].selected == true) {
-                    input_files.push(form.querySelector('.data_collection').options[i].data)
-                }
-            }
-
-            if (checking == 'on') {
-                if (out[form.querySelector('.data_collection').name].length < 1 ){
-                    form.querySelector('.data_collection').style.backgroundColor = 'pink'
-                    return 'error'
-                }
-                else {
-                    form.querySelector('.data_collection').style.backgroundColor = ''
-                    out[form.querySelector('.data_collection').name] = input_files
-                    form.querySelector('.data_collection').parentElement['data-file']['values'] = input_files
-                    out[form.querySelector('.data_collection').name] = form.querySelector('.data_collection').parentElement['data-file']
-                }
-            } else {
-                if (input_files.length == 0){
-                    form.querySelector('.data_collection').parentElement['data-file']['values'] = [{}]
-                } else{
-                    form.querySelector('.data_collection').parentElement['data-file']['values'] = input_files
-                }
-                out[form.querySelector('.data_collection').name] = form.querySelector('.data_collection').parentElement['data-file']
             }
         }
 
-        if (Object.keys(out).length > 0){
+        // if (Object.keys(out).length > 0){
             return out  
-        }
+        // }
     }
+
 
     galaxy_data_verify(file_cache, id) {
 
@@ -1146,8 +1192,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         var input_list = this.extract_input_dom(form)
 
-        for(var i = 0; i < input_list.length; i++) {
-
+        for (var i = 0; i < input_list.length; i++) {
             if (identifier == input_list[i]['element_name']) {
                 return input_list[i]
             }
@@ -1277,12 +1322,14 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                                     }
 
                                     var form = document.querySelector(`#${e.target.parentNode.parentNode.parentNode.id.replace('g-tool-','')}`)
-                                    var hi = form.parentNode.querySelector('#history_ids').value
-
-                                    var uri = await KernelSideDataObjects(`from GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.send_data_to_galaxy_tool(server_d=${JSON.stringify(server)}, server_u=${JSON.stringify(e.target.data)}, dataset_id=${JSON.stringify(dataset['id'])}, ext=${JSON.stringify(dataset['extension'])}, history_id=${JSON.stringify(hi)})`)
+                                    var hi = form.parentNode.parentNode.querySelector('#dataset-history-list').value
+                          
+                                    var uri = await KernelSideDataObjects(`from GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.send_data_to_galaxy_tool(server_d=${JSON.stringify(server)}, server_u=${JSON.stringify(e.target.data)}, dataset_id=${JSON.stringify(dataset['id'])}, ext=${JSON.stringify(dataset['extension'])}, dataset_name=${JSON.stringify(dataset['name'])}, history_id=${JSON.stringify(hi)})`)
 
                                     for (let i = 0; i < Infinity; ++i) {
+
                                         var out = await KernelSideDataObjects(`from GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.show_data_set(server=${JSON.stringify(e.target.data)},  dataset_id=${JSON.stringify(uri['outputs'][0]['id'])})`)
+                                      
                                         await this.waitforme(5000);
                                         if (out['state'] === 'ok') {
                                             e.target.parentNode.parentNode.querySelector('.fas.fa-spinner.fa-spin').style.display = 'none'
@@ -1436,7 +1483,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
     add_drill_down_section(input_def, FormParent, NamePrefix){
 
-
         if(this.el.querySelector('.tool-migration-select')){
             var origin = this.el.querySelector('.tool-migration-select').value
         }  else{
@@ -1509,7 +1555,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 Div2.querySelectorAll('span')[i].className = 'icon fa mr-1 fa-minus'
             }
 
-            var history_id = self.el.querySelector('#history_ids').value
+            var history_id = self.el.querySelector('#dataset-history-list').value
             var form = self.el.querySelector('.Galaxy-form')
 
             let formdata = form.parentNode.parentNode.parentNode.parentNode.parentNode.outerHTML
@@ -1550,6 +1596,26 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         return row
     }
 
+
+    add_variable_widget(tbl){
+
+        tbl.querySelector('h3').innerText = "Error in variable name.."
+
+        tbl.querySelector('#var-button').addEventListener('click', async (e)=>{
+            e.preventDefault()
+            var input = tbl.querySelector("#lname");
+            var value = input.value;
+            var refine = await KernelSideDataObjects(`import IPython.display\nIPython.display.JSON({'value':globals()['${value}']})`)
+            
+            if (refine['value'] == 'error'){
+                tbl.querySelector('h3').innerText = "Error in variable name.."
+            } else{
+                tbl.querySelector('h3').innerText = "Enter a variable."
+                tbl.parentNode.querySelector('.InputData').value = refine['value']
+            }
+        })
+    }
+
     add_input_value (input_def, FormParent, NamePrefix){
 
         if(this.el.querySelector('.tool-migration-select')){
@@ -1566,7 +1632,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         input.type = input_def.type
 
-        if(input.type == 'color'){
+        if (input.type == 'color'){
             input.style.height = '40px'
             input.style.padding= '1px'
         }
@@ -1576,8 +1642,35 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         input.value = input_def['value']
         input.className = 'InputData'
         const row = document.createElement('div')
+
         const title = document.createElement('div')
         title.className = 'ui-from-title'
+
+        // var row1 = `<table>
+        //                 <tr>
+        //                     <td id="float-menu" ><a class="icon-btn display-btn" target="" href="" data-original-title="View data"><span class="fa fa-exchange" style="" title="Get value from a variable"></span></a>
+        //                     <input type="checkbox" >
+        //                     <div class="div-to-display">
+        //                         <div>
+        //                             <div id="variable-title"> 
+        //                                 <h3 style="margin-left:10px;">Enter a variable.</h3>
+        //                             </div>
+        //                             <div>
+        //                                 <input type="text" id="lname" name="lname" >
+        //                                 <button  id="var-button"> Get Variable</button>
+        //                             </div>
+        //                         </div>
+        //                     <div>
+        //                     </td>
+        //                 </tr>
+        //             </table>`
+
+        // const Tbl = new DOMParser().parseFromString(row1, 'text/html').querySelector('table')
+
+        // title.append(Tbl)
+
+        // this.add_variable_widget(title)
+
         const TitleSpan = document.createElement('span')
         TitleSpan.className = "ui-form-title-text"
         TitleSpan.textContent = input_def.label
@@ -1603,7 +1696,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         title.style.float = 'left'
 
         input.addEventListener('input', async () =>{
-            var history_id = self.el.querySelector('#history_ids').value
+            var history_id = self.el.querySelector('#dataset-history-list').value
             var form = self.el.querySelector('.Galaxy-form')
             var inputs = self.get_form_data(form)
             var refine_inputs  = await KernelSideDataObjects(`import json\nimport base64\nfrom GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.updated_form(${JSON.stringify(origin)}, json.loads(base64.b64decode("${btoa(JSON.stringify(inputs))}")), ${JSON.stringify(self.model.get('inputs')['id'])}, ${JSON.stringify(history_id)})`)
@@ -1613,7 +1706,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
             self.update_metadata_FormState('galaxy_tool', refine_inputs['inputs'], JSON.parse(fint))
  
-        })
+        })        
 
         row.append(title)
         row.append(input)
@@ -1646,7 +1739,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                             <div id="upload" class="tabcontent">
                                 <div style="margin-top:10px"><div style="float: left;"><p class="resumable-upload-title"><b>Upload file to the Galaxy server.</b></p></div><div class="upload-status-icon" style="float:left; margin-top:5px; margin-left:5px; display: none;"><i class="fa fa-spinner fa-spin" style="font-size:10px; float:left;"></i></div></div>
                                 <input id="inputupload" class="input_upload" type="file" style="display: block" >
-                                <div class="resumable-upload-warning" style="display: none;"> <b>Warning:</b> CORS error, file uploaded through bioblend API.</div>
+                                <div class="resumable-upload-warning" style="display: none;"> <b>Warning:</b> The upload will take longer than expected due to CORS error.</div>
                             </div>
                     
                             <div id="from_url" class="tabcontent" style="display: none;">
@@ -1768,22 +1861,15 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
  
     async resumable (data){
 
-        var HistoryID = this.el.querySelector('#history_ids').value
+        var HistoryID = self.el.querySelector('#dataset-history-list').value
         var state
 
         var e = this.el.querySelector('.list-item')
         e.parentElement.removeChild(e)
-        var DHL = this.el.querySelector('#dataset-history-list')
-        var DataListdiv = this.el.querySelector('.history-dataset-list');
 
-        for (var i = 0; i < DHL.options.length; i++ ){
-            if (DHL[i].value == HistoryID) {
-                DHL.selectedIndex = i
-            }
-        }
-        
         DataListdiv.append(await this.data_row_list( HistoryID ))
         var ListItem =  this.el.querySelector('.list-item')
+
         data['type_id'] =`dataset-${data['id']}` 
         this.add_dataset(ListItem, this.data_row_list, HistoryID)
     }
@@ -1883,10 +1969,10 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         var origin = this.el.querySelector('.tool-migration-select').value
 
         this.el.querySelector('.resumable-upload-warning').style.display = 'block'
-        this.el.querySelector('.resumable-upload-warning').style.color = 'red'
+        this.el.querySelector('.resumable-upload-warning').style.color = 'orange'
 
         var elm = this.el.querySelector('#inputupload')
-        var hi = this.el.querySelector('#history_ids').value
+        var hi =  this.el.querySelector('#dataset-history-list').value
 
         const file = elm.files.item(0);
         const reader = new FileReader();
@@ -1927,7 +2013,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         var cnf = {};
 
         var data = {
-            "history_id": self.element.querySelector('#history_ids').value,
+            "history_id": self.element.querySelector('#dataset-history-list').value, 
             "targets": [
                 {
                     "destination": {
@@ -1963,7 +2049,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         var datatype = children.querySelector('.datatypes_options').value
         var genome = children.querySelector('.genomes_options').value
-        var history_id = this.el.querySelector('#history_ids').value
+        var history_id = this.el.querySelector('#dataset-history-list').value
 
         for (var i = 0; i < upload_method.length; i++ )  {
             if (upload_method[i].style.display ==  'block'){
@@ -1977,15 +2063,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
                     var InitialData = await KernelSideDataObjects(`from GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.upload_dataset(file_path=${JSON.stringify(upload_link)}, upload_method=${JSON.stringify(upload_method)}, datatype=${JSON.stringify(datatype)}, genome=${JSON.stringify(genome)}, server=${JSON.stringify(this.el.querySelector(".tool-migration-select").value)}, HistoryID=${JSON.stringify(history_id)} )`);
                 
-                    var DHL = this.el.querySelector('#dataset-history-list')
                     var DataListdiv = this.el.querySelector('.history-dataset-list');
                     
-                    for (var i = 0; i <  DHL.options.length; i++ ){
-                        if (DHL[i].value == history_id) {
-                            DHL.selectedIndex = i
-                        }
-                    }
-
                     var e = this.el.querySelector('.list-item')
                     e.parentElement.removeChild(e)
                     DataListdiv.append(await this.data_row_list( history_id ))
@@ -2002,25 +2081,20 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
     }
 
     async add_dataset_table(){
-
-        var UpdateButton = document.createElement('label')
-        UpdateButton.id = 'dataset-update-label'
-        UpdateButton.for = 'history-list'
-        UpdateButton.innerHTML = 'Update <i class="fa fa-refresh" aria-hidden="true"></i>'
-
-        this.el.querySelector('.dataset-list').prepend(UpdateButton)
-
-        if(this.el.querySelector('.tool-migration-select')){
-            var origin = this.el.querySelector('.tool-migration-select').value
-        }  else{
-            var origin = this.model.get('origin')
-        }
         var self = this
 
-        const options =  await KernelSideDataObjects(`import json\nimport base64\nfrom GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.get_histories(server=${JSON.stringify(origin)})`)
+        if (this.el.querySelector('.tool-migration-select')){
+            var origin = this.el.querySelector('.tool-migration-select').value
+        } else{
+            var origin = this.model.get('origin')
+        }
+
+        var self = this
+
+        const options = await KernelSideDataObjects(`import json\nimport base64\nfrom GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.get_histories(server=${JSON.stringify(origin)})`)
         const select = document.createElement('select')
 
-        if(this.el.querySelector(`#dataset-history-list`)){
+        if (this.el.querySelector(`#dataset-history-list`)){
             this.el.querySelector(`#dataset-history-list`).parentNode.removeChild(this.el.querySelector(`#dataset-history-list`))
         }
 
@@ -2029,12 +2103,13 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         var DataListdiv = this.el.querySelector('.history-dataset-list');
 
-        if(DataListdiv.children.length > 0 ){
+        if (DataListdiv.children.length > 0 ){
             self.removeAllChildNodes(DataListdiv)
         }
-        DataListdiv.append(await this.data_row_list( options[0]['id']))
+
+        DataListdiv.append(await this.data_row_list(options[0]['id']))
     
-        for(var i = 0; i < options.length; i++) {
+        for (var i = 0; i < options.length; i++) {
             const opt = `${i+1}: ${options[i]['name']}`;
             const el = document.createElement("option");
             el.textContent = opt;
@@ -2043,7 +2118,9 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         }
 
         select.addEventListener("change", async () => {
-
+     
+            self.removeAllChildNodes(DataListdiv)
+        
             if (this.model.get('galaxy_tool_id') != "GiN_data_upload_tool"){
 
                 var form = self.element.querySelector('.Galaxy-form')
@@ -2062,78 +2139,85 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             }
 
             var history_id = select.value
-
-            var e = self.el.querySelector('.list-item')
-            e.parentElement.removeChild(e)
-
+            
             DataListdiv.append(await this.data_row_list( history_id))
         });
 
-        var update = this.el.querySelector('#dataset-update-label')
+        var update = this.el.querySelector('#datalist-update').querySelector('.fa.fa-refresh')
+        var spn = this.el.querySelector('#datalist-update').querySelector('.fas.fa-spinner.fa-pulse')
 
         update.addEventListener('click', async () => {
+            update.style.display = 'none'
+            spn.style.display = 'block'
+            this.el.querySelector('#dataset-status-text').querySelector('b').style.display = 'block'
+
             self.removeAllChildNodes(DataListdiv)    
             DataListdiv.append(await this.data_row_list( this.el.querySelector('#dataset-history-list').value))
+            // await self.add_dataset_table()
+            update.style.display = 'block'
+            spn.style.display = 'none'
+
+            this.el.querySelector('#dataset-status-text').querySelector('b').style.display = 'none'
         })
 
         var DataList = this.el.querySelector('#history-list')
+
         DataList.append(select)
     }
 
+    // async add_history_list(){
 
-    async add_history_list(){
+    //     var self = this
 
-        var self = this
+    //     if(this.el.querySelector('.tool-migration-select')){
+    //         var origin = this.el.querySelector('.tool-migration-select').value
+    //     }  else{
+    //         var origin = this.model.get('origin')
+    //     }
 
-        if(this.el.querySelector('.tool-migration-select')){
-            var origin = this.el.querySelector('.tool-migration-select').value
-        }  else{
-            var origin = this.model.get('origin')
-        }
+    //     var histories = await KernelSideDataObjects(`import json\nimport base64\nfrom GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.get_histories(server=${JSON.stringify(origin)})`)
 
-        var histories = await KernelSideDataObjects(`import json\nimport base64\nfrom GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.get_histories(server=${JSON.stringify(origin)})`)
+    //     const options =  histories
+    //     const select = document.createElement('select')
+    //     select.id = `history_ids`  
+    //     select.className = 'InputData'   
 
-        const options =  histories
-        const select = document.createElement('select')
-        select.id = `history_ids`  
-        select.className = 'InputData'   
+    //     for(var i = 0; i < options.length; i++) {
+    //         const opt = `${i+1}: ${options[i]['name']}`;
+    //         const el = document.createElement("option");
+    //         el.textContent = opt;
+    //         el.value =  `${options[i]['id']}`;
+    //         select.appendChild(el);
+    //     }
 
-        for(var i = 0; i < options.length; i++) {
-            const opt = `${i+1}: ${options[i]['name']}`;
-            const el = document.createElement("option");
-            el.textContent = opt;
-            el.value =  `${options[i]['id']}`;
-            select.appendChild(el);
-        }
-
-        // select.selectedIndex = selected_value
+    //     // select.selectedIndex = selected_value
         
-        select.addEventListener("change", async () => {
+    //     select.addEventListener("change", async () => {
 
-            var history_id = select.value
+    //         var history_id = select.value
 
-            if(this.el.querySelector('.tool-migration-select')){
-                var server = this.el.querySelector('.tool-migration-select').value
-            }  else{
-                var server = this.model.get('origin')
-            }
+    //         if(this.el.querySelector('.tool-migration-select')){
+    //             var server = this.el.querySelector('.tool-migration-select').value
+    //         }  else{
+    //             var server = this.model.get('origin')
+    //         }
 
-            if (this.model.get('galaxy_tool_id') != "GiN_data_upload_tool") {
-                var form = self.element.querySelector('.Galaxy-form')
-                var inputs = self.get_form_data(form)
+    //         if (this.model.get('galaxy_tool_id') != "GiN_data_upload_tool") {
+    //             var form = self.element.querySelector('.Galaxy-form')
+    //             var inputs = self.get_form_data(form)
 
-                var refine_inputs  = await KernelSideDataObjects(`import json\nimport base64\nfrom GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.updated_form(${JSON.stringify(server)}, json.loads(base64.b64decode("${btoa(JSON.stringify(inputs))}")), ${JSON.stringify(self.model.get('galaxy_tool_id'))}, ${JSON.stringify(history_id)})`)
-                var FormParent = self.el.querySelector('.Galaxy-form')    
-                self.removeAllChildNodes(FormParent)
-                var selected_index = {}
-                selected_index['HID'] = select.selectedIndex
-                self.form_builder(refine_inputs['inputs'],  selected_index)  
-            }
-        });
+    //             var refine_inputs  = await KernelSideDataObjects(`import json\nimport base64\nfrom GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.updated_form(${JSON.stringify(server)}, json.loads(base64.b64decode("${btoa(JSON.stringify(inputs))}")), ${JSON.stringify(self.model.get('galaxy_tool_id'))}, ${JSON.stringify(history_id)})`)
+    //             var FormParent = self.el.querySelector('.Galaxy-form')    
+    //             self.removeAllChildNodes(FormParent)
+    //             var selected_index = {}
+    //             selected_index['HID'] = select.selectedIndex
+    //             self.form_builder(refine_inputs['inputs'],  selected_index)  
+    //         }
+    //     });
 
-        var HistoryList = this.el.querySelector('.galaxy-history-list')
-        HistoryList.append(select)
-    }
+    //     var HistoryList = this.el.querySelector('.galaxy-history-list')
+    //     HistoryList.append(select)
+    // }
  
     AddHelpSection(help){
 
@@ -2235,6 +2319,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         help.style.margin = '10px'
 
         row.className = 'ui-repeat section-row'
+        row.style.display = 'block'
         row.id = input_def.id
 
         FormParent.append(outtitle)
@@ -2283,7 +2368,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 self.repeat_del['name'] = JSON.parse(e.target.parentNode.parentNode.parentNode['data-value'])['name']
                 self.repeat_del['index'] = JSON.parse(e.target.parentNode.parentNode.parentNode['data-value'])['count']
 
-                var history_id = self.el.querySelector('.galaxy-history-list').querySelector('#history_ids')
+                var history_id = self.element.querySelector('#dataset-history-list')
                 var form = self.element.querySelector('.Galaxy-form')
                 var Inputs = self.get_form_data(form)
             
@@ -2297,8 +2382,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
                 let formdata = form.parentNode.parentNode.parentNode.parentNode.parentNode.outerHTML
                 let fint = JSON.stringify(formdata)
-                self.update_metadata_FormState('galaxy_tool', refine_inputs['inputs'], JSON.parse(fint))
-  
+                self.update_metadata_FormState('galaxy_tool', refine_inputs['inputs'], JSON.parse(fint))  
 
             });
 
@@ -2342,7 +2426,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         Button.addEventListener("click", async (e)=>{ 
             var Count = row.children.length
             add_internal_repeat(input_def['inputs'], Count)
-            var history_id = self.el.querySelector('#history_ids').value
+      
+            var history_id = self.el.querySelector('#dataset-history-list').value
             var form = self.el.querySelector('.Galaxy-form')
             var inputs = self.get_form_data(form)
             var refine_inputs  = await KernelSideDataObjects(`import json\nimport base64\nfrom GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.updated_form(${JSON.stringify(origin)}, json.loads(base64.b64decode("${btoa(JSON.stringify(inputs))}")), ${JSON.stringify(self.model.get('inputs')['id'])}, ${JSON.stringify(history_id)})`)
@@ -2355,7 +2440,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         DeleteButton.addEventListener("click", async function(e){ 
             self.el.querySelector('.delete-button').closest('.internal-ui-repeat.section-row').remove()
-            var history_id = self.el.querySelector('#history_ids').value
+            var history_id = self.el.querySelector('#dataset-history-list').value
             var form = self.el.querySelector('.Galaxy-form')
             var inputs = self.get_form_data(form)
             var refine_inputs  = await KernelSideDataObjects(`import json\nimport base64\nfrom GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.updated_form(${JSON.stringify(origin)}, json.loads(base64.b64decode("${btoa(JSON.stringify(inputs))}")), ${JSON.stringify(self.model.get('inputs')['id'])}, ${JSON.stringify(history_id)})`)
@@ -2664,7 +2749,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             var children = self.el.querySelector('.Galaxy-form')
             var inputs = self.get_form_data(children)
 
-            var history_id = self.el.querySelector('.galaxy-history-list').querySelector('#history_ids').value
+            var history_id = self.el.querySelector('#dataset-history-list').value
             var refine_inputs  = await KernelSideDataObjects(`import json\nimport base64\nfrom GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.updated_form(${JSON.stringify(origin)}, json.loads(base64.b64decode("${btoa(JSON.stringify(inputs))}")), ${JSON.stringify(self.model.get('inputs')['id'])}, ${JSON.stringify(history_id)})`)
           
             this.update_metadata_FormState('galaxy', refine_inputs['inputs'],  children)
@@ -2746,7 +2831,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                     // OuterDiv.querySelectorAll('input')[i].click()
                 }
 
-                var history_id = self.el.querySelector('#history_ids').value
+                var history_id = self.el.querySelector('#dataset-history-list').value 
                 var form = self.el.querySelector('.Galaxy-form')
                 var inputs = self.get_form_data(form)
                 var refine_inputs  = await KernelSideDataObjects(`import json\nimport base64\nfrom GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.updated_form(${JSON.stringify(origin)}, json.loads(base64.b64decode("${btoa(JSON.stringify(inputs))}")), ${JSON.stringify(self.model.get('inputs')['id'])}, ${JSON.stringify(history_id)})`)
@@ -2762,7 +2847,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                     OuterDiv.querySelectorAll('input')[i].checked = 'false'
                     OuterDiv.querySelectorAll('input')[i].click()
                 }
-                var history_id = self.el.querySelector('#history_ids').value
+                var history_id = self.el.querySelector('#dataset-history-list').value
+                
                 var form = self.el.querySelector('.Galaxy-form')
                 var inputs = self.get_form_data(form)
                 var refine_inputs  = await KernelSideDataObjects(`import json\nimport base64\nfrom GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.updated_form(${JSON.stringify(origin)}, json.loads(base64.b64decode("${btoa(JSON.stringify(inputs))}")), ${JSON.stringify(self.model.get('inputs')['id'])}, ${JSON.stringify(history_id)})`)
@@ -2775,6 +2861,17 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             row.append(TitleSpan)
             row.append(select_lable)
             row.append(OuterDiv)
+
+            if (input_def.value && input_def.value.length > 0){
+                for (var k = 0; k < input_def.options.length; k++){
+                    for(var l = 0; l < input_def.value.length; l++){
+                        if(input_def.value[l] == input_def.options[k][1]){
+                            input_def.options[k][2] = true 
+                            
+                        }
+                    }
+                }
+            }
 
             for(var i = 0; i < input_def.options.length; i++) {
 
@@ -2794,20 +2891,29 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 CheckBoxInput.type = 'checkbox'
                 CheckBoxInput.name = NamePrefix+input_def['name']
 
+                CheckBoxInput.checked = input_def.options[i][2]
+
                 CheckBoxInput.addEventListener('change', async () => {
-                    var history_id = self.el.querySelector('#history_ids').value
+                    var history_id = self.element.querySelector('#dataset-history-list').value
                     var form = self.el.querySelector('.Galaxy-form')
                     var inputs = self.get_form_data(form)
+
                     var refine_inputs  = await KernelSideDataObjects(`import json\nimport base64\nfrom GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.updated_form(${JSON.stringify(origin)}, json.loads(base64.b64decode("${btoa(JSON.stringify(inputs))}")), ${JSON.stringify(self.model.get('inputs')['id'])}, ${JSON.stringify(history_id)})`)
+
+                    // var refine_inputs  = await KernelSideDataObjects(`import json\nimport base64\nfrom GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.updated_form(${JSON.stringify(origin)}, json.loads(base64.b64decode("${btoa(JSON.stringify(inputs))}")), ${JSON.stringify(self.model.get('inputs')['id'])}, ${JSON.stringify(history_id)})`)
                     let formdata = form.parentNode.parentNode.parentNode.parentNode.parentNode.outerHTML
                     let fint = JSON.stringify(formdata)
                     self.update_metadata_FormState('galaxy_tool', refine_inputs['inputs'], JSON.parse(fint))
+                   
+                    //  var refine_inputs  = await KernelSideDataObjects(`import json\nimport base64\nfrom GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.updated_form(${JSON.stringify(origin)}, json.loads(base64.b64decode("${btoa(JSON.stringify(inputs))}")), ${JSON.stringify(self.model.get('inputs')['id'])}, ${JSON.stringify(history_id)})`)
+
                 })
 
                 CheckBoxDiv.append(CheckBoxInput)
                 CheckBoxDiv.append(CheckboxLabel)
                 OuterDiv.append(CheckBoxDiv)
             }
+
         } 
         else {
             var options 
@@ -2856,8 +2962,26 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             row.className = 'ui-form-element section-row'
             row.id = input_def.id
 
+            // var var_input =  document.createElement('input')
+            // var_input.type = 'checkbox'
+            // var_input.className = 'variable-checkbox'
+    
+            // var_input.style.marginRight = '5px;'
+    
+            // const title_1 = document.createElement('div')
+            // title_1.className = 'ui-from-title'
+            // const TitleSpan_1 = document.createElement('span')
+            // TitleSpan_1.className = "variable-ui-form-title-text"
+    
+            // TitleSpan_1.textContent = 'Get value from local variable'
+            // TitleSpan_1.style.marginLeft = "10px;"
+    
+            // title_1.append(var_input)
+            // title_1.append(TitleSpan_1)
+
             row.append(title)
             row.append(select)
+            // row.append(title_1)
 
             const help = document.createElement('div')
             help.className = 'ui-from-help'
@@ -2880,7 +3004,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
                     var children = self.el.querySelector('.Galaxy-form')
                     var inputs = self.get_form_data(children)
-                    var history_id = self.el.querySelector('.galaxy-history-list').querySelector('#history_ids').value
+                    var history_id = self.el.querySelector('#dataset-history-list').value
+
                     var refine_inputs  = await KernelSideDataObjects(`import json\nimport base64\nfrom GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.updated_form(${JSON.stringify(origin)}, json.loads(base64.b64decode("${btoa(JSON.stringify(inputs))}")), ${JSON.stringify(self.model.get('inputs')['id'])}, ${JSON.stringify(history_id)})`)
                     var form_parent = self.el.querySelector('.Galaxy-form')
     
@@ -2951,7 +3076,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         select.addEventListener('change', async (e) => {
 
-            var history_id = self.el.querySelector('#history_ids').value
+            var history_id = self.el.querySelector('#dataset-history-list').value
             var form = self.el.querySelector('.Galaxy-form')
             var inputs = self.get_form_data(form)
             var refine_inputs  = await KernelSideDataObjects(`import json\nimport base64\nfrom GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.updated_form(${JSON.stringify(origin)}, json.loads(base64.b64decode("${btoa(JSON.stringify(inputs))}")), ${JSON.stringify(self.model.get('inputs')['id'])}, ${JSON.stringify(history_id)})`)
@@ -2971,6 +3096,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
     }
 
     async add_conditional_section(input_def, parent, NamePrefix, call_back_data={}){
+
+        
 
         if (this.el.querySelector('.tool-migration-select')){
             var origin = this.el.querySelector('.tool-migration-select').value
@@ -2997,7 +3124,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         select.id = `select-${input_def.id}`    
         select.className = 'InputData' 
     
-        for(var i = 0; i < options.length; i++) {
+        for (var i = 0; i < options.length; i++) {
             const opt = options[i][0];
             const el = document.createElement("option");
             el.textContent = opt;
@@ -3005,8 +3132,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             select.appendChild(el);
         }
 
-        for(var i, j = 0; i = select.options[j]; j++) {
-            if(i.value == input_def.test_param.value) {
+        for (var i, j = 0; i = select.options[j]; j++) {
+            if (i.value == input_def.test_param.value) {
                 select.selectedIndex = j;
                 break;
             }
@@ -3051,7 +3178,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             var form = self.element.querySelector('.Galaxy-form')
             var inputs = self.get_form_data(form)
             self.removeAllChildNodes(ConditionalDiv)
-            var history_id = self.element.querySelector('#history_ids').value 
+            var history_id = self.element.querySelector('#dataset-history-list').value 
             var refine_inputs = await KernelSideDataObjects(`import json\nimport base64\nfrom GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.updated_form(${JSON.stringify(origin)}, json.loads(base64.b64decode("${btoa(JSON.stringify(inputs))}")), ${JSON.stringify(self.model.get('inputs')['id'])}, ${JSON.stringify(history_id)})`)
             this.conditional_name = input_def['name']
             var input_def1 = this.un_wrap(refine_inputs['inputs'], this.conditional_name)
@@ -3075,6 +3202,113 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         parent.append(ConditionalDiv)
     }
+
+    add_conditional_section_1(input_def, parent, NamePrefix, call_back_data={}){
+
+
+        if (this.el.querySelector('.tool-migration-select')){
+            var origin = this.el.querySelector('.tool-migration-select').value
+        }  else{
+            var origin = this.model.get('origin')
+        }
+
+        // // // ########################################################
+        input_def.id = this.uid()
+        var self = this
+
+        var options = []
+
+        if(input_def['test_param']['type'] == "boolean" ){
+            options =  [['Yes', true ],
+                    ['No',  false]]
+        }else{
+            options =  input_def['test_param']['options']
+        }
+
+        const select = document.createElement('select')
+        select.name = NamePrefix+input_def['name']+"|"+input_def['test_param']['name']
+
+        select.id = `select-${input_def.id}`    
+        select.className = 'InputData' 
+
+        var options_list = []
+    
+        for (var i = 0; i < options.length; i++) {
+
+            var div_uid = this.uid()
+            options_list.push(div_uid )
+
+            const opt = options[i][0];
+            const el = document.createElement("option");
+            el.textContent = opt;
+            // el.value = div_uid;
+            el.value = options[i][1];
+            select.appendChild(el);
+        }
+
+        for (var i, j = 0; i = select.options[j]; j++) {
+            if (i.value == input_def.test_param.value) {
+                select.selectedIndex = j;
+                break;
+            }
+        }
+    
+        const row = document.createElement('div')
+        const title = document.createElement('div')
+        title.className = 'ui-from-title'
+        const TitleSpan = document.createElement('span')
+        TitleSpan.className = "ui-form-title-text"
+        TitleSpan.textContent = input_def['test_param']['label']
+
+        TitleSpan.style.display = 'inline'
+        title.append(TitleSpan)
+        row.className = 'ui-form-element section-row conditional'
+        row.style.display = 'block'
+        row.id = input_def.id
+        row.append(title)
+        row.append(select)
+        parent.append(row)
+
+        var NewNamePrefix = NamePrefix+input_def['name']+"|"
+        input_def.id = this.uid()
+
+        for( var i = 0; i < options.length; i++ ) {
+          
+            var ConditionalDiv = document.createElement('div')
+            // ConditionalDiv.className = 'ui-form-element section-row pl-2'
+            ConditionalDiv.id = options_list[i]
+
+            if (input_def['test_param'].value == input_def['cases'][i]['value']) {
+                    ConditionalDiv.style.display = 'block'
+                    ConditionalDiv.className = 'ui-form-element section-row visible pl-2'
+            }
+            else{
+                ConditionalDiv.style.display = 'none'
+                ConditionalDiv.className = 'ui-form-element section-row pl-2'
+            }
+
+            for (var j in input_def.cases[i].inputs) {
+
+                this.add(input_def.cases[i].inputs[j], ConditionalDiv, NewNamePrefix, call_back_data)
+                input_def.cases[i].inputs[j].id = this.uid()
+            }
+            
+            parent.append(ConditionalDiv)
+        }
+
+        select.addEventListener("change", (e) => {
+
+            for (var i = 0; i <  options_list.length; i++){
+                if (e.target.value == input_def['cases'][i]['value'] ){
+                    self.el.querySelector(`#${options_list[i]}`).style.display = 'block'
+                    self.el.querySelector(`#${options_list[i]}`).className = 'ui-form-element section-row visible pl-2'
+                } else{
+                    self.el.querySelector(`#${options_list[i]}`).style.display = 'none'
+                    self.el.querySelector(`#${options_list[i]}`).className = 'ui-form-element section-row pl-2'
+                }
+            }
+        });
+    }
   
     add_section (input_def, parent, NamePrefix){
 
@@ -3092,6 +3326,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         const UpperDiv = document.createElement('div')
         UpperDiv.className = `ui-portlet-section section-row`
         UpperDiv.id = `${input_def.id}`
+
+
  
         const Button = document.createElement('button')
         Button.className = 'collapsible'
@@ -3101,6 +3337,15 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         UpperDiv.appendChild(Button)
  
         SectionDiv.className = `ui-form-element section-row sections`
+
+
+
+        if(input_def.expanded){
+            SectionDiv.style.display = 'block'
+        }else{
+            SectionDiv.style.display = 'none'
+        }
+        
         SectionDiv.id = `${input_def.id}-sections`
  
         UpperDiv.append(SectionDiv)
@@ -3121,13 +3366,15 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             if (SectionDiv.childNodes.length == 0){
                 section()
                 this.section[input_def['name']] = true
+                SectionDiv.style.display = 'block'
             } else{
                 self.removeAllChildNodes(SectionDiv)
                 this.section[input_def['name']] = false
+                SectionDiv.style.display = 'none'
             }
             e.preventDefault();
 
-            var history_id = self.el.querySelector('#history_ids').value
+            var history_id = self.el.querySelector('#dataset-history-list').value
             var form = self.el.querySelector('.Galaxy-form')
             var inputs = self.get_form_data(form)
             var refine_inputs  = await KernelSideDataObjects(`import json\nimport base64\nfrom GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.updated_form(${JSON.stringify(origin)}, json.loads(base64.b64decode("${btoa(JSON.stringify(inputs))}")), ${JSON.stringify(self.model.get('inputs')['id'])}, ${JSON.stringify(history_id)})`)
@@ -3163,7 +3410,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         var datasets = await KernelSideDataObjects(`from GiN.taskwidget  import GalaxyTaskWidget\nGalaxyTaskWidget.history_data_list(server=${JSON.stringify(server)}, history_id=${JSON.stringify(history_id)} )`) 
 
 
-
         for (var i = 0; i < datasets.length; i++){
             if (datasets[i]['history_content_type'] == 'dataset') {
                 this.add_dataset(data_list, datasets[i], history_id)
@@ -3172,6 +3418,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 data_list.append( await this.dataset_collection_row_state (datasets[i], history_id))
             }
         }
+
         return data_list
     }
  
@@ -3267,8 +3514,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                         Tbl.className = `list-item ${dataset['history_content_type']} history-content state-ok`
                         
                         if (Tbl.querySelector('.primary-actions')){
-                            Tbl.querySelector('.primary-actions').innerHTML = `<a class="icon-btn display-btn" title="" target="_blank" href="${URL}/datasets/${dataset['id']}/display/?preview=True" data-original-title="View data"><span class="fas fa-eye" style="" title="View Data" ></span></a><a class="icon-btn edit-btn" target="_blank"  href="${URL}/datasets/edit?dataset_id=${dataset['id']}" data-original-title="Edit attributes"><span class="fa fa-pencil" title="Edit data"></span></a><a class="icon-btn delete-btn" title="" href="javascript:void(0);" data-original-title="Delete"><span class="fa fa-times" style="" title="Delete" ></span></a><a class="icon-btn display-btn" title="" target="" href="javascript:void(0);" data-original-title="View data"><span class="fa fa-download" style="" title="Download data to JupyterLab Server" ></span></a><a class="icon-btn display-btn"  target="" href="javascript:void(0);" data-original-title="View data"><span class="fa fa-exchange" style="" title="Send data to available tools"></span></a>`
-                        }
+                            Tbl.querySelector('.primary-actions').innerHTML = `<a class="icon-btn display-btn" title="" target="_blank" href="${URL}/datasets/${dataset['id']}/preview" data-original-title="View data"><span class="fas fa-eye" style="" title="View Data" ></span></a><a class="icon-btn edit-btn" target="_blank"  href="${URL}/datasets/${dataset['id']}/edit" data-original-title="Edit attributes"><span class="fa fa-pencil" title="Edit data"></span></a><a class="icon-btn delete-btn" title="" href="javascript:void(0);" data-original-title="Delete"><span class="fa fa-times" style="" title="Delete" ></span></a><a class="icon-btn display-btn" title="" target="" href="javascript:void(0);" data-original-title="View data"><span class="fa fa-download" style="" title="Download data to JupyterLab Server" ></span></a><a class="icon-btn display-btn"  target="" href="javascript:void(0);" data-original-title="View data"><span class="fa fa-exchange" style="" title="Send data to available tools"></span></a>`
+                        }                                                                                         
                         break;
                     }  
                     
@@ -3277,7 +3524,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                         Tbl.className = `list-item ${dataset['history_content_type']} history-content state-error`
                     
                         if (Tbl.querySelector('.primary-actions')){
-                            Tbl.querySelector('.primary-actions').innerHTML = `<a class="icon-btn display-btn" title="" target="_blank" href="${URL}/datasets/${dataset['id']}/display/?preview=True" data-original-title="View data"><span class="fas fa-eye" style="" title="View Data" ></span></a><a class="icon-btn edit-btn" target="_blank"  href="${URL}/datasets/edit?dataset_id=${dataset['id']}" data-original-title="Edit attributes"><span class="fa fa-pencil" title="Edit data"></span></a><a class="icon-btn delete-btn" title="" href="javascript:void(0);" data-original-title="Delete"><span class="fa fa-times" style="" title="Delete" ></span></a>`
+                            Tbl.querySelector('.primary-actions').innerHTML = `<a class="icon-btn display-btn" title="" target="_blank" href="${URL}/datasets/${dataset['id']}/preview" data-original-title="View data"><span class="fas fa-eye" style="" title="View Data" ></span></a><a class="icon-btn edit-btn" target="_blank"  href="${URL}/datasets/${dataset['id']}/edit" data-original-title="Edit attributes"><span class="fa fa-pencil" title="Edit data"></span></a><a class="icon-btn delete-btn" title="" href="javascript:void(0);" data-original-title="Delete"><span class="fa fa-times" style="" title="Delete" ></span></a>`
                         }
                         break;
                     }     
@@ -3509,7 +3756,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         if (dataset['state'] == 'error'){
             if (Tbl.querySelector('.primary-actions')){
-            Tbl.querySelector('.primary-actions').innerHTML = `<a class="icon-btn display-btn" title="" target="_blank" href="${URL}/datasets/${dataset['id']}/display/?preview=True" data-original-title="View data"><span class="fas fa-eye" style="" title="View Data" ></span></a><a class="icon-btn edit-btn" target="_blank"  href="${URL}/datasets/edit?dataset_id=${dataset['id']}" data-original-title="Edit attributes"><span class="fa fa-pencil" title="Edit data"></span></a><a class="icon-btn delete-btn" title="" href="javascript:void(0);" data-original-title="Delete"><span class="fa fa-times" style="" title="Delete" ></span></a>`
+            Tbl.querySelector('.primary-actions').innerHTML = `<a class="icon-btn display-btn" title="" target="_blank" href="${URL}/datasets/${dataset['id']}/preview" data-original-title="View data"><span class="fas fa-eye" style="" title="View Data" ></span></a><a class="icon-btn edit-btn" target="_blank"  href="${URL}/datasets/${dataset['id']}/edit" data-original-title="Edit attributes"><span class="fa fa-pencil" title="Edit data"></span></a><a class="icon-btn delete-btn" title="" href="javascript:void(0);" data-original-title="Delete"><span class="fa fa-times" style="" title="Delete" ></span></a>`
             
             var spn = document.createElement('li')
             spn.className =  "fa fa-times-circle"
@@ -3519,7 +3766,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         } else if (dataset['state'] == 'ok') {
             if (Tbl.querySelector('.primary-actions')){
-                Tbl.querySelector('.primary-actions').innerHTML = `<a class="icon-btn display-btn" title="" data-original-title="View data"><span class="fas fa-eye" style="" title="View Data" ></span></a><a class="icon-btn edit-btn" target="_blank"  href="${URL}/datasets/edit?dataset_id=${dataset['id']}" data-original-title="Edit attributes"><span class="fa fa-pencil" title="Edit data"></span></a><a class="icon-btn delete-btn" title="" href="javascript:void(0);" data-original-title="Delete"><span class="fa fa-times" style="" title="Delete" ></span></a><a class="icon-btn display-btn" title="" target="" href="javascript:void(0);" data-original-title="View data"><span class="fa fa-download" style="" title="Download data to JupyterLab Server" ></span></a><a class="icon-btn display-btn"  target="" href="javascript:void(0);" data-original-title="View data"><span class="fa fa-exchange" style="" title="Send data to available tools"></span></a>`
+                Tbl.querySelector('.primary-actions').innerHTML = `<a class="icon-btn display-btn" title="" data-original-title="View data"><span class="fas fa-eye" style="" title="View Data" ></span></a><a class="icon-btn edit-btn" target="_blank"  href="${URL}/datasets/${dataset['id']}/edit" data-original-title="Edit attributes"><span class="fa fa-pencil" title="Edit data"></span></a><a class="icon-btn delete-btn" title="" href="javascript:void(0);" data-original-title="Delete"><span class="fa fa-times" style="" title="Delete" ></span></a><a class="icon-btn display-btn" title="" target="" href="javascript:void(0);" data-original-title="View data"><span class="fa fa-download" style="" title="Download data to JupyterLab Server" ></span></a><a class="icon-btn display-btn"  target="" href="javascript:void(0);" data-original-title="View data"><span class="fa fa-exchange" style="" title="Send data to available tools"></span></a>`
         
                 //FixME:
 
@@ -3534,8 +3781,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                                             <div class="data-preview-header-icon" style="float: left" ><a class="icon-btn delete-btn" title="" href="javascript:void(0);" data-original-title="Delete"><span class="fa fa-times" style="" title="Delete" ></span></a></div>
                                             <div class="data-preview-title" style="float: left">  <p class="title"> <b>${dataset['name']} </b></p> </div>
                                         </div>
-                                        <div class="data-preview-content" style="width:100%; height:95%;"> 
-                                            <iframe  src="${URL}/datasets/${dataset['id']}/display/?preview=True&?api_key={%27x-api-key%27:%27${apiKey['api_key']}%27}" > </iframe>
+                                        <div class="data-preview-content" style="width: 100%; height:100%;"> 
+                                            <iframe  src="${URL}/datasets/${dataset['id']}/display/?preview=True&?api_key={%27x-api-key%27:%27${apiKey['api_key']}%27}" style="width: 100%; height:100%;" > </iframe>
                                         </div>
                                     </div>`
 
@@ -3555,7 +3802,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             Tbl.style.background = '#daecf8'
             // Tbl.className = `list-item ${dataset['history_content_type']} history-content state-paused`
             if (Tbl.querySelector('.primary-actions')){
-                Tbl.querySelector('.primary-actions').innerHTML = `<a class="icon-btn display-btn" title="" target="_blank" href="${URL}/datasets/${dataset['id']}/display/?preview=True" data-original-title="View data"><span class="fas fa-eye" style="" title="View Data" ></span></a><a class="icon-btn edit-btn" target="_blank"  href="${URL}/datasets/edit?dataset_id=${dataset['id']}" data-original-title="Edit attributes"><span class="fa fa-pencil" title="Edit data"></span></a><a class="icon-btn delete-btn" title="" href="" data-original-title="Delete"><span class="fa fa-times" style="" title="Delete" ></span></a>`
+                Tbl.querySelector('.primary-actions').innerHTML = `<a class="icon-btn display-btn" title="" target="_blank" href="${URL}/datasets/${dataset['id']}/preview" data-original-title="View data"><span class="fas fa-eye" style="" title="View Data" ></span></a><a class="icon-btn edit-btn" target="_blank"  href="${URL}/datasets/${dataset['id']}/edit" data-original-title="Edit attributes"><span class="fa fa-pencil" title="Edit data"></span></a><a class="icon-btn delete-btn" title="" href="" data-original-title="Delete"><span class="fa fa-times" style="" title="Delete" ></span></a>`
             }
         }
 
@@ -3617,7 +3864,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                     Tbl.querySelector('.fas.fa-spinner.fa-spin').parentElement.removeChild(Tbl.querySelector('.fas.fa-spinner.fa-spin'))
                     
                     if (Tbl.querySelector('.primary-actions')){
-                        Tbl.querySelector('.primary-actions').innerHTML = `<a class="icon-btn display-btn" title="" target="_blank" href="${URL}/datasets/${dataset['id']}/display/?preview=True" data-original-title="View data"><span class="fas fa-eye" style="" title="View Data" ></span></a><a class="icon-btn edit-btn" target="_blank"  href="${URL}/datasets/edit?dataset_id=${dataset['id']}" data-original-title="Edit attributes"><span class="fa fa-pencil" title="Edit data"></span></a><a class="icon-btn delete-btn" title="" href="javascript:void(0);" data-original-title="Delete"><span class="fa fa-times" style="" title="Delete" ></span></a><a class="icon-btn display-btn" title="" target="" href="javascript:void(0);" data-original-title="View data"><span class="fa fa-download" style="" title="Download data to JupyterLab Server" ></span></a><a class="icon-btn display-btn"  target="" href="javascript:void(0);" data-original-title="View data"><span class="fa fa-exchange" style="" title="Send data to available tools"></span></a>`
+                        Tbl.querySelector('.primary-actions').innerHTML = `<a class="icon-btn display-btn" title="" target="_blank" href="${URL}/datasets/${dataset['id']}/preview" data-original-title="View data"><span class="fas fa-eye" style="" title="View Data" ></span></a><a class="icon-btn edit-btn" target="_blank"  href="${URL}/datasets/${dataset['id']}/edit" data-original-title="Edit attributes"><span class="fa fa-pencil" title="Edit data"></span></a><a class="icon-btn delete-btn" title="" href="javascript:void(0);" data-original-title="Delete"><span class="fa fa-times" style="" title="Delete" ></span></a><a class="icon-btn display-btn" title="" target="" href="javascript:void(0);" data-original-title="View data"><span class="fa fa-download" style="" title="Download data to JupyterLab Server" ></span></a><a class="icon-btn display-btn"  target="" href="javascript:void(0);" data-original-title="View data"><span class="fa fa-exchange" style="" title="Send data to available tools"></span></a>`
                     }
                     break;
                 }  
@@ -3635,10 +3882,9 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                     }
                 
                     if (Tbl.querySelector('.primary-actions')){
-                        Tbl.querySelector('.primary-actions').innerHTML = `<a class="icon-btn display-btn" title="" target="_blank" href="${URL}/datasets/${dataset['id']}/display/?preview=True" data-original-title="View data"><span class="fas fa-eye" style="" title="View Data" ></span></a><a class="icon-btn edit-btn" target="_blank"  href="${URL}/datasets/edit?dataset_id=${dataset['id']}" data-original-title="Edit attributes"><span class="fa fa-pencil" title="Edit data"></span></a><a class="icon-btn delete-btn" title="" href="javascript:void(0);" data-original-title="Delete"><span class="fa fa-times" style="" title="Delete" ></span></a>`
+                        Tbl.querySelector('.primary-actions').innerHTML = `<a class="icon-btn display-btn" title="" target="_blank" href="${URL}/datasets/${dataset['id']}/preview" data-original-title="View data"><span class="fas fa-eye" style="" title="View Data" ></span></a><a class="icon-btn edit-btn" target="_blank"  href="${URL}/datasets/${dataset['id']}/edit" data-original-title="Edit attributes"><span class="fa fa-pencil" title="Edit data"></span></a><a class="icon-btn delete-btn" title="" href="javascript:void(0);" data-original-title="Delete"><span class="fa fa-times" style="" title="Delete" ></span></a>`
                     }
 
-                    
                     break;
                 }     
 
@@ -3768,7 +4014,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         var row = `<div id="${dataset['type_id']}"   class="list-item ${dataset['history_content_type']} history-content state-ok" >
                     <div class="warnings"></div>
                     <div class="selector"><span class="fa fa-2x fa-square-o"></span></div>
-                    <div class="primary-actions"><a class="icon-btn display-btn" title="" target="_blank" href="${URL}/datasets/${dataset['id']}/display/?preview=True" data-original-title="View data"><span class="fas fa-eye" style="" title="View Data" ></span></a><a class="icon-btn edit-btn" target="_blank"  href="${URL}/datasets/edit?dataset_id=${dataset['id']}" data-original-title="Edit attributes"><span class="fa fa-pencil" title="Edit data"></span></a><a class="icon-btn delete-btn" title="" href="javascript:void(0);" data-original-title="Delete"><span class="fa fa-times" style="" title="Delete" ></span></a><a class="icon-btn display-btn" title="" target="" href="javascript:void(0);" data-original-title="View data"><span class="fa fa-download" style="" title="Download data to JupyterLab Server" ></span></a><a class="icon-btn display-btn"  target="" href="javascript:void(0);" data-original-title="View data"><span class="fa fa-exchange" style="" title="Send data to available tools"></span></a></div>
+                    <div class="primary-actions"><a class="icon-btn display-btn" title="" target="_blank" href="${URL}/datasets/${dataset['id']}/preview" data-original-title="View data"><span class="fas fa-eye" style="" title="View Data" ></span></a><a class="icon-btn edit-btn" target="_blank"  href="${URL}/datasets/${dataset['id']}/edit" data-original-title="Edit attributes"><span class="fa fa-pencil" title="Edit data"></span></a><a class="icon-btn delete-btn" title="" href="javascript:void(0);" data-original-title="Delete"><span class="fa fa-times" style="" title="Delete" ></span></a><a class="icon-btn display-btn" title="" target="" href="javascript:void(0);" data-original-title="View data"><span class="fa fa-download" style="" title="Download data to JupyterLab Server" ></span></a><a class="icon-btn display-btn"  target="" href="javascript:void(0);" data-original-title="View data"><span class="fa fa-exchange" style="" title="Send data to available tools"></span></a></div>
                     <div class="title-bar clear"  tabindex="0" draggable="true" ondragstart="event.dataTransfer.setData('text/plain',null) > 
                     <span class="state-icon"></span>
 
@@ -3935,7 +4181,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                             </div>
                             <div class="actions clear">
                                 <div class="left">
-                                    <a class="download-btn icon-btn"  href="${URL}/datasets/${dataset['id']}/display?to_ext=${dataset['extension']}" title="" data-original-title="Download"> <span class="fa fa-save" title="Download data"></span> </a><a class="icon-btn" title=""  href="javascript:void(0);" data-original-title="Copy link"><span class="fa fa-chain" style="" title="Copy link"></span></a><a class="icon-btn params-btn" title="" target="_blank" href="${URL}/datasets/${dataset['id']}/show_params" data-original-title="View details"><span class="fa fa-info-circle" style="" title="Dataset details"></span></a><a class="icon-btn visualization-link" title="" target="_blank" href="${URL}/visualizations?dataset_id=${dataset['dataset_id']}" data-original-title="Visualize this data"><span class="fa fa-bar-chart" style="" title="Visualize"></span></a>
+                                    <a class="download-btn icon-btn"  href="${URL}/datasets/${dataset['id']}/display?to_ext=${dataset['extension']}" title="" data-original-title="Download"> <span class="fa fa-save" title="Download data"></span> </a><a class="icon-btn" title=""  href="${URL}/api/datasets/${dataset['id']}/display?to_ext=${dataset['name']}" data-original-title="Copy link"><span class="fa fa-chain" style="" title="Copy link"></span></a><a class="icon-btn params-btn" title="" target=""_blank" href="${URL}/datasets/${dataset['id']}/show_params" data-original-title="View details"><span class="fa fa-info-circle" style="" title="Dataset details"></span></a><a class="icon-btn visualization-link" title="" target="_blank" href="${URL}/visualizations?dataset_id=${dataset['dataset_id']}" data-original-title="Visualize this data"><span class="fa fa-bar-chart" style="" title="Visualize"></span></a>
                                 </div>
                             </div>
 
@@ -3999,6 +4245,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         var chain_button = ok_details_html.querySelector('.fa.fa-chain')
 
         chain_button.addEventListener('click', (e) => {
+
       
         });
     }
@@ -4278,7 +4525,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 StdError.style.background = '#f4a3a5'
 
                 // parent.querySelector('.job-id').style.color = "red"
-
             }
 
             await this.waitforme(3000);
@@ -4327,7 +4573,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         var line = `<div id="dataset-${dataset['dataset_id']}" class="list-item dataset history-content state-running" style="display: none;">
                         <div class="warnings"></div>
                         <div class="selector"><span class="fa fa-2x fa-square-o"></span></div>
-                        <div class="primary-actions"><a class="icon-btn display-btn" title="" target="galaxy_main" href="${URL}/datasets/${dataset['dataset_id']}/display/?preview=True" data-original-title="View data"><span class="fa fa-eye" style=""></span></a><a class="icon-btn edit-btn" title="" href="${URL}/datasets/edit?dataset_id=${dataset['dataset_id']}" data-original-title="Edit attributes"><span class="fa fa-pencil" style=""></span></a><a class="icon-btn delete-btn" title="" href="javascript:void(0);" data-original-title="Delete"><span class="fa fa-times" style=""></span></a><a class="icon-btn display-btn" title="" target="galaxy_main" href="${URL}/datasets/${dataset['dataset_id']}/display/?preview=True" data-original-title="View data"><span class="fa fa-eye" style=""></span></a></div>
+                        <div class="primary-actions"><a class="icon-btn display-btn" title="" target="galaxy_main" href="${URL}/datasets/${dataset['id']}/preview" data-original-title="View data"><span class="fa fa-eye" style=""></span></a><a class="icon-btn edit-btn" title="" href="${URL}/datasets/${dataset['id']}/edit" data-original-title="Edit attributes"><span class="fa fa-pencil" style=""></span></a><a class="icon-btn delete-btn" title="" href="javascript:void(0);" data-original-title="Delete"><span class="fa fa-times" style=""></span></a><a class="icon-btn display-btn" title="" target="galaxy_main" href="${URL}/datasets/${dataset['dataset_id']}/display/?preview=True" data-original-title="View data"><span class="fa fa-eye" style=""></span></a></div>
                         <div class="title-bar clear" tabindex="0" draggable="true"> <span class="state-icon"></span>
                             <div class="title"> <span class="hid">${dataset['hid']}</span> <span class="name">${dataset['name']}/span> </div>
                             <br>
@@ -4339,7 +4585,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                                 <div>This job is currently running</div>
                             </div>
                             <div class="actions clear">
-                                <div class="left"><a class="icon-btn params-btn" title="" target="galaxy_main" href="${URL}/datasets/${dataset['dataset_id']}show_params" data-original-title="View details"><span class="fa fa-info-circle" style=""></span></a><a class="icon-btn rerun-btn" title="" target="galaxy_main" href="${URL}/tool_runner/rerun?id=${dataset['dataset_id']}" data-original-title="Run this job again"><span class="fa fa-refresh" style=""></span></a><a class="icon-btn icon-btn" title="" href="#" data-original-title="Tool Help"><span class="fa fa-question" style=""></span></a></div>
+                                <div class="left"><a class="icon-btn params-btn" title="" target="galaxy_main" href="${URL}/datasets/${dataset['id']}/show_params" data-original-title="View details"><span class="fa fa-info-circle" style=""></span></a><a class="icon-btn rerun-btn" title="" target="galaxy_main" href="${URL}/tool_runner/rerun?id=${dataset['dataset_id']}" data-original-title="Run this job again"><span class="fa fa-refresh" style=""></span></a><a class="icon-btn icon-btn" title="" href="#" data-original-title="Tool Help"><span class="fa fa-question" style=""></span></a></div>
                                 <div class="right"><a class="icon-btn tag-btn" title="" href="" data-original-title="Edit dataset tags"><span class="fa fa-tags" style=""></span></a><a class="icon-btn annotate-btn" title="" href="" data-original-title="Edit dataset annotation"><span class="fa fa-comment" style=""></span></a></div>
                             </div>
                             <div class="annotation-display"></div>
@@ -4508,7 +4754,12 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             }else {
                 var form = self.element.querySelector('.Galaxy-form')
                 var inputs = this.get_form_data(form, 'on')
-                var history_id = self.element.querySelector('#history_ids').value 
+
+                if (inputs == 'error'){
+                    return 
+                }
+
+                var history_id = self.element.querySelector('#dataset-history-list').value 
                 this.SubmitJob(inputs, history_id)
                 this.hide_run_buttons(true)
             }
@@ -4521,105 +4772,73 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         var logingForm = this.el.querySelector('.login-form-div')
         var formdata = logingForm.parentNode.parentNode.parentNode.parentNode.outerHTML       
         let fint = JSON.stringify(formdata)
-
         this.el.querySelector('#refresh-galaxy-cells').style.display = 'none'
         this.el.querySelector('.auth-error').style.display = 'none'
-        this.el.querySelector('.auth-waiting').style.display = 'block';
+        this.el.querySelector('.auth-waiting').style.display = 'none';
 
-        for(var i = 0; i < logingForm.children.length; i++) {
-            if (logingForm.children[i].style.display == 'block'){
-                if (logingForm.children[i].id == 'credential-login'){
-                    var credentials = logingForm.children[i].querySelectorAll('input')
+        var credentials = { 'server':null, 'email':null, 'password':null,  'api_key': null }  
+        var inputs = this.$(".tabcontent:visible")[0].querySelectorAll('input')
 
-                    for (let i = 0; i < Infinity; ++i) {
-                        var jobs = await KernelSideDataObjects(`from GiN.authwidget import GalaxyAuthWidget\na  = GalaxyAuthWidget()\na.login(server=${JSON.stringify(credentials[0].value)}, password=${JSON.stringify(credentials[2].value)}, email=${JSON.stringify(credentials[1].value)})`)
-                        await this.waitforme(3000);
-
-                        if (jobs.state === 'error' ) {
-
-                            this.el.querySelector('.auth-error').style.display = 'block'
-                            // this.el.querySelector('.login-form-div').style.display = "none";
-                            this.el.querySelector('.auth-waiting').style.display = 'none';
-                            this.el.querySelector('.auth-successful').style.display = 'none';
-
-                            break;
-                        } else if (jobs.state === 'success'){
-                            this.el.querySelector('.nbtools-subtitle').innerText = credentials[0].value
-                            this.el.querySelector('.auth-successful').style.display = 'block';
-                            this.el.querySelector('.login-form-div').style.display = "none";
-                            this.el.querySelector('.auth-waiting').style.display = 'none';
-                            this.el.querySelector('.auth-error').style.display = 'none'
-                            this.el.querySelector('#refresh-galaxy-cells').style.display = 'block'
-                            this.hide_run_buttons(true)
-
-                            if (this.el.querySelector('#form-restore').checked ){
-
-                                if (!ContextManager.notebook_tracker) return;               
-                                if (!ContextManager.notebook_tracker.currentWidget) return;
-                                var notebookTracker = ContextManager.notebook_tracker
-    
-                                const notebook = notebookTracker.currentWidget.content
-                                const notebookHasBeenRan = getRanNotebookIds().includes(notebook.id)
-                                // if(!notebookHasBeenRan) {
-                                    this.runAllGalaxyCells()
-                                // }
-                            }
-
-                            break;
-                        }
-                    }
-                  
-                    Private.origins.push(credentials[0].value);
-
-                } else {
-                    var credentials = logingForm.children[i].querySelectorAll('input')
-
-                    for (let i = 0; i < Infinity; ++i) {
-                        var jobs = await KernelSideDataObjects(`from GiN.authwidget import GalaxyAuthWidget\na  = GalaxyAuthWidget()\na.login(server=${JSON.stringify(credentials[0].value)}, api_key=${JSON.stringify(credentials[1].value)})`)
-               
-                        await this.waitforme(3000);
-
-                        if (jobs.state === 'error' ) {
-
-                            this.el.querySelector('.auth-error').style.display = 'block'
-                            // this.el.querySelector('.login-form-div').style.display = "none";
-                            this.el.querySelector('.auth-waiting').style.display = 'none';
-                            this.el.querySelector('.auth-successful').style.display = 'none';
-
-                            break;
-                        } else if (jobs.state === 'success'){
-                            this.el.querySelector('.nbtools-subtitle').innerText = credentials[0].value
-                            this.el.querySelector('.auth-successful').style.display = 'block';
-                            this.el.querySelector('.login-form-div').style.display = "none";
-                            this.el.querySelector('.auth-waiting').style.display = 'none';
-                            this.el.querySelector('.auth-error').style.display = 'none'
-                            this.el.querySelector('#refresh-galaxy-cells').style.display = 'block'
-                            this.hide_run_buttons(true)
-
-                            if (this.el.querySelector('#form-restore').checked ){
-
-                                if (!ContextManager.notebook_tracker) return;               
-                                if (!ContextManager.notebook_tracker.currentWidget) return;
-                                var notebookTracker = ContextManager.notebook_tracker
-    
-                                const notebook = notebookTracker.currentWidget.content
-                                const notebookHasBeenRan = getRanNotebookIds().includes(notebook.id)
-                                // if(!notebookHasBeenRan) {
-                                    this.runAllGalaxyCells()
-                                // }
-                            }
-                            break;
-                        }
-                    }
-                }
+        for (var i = 0; i < inputs.length; i++){
+            if (inputs[i].value == '' && inputs[i].style.display == 'block'){
+                inputs[i].style.background = 'pink'
+                return 
+            }else if (inputs[i].value != '' && inputs[i].style.display == 'block'){
+                inputs[i].style.background = ''
             }
         }
+
+        this.el.querySelector('.auth-waiting').style.display = 'block';
+
+        if (inputs[1].style.display == 'none'){
+            credentials['server'] = inputs[0].value
+            credentials['api_key'] = inputs[2].value
+        }else if (inputs[1].style.display == 'block'){
+            credentials['server'] = inputs[0].value
+            credentials['email'] =  inputs[1].value
+            credentials['password'] = inputs[2].value
+        }
+
+        var jobs = await KernelSideDataObjects(`import json\nimport base64\nfrom GiN.authwidget import GalaxyAuthWidget\na  = GalaxyAuthWidget()\na.login(json.loads(base64.b64decode("${btoa(JSON.stringify(credentials))}")))`)
+           
+        if (jobs.state === 'error' ) {
+
+            this.el.querySelector('.auth-error').style.display = 'block'
+            // this.el.querySelector('.login-form-div').style.display = "none";
+            this.el.querySelector('.auth-waiting').style.display = 'none';
+            this.el.querySelector('.auth-successful').style.display = 'none';
+
+        } else if (jobs.state === 'success'){
+
+            this.el.querySelector('.nbtools-subtitle').innerText = credentials['server']
+            this.el.querySelector('.auth-successful').style.display = 'block';
+            this.el.querySelector('.login-form-div').style.display = "none";
+            this.el.querySelector('.auth-waiting').style.display = 'none';
+            this.el.querySelector('.auth-error').style.display = 'none'
+            this.el.querySelector('#refresh-galaxy-cells').style.display = 'block'
+            this.hide_run_buttons(true)
+
+            if (this.el.querySelector('#form-restore').checked ){
+
+                if (!ContextManager.notebook_tracker) return;               
+                if (!ContextManager.notebook_tracker.currentWidget) return;
+                var notebookTracker = ContextManager.notebook_tracker
+
+                const notebook = notebookTracker.currentWidget.content
+                const notebookHasBeenRan = getRanNotebookIds().includes(notebook.id)
+                // if(!notebookHasBeenRan) {
+                    this.runAllGalaxyCells()
+                // }
+            }
+        }
+        
+        Private.origins.push(credentials['server']); 
     }
 
     async SubmitJob(inputs, history_id){
 
         if(this.el.querySelector('.tool-migration-select')){
-        var origin = this.el.querySelector('.tool-migration-select').value
+            var origin = this.el.querySelector('.tool-migration-select').value
         }  else{
             var origin = this.model.get('origin')
         }
@@ -4632,9 +4851,10 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 hl.selectedIndex = i
             }
         }
+
         // var jobs  = await KernelSideDataObjects(`import json\nfrom GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.submit_job(gal_instance=${JSON.stringify(this.model.get('gal_instance'))}, tool_inputs=json.loads("""${JSON.stringify(inputs)}"""), history_id=${JSON.stringify(history_id)})`)
         var jobs  = await KernelSideDataObjects(`import json\nimport base64\nfrom GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.submit_job(server=json.loads(base64.b64decode("${btoa(JSON.stringify(origin))}")), tool_id=json.loads(base64.b64decode("${btoa(JSON.stringify(this.model.get('galaxy_tool_id')))}")), tool_inputs=json.loads(base64.b64decode("${btoa(JSON.stringify(inputs))}")), history_id=json.loads(base64.b64decode("${btoa(JSON.stringify(history_id))}")))`)
-    
+        
     if (jobs['state'] == 'job failed'){
 
         this.JobStatusTemplate(toolforms, jobs)
@@ -4709,7 +4929,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         return display_apps
     }  
 
-
     register_button() {
 
         this.el.querySelector('.nbtools-buttons').querySelector('button').addEventListener('click', ()=>{
@@ -4718,10 +4937,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
     }
     
     _submit_keypress() {
-
-
-
-
        
     }
  }
