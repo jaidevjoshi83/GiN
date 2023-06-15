@@ -47,7 +47,7 @@ class GalaxyAuthWidget(GalaxyUIBuilder):
         )
 
     def login(self, credentials):
-    #def login(self, server, password=None, api_key=None, email=None):
+
 
         """Login to the Galaxy server"""
 
@@ -72,8 +72,6 @@ class GalaxyAuthWidget(GalaxyUIBuilder):
         self.session._notebook_password = credentials['password']
         self.session._notebook_key = credentials['api_key']
 
-        # Validate the provided credentials
-
         self.register_session()
 
         tool_list['url']  = self.session._notebook_url
@@ -91,23 +89,19 @@ class GalaxyAuthWidget(GalaxyUIBuilder):
                         tool['origin'] = self.session._notebook_url
                         tool['email'] = self.session._notebook_email
                         tool_list['tools'].append(tool)
-                        # GalaxyAuthWidget.RegisterMod(tool_list['tools'])
+               
  
         t = {"id": 'GiN_data_upload_tool',  "description": "Upload data files to galaxy server", "name": "Upload Data", 'origin': self.session._notebook_url, 'inputs': [{'type': 'data_upload'}]}
        
         t = TaskTool('+', t )
         ToolManager.instance().register(t)
 
-        # def register_modules_callback():
+    
         for i in tool_list['tools']:
             GalaxyAuthWidget().RegisterMod(i)
 
-        # registration_thread = Thread(target=register_modules_callback)
-        # registration_thread.start()
 
-        # print(GalaxyAuthWidget().RegisterMod(tool_list['tools']))
-
-        return IPython.display.JSON({'state':'success'})
+        return IPython.display.JSON({'state':'success'}) 
    
     def RegisterMod(self, tool):
 

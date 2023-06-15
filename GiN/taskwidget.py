@@ -11,6 +11,7 @@ from nbtools import UIBuilder
 
 import os
 import re
+import json
 
 
 log = logging.getLogger(__name__)
@@ -45,6 +46,7 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
 
         a = GiN.sessions.SessionList()
         gi = a.get(server=self.tool['origin'])
+
         history_ids = gi.gi.histories.get_histories()
 
         if self.tool['name'] == 'workflow_explorer' or self.tool['name'] == 'Upload Data' :
@@ -57,7 +59,7 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
                 history_id=history_ids[0]["id"],
                 python_side=True,
             )
-
+        
         GalaxyUIBuilder.__init__(
             self,
             inputs=inputs,
@@ -104,6 +106,7 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
                 OutDict = dict(list(OutDict.items()) + list(Dict3.items()))
 
         return OutDict
+
     @staticmethod
     def submit_job( server, tool_id, tool_inputs=None, history_id=None):
 
@@ -118,6 +121,9 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
             )
         except BaseException as e:
             job = {"state": "job failed", 'error': str(e)}
+
+
+        del gi1
 
         return IPython.display.JSON(job)
 
@@ -137,6 +143,8 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
         gi1 = a.get(server=server)
         job = gi1.jobs.gi.jobs.show_job(job_id=job_id)
 
+        del gi1
+
         return IPython.display.JSON(job)
 
     
@@ -151,7 +159,10 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
         datatypes_genomes = {
             "datatypes": data_types,
             "genomes": genomes,
+
         }
+
+        del gi2
 
         return IPython.display.JSON(datatypes_genomes)
 
@@ -159,7 +170,12 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
     def Return_api_key( server):
         a = GiN.sessions.SessionList()
         gi = a.get(server=server)
-        return IPython.display.JSON({'api_key': gi.gi.key, 'email': gi.gi.users.get_current_user()['email']})
+
+        key = gi.gi.key
+        email = gi.gi.users.get_current_user()['email']
+        
+        #return IPython.display.JSON({'api_key': key, 'email': email})
+        return {'api_key': key, 'email': email}
     
     @staticmethod
     def upload_dataset(
@@ -175,10 +191,12 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
 
         if upload_method == "text":
             job = gi3.gi.tools.put_url(content=file_path, history_id=HistoryID)
+            del gi3
             return IPython.display.JSON(job)
 
         elif upload_method == "textarea":
             job = gi3.gi.tools.put_url(content=file_path, history_id=HistoryID)
+            del gi3
             return IPython.display.JSON(job)
 
         # return IPython.display.JSON(job)
@@ -189,6 +207,7 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
         gi4 = a.get(server=server)
 
         status = gi4.jobs.gi.jobs.show_job(JobID, full_details=True)
+        del gi4
         return IPython.display.JSON(status)
 
     @staticmethod
@@ -196,6 +215,7 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
 
         a = GiN.sessions.SessionList()
         gi4 = a.get(server=server)
+        del gi4
 
     @staticmethod
     def OutPutData( server=None, JobID=None):
@@ -214,6 +234,8 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
                     hda_ldda=showJob["outputs"][i]["src"],
                 )
             )
+
+        del gi5
 
         return IPython.display.JSON(DataList)
 
@@ -259,16 +281,17 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
             )
 
             if input_data_param is False:
-                return IPython.display.JSON(data=inputs)
+                # return IPython.display.JSON(data=inputs)
+                data=inputs
+                return data
             else:
-                return IPython.display.JSON(
-                    GalaxyTaskWidget.RetrivParm(inputs["inputs"])
-                )
-
+                return GalaxyTaskWidget.RetrivParm(inputs["inputs"])
+                    
         elif (tool_inputs is None) and (tool_id is not None):
 
             inputs = gi6.tools.gi.tools.build(tool_id=tool_id, history_id=history_id)
-            return IPython.display.JSON(data=inputs)
+            data=inputs
+            return data
 
         else:
             history_data = gi6.gi.datasets.gi.datasets.get_datasets(
@@ -282,7 +305,11 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
             if python_side is True:
                 return history_data
             else:
-                return IPython.display.JSON(data=history_data)
+                # IPython.display.JSON(data=history_data)
+                data=history_data
+                return data
+
+
     @staticmethod
     def history_data_list( server=None, history_id=None):
 
@@ -293,21 +320,28 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
             history_data = gi7.gi.datasets.gi.datasets.get_datasets(
                 history_id=history_id, deleted=False, purged=False, visible=True
             )
-            # for i in HistoryData:
-            #  
-            #    datasets.append(gi.gi.datasets.gi.datasets.show_dataset(dataset_id=i['id']))
-            return IPython.display.JSON(history_data)
+
+            # # for i in HistoryData:
+            # #  
+            # #    datasets.append(gi.gi.datasets.gi.datasets.show_dataset(dataset_id=i['id']))
+            # del gi7
+            #return IPython.display.JSON(history_data)
+            return history_data
+
         except:
-            return IPython.display.JSON([])
+            del gi7
+            #return IPython.display.JSON([])
+            return []
 
     @staticmethod
     def show_data_set(server=None, dataset_id=None):
 
         a = GiN.sessions.SessionList()
         gi8 = a.get(server=server)
-
         show_dataset = gi8.gi.datasets.gi.datasets.show_dataset(dataset_id=dataset_id)
-        return IPython.display.JSON(show_dataset)
+        
+        #return IPython.display.JSON(show_dataset) #keeps kernel busy 
+        return show_dataset
 
     @staticmethod
     def delete_dataset(server=None, history_id=None, dataset_id=None):
@@ -318,6 +352,8 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
         gi9.gi.histories.gi.histories.delete_dataset(
             history_id=history_id, dataset_id=dataset_id, purge=True
         )
+        del gi9
+
     @staticmethod
     def delete_dataset_collection(
          server=None, history_id=None, dataset_collection_id=None
@@ -331,6 +367,9 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
             dataset_collection_id=dataset_collection_id,
             # purge=True,
         )
+
+        del gi10
+
     @staticmethod
     def show_dataset_collection( server=None, dataset_id=None):
 
@@ -340,7 +379,12 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
         show_dataset = gi11.gi.dataset_collections.show_dataset_collection(
             dataset_collection_id=dataset_id
         )
-        return IPython.display.JSON(show_dataset)
+
+
+        print(show_dataset)
+
+        # return IPython.display.JSON(show_dataset)
+        return show_dataset
 
 
     @staticmethod
@@ -380,6 +424,7 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
             gi12.gi.datasets.download_dataset(
                 dataset_id=collection_id, file_path=galaxy_data
             )
+        del gi12
     @staticmethod
     def CORS_fallback_upload(
         file_name,
@@ -403,6 +448,7 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
         f.close()
    
         out = gi.tools.gi.tools.upload_file(path=path, history_id=history_id)
+        del gi
         return IPython.display.JSON(out)
 
     @staticmethod
@@ -438,6 +484,9 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
 
         out = gi14.tools.gi.tools.upload_file(path=file_name[0], history_id=history_id)
 
+        del gi13
+        del gi14
+
         return IPython.display.JSON(out)
 
         # if not os.path.exists(galaxy_data):
@@ -452,6 +501,8 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
         gi14 = a.get(server=server_u)
         file_name = glob.glob(temp_dir + "/*.*")
         out = gi14.tools.gi.tools.upload_file(path=file_name[0], history_id=history_id)
+
+        del gi14
 
         return IPython.display.JSON(out)
 
@@ -491,6 +542,8 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
         gi15 = a.get(server=server)
         job_state = gi15.gi.jobs.show_job(job_id=job_id, full_details=True)
 
+        del gi15
+
         return IPython.display.JSON(job_state)
 
     @staticmethod
@@ -499,6 +552,8 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
         a = GiN.sessions.SessionList()
         gi16 = a.get(server=server)
         job_state = gi16.gi.jobs.get_state(job_id=job_id)
+
+        del gi16
 
         return IPython.display.JSON({"job_state": job_state})
 
