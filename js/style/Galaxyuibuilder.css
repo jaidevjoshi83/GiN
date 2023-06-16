@@ -329,14 +329,14 @@ overflow:hidden;
 } 
 
 .tool-forms {
-float:left;
-width:70%;
+/* float:left; */
+width:60%;
 height:100%;
-margin-right: 10px;
-padding:10px 5px 10px 5px; 
 background-color: rgb(246,246,246);
 border-radius: 5px;
 } 
+
+
 
 #dataset-history-label{
   height: 5px;

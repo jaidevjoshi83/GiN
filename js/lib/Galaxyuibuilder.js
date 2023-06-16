@@ -113,13 +113,15 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
     this.KernelOutPut = '';
     this.JOBID = {};
     this.file_cache = [];
-    this.galaxy_file_cache = []
-    this.conditional_name = []
-    this.list = []
-    this.repeat_del = {'name':"", "index":""}
-    this.toolregistry = {'tools':""}
-    this.select_index = null
-    this.section = {}
+    this.galaxy_file_cache = [];
+    this.conditional_name = [];
+    this.list = [];
+    this.repeat_del = {'name':"", "index":""};
+    this.toolregistry = {'tools':""};
+    this.select_index = null;
+    this.section = {};
+ 
+
 
     // this.section_collapse = {'expanded':false, 'name':''}
     // <iframe src="http://localhost:8080/datasets/fa70ae9fc8539e18/display/?preview=True&?api_key=865ad23561f93ec78ed5398e815c1057" title="W3Schools Free Online Web Tutorials"></iframe>
@@ -195,6 +197,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         var refresh_i = document.querySelector('i')
         refresh_i.className = "fa fa-refresh"
         refresh_i.style.fontSize = '14'
+        refresh_i.style.float = 'left'
         refresh_i.style.marginRight = '5px'
         refresh_i.title = "Refresh server list"
         refresh_i.id = "migration-tool-button"
@@ -211,8 +214,9 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         Label.innerHTML = '<b>Select Server</b>'
         Label.style.marginRight =  '20px'
 
-        div.append(Label)
+       
         div.append(refresh_i)
+        div.append(Label)
 
         div.style.float = 'left'
         div.style.marginRight = '150px'
@@ -267,7 +271,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
             var servers   = await KernelSideDataObjects(`import GiN\na = GiN.sessions.SessionList()\na.get_servers()`)
             KernelSideDataObjects(`try:\n    del a\nexcept:    print("a is not defined")`)
-            
+
             self.removeAllChildNodes(Select)
 
             for (var i = 0; i < servers.length; i++){
@@ -438,9 +442,9 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                                             <input type="text" class="InputData" name="server" value="https://usegalaxy.org" autocomplete="off">
                                         </div>
                                         <ul class="ul-login">
-                                            <li data-value="https://usegalaxy.org" >  <div class="server-name"> Main </div> </li>
-                                            <li data-value="https://usegalaxy.eu">  <div class="server-name"> Europe </div>  </li>
-                                            <li data-value="https://localhost:8080" > <div class="server-name"> Local Server </div></li>
+                                            <li class="server-list-el" data-value="https://usegalaxy.org" > <b> Main<b/>  </li>
+                                            <li class="server-list-el" data-value="https://usegalaxy.eu">  <b>Europe</b>   </li>
+                                            <li class="server-list-el" data-value="https://localhost:8080" >  <b>Local Server</b> </li>
                                         </ul>
                                     </div>
 
@@ -736,7 +740,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 break;
             case "data":
             case "data_collection":
-
                 this.add_input_data(input_def, form_parent, name_prefix, data)
                 break
             case "integer" :
@@ -1810,6 +1813,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         utm.querySelector('.available-sessions')
         var datatypes_genomes = await KernelSideDataObjects(`from GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.get_data_type_and_genomes(server=${JSON.stringify(origin)})`)
+       
+       
         var Input = utm.querySelector('#inputupload')
 
         if (Input.files.length > 0){
@@ -2119,6 +2124,16 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
     }
 
     async add_dataset_table(){
+
+
+        var spn = this.el.querySelector('#datalist-update').querySelector('.fas.fa-spinner.fa-pulse')
+        var update = this.el.querySelector('#datalist-update').querySelector('.fa.fa-refresh')
+
+        spn.style.display = 'block'
+        update.style.display = 'none'
+        this.el.querySelector('#dataset-status-text').querySelector('b').style.display = 'block'
+
+
         var self = this
 
         if (this.el.querySelector('.tool-migration-select')){
@@ -2156,7 +2171,13 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             select.appendChild(el);
         }
 
+
+
         select.addEventListener("change", async () => {
+
+            this.el.querySelector('#dataset-status-text').querySelector('b').style.display = 'block'
+            spn.style.display = 'block'
+            update.style.display = 'none'
      
             self.removeAllChildNodes(DataListdiv)
         
@@ -2175,6 +2196,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 var selected_index = {}
                 selected_index['HID'] = select.selectedIndex
                 self.form_builder(refine_inputs['inputs'],  selected_index) 
+
+
             } else {
                 self.removeAllChildNodes(DataListdiv )
                 DataListdiv.append(await this.data_row_list(select.value))
@@ -2183,10 +2206,11 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             var history_id = select.value
             
             DataListdiv.append(await this.data_row_list( history_id))
-        });
 
-        var update = this.el.querySelector('#datalist-update').querySelector('.fa.fa-refresh')
-        var spn = this.el.querySelector('#datalist-update').querySelector('.fas.fa-spinner.fa-pulse')
+            spn.style.display = 'none'
+            this.el.querySelector('#dataset-status-text').querySelector('b').style.display = 'none'
+            update.style.display = 'block'
+        });
 
         update.addEventListener('click', async () => {
             update.style.display = 'none'
@@ -2204,7 +2228,13 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         var DataList = this.el.querySelector('#history-list')
 
+
+
         DataList.append(select)
+
+        spn.style.display = 'none'
+        update.style.display = 'block'
+        this.el.querySelector('#dataset-status-text').querySelector('b').style.display = 'none'
     }
 
     // async add_history_list(){
@@ -2649,6 +2679,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         row.append(FileManu)
         row.append(help)
 
+
         if (input_def.type == 'data_collection'){
             for (var i = 0; i < options['hdca'].length; i++) {
                 const el = document.createElement("option");
@@ -2675,10 +2706,9 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         sim.querySelector('#data-file-input').addEventListener('click', (e) => {
 
+
             FileManu.querySelector('.data-descriptor-label').style.display = 'none'
-
             FileManu['data-file']['batch'] = false
-
             Select.multiple = false
 
             self.removeAllChildNodes(Select)
@@ -3402,7 +3432,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         UpperDiv.id = `${input_def.id}`
 
 
- 
         const Button = document.createElement('button')
         Button.className = 'collapsible'
         Button.innerText = input_def['title']

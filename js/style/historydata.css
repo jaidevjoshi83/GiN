@@ -290,6 +290,7 @@ border-radius: 3px;
   overflow:auto;
   width: 28%;
   background-color: rgb(246,246,246);
+  float: left; 
 } 
 
 .galaxy-uibuilder .galaxy-history-list{
@@ -424,4 +425,8 @@ border-radius: 3px;
 
 .galaxy-uibuilder .job-status-buttons .display-btn:hover {
   color: white;
+}
+
+.galaxy-uibuilder .jp-mod-selected .nbtools-form .dataset-list{
+  float: left;  
 }
