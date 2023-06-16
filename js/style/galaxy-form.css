@@ -280,26 +280,25 @@
   margin-bottom: 5px;
 }
 
-.galaxy-uibuilder .tool-migration-select{
+.galaxy-uibuilder .tool-migration-select {
   width: 80%;
   margin: 1px;
   float: right;
   background: rgb(255,255,255);
   border: none;
-  width: 40%;
   height: 30px;
   position: absolute;
   margin-right: 20px;
   margin-top: 2px;
+  margin-left: 10px;
 }
-
 
 .galaxy-uibuilder .form-restore-div .fa-refresh {  
-  float: right;
-  font-size: 20px;
-  margin: 5px
+  float: left;
+  color: rgb(233, 233, 246);
+  font-size: 25px;
+  margin-top: 5px;
 }
-
 
 .galaxy-uibuilder .job-status-footer div {
   overflow: auto;
@@ -316,33 +315,19 @@
 }
 
 
+.galaxy-uibuilder .form-restore-div span {
+ 
 
-.galaxy-uibuilder .form-restore-div .fa-refresh {
-  color: rgb(233, 233, 246);
-  font-size: 20px;
-  margin: 5px;
 }
-
-.galaxy-uibuilder .form-restore-div label{
-  margin-top:  5px;
-}
-
-
-.galaxy-uibuilder .combo-box .fa {
-  /* background: rgb(222, 225, 222); */
-  /* padding: 5px; */
+/* .galaxy-uibuilder .combo-box .fa {
   margin: 0px;
-  /* float: right; */
-  /* width: 5%; */
-}
+} */
 
 .galaxy-uibuilder .combo-box .InputData::-webkit-inner-spin-button {
   margin: 0px;
   border: none;
   width: 98%;
   opacity: 1
- 
-
 }
 
 .galaxy-uibuilder .combo-box .login-input-div{
@@ -361,15 +346,11 @@
   border: solid 1px black;
 }
 
-
-
 .galaxy-uibuilder .combo-box li{
   background: rgb(18,2,56);
   width: 100%;
   color: rgb(244, 244, 244);
   padding: 5px;
-  
-
 }
 
 .galaxy-uibuilder .combo-box li:hover{
@@ -379,7 +360,6 @@
   padding-top: 5px;
   border-left: solid rgb(132,129,129) 1px;
   border-top: solid rgb(131,130,130) 1px;
-
 }
 
 .galaxy-uibuilder .combo-box ul{
@@ -395,20 +375,18 @@
   height: 100px;
   overflow-y: auto; 
   overflow-x: hidden; 
-  
 }
 
 .galaxy-uibuilder .combo-box {
   width: 100%;
-  height: 60px;
+  height: 80px;
 }
 
 .combo-box  .input-wrapper {
   position: relative;
   display: inline-block;
   margin-top: 10px;
-  margin-left: 10px;
-  width: 98.5%;
+  width: 100%;
   height: 30px;
 }
 
@@ -457,10 +435,41 @@
   border-radius: 5px;
   }
   
+.galaxy-uibuilder #login-email {
+    height: 60px;
+  }
+
+.galaxy-uibuilder #login-password {
+    height:  60px;
+  }
+
+.galaxy-uibuilder #refresh-button {
+    width: 150px;
+    margin-top: 10px
+}
+
+.galaxy-uibuilder .form-restore-div #migra-label {
+  float: left;
+  margin: 10px;
+}
 
 
-  .jp-mod-selected .tool-migration-select {
-    width: 80%;
-    height: 28px;
+.jp-mod-selected .ui-form-title-text b {
+  float: left;
+  margin: 5px;
+  font-size: 15px;
+}
+
+.galaxy-uibuilder #datalist-update .fa-refresh {
+  float: right;
+  margin: 5px;
+  font-size: 20px;
+  
+}
+
+.galaxy-uibuilder #datalist-update .fa-pulse {
+  float: right;
+  margin: 5px;
+  font-size: 20px;
   
 }
