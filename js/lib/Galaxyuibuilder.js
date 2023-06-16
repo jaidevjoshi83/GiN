@@ -267,7 +267,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
             var servers   = await KernelSideDataObjects(`import GiN\na = GiN.sessions.SessionList()\na.get_servers()`)
             KernelSideDataObjects(`try:\n    del a\nexcept:    print("a is not defined")`)
-            
+
             self.removeAllChildNodes(Select)
 
             for (var i = 0; i < servers.length; i++){
@@ -438,9 +438,9 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                                             <input type="text" class="InputData" name="server" value="https://usegalaxy.org" autocomplete="off">
                                         </div>
                                         <ul class="ul-login">
-                                            <li data-value="https://usegalaxy.org" >  <div class="server-name"> Main </div> </li>
-                                            <li data-value="https://usegalaxy.eu">  <div class="server-name"> Europe </div>  </li>
-                                            <li data-value="https://localhost:8080" > <div class="server-name"> Local Server </div></li>
+                                            <li class="server-list-el" data-value="https://usegalaxy.org" > <b> Main<b/>  </li>
+                                            <li class="server-list-el" data-value="https://usegalaxy.eu">  <b>Europe</b>   </li>
+                                            <li class="server-list-el" data-value="https://localhost:8080" >  <b>Local Server</b> </li>
                                         </ul>
                                     </div>
 
@@ -1810,6 +1810,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         utm.querySelector('.available-sessions')
         var datatypes_genomes = await KernelSideDataObjects(`from GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.get_data_type_and_genomes(server=${JSON.stringify(origin)})`)
+       
+       
         var Input = utm.querySelector('#inputupload')
 
         if (Input.files.length > 0){
@@ -2119,6 +2121,16 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
     }
 
     async add_dataset_table(){
+
+
+        var spn = this.el.querySelector('#datalist-update').querySelector('.fas.fa-spinner.fa-pulse')
+        var update = this.el.querySelector('#datalist-update').querySelector('.fa.fa-refresh')
+
+        spn.style.display = 'block'
+        update.style.display = 'none'
+        this.el.querySelector('#dataset-status-text').querySelector('b').style.display = 'block'
+
+
         var self = this
 
         if (this.el.querySelector('.tool-migration-select')){
@@ -2156,7 +2168,13 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             select.appendChild(el);
         }
 
+
+
         select.addEventListener("change", async () => {
+
+            this.el.querySelector('#dataset-status-text').querySelector('b').style.display = 'block'
+            spn.style.display = 'block'
+            update.style.display = 'none'
      
             self.removeAllChildNodes(DataListdiv)
         
@@ -2175,6 +2193,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 var selected_index = {}
                 selected_index['HID'] = select.selectedIndex
                 self.form_builder(refine_inputs['inputs'],  selected_index) 
+
+
             } else {
                 self.removeAllChildNodes(DataListdiv )
                 DataListdiv.append(await this.data_row_list(select.value))
@@ -2183,10 +2203,11 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             var history_id = select.value
             
             DataListdiv.append(await this.data_row_list( history_id))
-        });
 
-        var update = this.el.querySelector('#datalist-update').querySelector('.fa.fa-refresh')
-        var spn = this.el.querySelector('#datalist-update').querySelector('.fas.fa-spinner.fa-pulse')
+            spn.style.display = 'none'
+            this.el.querySelector('#dataset-status-text').querySelector('b').style.display = 'none'
+            update.style.display = 'block'
+        });
 
         update.addEventListener('click', async () => {
             update.style.display = 'none'
@@ -2204,7 +2225,13 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         var DataList = this.el.querySelector('#history-list')
 
+
+
         DataList.append(select)
+
+        spn.style.display = 'none'
+        update.style.display = 'block'
+        this.el.querySelector('#dataset-status-text').querySelector('b').style.display = 'none'
     }
 
     // async add_history_list(){
@@ -3402,7 +3429,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         UpperDiv.id = `${input_def.id}`
 
 
- 
         const Button = document.createElement('button')
         Button.className = 'collapsible'
         Button.innerText = input_def['title']
