@@ -113,13 +113,15 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
     this.KernelOutPut = '';
     this.JOBID = {};
     this.file_cache = [];
-    this.galaxy_file_cache = []
-    this.conditional_name = []
-    this.list = []
-    this.repeat_del = {'name':"", "index":""}
-    this.toolregistry = {'tools':""}
-    this.select_index = null
-    this.section = {}
+    this.galaxy_file_cache = [];
+    this.conditional_name = [];
+    this.list = [];
+    this.repeat_del = {'name':"", "index":""};
+    this.toolregistry = {'tools':""};
+    this.select_index = null;
+    this.section = {};
+ 
+
 
     // this.section_collapse = {'expanded':false, 'name':''}
     // <iframe src="http://localhost:8080/datasets/fa70ae9fc8539e18/display/?preview=True&?api_key=865ad23561f93ec78ed5398e815c1057" title="W3Schools Free Online Web Tutorials"></iframe>
@@ -195,6 +197,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         var refresh_i = document.querySelector('i')
         refresh_i.className = "fa fa-refresh"
         refresh_i.style.fontSize = '14'
+        refresh_i.style.float = 'left'
         refresh_i.style.marginRight = '5px'
         refresh_i.title = "Refresh server list"
         refresh_i.id = "migration-tool-button"
@@ -211,8 +214,9 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         Label.innerHTML = '<b>Select Server</b>'
         Label.style.marginRight =  '20px'
 
-        div.append(Label)
+       
         div.append(refresh_i)
+        div.append(Label)
 
         div.style.float = 'left'
         div.style.marginRight = '150px'
@@ -736,7 +740,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 break;
             case "data":
             case "data_collection":
-
                 this.add_input_data(input_def, form_parent, name_prefix, data)
                 break
             case "integer" :
@@ -2676,6 +2679,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         row.append(FileManu)
         row.append(help)
 
+
         if (input_def.type == 'data_collection'){
             for (var i = 0; i < options['hdca'].length; i++) {
                 const el = document.createElement("option");
@@ -2702,10 +2706,9 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         sim.querySelector('#data-file-input').addEventListener('click', (e) => {
 
+
             FileManu.querySelector('.data-descriptor-label').style.display = 'none'
-
             FileManu['data-file']['batch'] = false
-
             Select.multiple = false
 
             self.removeAllChildNodes(Select)

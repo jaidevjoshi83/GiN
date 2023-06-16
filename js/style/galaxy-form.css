@@ -268,19 +268,20 @@
 
 
 .galaxy-uibuilder  .form-restore-div{
-  background: rgb(68,68,86);
+  background: rgb(53, 53, 54);
   padding-left: 10px;
-  width: 60%;
+  width: 98%;
   float: right;
   color: white;
   height: 35px;
   border-radius: 2px;
   padding-top: 2px;
   padding-bottom: 2px;
+  margin-bottom: 5px;
 }
 
 .galaxy-uibuilder .tool-migration-select{
-  width: 60%;
+  width: 80%;
   margin: 1px;
   float: right;
   background: rgb(255,255,255);
@@ -292,10 +293,6 @@
   margin-top: 2px;
 }
 
-
-/* .galaxy-uibuilder .form-restore-div label{
-  margin-top:  10px
-} */
 
 .galaxy-uibuilder .form-restore-div .fa-refresh {  
   float: right;
@@ -317,12 +314,8 @@
 .galaxy-uibuilder .jp-mod-selected .form-restore-div {
   background: rgb(15, 16, 20);
 }
-.galaxy-uibuilder .form-restore-div {
-  height: 30px;
-}
-.galaxy-uibuilder .tool-migration-select {
-  height: 26px;
-}
+
+
 
 .galaxy-uibuilder .form-restore-div .fa-refresh {
   color: rgb(233, 233, 246);
@@ -331,7 +324,7 @@
 }
 
 .galaxy-uibuilder .form-restore-div label{
-margin-top:  5px;
+  margin-top:  5px;
 }
 
 
@@ -464,3 +457,10 @@ margin-top:  5px;
   border-radius: 5px;
   }
   
+
+
+  .jp-mod-selected .tool-migration-select {
+    width: 80%;
+    height: 28px;
+  
+}
