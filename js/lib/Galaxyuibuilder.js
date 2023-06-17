@@ -65,10 +65,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
     <div class="nbtools-info" data-traitlet="info"></div>
     
     <div class="nbtools-form"> 
-       
-        <div class="Galaxy-form-div" style="width: 100%; height: 100%;">
-        
-            <div class="data-preview" style=" float: left;">
+        <div class="Galaxy-form-div" >
+            <div class="data-preview">
 
             </div>
 
@@ -80,18 +78,16 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             <div class="dataset-list">
                 <div id="datalist-update" style="width: 100%;" >
 
-                    <div style="float:left; width:55%; margin-top:5px; margin-left:10px;"><span class="ui-form-title-text"><b> Select History</b> </span> </div>
+                    <div ><span class="ui-form-title-text"><b> Select History</b> </span> </div>
 
-                    <div id="dataset-status-text" style="float:left; width: 20%; margin-top:5px;"><span class="ui-form-title-text"><b style="display:none;"> Loading.. </b> </span> </div>
+                    <div id="dataset-status-text"><span class="ui-form-title-text"><b style="display:none;"> Loading.. </b> </span> </div>
 
-                    <div style="float:right; width:10%; height: 30px; display:block; "> 
-                        <i class="fa fa-refresh" aria-hidden="true"  title="Refresh History" style="float:right; font-size: 20px; margin-right: 8px; margin-top: 5px"></i>
-                        <i class="fas fa-spinner fa-pulse" aria-hidden="true" style="float:right; font-size: 20px; margin-right: 8px; margin-top: 5px; display:none;"></i>
+                    <div> 
+                        <i class="fa fa-refresh" aria-hidden="true"  title="Refresh History" ></i>
+                        <i class="fas fa-spinner fa-pulse" aria-hidden="true" ></i>
                     </div>
-
-
                 </div>
-                <div id="history-list" style="width: 100%" >
+                <div id="history-list" >
 
                 </div>
                 <div  class="history-dataset-list">
@@ -99,7 +95,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 </div>
             </div> 
 
-            <div class="help-section" style="width: 100%">
+            <div class="help-section" >
             </div>
         </div>
     </div>
@@ -187,6 +183,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
     async add_tool_migration_button(index){
 
+
         var self = this
 
         var servers   = await KernelSideDataObjects(`import GiN\na = GiN.sessions.SessionList()\na.get_servers()`)
@@ -196,11 +193,12 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         var refresh_i = document.querySelector('i')
         refresh_i.className = "fa fa-refresh"
-        refresh_i.style.fontSize = '14'
-        refresh_i.style.float = 'left'
-        refresh_i.style.marginRight = '5px'
         refresh_i.title = "Refresh server list"
         refresh_i.id = "migration-tool-button"
+
+        var d = document.createElement('div')
+        d.id = 'migra-refresh-btn'
+        d.append(refresh_i)
 
         var nbtools = this.el.querySelector('.nbtools-form')
         var Select = document.createElement('select')
@@ -209,17 +207,15 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         var div = document.createElement('div')
         div.className = 'form-restore-div'
 
-        var Label = document.createElement('label')
-        Label.htmlFor = 'form-restore-div'
-        Label.innerHTML = '<b>Select Server</b>'
-        Label.style.marginRight =  '20px'
+        var Label = document.createElement('div')
+        Label.id = 'migra-label'
+        Label.innerText = 'Select Server'
 
-       
-        div.append(refresh_i)
+        div.append(d)
         div.append(Label)
 
         div.style.float = 'left'
-        div.style.marginRight = '150px'
+
 
         for (var i = 0; i < servers.length; i++){
             var opt = document.createElement('option')
@@ -235,9 +231,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
             if (this.model.get('galaxy_tool_id') !=  'GiN_data_upload_tool'){
 
-
                 Private.Index = Select.selectedIndex
-
 
                 if (!ContextManager.notebook_tracker) return;               
                 if (!ContextManager.notebook_tracker.currentWidget) return;
@@ -260,9 +254,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
                 // this.el.querySelector('#history_ids').parentNode.removeChild(this.el.querySelector('#dataset-history-list'))
                 // this.add_history_list()
-
                 // this.el.querySelector('#dataset-update-label').parentNode.removeChild(this.el.querySelector('#dataset-update-label'))
-
                 this.add_dataset_table()
             }
         })
@@ -288,6 +280,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         div.append(Select)
         nbtools.prepend(div)
+
+
         // }
     }
 
@@ -407,22 +401,21 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         var nb_form = this.el.querySelector('.nbtools-form')
 
         var data_upload = `<div class="login-form"> 
-                               
-
-                                <div class="auth-error" style="display: none; margin: 10px;"> 
+                                <div class="auth-error" style="display: none;"> 
                                     <p> <b>Authentication error</b> </p>
                                 </div>
 
-                                <div class="auth-successful" style="display: none; margin: 10px;">
+                                <div class="auth-successful" style="display: none;">
                                     <p> <b>Login Successful </b></p>
                                 </div>
 
-                                <div class="auth-waiting" style="display: none; margin: 10px;">
-                                    <i class="fa fa-spinner fa-spin" style="font-size:40px"></i>
+                                <div class="auth-waiting" style="display: none;">
+                                   <h4> Login in progress <i class="fa fa-spinner fa-spin" ></i> </h> 
+                                    
                                 </div>
 
-                                <div id="refresh-galaxy-cells" style="display: none; margin: 10px;">
-                                    <button id="refresh-button" type="button" class="tablinks" style="width: 200px;"> Save parameter values </button>
+                                <div id="refresh-galaxy-cells" style="display: none; ">
+                                    <button id="refresh-button" type="button" class="tablinks""> Save parameter values </button>
                                 </div>
 
                                 <div class="login-form-div" style="display:block">
@@ -436,28 +429,29 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                                     <div id="credential-login" class="tabcontent" style="display: block;">
 
         
-                                    <div class="combo-box"> 
-                                        <div class="input-wrapper">
-                                            <span class="ui-form-title-text"> <b> Select Galaxy Server</b> </span>
-                                            <input type="text" class="InputData" name="server" value="https://usegalaxy.org" autocomplete="off">
+                                        <div class="combo-box"> 
+                                            <div class="input-wrapper">
+                                                <span class="ui-form-title-text"> <b> Select Galaxy Server</b> </span>
+                                                <input type="text" class="InputData" name="server" value="https://usegalaxy.org" autocomplete="off">
+                                            </div>
+                                            <ul class="ul-login">
+                                                <li class="server-list-el" data-value="https://usegalaxy.org" > <b> Main</b>  </li>
+                                                <li class="server-list-el" data-value="https://usegalaxy.eu">  <b>Europe</b>   </li>
+                                                <li class="server-list-el" data-value="https://localhost:8080" >  <b>Local Server</b> </li>
+                                            </ul>
                                         </div>
-                                        <ul class="ul-login">
-                                            <li class="server-list-el" data-value="https://usegalaxy.org" > <b> Main<b/>  </li>
-                                            <li class="server-list-el" data-value="https://usegalaxy.eu">  <b>Europe</b>   </li>
-                                            <li class="server-list-el" data-value="https://localhost:8080" >  <b>Local Server</b> </li>
-                                        </ul>
-                                    </div>
 
-                                    <div id="login-email" style=" margin:10px">
-                                        <span class="ui-form-title-text"> <b>Email ID/User Name</b> </span>
-                                        <input class="InputData" name="email" style="display: block" >
-                                    </div>
+                                        <div id="login-email" >
+                                            <span class="ui-form-title-text"> <b>Email ID/User Name</b> </span>
+                                            <input class="InputData" name="email" style="display: block" >
+                                        </div>
 
-                                    <div id="login-password" style=" margin:10px">
-                                        <span class="ui-form-title-text"> <b>Password</b> </span>
-                                        <input class="InputData" type="password" name="password" style="display: block" >
+                                        <div id="login-password" >
+                                            <span class="ui-form-title-text"> <b>Password</b> </span>
+                                            <input class="InputData" type="password" name="password" style="display: block" >
+                                        </div>
                                     </div>
-                                    </div>
+                                  
                                 </div>
                             </div>`
 
