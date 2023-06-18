@@ -335,9 +335,6 @@
   width: 100%;
 }
 
-.galaxy-uibuilder .combo-box .InputData:focus {
-  outline: none; /* Remove outline when input is focused */
-}
 
 
 .galaxy-uibuilder .combo-box .InputData:hover {
@@ -393,7 +390,7 @@
 .combo-box  .input-wrapper::after {
   content: "";
   position: absolute;
-  top: 50%;
+  top: 80%;
   right: 8px;
   transform: translateY(200%);
   width: 0;
