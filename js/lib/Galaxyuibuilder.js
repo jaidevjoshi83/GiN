@@ -410,7 +410,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                                 </div>
 
                                 <div class="auth-waiting" style="display: none;">
-                                   <h4> Login in progress <i class="fa fa-spinner fa-spin" ></i> </h> 
+                                   <h4> Tools are loading <i class="fa fa-spinner fa-spin" ></i> </h> 
                                     
                                 </div>
 
