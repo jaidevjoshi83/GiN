@@ -523,9 +523,9 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             cb.querySelector('.ul-login').style.display = 'none'
         });
         
-        cb.querySelector('.InputData').addEventListener("click", ()=>{
-            cb.querySelector('.ul-login').style.display = 'none'
-        });
+        // cb.querySelector('.InputData').addEventListener("click", ()=>{
+        //     cb.querySelector('.ul-login').style.display = 'none'
+        // });
     }
 
     iterate_over_tool_cells() {
