@@ -84,7 +84,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
                     <div> 
                         <i class="fa fa-refresh" aria-hidden="true"  title="Refresh History" ></i>
-                        <i class="fas fa-spinner fa-pulse" aria-hidden="true" ></i>
+                        <i class="fas fa-spinner fa-pulse" aria-hidden="true" style="display:none;" ></i>
                     </div>
                 </div>
                 <div id="history-list" >
@@ -2165,23 +2165,18 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             select.appendChild(el);
         }
 
-
-
         select.addEventListener("change", async () => {
 
             this.el.querySelector('#dataset-status-text').querySelector('b').style.display = 'block'
             spn.style.display = 'block'
             update.style.display = 'none'
      
-            self.removeAllChildNodes(DataListdiv)
-        
             if (this.model.get('galaxy_tool_id') != "GiN_data_upload_tool"){
+
+                self.removeAllChildNodes(DataListdiv)
 
                 var form = self.element.querySelector('.Galaxy-form')
                 var Inputs = self.get_form_data(form)
-
-                // var refine_inputs  = await KernelSideDataObjects(`import json\nimport base64\nfrom GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.updated_form(server=${JSON.stringify(origin)}, tool_inputs=json.loads(base64.b64decode("${btoa(JSON.stringify(Inputs))}")), tool_id=${JSON.stringify(self.model.get('galaxy_tool_id'))}, history_id=${JSON.stringify(select.value)})`)
-
                 var refine_inputs = await KernelSideDataObjects(`import IPython\nfrom GiN.taskwidget  import GalaxyTaskWidget\nclass Temp(object):\n    def Return(self):\n        return IPython.display.JSON(GalaxyTaskWidget.updated_form(${JSON.stringify(origin)}, json.loads(base64.b64decode("${btoa(JSON.stringify(Inputs))}")), ${JSON.stringify(self.model.get('inputs')['id'])}, ${JSON.stringify(select.value)}))\na = Temp()\na.Return()`)
                 KernelSideDataObjects(`try:\n    del a\nexcept:\n    print("a is not defined")`)
 
@@ -2190,20 +2185,17 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 var selected_index = {}
                 selected_index['HID'] = select.selectedIndex
                 self.form_builder(refine_inputs['inputs'],  selected_index) 
-
+                DataListdiv.append(await this.data_row_list(select.value))
 
             } else {
                 self.removeAllChildNodes(DataListdiv )
                 DataListdiv.append(await this.data_row_list(select.value))
             }
 
-            var history_id = select.value
-            
-            DataListdiv.append(await this.data_row_list( history_id))
-
             spn.style.display = 'none'
             this.el.querySelector('#dataset-status-text').querySelector('b').style.display = 'none'
             update.style.display = 'block'
+
         });
 
         update.addEventListener('click', async () => {
