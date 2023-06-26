@@ -21,8 +21,7 @@ import { ContextManager } from '@g2nb/nbtools';
 import { NotebookActions } from '@jupyterlab/notebook';
 import { Private,  getRanNotebookIds, getIndex } from './notebookActions';
 import $ from 'jquery'
-
-
+import {FileStreamer } from './utils'
 
 
 export class GalaxyUIBuilderModel extends BaseWidgetModel{
@@ -79,12 +78,11 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 <div id="datalist-update" style="width: 100%;" >
 
                     <div ><span class="ui-form-title-text"><b> Select History</b> </span> </div>
-
                     <div id="dataset-status-text"><span class="ui-form-title-text"><b style="display:none;"> Loading.. </b> </span> </div>
 
                     <div> 
                         <i class="fa fa-refresh" aria-hidden="true"  title="Refresh History" ></i>
-                        <i class="fas fa-spinner fa-pulse" aria-hidden="true" ></i>
+                        <i class="fas fa-spinner fa-pulse" aria-hidden="true" style="display:none"></i>
                     </div>
                 </div>
                 <div id="history-list" >
@@ -323,6 +321,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                                                 <option value="https://usegalaxy.org"> Galaxy Main </option>
                                                 <option value="https://localhost:8080"> Galaxy Local</option>
                                                 <option value="https://usegalaxy.eu"> Galaxy Europe</option>
+                                                <option value="10.66.95.3:8080"> Lab local for testing</option>
                                             </datalist>
                                         </div>
 
@@ -438,6 +437,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                                                 <li class="server-list-el" data-value="https://usegalaxy.org" > <b> Main</b>  </li>
                                                 <li class="server-list-el" data-value="https://usegalaxy.eu">  <b>Europe</b>   </li>
                                                 <li class="server-list-el" data-value="https://localhost:8080" >  <b>Local Server</b> </li>
+                                                <li class="server-list-el" data-value=" http://10.66.95.3:8080" >  <b>Lab's local for testing</b> </li>
+                                                    
                                             </ul>
                                         </div>
 
@@ -877,6 +878,46 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 gp_tool_list.append(tool)
             }
         }
+    }
+
+    add_tools(tool_list){
+
+        var a = document.querySelector('.lm-Widget.p-Widget.nbtools-toolbox.nbtools-wrapper')
+        
+        // const list = origin.querySelector('ul');
+        // const tool_wrapper = document.createElement('li');
+        // tool_wrapper.classList.add('nbtools-tool');
+        // tool_wrapper.setAttribute('title', 'Click to add to notebook');
+        // tool_wrapper.innerHTML = `
+        //     <div class="nbtools-add">+</div>
+        //     <div class="nbtools-header">${tool.name}</div>
+        //     <div class="nbtools-description">${tool.description}</div>`;
+        // if (list) list.append(tool_wrapper);
+
+        // // Add the click event
+        // tool_wrapper.addEventListener("click", () => {
+        //     Toolbox.add_tool_cell(tool);
+        // })
+    }
+
+
+    add_origin(name) {
+        // Create the HTML DOM element
+        const origin_wrapper = document.createElement('div');
+        origin_wrapper.innerHTML = `
+            <header class="nbtools-origin" title="${name}">
+                <span class="nbtools-expanded nbtools-collapse jp-Icon jp-Icon-16 jp-ToolbarButtonComponent-icon"></span>
+                ${name}
+            </header>
+            <ul class="nbtools-origin" title="${name}"></ul>`;
+
+        // Attach the expand / collapse functionality
+        const collapse = origin_wrapper.querySelector('span.nbtools-collapse');
+        collapse.addEventListener("click", () => this.toggle_collapse(origin_wrapper));
+
+        // Add to the toolbox
+        this.node.append(origin_wrapper);
+        return origin_wrapper;
     }
 
     add_DataCollectionToolParameter(input_def, FormParent, NamePrefix){
@@ -1402,6 +1443,121 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             }
         }
     }
+
+    encode_chunk (blob) {
+        return new Promise((resolve, _) => {
+            const reader = new FileReader();
+            reader.onloadend = () => resolve(reader.result.split(',')[1]);
+            reader.readAsDataURL(blob);
+        });
+    }
+
+    async chunk_file (file) {
+        const chunk_size = 1024 * 1024;
+        const chunks_in_file = Math.ceil(file.size / chunk_size);
+        const chunk_functions = [];
+        const chunks = [];
+
+        // Split the file into chunks
+        let count = 0;
+        while (count < chunks_in_file) {
+            let offset = count * chunk_size;
+            let file_blob = file.slice(offset, offset + chunk_size);
+            chunks.push(file_blob);
+            count++;
+        }
+
+        count = 0;
+        for (const chunk of chunks) {
+            const encoded_chunk = await this.encode_chunk(chunk);
+            const chunk_function = async () => {
+                this.send({
+                    "event": "upload",
+                    "file": file.name,
+                    "count": count + 1,
+                    "total": chunks_in_file,
+                    "chunk": encoded_chunk
+                });
+                count++;
+                this._chunks_complete++;
+                this.update_upload_label(false, false)
+                return {
+                    chunk: this._chunks_complete,
+                    total: this._chunks_total
+                };
+            }
+            chunk_functions.push(chunk_function);
+        }
+
+        return chunk_functions;
+    }
+
+    update_upload_label(initial, final) {
+        if (initial) {
+            this._icon = this.model.get('icon');
+            this._description = this.model.get('description');
+            this.model.set('icon', '');
+        }
+        if (final) {
+            this.model.set('icon', this._icon);
+            this.model.set('description', this._description);
+        }
+        else {
+            const percent = Math.floor(this._chunks_complete * (100 / this._chunks_total));
+            this.model.set('description', `${percent}%`);
+        }
+        this.model.save();
+    }
+
+    async upload_files () {
+
+        var elm = this.el.querySelector('#inputupload')
+        // Set the widget as busy
+        this.model.set('busy', true);
+        this.model.save();
+
+        // Estimate the number of chunks to upload
+        this._chunks_total = 0;
+        this._chunks_complete = 0;
+        const files = Array.from( elm.files ?? []);
+        files.forEach((file) => this._chunks_total += Math.ceil(file.size / (1024 * 1024)));
+
+        // Set the uploading label
+        // this.update_upload_label(true, false);
+
+        // Cycle through all files
+        const file_functions = [];
+        files.forEach((file) => {
+            const file_func = async () => {
+                const chunk_funcs = await this.chunk_file(file);
+                for (const cp of chunk_funcs) await cp();
+                this.send({
+                    "event": "file_complete",
+                    "name": file.name
+                });
+                return {
+                    name: file.name,
+                    type: file.type,
+                    size: file.size,
+                    last_modified: file.lastModified,
+                };
+            }
+            file_functions.push(file_func);
+        });
+
+        const files_data = [];
+        for (const fp of file_functions) files_data.push(await fp());
+        this.model.set('busy', false);
+        this.model.set({
+            value: files_data,
+            error: '',
+        });
+        this.update_upload_label(false, true);
+        this.send({
+            "event": "all_files_complete",
+            "names": files_data
+        });
+    }
  
     file_exist(dataset){
         if (this.file_cache.length  > 0) {
@@ -1904,146 +2060,136 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         this.add_dataset(ListItem, this.data_row_list, HistoryID)
     }
  
+    // async NewTusUpload(data){
+
+    //     if(this.el.querySelector('.tool-migration-select')){
+    //         var origin = this.el.querySelector('.tool-migration-select').value
+    //     }  else{
+    //         var origin = this.model.get('origin')
+    //     }
+
+    //     // var apiKey = await KernelSideDataObjects(`from GiN.taskwidget  import GalaxyTaskWidget\nGalaxyTaskWidget.Return_api_key(${JSON.stringify(origin)})`)
+
+    //     var apiKey =  await KernelSideDataObjects(`import IPython\nfrom GiN.taskwidget  import GalaxyTaskWidget\nclass Temp(object):\n    def Return(self):\n        return IPython.display.JSON(GalaxyTaskWidget.Return_api_key(${JSON.stringify(origin)}))\na = Temp()\na.Return()`)
+    //     KernelSideDataObjects('try:\n    del a\nexcept:    print("a is not defined")')
+
+    //     var self = this
+    //     var elm = this.el.querySelector('#inputupload')
+    //     var rp = this.el.querySelector('.resumable-upload-title')
+    //     var title = document.createElement('p')
+    //     title.className = 'upload-title'
+    //     var Parent = elm.parentElement
+    //     title.style.marginTop  = '20px'
+
+    //     Parent.prepend(title)
+    
+    //     var chunkSize = 10485760;
+    //     var file = data.files[0];
+
+    //     //FixMe
+    //     // var credentials = this.model.get('gal_instance')
+    //     data['key'] =  apiKey['api_key']
+
+    //     var upload = new tus.Upload(file, {
+    //         endpoint: `${origin}/api/upload/resumable_upload/`,
+    //         retryDelays: [0, 3000, 5000, 10000, 20000],
+    //         chunkSize: chunkSize,
+
+    //         metadata: {
+    //             filename: file.name,
+    //             filetype: file.type,
+    //         },
+    //         headers: {
+    //             'x-api-key': apiKey['api_key'],
+    //         },
+            
+    //         onError: function(error) {
+
+    //             self.readFile()
+
+    //             console.log("Failed because: " + error)
+        
+    //         },
+
+    //         onProgress: function(bytesUploaded, bytesTotal) {
+    //             var percentage = (bytesUploaded / bytesTotal * 100).toFixed(2)
+    //             console.log(bytesUploaded, bytesTotal, percentage + "%")
+
+    //             title.innerText = `Uploading file ${upload.file.name,  percentage + "%"}` 
+
+    //             var btn = self.el.querySelector('#resumable_upload_button')
+    //             btn.innerHTML = 'Uploading '
+
+    //             var i = document.createElement('i')
+    //             i.className = 'fa fa-spinner fa-spin'
+    //             btn.append(i)
+    //         },
+
+    //         onSuccess: function() {
+    //             console.log("Download %s from %s", upload.file.name, upload.url)
+
+    //             var btn = self.el.querySelector('#resumable_upload_button')
+    //             self.removeAllChildNodes(btn)
+    //             btn.innerHTML = "Upload"
+
+    //             data[`files_${0}|file_data`] = {
+    //                 session_id: upload.url.split("/").at(-1),
+    //                 name: upload.file.name,
+    //             };
+
+    //             title.parentElement.removeChild(title)
+
+    //             delete data["files"]
+
+    //             elm.style.display = 'block'
+    //             self.submitPayload(data, credentials)
+    //             this.el.querySelector('#inputupload').value = null
+    //             this.el.querySelector('.upload-status-icon').style.display = 'none'
+    //         }
+    //     })
+    //     // Check if there are any previous uploads to continue.
+    //     upload.findPreviousUploads().then(function (previousUploads) {
+    //         // Found previous uploads so we select the first one. 
+    //         if (previousUploads.length) {
+    //             upload.resumeFromPreviousUpload(previousUploads[0])
+    //         }
+    //         upload.start()
+    //     })
+
+    // }
+
+
     async NewTusUpload(data){
 
-        if(this.el.querySelector('.tool-migration-select')){
-            var origin = this.el.querySelector('.tool-migration-select').value
-        }  else{
-            var origin = this.model.get('origin')
-        }
-
-        // var apiKey = await KernelSideDataObjects(`from GiN.taskwidget  import GalaxyTaskWidget\nGalaxyTaskWidget.Return_api_key(${JSON.stringify(origin)})`)
-
-        var apiKey =  await KernelSideDataObjects(`import IPython\nfrom GiN.taskwidget  import GalaxyTaskWidget\nclass Temp(object):\n    def Return(self):\n        return IPython.display.JSON(GalaxyTaskWidget.Return_api_key(${JSON.stringify(origin)}))\na = Temp()\na.Return()`)
-        KernelSideDataObjects('try:\n    del a\nexcept:    print("a is not defined")')
-
-        var self = this
-        var elm = this.el.querySelector('#inputupload')
-        var rp = this.el.querySelector('.resumable-upload-title')
-        var title = document.createElement('p')
-        title.className = 'upload-title'
-        var Parent = elm.parentElement
-        title.style.marginTop  = '20px'
-
-        Parent.prepend(title)
-    
-        var chunkSize = 10485760;
-        var file = data.files[0];
-
-        //FixMe
-        // var credentials = this.model.get('gal_instance')
-        data['key'] =  apiKey['api_key']
-
-        var upload = new tus.Upload(file, {
-            endpoint: `${origin}/api/upload/resumable_upload/`,
-            retryDelays: [0, 3000, 5000, 10000, 20000],
-            chunkSize: chunkSize,
-
-            metadata: {
-                filename: file.name,
-                filetype: file.type,
-            },
-            headers: {
-                'x-api-key': apiKey['api_key'],
-            },
-            
-            onError: function(error) {
-
-                self.readFile()
-                console.log("Failed because: " + error)
-        
-            },
-
-            onProgress: function(bytesUploaded, bytesTotal) {
-                var percentage = (bytesUploaded / bytesTotal * 100).toFixed(2)
-                console.log(bytesUploaded, bytesTotal, percentage + "%")
-
-                title.innerText = `Uploading file ${upload.file.name,  percentage + "%"}` 
-
-                var btn = self.el.querySelector('#resumable_upload_button')
-                btn.innerHTML = 'Uploading '
-
-                var i = document.createElement('i')
-                i.className = 'fa fa-spinner fa-spin'
-                btn.append(i)
-            },
-
-            onSuccess: function() {
-                console.log("Download %s from %s", upload.file.name, upload.url)
-
-                var btn = self.el.querySelector('#resumable_upload_button')
-                self.removeAllChildNodes(btn)
-                btn.innerHTML = "Upload"
-
-                data[`files_${0}|file_data`] = {
-                    session_id: upload.url.split("/").at(-1),
-                    name: upload.file.name,
-                };
-
-                title.parentElement.removeChild(title)
-
-                delete data["files"]
-
-                elm.style.display = 'block'
-                self.submitPayload(data, credentials)
-                this.el.querySelector('#inputupload').value = null
-                this.el.querySelector('.upload-status-icon').style.display = 'none'
-            }
-        })
-        // Check if there are any previous uploads to continue.
-        upload.findPreviousUploads().then(function (previousUploads) {
-            // Found previous uploads so we select the first one. 
-            if (previousUploads.length) {
-                upload.resumeFromPreviousUpload(previousUploads[0])
-            }
-            upload.start()
-        })
-
+        await this.upload_files()
+        await this.readFile()
     }
 
-    readFile() {
+    async readFile() {
 
         var origin = this.el.querySelector('.tool-migration-select').value
-
         this.el.querySelector('.resumable-upload-warning').style.display = 'block'
         this.el.querySelector('.resumable-upload-warning').style.color = 'orange'
-
         var elm = this.el.querySelector('#inputupload')
         var hi =  this.el.querySelector('#dataset-history-list').value
 
         const file = elm.files.item(0);
-        const reader = new FileReader();
-        
-        reader.onload = async () => {
 
-            var out  = await KernelSideDataObjects(`from GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.CORS_fallback_upload(file_name=${JSON.stringify(file['name'])}, data=${JSON.stringify(reader.result)}, server=${JSON.stringify(origin)}, history_id=${JSON.stringify(hi)})`);
-            this.el.querySelector('#inputupload').value = null
+        console.log(hi)
 
-            var data_list_div = this.el.querySelector('.history-dataset-list');
-            var e = this.el.querySelector('.list-item')
-            e.parentElement.removeChild(e)
-            data_list_div.append(await this.data_row_list( hi))
-
-            var hl = this.el.querySelector('#dataset-history-list')
-
-            for (var i = 0; i <  hl.options.length; i++ ){
-                if (hl[i].value == hi) {
-                    hl.selectedIndex = i
-                }
-            }
-
-            this.el.querySelector('.upload-status-icon').style.display = 'none'
+        var a = async () => {
+            var out  = await KernelSideDataObjects(`from GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.CORS_fallback_upload( server=${JSON.stringify(origin)}, history_id=${JSON.stringify(hi)})`);
         }
-        reader.readAsText(file);
+
+        a()
+       
     }
 
-    Upload_callback(input){
+    async Upload_callback(input){
         
         var self  = this
         var children = this.element.querySelector('.Galaxy-form')
 
-        // this.el.querySelectorAll('.nbtools-run').forEach((button) => button.addEventListener('click', () => {
-    
         this.el.querySelector('.resumable-upload-warning').style.display = 'none'
         this.el.querySelector('.upload-status-icon').style.display = 'block'
         
@@ -2069,14 +2215,14 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             'files': input.files,
         }
         self.NewTusUpload(data)
-        // }))
+     
     }
  
     async dataupload_job( uplood_status='', HistoryID='' ) {
 
         var origin = this.el.querySelector('.tool-migration-select').value
 
-        this.hide_run_buttons(true)
+        // this.hide_run_buttons(true)
 
         var children = this.element.querySelector('.Galaxy-form')
         var upload_link 
@@ -2114,7 +2260,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             }  
         } 
 
-        this.hide_run_buttons(false)
+        // this.hide_run_buttons(false)
     }
 
     async add_dataset_table(){
@@ -3434,8 +3580,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         UpperDiv.appendChild(Button)
  
         SectionDiv.className = `ui-form-element section-row sections`
-
-
 
         if(input_def.expanded){
             SectionDiv.style.display = 'block'
@@ -4967,6 +5111,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             this.el.querySelector('.auth-successful').style.display = 'none';
 
         } else if (jobs.state === 'success'){
+
+            this.add_tools(jobs.tool_list)
 
             this.el.querySelector('.nbtools-subtitle').innerText = credentials['server']
             this.el.querySelector('.auth-successful').style.display = 'block';

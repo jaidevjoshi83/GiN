@@ -11,12 +11,14 @@ import * as utils_exports from './utils'
 import { MODULE_NAME, MODULE_VERSION } from './version';
 import { removeAllChildNodes , KernelSideDataObjects} from './utils';
 import { NotebookActions } from '@jupyterlab/notebook';
+
+
 // import {refresh_cells} from './Galaxyuibuilder';
 
 import {  Widget } from '@lumino/widgets';
 
 import { Private,  getRanNotebookIds} from './notebookActions';
-const module_exports = Object.assign(Object.assign(Object.assign({},  galaxyuibuilder_exports), utils_exports));
+const module_exports = Object.assign(Object.assign(Object.assign(   {}, galaxyuibuilder_exports), utils_exports));
 
 const EXTENSION_ID = 'GiN:plugin';
 /**

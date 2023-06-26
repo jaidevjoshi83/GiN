@@ -107,6 +107,7 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
 
         return OutDict
 
+
     @staticmethod
     def submit_job( server, tool_id, tool_inputs=None, history_id=None):
 
@@ -371,9 +372,6 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
             dataset_collection_id=dataset_id
         )
 
-
-        print(show_dataset)
-
         # return IPython.display.JSON(show_dataset)
         return show_dataset
 
@@ -418,29 +416,27 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
 
     @staticmethod
     def CORS_fallback_upload(
-        file_name,
-        data, 
         server,
         history_id,
     ):
 
-        temp_dir = os.path.join(os.getcwd(), "temp")
-
-        if not os.path.exists(temp_dir):
-            os.mkdir(temp_dir)
-
         a = GiN.sessions.SessionList()
         gi = a.get(server=server)
-        path = os.path.join(temp_dir, file_name)
 
-        with open(path, 'w') as f:
-            f.write(data)
-       
-        f.close()
+        temp_dir = os.path.join(os.getcwd(), "temp")
+
    
-        out = gi.tools.gi.tools.upload_file(path=path, history_id=history_id)
+        file_path = glob.glob(os.path.join(temp_dir, '*'))[0]
 
-        return IPython.display.JSON(out)
+        print(history_id)
+        
+        # out = gi.tools.gi.tools.upload_file(path=file_path, history_id=history_id)
+
+        # print(out)
+
+        # [os.remove(file) for file in glob.glob(os.path.join(temp_dir, '*')) if os.path.isfile(file_path)]
+
+        # return IPython.display.JSON(out)
 
     @staticmethod
     def send_data_to_galaxy_tool(
