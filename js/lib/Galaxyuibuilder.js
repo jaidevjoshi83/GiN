@@ -427,7 +427,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                                     <!-- Tab content -->
                                     <div id="credential-login" class="tabcontent" style="display: block;">
 
-        
                                         <div class="combo-box"> 
                                             <div class="input-wrapper">
                                                 <span class="ui-form-title-text"> <b> Select Galaxy Server</b> </span>
@@ -461,8 +460,12 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         var List = utm.querySelectorAll('.tablinks')    
         var cb = utm.querySelector('.combo-box') 
 
+        cb.querySelector('.input-wrapper').querySelector('input').addEventListener('click', ()=>{
+            cb.querySelector('.ul-login').style.display = 'none'
+        })
+
         this.login_server_list(cb)
-        
+
         List.forEach((button) => button.addEventListener('click', () => {
 
             if (button.innerText  == 'With Credential') {
@@ -493,7 +496,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         this.el.querySelector('.form-restore-div').style.display  =  'none';
         nb_form.append(utm)
     }
-
 
     login_server_list(cb){
 
