@@ -18,20 +18,14 @@ npm install -g yarn
 [ipyuploads](https://github.com/g2nb/ipyuploads.git) 
 
 ```
-git clone https://github.com/g2nb/ipyuploads.git && \
-    cd ipyuploads && pip install .
+pip install ipyuploads
 ```
 
 [nbtools](https://github.com/g2nb/nbtools.git)
 
 ```
-git clone -b lab https://github.com/g2nb/nbtools.git
+pip install nbtools
 
-cd nbtools/
-
-pip install .
-
-jupyter labextension install . 
 jupyter nbextension install --py nbtools --sys-prefix 
 jupyter nbextension enable --py nbtools --sys-prefix
 ```
@@ -48,14 +42,14 @@ pip install bioblend
 
 Installation for a user
 ------------
-    $ git clone https://github.com/jaidevjoshi83/GiN.git 
-    $ cd GiN
-    $ npm install @g2nb/nbtools
-    $ pip install .
-    $ jupyter nbextension install --py --symlink --overwrite --sys-prefix GiN
-    $ jupyter nbextension enable --py --sys-prefix GiN
-    
 
+```
+pip install bioblend
+jupyter nbextension install --py --symlink --overwrite --sys-prefix GiN
+jupyter nbextension enable --py --sys-prefix GiN
+```
+
+    
 For a development installation (requires [Node.js](https://nodejs.org) and [Yarn version 1](https://classic.yarnpkg.com/)),
 ------------
     $ cd GiN
