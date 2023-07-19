@@ -25,7 +25,9 @@ pip install ipyuploads
 
 ```
 pip install nbtools
+```
 
+```
 jupyter nbextension install --py nbtools --sys-prefix 
 jupyter nbextension enable --py nbtools --sys-prefix
 ```
@@ -44,7 +46,9 @@ Installation for a user
 ------------
 
 ```
-pip install bioblend
+pip install galaxy-gin
+```
+```
 jupyter nbextension install --py --symlink --overwrite --sys-prefix GiN
 jupyter nbextension enable --py --sys-prefix GiN
 ```
