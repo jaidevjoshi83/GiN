@@ -8,10 +8,14 @@ import logging
 import IPython.display
 import glob
 from nbtools import UIBuilder
-
+# from  .GalaxyUpload import GalaxyUpload
 import os
 import re
 import json
+
+from ipyuploads import Upload
+import uuid
+import threading
 
 
 log = logging.getLogger(__name__)
@@ -265,6 +269,17 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
         python_side=False,
         input_data_param=False,
     ):
+        
+        print (
+
+            server,
+            tool_inputs,
+            tool_id,
+            history_id,
+            python_side,
+            input_data_param,
+
+        )
 
         a = GiN.sessions.SessionList()
         gi6 = a.get(server=server)
@@ -415,6 +430,55 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
             )
 
     @staticmethod
+    def CORS_fallback_upload_old(
+        server,
+        history_id,
+    ):
+
+        a = GiN.sessions.SessionList()
+        gi = a.get(server=server)
+
+        temp_dir = os.path.join(os.getcwd(), "temp")
+        file_path = glob.glob(os.path.join(temp_dir, '*'))[0]
+        
+        out = gi.tools.gi.tools.upload_file(path=file_path, history_id=history_id)
+
+        return IPython.display.JSON(out)
+    
+
+    def start_upload(server, history_id):
+
+        upload_id = str(uuid.uuid4())
+        a = GiN.sessions.SessionList()
+        gi = a.get(server=server)
+
+        temp_dir = os.path.join(os.getcwd(), "temp")
+        if not os.path.exists(temp_dir):
+            os.mkdir(temp_dir)
+        file_path = glob.glob(os.path.join(temp_dir, '*'))[0]
+
+        t = threading.Thread(target=gi.tools.gi.tools.upload_file, kwargs={'path':file_path, 'history_id':history_id})
+    
+        t.start()
+        a.galaxy_upload[upload_id] = t
+    
+        return IPython.display.JSON({'id':upload_id, 'status':'start'})
+
+    def check_upload(upload_id):
+        a = GiN.sessions.SessionList()
+        # gi = a.get(server=server)
+        t = a.galaxy_upload.get(upload_id)
+
+        status = {'id': upload_id, 'status':'running'}
+        if not t.is_alive():
+            out = t.join()
+            status['status'] = 'finish'
+            del a.galaxy_upload[upload_id]
+
+        return IPython.display.JSON(status)
+
+
+    @staticmethod
     def CORS_fallback_upload(
         server,
         history_id,
@@ -430,13 +494,13 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
 
         print(history_id)
         
-        # out = gi.tools.gi.tools.upload_file(path=file_path, history_id=history_id)
+        out = gi.tools.gi.tools.upload_file(path=file_path, history_id=history_id)
 
         # print(out)
 
         # [os.remove(file) for file in glob.glob(os.path.join(temp_dir, '*')) if os.path.isfile(file_path)]
 
-        # return IPython.display.JSON(out)
+        return IPython.display.JSON(out)
 
     @staticmethod
     def send_data_to_galaxy_tool(

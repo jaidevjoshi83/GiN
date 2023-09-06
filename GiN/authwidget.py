@@ -111,7 +111,6 @@ class GalaxyAuthWidget(GalaxyUIBuilder):
 
     def login(self, credentials):
 
-
         """Login to the Galaxy server"""
 
         tool_list =  {'tools':[]}

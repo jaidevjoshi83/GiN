@@ -22,6 +22,8 @@ import { NotebookActions } from '@jupyterlab/notebook';
 import { Private,  getRanNotebookIds, getIndex } from './notebookActions';
 import $ from 'jquery'
 import {FileStreamer } from './utils'
+import { UploadModel, UploadView } from '@g2nb/ipyuploads';
+
 
 
 export class GalaxyUIBuilderModel extends BaseWidgetModel{
@@ -116,7 +118,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
     this.section = {};
  
 
-
     // this.section_collapse = {'expanded':false, 'name':''}
     // <iframe src="http://localhost:8080/datasets/fa70ae9fc8539e18/display/?preview=True&?api_key=865ad23561f93ec78ed5398e815c1057" title="W3Schools Free Online Web Tutorials"></iframe>
     }
@@ -129,6 +130,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         //########################
         // this.form_builder(inputs['inputs'])
         //########################
+
 
         // // Hide the header or footer, if necessary
         this.display_header_changed();
@@ -165,6 +167,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         if (this.model.get('galaxy_tool_id') == 'GiN_data_upload_tool') {
             this.data_upload_tool()
         }
+
+
     }
 
     refresh_cells(){
@@ -278,7 +282,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         div.append(Select)
         nbtools.prepend(div)
-
 
         // }
     }
@@ -1478,7 +1481,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                     "file": file.name,
                     "count": count + 1,
                     "total": chunks_in_file,
-                    "chunk": encoded_chunk
+                    "chunk": encoded_chunk,
+                    "type":file.type
                 });
                 count++;
                 this._chunks_complete++;
@@ -1535,9 +1539,12 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 for (const cp of chunk_funcs) await cp();
                 this.send({
                     "event": "file_complete",
-                    "name": file.name
+                    "name": file.name,
+                    "type": "test",
                 });
+
                 return {
+                    
                     name: file.name,
                     type: file.type,
                     size: file.size,
@@ -1729,11 +1736,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             var inputs = self.get_form_data(form)
           //  var refine_inputs  = await KernelSideDataObjects(`import json\nimport base64\nfrom GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.updated_form(${JSON.stringify(origin)}, json.loads(base64.b64decode("${btoa(JSON.stringify(inputs))}")), ${JSON.stringify(self.model.get('inputs')['id'])}, ${JSON.stringify(history_id)})`)
            
-
             var refine_inputs = await KernelSideDataObjects(`import IPython\nfrom GiN.taskwidget  import GalaxyTaskWidget\nclass Temp(object):\n    def Return(self):\n        return IPython.display.JSON(GalaxyTaskWidget.updated_form(${JSON.stringify(origin)}, json.loads(base64.b64decode("${btoa(JSON.stringify(inputs))}")), ${JSON.stringify(self.model.get('inputs')['id'])}, ${JSON.stringify(history_id)}))\na = Temp()\na.Return()`)
             KernelSideDataObjects(`try:\n    del a\nexcept:\n    print("a is not defined")`)
-
-
 
             self.update_metadata_FormState('galaxy_tool', refine_inputs['inputs'], JSON.parse(fint))
         })
@@ -1758,10 +1762,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             var inputs = self.get_form_data(form)
             //var refine_inputs  = await KernelSideDataObjects(`import json\nfrom GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.updated_form(${JSON.stringify(origin)}, json.loads(base64.b64decode("${btoa(JSON.stringify(inputs))}")), ${JSON.stringify(self.model.get('inputs')['id'])}, ${JSON.stringify(history_id)})`)
             
-
             var refine_inputs = await KernelSideDataObjects(`import IPython\nfrom GiN.taskwidget  import GalaxyTaskWidget\nclass Temp(object):\n    def Return(self):\n        return IPython.display.JSON(GalaxyTaskWidget.updated_form(${JSON.stringify(origin)}, json.loads(base64.b64decode("${btoa(JSON.stringify(inputs))}")), ${JSON.stringify(self.model.get('inputs')['id'])}, ${JSON.stringify(history_id)}))\na = Temp()\na.Return()`)
             KernelSideDataObjects(`try:\n    del a\nexcept:\n    print("a is not defined")`)
-
 
             let formdata = form.parentNode.parentNode.parentNode.parentNode.parentNode.outerHTML
             let fint = JSON.stringify(formdata)
@@ -1877,10 +1879,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             var inputs = self.get_form_data(form)
             //var refine_inputs  = await KernelSideDataObjects(`import json\nimport base64\nfrom GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.updated_form(${JSON.stringify(origin)}, json.loads(base64.b64decode("${btoa(JSON.stringify(inputs))}")), ${JSON.stringify(self.model.get('inputs')['id'])}, ${JSON.stringify(history_id)})`)
           
-
             var refine_inputs = await KernelSideDataObjects(`import IPython\nfrom GiN.taskwidget  import GalaxyTaskWidget\nclass Temp(object):\n    def Return(self):\n        return IPython.display.JSON(GalaxyTaskWidget.updated_form(${JSON.stringify(origin)}, json.loads(base64.b64decode("${btoa(JSON.stringify(inputs))}")), ${JSON.stringify(self.model.get('inputs')['id'])}, ${JSON.stringify(history_id)}))\na = Temp()\na.Return()`)
             KernelSideDataObjects(`try:\n    del a\nexcept:\n    print("a is not defined")`)
-
 
             let formdata = form.parentNode.parentNode.parentNode.parentNode.parentNode.outerHTML
             let fint = JSON.stringify(formdata)
@@ -1899,8 +1899,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
  
     async data_upload_tool() {
 
-
-        if(this.el.querySelector('.tool-migration-select')){
+        if (this.el.querySelector('.tool-migration-select')){
             var origin = this.el.querySelector('.tool-migration-select').value
         }  else{
             var origin = this.model.get('origin')
@@ -1966,7 +1965,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         utm.querySelector('.available-sessions')
         var datatypes_genomes = await KernelSideDataObjects(`from GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.get_data_type_and_genomes(server=${JSON.stringify(origin)})`)
        
-       
         var Input = utm.querySelector('#inputupload')
 
         if (Input.files.length > 0){
@@ -2024,9 +2022,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         }
 
         // var apiKey = await KernelSideDataObjects(`from GiN.taskwidget  import GalaxyTaskWidget\nGalaxyTaskWidget.Return_api_key(${JSON.stringify(origin)})`)
-
-
-
         var apiKey =  await KernelSideDataObjects(`import IPython\nfrom GiN.taskwidget  import GalaxyTaskWidget\nclass Temp(object):\n    def Return(self):\n        return IPython.display.JSON(GalaxyTaskWidget.Return_api_key(${JSON.stringify(origin)}))\na = Temp()\na.Return()`)
         KernelSideDataObjects('try:\n    del a\nexcept:    print("a is not defined")')
 
@@ -2062,110 +2057,113 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         this.add_dataset(ListItem, this.data_row_list, HistoryID)
     }
  
-    // async NewTusUpload(data){
-
-    //     if(this.el.querySelector('.tool-migration-select')){
-    //         var origin = this.el.querySelector('.tool-migration-select').value
-    //     }  else{
-    //         var origin = this.model.get('origin')
-    //     }
-
-    //     // var apiKey = await KernelSideDataObjects(`from GiN.taskwidget  import GalaxyTaskWidget\nGalaxyTaskWidget.Return_api_key(${JSON.stringify(origin)})`)
-
-    //     var apiKey =  await KernelSideDataObjects(`import IPython\nfrom GiN.taskwidget  import GalaxyTaskWidget\nclass Temp(object):\n    def Return(self):\n        return IPython.display.JSON(GalaxyTaskWidget.Return_api_key(${JSON.stringify(origin)}))\na = Temp()\na.Return()`)
-    //     KernelSideDataObjects('try:\n    del a\nexcept:    print("a is not defined")')
-
-    //     var self = this
-    //     var elm = this.el.querySelector('#inputupload')
-    //     var rp = this.el.querySelector('.resumable-upload-title')
-    //     var title = document.createElement('p')
-    //     title.className = 'upload-title'
-    //     var Parent = elm.parentElement
-    //     title.style.marginTop  = '20px'
-
-    //     Parent.prepend(title)
-    
-    //     var chunkSize = 10485760;
-    //     var file = data.files[0];
-
-    //     //FixMe
-    //     // var credentials = this.model.get('gal_instance')
-    //     data['key'] =  apiKey['api_key']
-
-    //     var upload = new tus.Upload(file, {
-    //         endpoint: `${origin}/api/upload/resumable_upload/`,
-    //         retryDelays: [0, 3000, 5000, 10000, 20000],
-    //         chunkSize: chunkSize,
-
-    //         metadata: {
-    //             filename: file.name,
-    //             filetype: file.type,
-    //         },
-    //         headers: {
-    //             'x-api-key': apiKey['api_key'],
-    //         },
-            
-    //         onError: function(error) {
-
-    //             self.readFile()
-
-    //             console.log("Failed because: " + error)
-        
-    //         },
-
-    //         onProgress: function(bytesUploaded, bytesTotal) {
-    //             var percentage = (bytesUploaded / bytesTotal * 100).toFixed(2)
-    //             console.log(bytesUploaded, bytesTotal, percentage + "%")
-
-    //             title.innerText = `Uploading file ${upload.file.name,  percentage + "%"}` 
-
-    //             var btn = self.el.querySelector('#resumable_upload_button')
-    //             btn.innerHTML = 'Uploading '
-
-    //             var i = document.createElement('i')
-    //             i.className = 'fa fa-spinner fa-spin'
-    //             btn.append(i)
-    //         },
-
-    //         onSuccess: function() {
-    //             console.log("Download %s from %s", upload.file.name, upload.url)
-
-    //             var btn = self.el.querySelector('#resumable_upload_button')
-    //             self.removeAllChildNodes(btn)
-    //             btn.innerHTML = "Upload"
-
-    //             data[`files_${0}|file_data`] = {
-    //                 session_id: upload.url.split("/").at(-1),
-    //                 name: upload.file.name,
-    //             };
-
-    //             title.parentElement.removeChild(title)
-
-    //             delete data["files"]
-
-    //             elm.style.display = 'block'
-    //             self.submitPayload(data, credentials)
-    //             this.el.querySelector('#inputupload').value = null
-    //             this.el.querySelector('.upload-status-icon').style.display = 'none'
-    //         }
-    //     })
-    //     // Check if there are any previous uploads to continue.
-    //     upload.findPreviousUploads().then(function (previousUploads) {
-    //         // Found previous uploads so we select the first one. 
-    //         if (previousUploads.length) {
-    //             upload.resumeFromPreviousUpload(previousUploads[0])
-    //         }
-    //         upload.start()
-    //     })
-
-    // }
-
-
     async NewTusUpload(data){
 
-        await this.upload_files()
-        await this.readFile()
+        if(this.el.querySelector('.tool-migration-select')){
+            var origin = this.el.querySelector('.tool-migration-select').value
+        }  else{
+            var origin = this.model.get('origin')
+        }
+
+        // var apiKey = await KernelSideDataObjects(`from GiN.taskwidget  import GalaxyTaskWidget\nGalaxyTaskWidget.Return_api_key(${JSON.stringify(origin)})`)
+
+        var apiKey =  await KernelSideDataObjects(`import IPython\nfrom GiN.taskwidget  import GalaxyTaskWidget\nclass Temp(object):\n    def Return(self):\n        return IPython.display.JSON(GalaxyTaskWidget.Return_api_key(${JSON.stringify(origin)}))\na = Temp()\na.Return()`)
+        KernelSideDataObjects('try:\n    del a\nexcept:    print("a is not defined")')
+
+        var self = this
+        var elm = this.el.querySelector('#inputupload')
+        var rp = this.el.querySelector('.resumable-upload-title')
+        var title = document.createElement('p')
+        title.className = 'upload-title'
+        var Parent = elm.parentElement
+        title.style.marginTop  = '20px'
+
+        Parent.prepend(title)
+    
+        var chunkSize = 10485760;
+        var file = data.files[0];
+
+        //FixMe
+        // var credentials = this.model.get('gal_instance')
+        data['key'] =  apiKey['api_key']
+
+        var upload = new tus.Upload(file, {
+            endpoint: `${origin}/api/upload/resumable_upload/`,
+            retryDelays: [0, 3000, 5000, 10000, 20000],
+            chunkSize: chunkSize,
+
+            metadata: {
+                filename: file.name,
+                filetype: file.type,
+            },
+            headers: {
+                'x-api-key': apiKey['api_key'],
+            },
+            
+            onError: function(error) {
+
+                var a = async () =>{
+                    await self.upload_files()
+                    await self.readFile()
+                }
+
+                a()
+
+                console.log("Failed because: " + error)
+            },
+
+            onProgress: function(bytesUploaded, bytesTotal) {
+                var percentage = (bytesUploaded / bytesTotal * 100).toFixed(2)
+                console.log(bytesUploaded, bytesTotal, percentage + "%")
+
+                title.innerText = `Uploading file ${upload.file.name,  percentage + "%"}` 
+
+                var btn = self.el.querySelector('#resumable_upload_button')
+                btn.innerHTML = 'Uploading '
+
+                var i = document.createElement('i')
+                i.className = 'fa fa-spinner fa-spin'
+                btn.append(i)
+            },
+
+            onSuccess: function() {
+                console.log("Download %s from %s", upload.file.name, upload.url)
+
+                var btn = self.el.querySelector('#resumable_upload_button')
+                self.removeAllChildNodes(btn)
+                btn.innerHTML = "Upload"
+
+                data[`files_${0}|file_data`] = {
+                    session_id: upload.url.split("/").at(-1),
+                    name: upload.file.name,
+                };
+
+                title.parentElement.removeChild(title)
+
+                delete data["files"]
+
+                elm.style.display = 'block'
+                self.submitPayload(data, credentials)
+                this.el.querySelector('#inputupload').value = null
+                this.el.querySelector('.upload-status-icon').style.display = 'none'
+            }
+        })
+        // Check if there are any previous uploads to continue.
+        upload.findPreviousUploads().then(function (previousUploads) {
+            // Found previous uploads so we select the first one. 
+            if (previousUploads.length) {
+                upload.resumeFromPreviousUpload(previousUploads[0])
+            }
+            upload.start()
+        })
     }
+
+    // async NewTusUpload(data){
+
+    //     await this.upload_files()
+    //     await this.readFile()
+    // }
+
 
     async readFile() {
 
@@ -2177,14 +2175,23 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         const file = elm.files.item(0);
 
-        console.log(hi)
-
         var a = async () => {
-            var out  = await KernelSideDataObjects(`from GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.CORS_fallback_upload( server=${JSON.stringify(origin)}, history_id=${JSON.stringify(hi)})`);
-        }
+            var out  = await KernelSideDataObjects(`from GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.start_upload( server=${JSON.stringify(origin)}, history_id=${JSON.stringify(hi)})`);
+            while (out.status != 'finish'){
+                setTimeout(5000)
+                var out  = await KernelSideDataObjects(`from GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.check_upload(upload_id=${JSON.stringify(out.id)})`);
+            }
 
+            this.el.querySelector('.upload-status-icon .fa-spin').style.display = 'none'
+            var DataListdiv = this.el.querySelector('.history-dataset-list');
+    
+            this.removeAllChildNodes(DataListdiv)    
+            DataListdiv.append(await this.data_row_list(this.el.querySelector('#dataset-history-list').value))
+            this.el.querySelector('#inputupload').value = ''
+
+            return 
+        }
         a()
-       
     }
 
     async Upload_callback(input){
@@ -2239,6 +2246,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         for (var i = 0; i < upload_method.length; i++ )  {
             if (upload_method[i].style.display ==  'block'){
                 if (upload_method[i].querySelector('.input_upload').type == 'file') {
+                  
                     this.Upload_callback(upload_method[i].querySelector('.input_upload'))
 
                 } else{
@@ -2312,8 +2320,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         select.addEventListener("change", async () => {
 
-            console.log("OKK")
-
             this.el.querySelector('#dataset-status-text').querySelector('b').style.display = 'block'
             spn.style.display = 'block'
             update.style.display = 'none'
@@ -2342,7 +2348,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             spn.style.display = 'none'
             this.el.querySelector('#dataset-status-text').querySelector('b').style.display = 'none'
             update.style.display = 'block'
-
         });
 
         update.addEventListener('click', async () => {
@@ -3300,7 +3305,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         row.append(select)
         row.append(help)
 
-
         select.addEventListener('change', async (e) => {
 
             var history_id = self.el.querySelector('#dataset-history-list').value
@@ -3308,6 +3312,12 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             var inputs = self.get_form_data(form)
             // var refine_inputs  = await KernelSideDataObjects(`import json\nimport base64\nfrom GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.updated_form(${JSON.stringify(origin)}, json.loads(base64.b64decode("${btoa(JSON.stringify(inputs))}")), ${JSON.stringify(self.model.get('inputs')['id'])}, ${JSON.stringify(history_id)})`)
            
+            if(this.el.querySelector('.tool-migration-select')){
+                var origin = this.el.querySelector('.tool-migration-select').value
+            }  else{
+                var origin = this.model.get('origin')
+            }
+
             var refine_inputs = await KernelSideDataObjects(`import IPython\nfrom GiN.taskwidget  import GalaxyTaskWidget\nclass Temp(object):\n    def Return(self):\n        return IPython.display.JSON(GalaxyTaskWidget.updated_form(${JSON.stringify(origin)}, json.loads(base64.b64decode("${btoa(JSON.stringify(inputs))}")), ${JSON.stringify(self.model.get('inputs')['id'])}, ${JSON.stringify(history_id)}))\na = Temp()\na.Return()`)
             KernelSideDataObjects(`try:\n    del a\nexcept:\n    print("a is not defined")`)
             let formdata = form.parentNode.parentNode.parentNode.parentNode.parentNode.outerHTML
@@ -3326,8 +3336,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
     }
 
     async add_conditional_section(input_def, parent, NamePrefix, call_back_data={}){
-
-        
 
         if (this.el.querySelector('.tool-migration-select')){
             var origin = this.el.querySelector('.tool-migration-select').value
@@ -4509,9 +4517,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
  
     async JobStatusTemplate (parent, job){
 
-        console.log("OK")
-
-        if(this.el.querySelector('.tool-migration-select')){
+        if (this.el.querySelector('.tool-migration-select')){
             var origin = this.el.querySelector('.tool-migration-select').value
         }  else{
             var origin = this.model.get('origin')
@@ -4558,8 +4564,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         template.style.margin = '20px'
 
         // var apiKey = await KernelSideDataObjects(`from GiN.taskwidget  import GalaxyTaskWidget\nGalaxyTaskWidget.Return_api_key('${origin}')`)
-
-
         var apiKey =  await KernelSideDataObjects(`import IPython\nfrom GiN.taskwidget  import GalaxyTaskWidget\nclass Temp(object):\n    def Return(self):\n        return IPython.display.JSON(GalaxyTaskWidget.Return_api_key(${JSON.stringify(origin)}))\na = Temp()\na.Return()`)
         KernelSideDataObjects('try:\n    del a\nexcept:    print("a is not defined")')
 
@@ -4626,8 +4630,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
             var jb = await KernelSideDataObjects(`import IPython\nfrom GiN.taskwidget  import GalaxyTaskWidget\nclass Temp(object):\n    def Return(self):\n        return IPython.display.JSON(GalaxyTaskWidget.show_job(server=${JSON.stringify(origin)}, job_id=${JSON.stringify(job["id"])}))\na = Temp()\na.Return()`)
             KernelSideDataObjects(`try:\n    del a\nexcept:\n    print("a is not defined")`)
-
-            console.log(jb)
 
             for (var j = 0; j < Object.keys(jb['inputs']).length; j++){
 
@@ -5038,6 +5040,13 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             var toolid =  "GiN_data_upload_tool"
 
             if (this.model.get('galaxy_tool_id') == toolid) {
+
+                var a = async ()=>{
+                    await KernelSideDataObjects(`from GiN.util import delete_file\ndelete_file()`)
+                }
+
+                a()
+
                 this.dataupload_job()
             } else if (this.model.get('name') == 'login'){
                 this.trigger_login()
@@ -5151,9 +5160,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         var jobs = await KernelSideDataObjects(`import IPython\nimport json\nimport base64\nfrom GiN.taskwidget import GalaxyTaskWidget\nclass Temp(object):\n    def Return(self):\n        return IPython.display.JSON(GalaxyTaskWidget.submit_job(server=json.loads(base64.b64decode("${btoa(JSON.stringify(origin))}")), tool_id=json.loads(base64.b64decode("${btoa(JSON.stringify(this.model.get('galaxy_tool_id')))}")), tool_inputs=json.loads(base64.b64decode("${btoa(JSON.stringify(inputs))}")), history_id=json.loads(base64.b64decode("${btoa(JSON.stringify(history_id))}"))))\na = Temp()\na.Return()`)
         KernelSideDataObjects(`try:\n    del a\nexcept:\n    print("a is not defined")`)
-       
-        console.log(jobs)
-
 
     if (jobs['state'] == 'job failed'){
 

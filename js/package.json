@@ -36,6 +36,7 @@
     "webpack-cli": "^4.5.0"
   },
   "dependencies": {
+    "@g2nb/ipyuploads": "file:../../ipyuploads/js",
     "@g2nb/nbtools": "22.3.0-beta.2",
     "@jupyter-widgets/base": "^4.0.0",
     "@jupyterlab/notebook": "^3.0.4",

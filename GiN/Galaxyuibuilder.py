@@ -2,11 +2,17 @@ from traitlets import Unicode, List, Bool, Dict
 from ._frontend import module_name, module_version
 from nbtools.basewidget import BaseWidget
 from nbtools.tool_manager import  NBTool
-from .util import GALAXY_SERVER_NAME_BY_URL
+from .util import GALAXY_SERVER_NAME_BY_URL, delete_file
 import base64
 import shutil
 import os
 import glob
+from ipyuploads import Upload
+
+
+
+
+Upload = Upload(accept='txt', multiple=False)
 
 
 class GalaxyUIBuilder(BaseWidget, NBTool):
@@ -83,6 +89,7 @@ class GalaxyUIBuilder(BaseWidget, NBTool):
     @staticmethod
     def write_chunk(name, encoded_chunk, first_chunk):
 
+
         mode = 'w' if first_chunk else 'a'
 
         file = os.path.join(os.getcwd(), 'temp', name)
@@ -90,13 +97,14 @@ class GalaxyUIBuilder(BaseWidget, NBTool):
 
         with open(file, mode) as f:
             f.write(base64.b64decode(encoded_chunk).decode("utf-8"))
-
+             
     def handle_messages(self, _, content, buffers):
         """Handle messages sent from the client-side"""
         if content.get('event', '') == 'upload':
             name = content.get('file', '')
             encoded_chunk = content.get('chunk', '')
             first_chunk = content.get('count', '') == 1
+            print("example", content.get('type', ''))
 
             # print(type(base64.b64decode(encoded_chunk).decode("utf-8")))
             GalaxyUIBuilder.write_chunk(name, encoded_chunk, first_chunk)
