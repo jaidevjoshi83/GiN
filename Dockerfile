@@ -18,46 +18,41 @@ RUN apt-get update && apt-get install -y npm
 
 USER $NB_USER
 
-#RUN conda create -n GINT python=3.9 install -c conda-forge jupyterlab=3.4 nodejs  npm install -g yarn
-
-RUN conda install -c conda-forge jupyterlab=3.4 nodejs=14.15.1 && \
+RUN conda install -c conda-forge jupyterlab=3.4 nodejs=16 && \
     npm install -g yarn
 
 #############################################
 ##  $NB_USER                               ##
-##      Clone & install ipyuploads repo    ##
+##      install ipyuploads repo            ##
 #############################################
 
-RUN git clone https://github.com/g2nb/ipyuploads.git && \
-    cd ipyuploads && pip install .
-
-#############################################
-##  $NB_USER                               ##
-##      Clone the nbtools repo             ##
-#############################################
-
-RUN git clone https://github.com/g2nb/nbtools.git
+RUN pip install ipyuploads 
 
 #############################################
 ##  $NB_USER                               ##
-##      Build and install nbtools          ##
+##      install nbtools                    ##
 #############################################
 
-RUN cd nbtools && pip install . && \
-    jupyter labextension install . && \
+RUN pip install nbtools && \
     jupyter nbextension install --py nbtools --sys-prefix && \
     jupyter nbextension enable --py nbtools --sys-prefix
 
 #############################################
 ##  $NB_USER                               ##
-##      Install GalaxyLab                  ##
+##      Install  GiN                       ##
 #############################################
 
 RUN pip install bioblend && \
-    git clone https://github.com/jaidevjoshi83/GiN.git && \
-    cd GiN && npm install @g2nb/nbtools && pip install . && \
+    pip install galaxy-gin && \
     jupyter nbextension install --py --symlink --overwrite --sys-prefix GiN && \
     jupyter nbextension enable --py --sys-prefix GiN
+
+#############################################
+##  $NB_USER                               ##
+##      Install  genepattern-notebook      ##
+#############################################
+
+RUN pip install genepattern-notebook
 
 
 #############################################

@@ -19,11 +19,12 @@ log.set_verbosity(log.DEBUG)
 log.info('setup.py entered')
 log.info('$PATH=%s' % os.environ['PATH'])
 
-name = 'GiN'
+name = 'galaxy-gin'
 LONG_DESCRIPTION = 'A Custom Jupyter Widget Library'
 
 # Get GiN version
-version = get_version(pjoin(name, '_version.py'))
+version = get_version(pjoin('GiN', '_version.py'))
+
 
 js_dir = pjoin(here, 'js')
 
