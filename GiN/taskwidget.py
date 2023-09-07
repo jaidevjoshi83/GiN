@@ -2,7 +2,7 @@ import os
 import IPython
 from nbtools import NBTool
 from .Galaxyuibuilder import GalaxyUIBuilder
-from .util import DEFAULT_COLOR, DEFAULT_LOGO
+from .util import DEFAULT_COLOR, DEFAULT_LOGO, GALAXY_SERVER_NAME_BY_URL
 import json5
 import logging
 import IPython.display
@@ -16,6 +16,7 @@ import json
 from ipyuploads import Upload
 import uuid
 import threading
+
 
 
 log = logging.getLogger(__name__)
@@ -68,7 +69,7 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
             self,
             inputs=inputs,
             id = self.tool['id'],
-            name = self.tool['name']+' ('+self.tool['origin']+')',
+            name = self.tool['name']+' ('+GALAXY_SERVER_NAME_BY_URL.get(self.tool['origin'])+')',
             galaxy_tool_id=self.tool['id'],
             description=self.tool['description'],
             subtitle=self.tool['origin'],
@@ -270,17 +271,6 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
         input_data_param=False,
     ):
         
-        print (
-
-            server,
-            tool_inputs,
-            tool_id,
-            history_id,
-            python_side,
-            input_data_param,
-
-        )
-
         a = GiN.sessions.SessionList()
         gi6 = a.get(server=server)
 
@@ -600,6 +590,7 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
         job_state = gi16.gi.jobs.get_state(job_id=job_id)
 
         return IPython.display.JSON({"job_state": job_state})
+    
 
 class TaskTool(NBTool):
 

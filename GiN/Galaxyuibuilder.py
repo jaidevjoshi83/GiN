@@ -10,10 +10,7 @@ import glob
 from ipyuploads import Upload
 
 
-
-
 Upload = Upload(accept='txt', multiple=False)
-
 
 class GalaxyUIBuilder(BaseWidget, NBTool):
     """
@@ -55,7 +52,6 @@ class GalaxyUIBuilder(BaseWidget, NBTool):
         self, galaxy_tool_id=None, history_ids=None, description=None, inputs={}, history_data=[], origin='', **kwargs
     ):
 
-
         self._apply_defaults()
         self.on_msg(self.handle_messages)
         
@@ -74,8 +70,9 @@ class GalaxyUIBuilder(BaseWidget, NBTool):
     def _apply_defaults(self, function_or_method=None):
         # Set the name based on the function name
 
-        # self.name = f"{self.name} ({GALAXY_SERVER_NAME_BY_URL.get(self.origin, self.origin)})"
         self.name = f"{self.name} ({GALAXY_SERVER_NAME_BY_URL.get(self.origin, self.origin)})"
+        # self.name = f"{self.name} "
+       
         self.id = "galaxy_authentication"  # function_or_method.__qualname__
         # Set the description based on the docstring
 
@@ -88,7 +85,6 @@ class GalaxyUIBuilder(BaseWidget, NBTool):
 
     @staticmethod
     def write_chunk(name, encoded_chunk, first_chunk):
-
 
         mode = 'w' if first_chunk else 'a'
 
