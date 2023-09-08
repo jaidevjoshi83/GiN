@@ -1082,10 +1082,11 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                             form.children[i].querySelector('.InputData').style.backgroundColor = 'pink'
                             return 'error'
                         } else {
-                            console.log(form.children[i].querySelector('.InputData'))
+                            
                             form.children[i].querySelector('.InputData').style.backgroundColor = ''
                             // out[form.children[i].querySelector('.InputData').name] =  form.children[i].querySelector('.InputData').value
                             if (form.children[i].querySelector('.InputData').parentNode.querySelector('#variable-checkbox') && form.children[i].querySelector('.InputData').parentNode.querySelector('#variable-checkbox').checked) {
+                                // var variables =  await KernelSideDataObjects(`import IPython.display\ntry:\n    IPython.display.JSON({'value':globals()['${form.children[i].querySelector('.InputData').value}']})\nexcept:\n    pass`)
                                 var variables =  await KernelSideDataObjects(`import IPython.display\nIPython.display.JSON({'value':globals()['${form.children[i].querySelector('.InputData').value}']})`)
                                 out[form.children[i].querySelector('.InputData').name] =  variables
                             } else {
@@ -1094,12 +1095,15 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                         }
                     } else {
 
-                        if (form.children[i].querySelector('.InputData').parentNode.querySelector('#variable-checkbox') && form.children[i].querySelector('.InputData').parentNode.querySelector('#variable-checkbox').checked) {
+                        if (form.children[i].querySelector('.InputData').parentNode.querySelector('#variable-checkbox') && form.children[i].querySelector('.InputData').parentNode.querySelector('#variable-checkbox').checked) {                           
+                            // var variables =  await KernelSideDataObjects(`import IPython.display\ntry:\n    IPython.display.JSON({'value':globals()['${form.children[i].querySelector('.InputData').value}']})\nexcept:\n    pass`)
                             var variables =  await KernelSideDataObjects(`import IPython.display\nIPython.display.JSON({'value':globals()['${form.children[i].querySelector('.InputData').value}']})`)
                             out[form.children[i].querySelector('.InputData').name] =  variables
                         } else {
                             out[form.children[i].querySelector('.InputData').name] =  form.children[i].querySelector('.InputData').value
                         }
+
+                        // out[form.children[i].querySelector('.InputData').name] =  form.children[i].querySelector('.InputData').value
                     }
                 
                 } else if (form.children[i].querySelector('.outer-checkbox-div')){
@@ -4633,10 +4637,10 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
                 var show_dataset = await KernelSideDataObjects(`import IPython\nfrom GiN.taskwidget  import GalaxyTaskWidget\nclass Temp(object):\n    def Return(self):\n        return IPython.display.JSON([GalaxyTaskWidget.show_data_set(server=${JSON.stringify(origin)}, dataset_id=${JSON.stringify(jb['inputs'][Object.keys(jb['inputs'])[j]]['id'])} )])\na = Temp()\na.Return()`) 
                 KernelSideDataObjects(`try:\n    del a\nexcept:\n    print("a is not defined")`)
-                
+    
                 var ili  = document.createElement('li')
                 var ib = document.createElement('b')
-                ib.innerText = `${show_dataset['name']}`
+                ib.innerText = `${show_dataset[0]['name']}`
                 ili.append(ib)
                 inputs.append(ili)
             }
@@ -4648,7 +4652,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 var show_dataset = await KernelSideDataObjects(`import IPython\nfrom GiN.taskwidget  import GalaxyTaskWidget\nclass Temp(object):\n    def Return(self):\n        return IPython.display.JSON([GalaxyTaskWidget.show_data_set(server=${JSON.stringify(origin)}, dataset_id=${JSON.stringify(jb['outputs'][Object.keys(jb['outputs'])[k]]['id'])} )])\na = Temp()\na.Return()`) 
                 KernelSideDataObjects(`try:\n    del a\nexcept:\n    print("a is not defined")`)
                
-                ob.innerText =  `${show_dataset['name']}`
+                ob.innerText =  `${show_dataset[0]['name']}`
                 oli.append(ob)
                 outputs.append(oli)
             }
@@ -4656,7 +4660,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             this.input_output_file_status_update(template, job)
         } else{
             self.el.querySelector('.Galaxy-form').style.display = 'none'
-            self.el.querySelector('.galaxy-history-list').style.display = 'none'
+            // self.el.querySelector('.galaxy-history-list').style.display = 'none'
 
             template.querySelector('.job-output-files').style.backgroundColor = 'pink'
             template.querySelector('.job-output-files').innerHTML = `<p> ${job['error']} </p>` 
