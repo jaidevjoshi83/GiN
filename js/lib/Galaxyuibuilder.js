@@ -749,6 +749,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             case  "float" :
             case "text":
             case "color":
+                console.log(input_def)
                 this.add_input_value(input_def, form_parent, name_prefix)
                 break
             case "boolean":
@@ -1284,33 +1285,35 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
                     if(form.children[i].className == 'outer-checkbox-div'){
 
-                        console.log("OKKK")
-
-                        var optional = JSON.parse(form.children[i]['data-value'])['optional']
-
+                        var div_data = JSON.parse(form.children[i]['data-value'])
 
                         var options = []
-                        for (var j = 0; j < form.childNodes[i].children.length; j++){
-                        var name 
-                        if ($(form.childNodes[i].children[j]).find('.InputDataCheckbox')[0].checked) {
-                                name = $(form.childNodes[i].children[j]).find('.InputDataCheckbox')[0].name
-                                options.push($(form.childNodes[i].children[j]).find('.InputDataCheckbox')[0].value)
-                        }
-                        }
 
-                        out[name] = options
+                        for (var j = 0; j < form.childNodes[i].children.length; j++){
+                            var name 
+                            if ($(form.childNodes[i].children[j]).find('.InputDataCheckbox')[0].checked) {
+                                options.push($(form.childNodes[i].children[j]).find('.InputDataCheckbox')[0].value)
+                            }
+                        }
 
                         if (checking) {
 
-                            if(optional){
+                            if(!div_data['optional'] && options.length == 0){
 
+                                console.log(!div_data['optional'], div_data['optional'], options.length)
 
-                            }
-                            if (options.length == 0){
                                 form.children[i].style.backgroundColor = 'pink'
                                 return 'error'
-                            } else if (optional && options.length == 0 ) {
+                            }
+                            else if(!div_data['optional'] && options.length > 0){
                                 form.children[i].style.backgroundColor = ''
+                                out[div_data['name']] = options
+                            } else if (div_data['optional'] && options.length == 0 ) {
+
+                                console.log("Im here")
+                                out[div_data['name']] = div_data['value']
+                            } else if(div_data['optional']&& options.length > 0) {
+                                out[div_data['name']] = options
                             }
                         }
                     }
@@ -1338,17 +1341,19 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
                     if(form.children[i].className == 'InputData'){
 
-                        if (checking){
-                            if (form.children[i].value == ''){
+                        var div_data = JSON.parse(form.children[i].getAttribute('data-value'))
+
+
+                        if (checking && !div_data['optional']){
+                            if(form.children[i].className == "" || null) {
                                 form.children[i].style.backgroundColor  = 'pink' 
                                 return 'error'
-                            } else(
-                                form.children[i].style.backgroundColor  = '' 
-                            )
+                            } else{
+                                  out[form.children[i].name] = div_data['value']
+    
+                            } 
                         }
-                        out[form.children[i].name] = form.children[i].value
                     }
-
                 }
             }
         }
@@ -1941,7 +1946,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         input.id = `input-${input_def.id}`
         input.name = NamePrefix+input_def['name']
-        input.value = input_def['value']
+        input.value = input_def['default_value']
         input.className = 'InputData'
         const row = document.createElement('div')
 
@@ -1992,7 +1997,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         TitleSpan.textContent = input_def.label
         TitleSpan.style.display = 'inline'
 
-        input['data-value'] = input_def['optional']
+        input.setAttribute('data-value', JSON.stringify({"optional": input_def['optional'], "value":input_def['default_value']})) 
 
         const help = document.createElement('div')
         help.className = 'ui-from-help'
@@ -3122,6 +3127,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
  
     add_select_field(input_def, FormParent, NamePrefix){
 
+        console.log(input_def)
+
         if(this.el.querySelector('.tool-migration-select')){
             var origin = this.el.querySelector('.tool-migration-select').value
         }  else{
@@ -3144,15 +3151,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             const OuterDiv = document.createElement('div')
             OuterDiv.className =  'outer-checkbox-div'
 
-            if (input_def.optional == true) { 
-                OuterDiv['data-value'] = JSON.stringify({"optional": true})
-            } else {
-                OuterDiv['data-value'] = JSON.stringify({"optional": false})
-            }
-
-            OuterDiv['data-value']['name'] = input_def['name']
-            OuterDiv['data-value']['value'] = input_def['value']
-
+            OuterDiv['data-value'] = JSON.stringify({"optional": input_def.optional, "name":input_def['name'], "value":input_def['value'] })
+        
             const selectspan = document.createElement('span')
             selectspan.className = "select-ui-form-title-text"
             selectspan.textContent = 'Select all'
@@ -3226,7 +3226,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                     for(var l = 0; l < input_def.value.length; l++){
                         if(input_def.value[l] == input_def.options[k][1]){
                             input_def.options[k][2] = true 
-                            
                         }
                     }
                 }
@@ -3287,9 +3286,13 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             }
 
             const select = document.createElement('select')
+
             select.id = `select-${input_def.id}`  
             select.className = 'InputData'   
             select.name = NamePrefix+input_def['name']
+            select.setAttribute('data-value', JSON.stringify({'optional': input_def.optional, 'value':input_def.value}))
+
+            console.log("OKKK")
         
             for(var i = 0; i < options.length; i++) {
 
@@ -3409,6 +3412,9 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             }
         }
 
+
+        select.setAttribute('data-value', JSON.stringify({'optional': input_def.optional, 'value':input_def.value}))
+
         select.id = `input-${input_def.id}`
         select.className = 'InputData' 
         const row = document.createElement('div')
@@ -3493,6 +3499,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         select.id = `select-${input_def.id}`    
         select.className = 'InputData' 
+
+        select.setAttribute('data-value', JSON.stringify({'optional': input_def.optional, 'value':input_def.value}))
     
         for (var i = 0; i < options.length; i++) {
             const opt = options[i][0];
@@ -3579,6 +3587,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
     add_conditional_section_1(input_def, parent, NamePrefix, call_back_data={}){
 
+        console.log(input_def)
+
         if (this.el.querySelector('.tool-migration-select')){
             var origin = this.el.querySelector('.tool-migration-select').value
         }  else{
@@ -3600,6 +3610,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         const select = document.createElement('select')
         select.name = NamePrefix+input_def['name']+"|"+input_def['test_param']['name']
+        select.setAttribute('data-value', JSON.stringify({'optional': input_def['test_param'].optional, 'value':input_def['test_param'].value}))
 
         select.id = `select-${input_def.id}`    
         select.className = 'InputData' 
@@ -3619,8 +3630,9 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             select.appendChild(el);
         }
 
-        for (var i, j = 0; i = select.options[j]; j++) {
-            if (i.value == input_def.test_param.value) {
+        for (var j = 0; j < select.options.length; j++) {
+            var option = select.options[j];
+            if (option.value == input_def.test_param.value) {
                 select.selectedIndex = j;
                 break;
             }
