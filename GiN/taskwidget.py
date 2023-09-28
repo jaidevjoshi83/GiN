@@ -17,8 +17,6 @@ from ipyuploads import Upload
 import uuid
 import threading
 
-
-
 log = logging.getLogger(__name__)
 
 try:
@@ -64,12 +62,17 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
                 history_id=history_ids[0]["id"],
                 python_side=True,
             )
-        
+
+        if GALAXY_SERVER_NAME_BY_URL.get(self.tool['origin']):
+            server_name = GALAXY_SERVER_NAME_BY_URL.get(self.tool['origin'])
+        else:
+            server_name = self.tool['origin']
+
         GalaxyUIBuilder.__init__(
             self,
             inputs=inputs,
             id = self.tool['id'],
-            name = self.tool['name']+' ('+GALAXY_SERVER_NAME_BY_URL.get(self.tool['origin'])+')',
+            name = self.tool['name']+' ('+server_name+')',
             galaxy_tool_id=self.tool['id'],
             description=self.tool['description'],
             subtitle=self.tool['origin'],
@@ -127,7 +130,6 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
             )
         except BaseException as e:
             job = {"state": "job failed", 'error': str(e)}
-
 
         #return IPython.display.JSON(job)
         return job
@@ -386,7 +388,6 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
 
         a = GiN.sessions.SessionList()
         gi12 = a.get(server=server)
-
         histories = gi12.gi.histories.gi.histories.get_histories()
 
         return IPython.display.JSON(histories)
@@ -478,16 +479,10 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
         gi = a.get(server=server)
 
         temp_dir = os.path.join(os.getcwd(), "temp")
-
-   
         file_path = glob.glob(os.path.join(temp_dir, '*'))[0]
-
-        print(history_id)
-        
         out = gi.tools.gi.tools.upload_file(path=file_path, history_id=history_id)
 
         # print(out)
-
         # [os.remove(file) for file in glob.glob(os.path.join(temp_dir, '*')) if os.path.isfile(file_path)]
 
         return IPython.display.JSON(out)

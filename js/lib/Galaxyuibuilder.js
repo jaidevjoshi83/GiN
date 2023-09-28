@@ -734,7 +734,10 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             input_def.id = this.uid()  
         }
 
+       
+
         switch (input_def.type) {
+            
             case "conditional":  
                 this.add_conditional_section_1(input_def, form_parent, name_prefix, data);
                 break;
@@ -752,6 +755,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 this.add_boolean_field(input_def, form_parent, name_prefix)
                 break
             case "select":
+                console.log(input_def)
                 this.add_select_field(input_def, form_parent, name_prefix)
                 break
             case "repeat": 
@@ -1051,196 +1055,305 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         return divElement.offsetWidth > 0 && divElement.offsetHeight > 0;
       }
  
-    async get_form_data(form, checking){
 
+    // async get_form_data(form, checking){
+
+    //     var self = this
+    //     var out = {}
+
+    //     // var Check = checking
+        
+    //     for (var i = 0; i < form.children.length; i++){
+    //         if ((form.children[i].className.includes('pl-2') &&  form.children[i].style.display == 'block' && form.children[i].children.length > 0) ||  form.children[i].className.includes('ui-portlet-section') || form.children[i].className.includes('ui-repeat')  || form.children[i].className.includes('sections')){
+
+    //             if (await self.get_form_data(form.children[i], checking) == 'error') {
+    //                 return 'error'
+    //             } else{
+    //                 Object.assign(out,  await self.get_form_data(form.children[i], checking))
+    //             }
+    //         } else if (form.children[i].className == 'ui-form-element section-row') {
+        
+    //             if (form.children[i].querySelector('.InputData')){
+
+    //                 var opt
+        
+    //                 if (form.children[i].querySelector('.InputData')['data-value']){
+    //                     opt = form.children[i].querySelector('.InputData')['data-value']
+    //                 }
+            
+    //                 if (checking == 'on' && opt == false){
+
+    //                     if (form.children[i].querySelector('.InputData').value == "") {
+    //                         form.children[i].querySelector('.InputData').style.backgroundColor = 'pink'
+    //                         return 'error'
+    //                     } else {
+                            
+    //                         form.children[i].querySelector('.InputData').style.backgroundColor = ''
+    //                         // out[form.children[i].querySelector('.InputData').name] =  form.children[i].querySelector('.InputData').value
+    //                         if (form.children[i].querySelector('.InputData').parentNode.querySelector('#variable-checkbox') && form.children[i].querySelector('.InputData').parentNode.querySelector('#variable-checkbox').checked) {
+    //                             // var variables =  await KernelSideDataObjects(`import IPython.display\ntry:\n    IPython.display.JSON({'value':globals()['${form.children[i].querySelector('.InputData').value}']})\nexcept:\n    pass`)
+    //                             var variables =  await KernelSideDataObjects(`import IPython.display\nIPython.display.JSON({'value':globals()['${form.children[i].querySelector('.InputData').value}']})`)
+    //                             out[form.children[i].querySelector('.InputData').name] =  variables
+    //                         } else {
+    //                             out[form.children[i].querySelector('.InputData').name] =  form.children[i].querySelector('.InputData').value
+    //                         }
+    //                     }
+    //                 } else {
+
+    //                     if (form.children[i].querySelector('.InputData').parentNode.querySelector('#variable-checkbox') && form.children[i].querySelector('.InputData').parentNode.querySelector('#variable-checkbox').checked) {                           
+    //                         // var variables =  await KernelSideDataObjects(`import IPython.display\ntry:\n    IPython.display.JSON({'value':globals()['${form.children[i].querySelector('.InputData').value}']})\nexcept:\n    pass`)
+    //                         var variables =  await KernelSideDataObjects(`import IPython.display\nIPython.display.JSON({'value':globals()['${form.children[i].querySelector('.InputData').value}']})`)
+    //                         out[form.children[i].querySelector('.InputData').name] =  variables
+    //                     } else {
+    //                         out[form.children[i].querySelector('.InputData').name] =  form.children[i].querySelector('.InputData').value
+    //                     }
+
+    //                     // out[form.children[i].querySelector('.InputData').name] =  form.children[i].querySelector('.InputData').value
+    //                 }
+                
+    //             } else if (form.children[i].querySelector('.outer-checkbox-div')){
+
+    //                 var select_list = []
+        
+    //                 if (JSON.parse(form.children[i].querySelector('.outer-checkbox-div')['data-value'])["optional"] == true ) {
+        
+    //                     for (var k = 0; k < form.children[i].querySelector('.outer-checkbox-div').children.length; k++ ) {
+    //                         if (form.children[i].querySelector('.outer-checkbox-div').children[k].querySelector('.InputDataCheckbox').checked) {
+    //                             select_list.push(form.children[i].querySelector('.outer-checkbox-div').children[k].querySelector('.InputDataCheckbox').value)
+    //                         }
+    //                     }
+        
+    //                     if (select_list.length == 0){
+    //                         out[form.children[i].querySelector('.outer-checkbox-div').querySelector('.InputDataCheckbox').name] = null
+    //                     }  else{
+    //                         out[form.children[i].querySelector('.outer-checkbox-div').querySelector('.InputDataCheckbox').name] = select_list
+    //                     }
+        
+    //                 }  else if ((JSON.parse(form.children[i].querySelector('.outer-checkbox-div')['data-value'])["optional"] == false )){
+    //                         if (select_list.length == 0){
+    //                             form.children[i].querySelector('.outer-checkbox-div').children[0].querySelector('.InputDataCheckbox').parentNode.style.backgroundColor = 'pink'
+        
+    //                         } else if (select_list.length > 0 ){
+    //                             form.children[i].querySelector('.outer-checkbox-div').children[0].querySelector('.InputDataCheckbox').parentNode.style.backgroundColor = ''
+    //                             out[form.children[i].querySelector('.outer-checkbox-div').querySelector('.InputDataCheckbox').name] = select_list
+    //                         }
+    //                 }
+
+    //             } else if (form.children[i].querySelector('.InputDataFile')){
+
+    //                 if (checking == 'on') {
+    //                     if (form.querySelector('.InputDataFile').options.length  == 0 ){
+    //                         form.querySelector('.InputDataFile').style.backgroundColor = 'pink'
+    //                         return 'error'
+    //                     } else{
+    //                         form.querySelector('.InputDataFile').style.backgroundColor = ''
+        
+    //                         var input_data = form.querySelector('.InputDataFile').parentElement['data-file']
+    //                         var input_files = []
+                
+    //                         for (var i = 0; i < form.querySelector('.InputDataFile').options.length; i++) {
+    //                             if (form.querySelector('.InputDataFile').options[i].selected == true) {
+    //                                 input_files.push(JSON.parse(form.querySelector('.InputDataFile').options[i].value))
+    //                             }
+    //                         }
+                            
+    //                         out[form.querySelector('.InputDataFile').name] = input_data 
+            
+    //                         if (input_files.length == 1 && input_files[0]['id'] == ''){
+    //                             out[form.querySelector('.InputDataFile').name] = null
+    //                         } else{
+    //                             input_data['values'] = input_files
+    //                             out[form.querySelector('.InputDataFile').name] = input_data
+    //                         }
+    //                     }
+        
+    //                 } else{
+
+    //                     var input_data = form.children[i].querySelector('.InputDataFile').parentElement['data-file']
+    //                     var input_files = []
+    
+    //                     var opts = form.children[i].querySelector('.InputDataFile').options
+    
+    //                     for (var n = 0; n < opts.length ; n++){
+    //                         if (opts[n].selected == true){
+    //                             input_files.push(JSON.parse(opts[n].value))
+    //                         }
+    //                     }
+                        
+    //                     out[form.children[i].querySelector('.InputDataFile').name] = input_data 
+
+    //                     if (input_files.length == 1 && input_files[0]['id'] == ''){
+    //                         out[form.children[i].querySelector('.InputDataFile').name] = null
+    //                     } else if (input_files.length == 0 ) {
+    //                         out[form.children[i].querySelector('.InputDataFile').name] = {}
+    //                     }
+    //                     else{
+    //                         input_data['values'] = input_files
+    //                         out[form.children[i].querySelector('.InputDataFile').name] = input_data
+    //                     }
+    //                 }
+
+    //             } else if(form.children[i].querySelector('.drill-down.container')) {
+
+    //                 var drill_down_inputs = []
+            
+    //                     for(var n = 0; n < form.children[i].querySelector('.drill-down.container').querySelectorAll('input').length; n++) {
+    //                         if (form.children[i].querySelector('.drill-down.container').querySelectorAll('input')[n].checked) {
+    //                             drill_down_inputs.push(form.children[i].querySelector('.drill-down.container').querySelectorAll('input')[n].value)
+    //                         }
+    //                     }
+    //                     out[form.children[i].querySelector('.drill-down.container').name] =  drill_down_inputs
+            
+    //             } else if (form.children[i].querySelector('.data_collection')){
+                    
+    //                     var input_files = []  
+            
+    //                     out[form.children[i].querySelector('.data_collection').name] = input_files  
+            
+    //                     for (var i = 0; i < form.children[i].querySelector('.data_collection').options.length; i++) {
+    //                         if (form.children[i].querySelector('.data_collection').options[i].selected == true) {
+    //                             input_files.push(form.children[i].querySelector('.data_collection').options[i].data)
+    //                         }
+    //                     }
+
+    //                     if (checking == 'on') {
+    //                         if (out[form.children[i].querySelector('.data_collection').name].length < 1 ){
+    //                             fform.children[i].querySelector('.data_collection').style.backgroundColor = 'pink'
+    //                             return 'error'
+    //                         }
+    //                         else {
+    //                             form.children[i].querySelector('.data_collection').style.backgroundColor = ''
+    //                             out[form.children[i].querySelector('.data_collection').name] = input_files
+    //                             form.children[i].querySelector('.data_collection').parentElement['data-file']['values'] = input_files
+    //                             out[form.children[i].querySelector('.data_collection').name] = form.children[i].querySelector('.data_collection').parentElement['data-file']
+    //                         }
+    //                     } else {
+    //                         if (input_files.length == 0){
+    //                             form.children[i].querySelector('.data_collection').parentElement['data-file']['values'] = [{}]
+    //                         } else{
+    //                             form.children[i].querySelector('.data_collection').parentElement['data-file']['values'] = input_files
+    //                         }
+    //                         out[form.children[i].querySelector('.data_collection').name] = form.children[i].querySelector('.data_collection').parentElement['data-file']
+    //                     }
+    //             }
+    //         } else if (form.children[i].className == 'ui-form-element section-row conditional'){
+    //             if (form.children[i].querySelector('.InputData')){
+    //                 out[form.children[i].querySelector('.InputData').name] = form.children[i].querySelector('.InputData').value
+    //             }
+    //         }
+    //     }
+
+    //     // if (Object.keys(out).length > 0){
+    //         return out  
+    //     // }
+    // }
+
+    get_form_data(form, checking){
         var self = this
         var out = {}
 
-        // var Check = checking
-        
-        for (var i = 0; i < form.children.length; i++){
-            if ((form.children[i].className.includes('pl-2') &&  form.children[i].style.display == 'block' && form.children[i].children.length > 0) ||  form.children[i].className.includes('ui-portlet-section') || form.children[i].className.includes('ui-repeat')  || form.children[i].className.includes('sections')){
+        for(var i = 0 ; i < form.children.length;  i++){
+            if($(form.children[i]).is(':visible')){
 
-                if (await self.get_form_data(form.children[i], checking) == 'error') {
+                if(self.get_form_data(form.children[i], checking) == 'error'){
                     return 'error'
                 } else{
-                    Object.assign(out,  await self.get_form_data(form.children[i], checking))
-                }
-            } else if (form.children[i].className == 'ui-form-element section-row') {
-        
-                if (form.children[i].querySelector('.InputData')){
 
-                    var opt
-        
-                    if (form.children[i].querySelector('.InputData')['data-value']){
-                        opt = form.children[i].querySelector('.InputData')['data-value']
-                    }
-            
-                    if (checking == 'on' && opt == false){
+                    Object.assign(out, self.get_form_data(form.children[i], checking))
+                    if(form.children[i].className == 'InputDataFile'){
+                        var input_data = form.children[i].parentNode['data-file']
+                        var data_files = []
 
-                        if (form.children[i].querySelector('.InputData').value == "") {
-                            form.children[i].querySelector('.InputData').style.backgroundColor = 'pink'
-                            return 'error'
-                        } else {
-                            
-                            form.children[i].querySelector('.InputData').style.backgroundColor = ''
-                            // out[form.children[i].querySelector('.InputData').name] =  form.children[i].querySelector('.InputData').value
-                            if (form.children[i].querySelector('.InputData').parentNode.querySelector('#variable-checkbox') && form.children[i].querySelector('.InputData').parentNode.querySelector('#variable-checkbox').checked) {
-                                // var variables =  await KernelSideDataObjects(`import IPython.display\ntry:\n    IPython.display.JSON({'value':globals()['${form.children[i].querySelector('.InputData').value}']})\nexcept:\n    pass`)
-                                var variables =  await KernelSideDataObjects(`import IPython.display\nIPython.display.JSON({'value':globals()['${form.children[i].querySelector('.InputData').value}']})`)
-                                out[form.children[i].querySelector('.InputData').name] =  variables
-                            } else {
-                                out[form.children[i].querySelector('.InputData').name] =  form.children[i].querySelector('.InputData').value
+                        for(var k = 0; k < form.children[i].children.length; k++ ){
+                            if(form.children[i].children[k].selected){
+                                data_files.push(JSON.parse(form.children[i].children[k].value))
                             }
                         }
-                    } else {
+                        input_data['values'] = data_files
+                        out[form.children[i].name] = input_data
 
-                        if (form.children[i].querySelector('.InputData').parentNode.querySelector('#variable-checkbox') && form.children[i].querySelector('.InputData').parentNode.querySelector('#variable-checkbox').checked) {                           
-                            // var variables =  await KernelSideDataObjects(`import IPython.display\ntry:\n    IPython.display.JSON({'value':globals()['${form.children[i].querySelector('.InputData').value}']})\nexcept:\n    pass`)
-                            var variables =  await KernelSideDataObjects(`import IPython.display\nIPython.display.JSON({'value':globals()['${form.children[i].querySelector('.InputData').value}']})`)
-                            out[form.children[i].querySelector('.InputData').name] =  variables
-                        } else {
-                            out[form.children[i].querySelector('.InputData').name] =  form.children[i].querySelector('.InputData').value
-                        }
-
-                        // out[form.children[i].querySelector('.InputData').name] =  form.children[i].querySelector('.InputData').value
-                    }
-                
-                } else if (form.children[i].querySelector('.outer-checkbox-div')){
-
-                    var select_list = []
-        
-                    if (JSON.parse(form.children[i].querySelector('.outer-checkbox-div')['data-value'])["optional"] == true ) {
-        
-                        for (var k = 0; k < form.children[i].querySelector('.outer-checkbox-div').children.length; k++ ) {
-                            if (form.children[i].querySelector('.outer-checkbox-div').children[k].querySelector('.InputDataCheckbox').checked) {
-                                select_list.push(form.children[i].querySelector('.outer-checkbox-div').children[k].querySelector('.InputDataCheckbox').value)
-                            }
-                        }
-        
-                        if (select_list.length == 0){
-                            out[form.children[i].querySelector('.outer-checkbox-div').querySelector('.InputDataCheckbox').name] = null
-                        }  else{
-                            out[form.children[i].querySelector('.outer-checkbox-div').querySelector('.InputDataCheckbox').name] = select_list
-                        }
-        
-                    }  else if ((JSON.parse(form.children[i].querySelector('.outer-checkbox-div')['data-value'])["optional"] == false )){
-                            if (select_list.length == 0){
-                                form.children[i].querySelector('.outer-checkbox-div').children[0].querySelector('.InputDataCheckbox').parentNode.style.backgroundColor = 'pink'
-        
-                            } else if (select_list.length > 0 ){
-                                form.children[i].querySelector('.outer-checkbox-div').children[0].querySelector('.InputDataCheckbox').parentNode.style.backgroundColor = ''
-                                out[form.children[i].querySelector('.outer-checkbox-div').querySelector('.InputDataCheckbox').name] = select_list
-                            }
-                    }
-
-                } else if (form.children[i].querySelector('.InputDataFile')){
-
-                    if (checking == 'on') {
-                        if (form.querySelector('.InputDataFile').options.length  == 0 ){
-                            form.querySelector('.InputDataFile').style.backgroundColor = 'pink'
-                            return 'error'
-                        } else{
-                            form.querySelector('.InputDataFile').style.backgroundColor = ''
-        
-                            var input_data = form.querySelector('.InputDataFile').parentElement['data-file']
-                            var input_files = []
-                
-                            for (var i = 0; i < form.querySelector('.InputDataFile').options.length; i++) {
-                                if (form.querySelector('.InputDataFile').options[i].selected == true) {
-                                    input_files.push(JSON.parse(form.querySelector('.InputDataFile').options[i].value))
-                                }
-                            }
-                            
-                            out[form.querySelector('.InputDataFile').name] = input_data 
-            
-                            if (input_files.length == 1 && input_files[0]['id'] == ''){
-                                out[form.querySelector('.InputDataFile').name] = null
-                            } else{
-                                input_data['values'] = input_files
-                                out[form.querySelector('.InputDataFile').name] = input_data
-                            }
-                        }
-        
-                    } else{
-
-                        var input_data = form.children[i].querySelector('.InputDataFile').parentElement['data-file']
-                        var input_files = []
-    
-                        var opts = form.children[i].querySelector('.InputDataFile').options
-    
-                        for (var n = 0; n < opts.length ; n++){
-                            if (opts[n].selected == true){
-                                input_files.push(JSON.parse(opts[n].value))
-                            }
-                        }
-                        
-                        out[form.children[i].querySelector('.InputDataFile').name] = input_data 
-
-                        if (input_files.length == 1 && input_files[0]['id'] == ''){
-                            out[form.children[i].querySelector('.InputDataFile').name] = null
-                        } else if (input_files.length == 0 ) {
-                            out[form.children[i].querySelector('.InputDataFile').name] = {}
-                        }
-                        else{
-                            input_data['values'] = input_files
-                            out[form.children[i].querySelector('.InputDataFile').name] = input_data
-                        }
-                    }
-
-                } else if(form.children[i].querySelector('.drill-down.container')) {
-
-                    var drill_down_inputs = []
-            
-                        for(var n = 0; n < form.children[i].querySelector('.drill-down.container').querySelectorAll('input').length; n++) {
-                            if (form.children[i].querySelector('.drill-down.container').querySelectorAll('input')[n].checked) {
-                                drill_down_inputs.push(form.children[i].querySelector('.drill-down.container').querySelectorAll('input')[n].value)
-                            }
-                        }
-                        out[form.children[i].querySelector('.drill-down.container').name] =  drill_down_inputs
-            
-                } else if (form.children[i].querySelector('.data_collection')){
-                    
-                        var input_files = []  
-            
-                        out[form.children[i].querySelector('.data_collection').name] = input_files  
-            
-                        for (var i = 0; i < form.children[i].querySelector('.data_collection').options.length; i++) {
-                            if (form.children[i].querySelector('.data_collection').options[i].selected == true) {
-                                input_files.push(form.children[i].querySelector('.data_collection').options[i].data)
-                            }
-                        }
-
-                        if (checking == 'on') {
-                            if (out[form.children[i].querySelector('.data_collection').name].length < 1 ){
-                                fform.children[i].querySelector('.data_collection').style.backgroundColor = 'pink'
+                        if (checking) {
+                            if (data_files.length == 0){
+                                form.children[i].style.backgroundColor = 'pink'
                                 return 'error'
-                            }
-                            else {
-                                form.children[i].querySelector('.data_collection').style.backgroundColor = ''
-                                out[form.children[i].querySelector('.data_collection').name] = input_files
-                                form.children[i].querySelector('.data_collection').parentElement['data-file']['values'] = input_files
-                                out[form.children[i].querySelector('.data_collection').name] = form.children[i].querySelector('.data_collection').parentElement['data-file']
-                            }
-                        } else {
-                            if (input_files.length == 0){
-                                form.children[i].querySelector('.data_collection').parentElement['data-file']['values'] = [{}]
                             } else{
-                                form.children[i].querySelector('.data_collection').parentElement['data-file']['values'] = input_files
+                                form.children[i].style.backgroundColor = ''
                             }
-                            out[form.children[i].querySelector('.data_collection').name] = form.children[i].querySelector('.data_collection').parentElement['data-file']
                         }
-                }
-            } else if (form.children[i].className == 'ui-form-element section-row conditional'){
-                if (form.children[i].querySelector('.InputData')){
-                    out[form.children[i].querySelector('.InputData').name] = form.children[i].querySelector('.InputData').value
+                    }
+
+                    if(form.children[i].className == 'outer-checkbox-div'){
+
+                        console.log("OKKK")
+
+                        var optional = JSON.parse(form.children[i]['data-value'])['optional']
+
+
+                        var options = []
+                        for (var j = 0; j < form.childNodes[i].children.length; j++){
+                        var name 
+                        if ($(form.childNodes[i].children[j]).find('.InputDataCheckbox')[0].checked) {
+                                name = $(form.childNodes[i].children[j]).find('.InputDataCheckbox')[0].name
+                                options.push($(form.childNodes[i].children[j]).find('.InputDataCheckbox')[0].value)
+                        }
+                        }
+
+                        out[name] = options
+
+                        if (checking) {
+
+                            if(optional){
+
+
+                            }
+                            if (options.length == 0){
+                                form.children[i].style.backgroundColor = 'pink'
+                                return 'error'
+                            } else if (optional && options.length == 0 ) {
+                                form.children[i].style.backgroundColor = ''
+                            }
+                        }
+                    }
+
+                    if(form.children[i].className == 'drill-down container'){            
+                        var drill_down_inputs = []
+
+                        for (var n = 0; n < $(form.children[i]).find('input').length; n++){
+                            if ($(form.children[i]).find('input')[n].checked) {
+                                drill_down_inputs.push($(form.children[i]).find('input')[n].value)
+                            }
+                        }
+
+                        out[form.children[i].name] =  drill_down_inputs
+
+                        if (checking) {
+                            if ( drill_down_inputs.length == 0){
+                                form.children[i].style.backgroundColor = 'pink'
+                                return 'error' 
+                            } else{
+                                form.children[i].style.backgroundColor = ''
+                            }
+                        }
+                    }
+
+                    if(form.children[i].className == 'InputData'){
+
+                        if (checking){
+                            if (form.children[i].value == ''){
+                                form.children[i].style.backgroundColor  = 'pink' 
+                                return 'error'
+                            } else(
+                                form.children[i].style.backgroundColor  = '' 
+                            )
+                        }
+                        out[form.children[i].name] = form.children[i].value
+                    }
+
                 }
             }
         }
 
-        // if (Object.keys(out).length > 0){
-            return out  
-        // }
+        return out
     }
 
     galaxy_data_verify(file_cache, id) {
@@ -3036,6 +3149,9 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             } else {
                 OuterDiv['data-value'] = JSON.stringify({"optional": false})
             }
+
+            OuterDiv['data-value']['name'] = input_def['name']
+            OuterDiv['data-value']['value'] = input_def['value']
 
             const selectspan = document.createElement('span')
             selectspan.className = "select-ui-form-title-text"
@@ -5036,7 +5152,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             var toolid =  "GiN_data_upload_tool"
 
             if (this.model.get('galaxy_tool_id') == toolid) {
-
                 var a = async ()=>{
                     await KernelSideDataObjects(`from GiN.util import delete_file\ndelete_file()`)
                 }
@@ -5048,7 +5163,10 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 this.trigger_login()
             }else {
                 var form = self.element.querySelector('.Galaxy-form')
-                var inputs = await this.get_form_data(form, 'on')
+                var inputs = this.get_form_data(form, true)
+
+                console.log(inputs)
+
 
                 if (inputs == 'error'){
                     return 
@@ -5056,7 +5174,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
                 var history_id = self.element.querySelector('#dataset-history-list').value 
 
-                console.log(inputs)
                 this.SubmitJob(inputs, history_id)
                 this.hide_run_buttons(true)
             }
