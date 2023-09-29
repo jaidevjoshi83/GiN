@@ -749,14 +749,13 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             case  "float" :
             case "text":
             case "color":
-                console.log(input_def)
                 this.add_input_value(input_def, form_parent, name_prefix)
                 break
             case "boolean":
                 this.add_boolean_field(input_def, form_parent, name_prefix)
                 break
             case "select":
-                console.log(input_def)
+
                 this.add_select_field(input_def, form_parent, name_prefix)
                 break
             case "repeat": 
@@ -1299,9 +1298,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                         if (checking) {
 
                             if(!div_data['optional'] && options.length == 0){
-
-                                console.log(!div_data['optional'], div_data['optional'], options.length)
-
                                 form.children[i].style.backgroundColor = 'pink'
                                 return 'error'
                             }
@@ -1309,8 +1305,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                                 form.children[i].style.backgroundColor = ''
                                 out[div_data['name']] = options
                             } else if (div_data['optional'] && options.length == 0 ) {
-
-                                console.log("Im here")
                                 out[div_data['name']] = div_data['value']
                             } else if(div_data['optional']&& options.length > 0) {
                                 out[div_data['name']] = options
@@ -1343,15 +1337,12 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
                         var div_data = JSON.parse(form.children[i].getAttribute('data-value'))
 
+                        if(checking && form.children[i] == "" && div_data['optional']){
+                            form.children[i].style.backgroundColor  = 'pink' 
+                            return 'error'
+                        } else{
+                            out[form.children[i].name]  = form.children[i].value
 
-                        if (checking && !div_data['optional']){
-                            if(form.children[i].className == "" || null) {
-                                form.children[i].style.backgroundColor  = 'pink' 
-                                return 'error'
-                            } else{
-                                  out[form.children[i].name] = div_data['value']
-    
-                            } 
                         }
                     }
                 }
@@ -3127,8 +3118,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
  
     add_select_field(input_def, FormParent, NamePrefix){
 
-        console.log(input_def)
-
         if(this.el.querySelector('.tool-migration-select')){
             var origin = this.el.querySelector('.tool-migration-select').value
         }  else{
@@ -3291,8 +3280,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             select.className = 'InputData'   
             select.name = NamePrefix+input_def['name']
             select.setAttribute('data-value', JSON.stringify({'optional': input_def.optional, 'value':input_def.value}))
-
-            console.log("OKKK")
         
             for(var i = 0; i < options.length; i++) {
 
@@ -3391,6 +3378,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
  
     add_boolean_field (input_def, FormParent, NamePrefix ){
 
+
         var self = this
 
         input_def.id = this.uid()
@@ -3406,12 +3394,11 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             opt.textContent = options[i][0];
             opt.value = options[i][1];
             select.appendChild(opt);
-
-            if(input_def.value == options[i][0]){
+ 
+            if(`${options[i][1]}` ==  `${input_def.default_value}`){
                 opt.selected = true
             }
         }
-
 
         select.setAttribute('data-value', JSON.stringify({'optional': input_def.optional, 'value':input_def.value}))
 
@@ -3586,8 +3573,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
     }
 
     add_conditional_section_1(input_def, parent, NamePrefix, call_back_data={}){
-
-        console.log(input_def)
 
         if (this.el.querySelector('.tool-migration-select')){
             var origin = this.el.querySelector('.tool-migration-select').value
@@ -4260,11 +4245,10 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                     Tbl.style.background = '#C2EBC2'
                     Tbl.className = `list-item ${dataset['history_content_type']} history-content state-ok`
 
-                    Tbl.querySelector('.fas.fa-spinner.fa-spin').parentElement.removeChild(Tbl.querySelector('.fas.fa-spinner.fa-spin'))
-                    
                     if (Tbl.querySelector('.primary-actions')){
                         Tbl.querySelector('.primary-actions').innerHTML = `<a class="icon-btn display-btn" title="" target="_blank" href="${URL}/datasets/${dataset['id']}/preview" data-original-title="View data"><span class="fas fa-eye" style="" title="View Data" ></span></a><a class="icon-btn edit-btn" target="_blank"  href="${URL}/datasets/${dataset['id']}/edit" data-original-title="Edit attributes"><span class="fa fa-pencil" title="Edit data"></span></a><a class="icon-btn delete-btn" title="" href="javascript:void(0);" data-original-title="Delete"><span class="fa fa-times" style="" title="Delete" ></span></a><a class="icon-btn display-btn" title="" target="" href="javascript:void(0);" data-original-title="View data"><span class="fa fa-download" style="" title="Download data to JupyterLab Server" ></span></a><a class="icon-btn display-btn"  target="" href="javascript:void(0);" data-original-title="View data"><span class="fa fa-exchange" style="" title="Send data to available tools"></span></a>`
                     }
+                    Tbl.querySelector('.fas.fa-spinner.fa-spin, fa fa-clock-o').parentElement.removeChild(Tbl.querySelector('.fas.fa-spinner.fa-spin'))
                     break;
                 }  
                 
