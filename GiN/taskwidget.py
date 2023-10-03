@@ -2,17 +2,20 @@ import os
 import IPython
 from nbtools import NBTool
 from .Galaxyuibuilder import GalaxyUIBuilder
-from .util import DEFAULT_COLOR, DEFAULT_LOGO
+from .util import DEFAULT_COLOR, DEFAULT_LOGO, GALAXY_SERVER_NAME_BY_URL
 import json5
 import logging
 import IPython.display
 import glob
 from nbtools import UIBuilder
-
+# from  .GalaxyUpload import GalaxyUpload
 import os
 import re
 import json
 
+from ipyuploads import Upload
+import uuid
+import threading
 
 log = logging.getLogger(__name__)
 
@@ -59,12 +62,17 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
                 history_id=history_ids[0]["id"],
                 python_side=True,
             )
-        
+
+        if GALAXY_SERVER_NAME_BY_URL.get(self.tool['origin']):
+            server_name = GALAXY_SERVER_NAME_BY_URL.get(self.tool['origin'])
+        else:
+            server_name = self.tool['origin']
+
         GalaxyUIBuilder.__init__(
             self,
             inputs=inputs,
             id = self.tool['id'],
-            name = self.tool['name']+' ('+self.tool['origin']+')',
+            name = self.tool['name']+' ('+server_name+')',
             galaxy_tool_id=self.tool['id'],
             description=self.tool['description'],
             subtitle=self.tool['origin'],
@@ -107,6 +115,7 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
 
         return OutDict
 
+
     @staticmethod
     def submit_job( server, tool_id, tool_inputs=None, history_id=None):
 
@@ -121,7 +130,6 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
             )
         except BaseException as e:
             job = {"state": "job failed", 'error': str(e)}
-
 
         #return IPython.display.JSON(job)
         return job
@@ -264,7 +272,7 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
         python_side=False,
         input_data_param=False,
     ):
-
+        
         a = GiN.sessions.SessionList()
         gi6 = a.get(server=server)
 
@@ -371,9 +379,6 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
             dataset_collection_id=dataset_id
         )
 
-
-        print(show_dataset)
-
         # return IPython.display.JSON(show_dataset)
         return show_dataset
 
@@ -383,7 +388,6 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
 
         a = GiN.sessions.SessionList()
         gi12 = a.get(server=server)
-
         histories = gi12.gi.histories.gi.histories.get_histories()
 
         return IPython.display.JSON(histories)
@@ -417,28 +421,69 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
             )
 
     @staticmethod
-    def CORS_fallback_upload(
-        file_name,
-        data, 
+    def CORS_fallback_upload_old(
         server,
         history_id,
     ):
 
-        temp_dir = os.path.join(os.getcwd(), "temp")
+        a = GiN.sessions.SessionList()
+        gi = a.get(server=server)
 
+        temp_dir = os.path.join(os.getcwd(), "temp")
+        file_path = glob.glob(os.path.join(temp_dir, '*'))[0]
+        
+        out = gi.tools.gi.tools.upload_file(path=file_path, history_id=history_id)
+
+        return IPython.display.JSON(out)
+    
+
+    def start_upload(server, history_id):
+
+        upload_id = str(uuid.uuid4())
+        a = GiN.sessions.SessionList()
+        gi = a.get(server=server)
+
+        temp_dir = os.path.join(os.getcwd(), "temp")
         if not os.path.exists(temp_dir):
             os.mkdir(temp_dir)
+        file_path = glob.glob(os.path.join(temp_dir, '*'))[0]
+
+        t = threading.Thread(target=gi.tools.gi.tools.upload_file, kwargs={'path':file_path, 'history_id':history_id})
+    
+        t.start()
+        a.galaxy_upload[upload_id] = t
+    
+        return IPython.display.JSON({'id':upload_id, 'status':'start'})
+
+    def check_upload(upload_id):
+        a = GiN.sessions.SessionList()
+        # gi = a.get(server=server)
+        t = a.galaxy_upload.get(upload_id)
+
+        status = {'id': upload_id, 'status':'running'}
+        if not t.is_alive():
+            out = t.join()
+            status['status'] = 'finish'
+            del a.galaxy_upload[upload_id]
+
+        return IPython.display.JSON(status)
+
+
+    @staticmethod
+    def CORS_fallback_upload(
+        server,
+        history_id,
+    ):
 
         a = GiN.sessions.SessionList()
         gi = a.get(server=server)
-        path = os.path.join(temp_dir, file_name)
 
-        with open(path, 'w') as f:
-            f.write(data)
-       
-        f.close()
-   
-        out = gi.tools.gi.tools.upload_file(path=path, history_id=history_id)
+        temp_dir = os.path.join(os.getcwd(), "temp")
+        file_path = glob.glob(os.path.join(temp_dir, '*'))[0]
+        out = gi.tools.gi.tools.upload_file(path=file_path, history_id=history_id)
+
+        # print(out)
+        # [os.remove(file) for file in glob.glob(os.path.join(temp_dir, '*')) if os.path.isfile(file_path)]
 
         return IPython.display.JSON(out)
 
@@ -540,6 +585,7 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
         job_state = gi16.gi.jobs.get_state(job_id=job_id)
 
         return IPython.display.JSON({"job_state": job_state})
+    
 
 class TaskTool(NBTool):
 

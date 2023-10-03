@@ -9,6 +9,7 @@ class SessionList:
     """
 
     sessions = []
+    galaxy_upload = {}
 
     def register(self, server, email=None, password=None, api_key=None):
         """

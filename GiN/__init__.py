@@ -14,6 +14,7 @@ from .taskwidget import GalaxyTaskWidget
 from .sessions import session, get_session
 from .uioutput import GalaxyUIOutput
 from .Galaxyuibuilder import GalaxyUIBuilder
+# from .galaxyUpload import GalaxyUpload
 from ._version import __version__
 
 

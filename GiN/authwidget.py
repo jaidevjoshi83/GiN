@@ -111,7 +111,6 @@ class GalaxyAuthWidget(GalaxyUIBuilder):
 
     def login(self, credentials):
 
-
         """Login to the Galaxy server"""
 
         tool_list =  {'tools':[]}
@@ -153,18 +152,15 @@ class GalaxyAuthWidget(GalaxyUIBuilder):
                         tool['email'] = self.session._notebook_email
                         tool_list['tools'].append(tool)
                
- 
         t = {"id": 'GiN_data_upload_tool',  "description": "Upload data files to galaxy server", "name": "Upload Data", 'origin': self.session._notebook_url, 'inputs': [{'type': 'data_upload'}]}
        
         t = TaskTool('+', t )
         ToolManager.instance().register(t)
 
-    
         for i in tool_list['tools']:
             GalaxyAuthWidget().RegisterMod(i)
 
-
-        return IPython.display.JSON({'state':'success'}) 
+        return IPython.display.JSON({'state':'success', 'tool_list': tool_list}) 
    
     def RegisterMod(self, tool):
 
@@ -178,7 +174,6 @@ class GalaxyAuthWidget(GalaxyUIBuilder):
         # registration_thread.start()
         # return "OK"
         
-    
     def has_credentials(self):
         """Test whether the session object is instantiated and whether an email and password have been provided"""
         if type(self.session) is not GalaxyInstance:
@@ -210,7 +205,6 @@ class GalaxyAuthWidget(GalaxyUIBuilder):
     def replace_widget(self):
         """Replace the unauthenticated widget with the authenticated widget"""
         # self.form.children[1].value = "" 
-       
         # self.form.children[2].value = ""  # Blank password so it doesn't get serialized
         display(GalaxyAuthWidget(session=self.session))  # Display the authenticated widget
         self.close()  # Close the unauthenticated widget

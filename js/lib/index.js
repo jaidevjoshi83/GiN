@@ -6,4 +6,5 @@
 export * from './version';
 export * from './Galaxyuibuilder';
 export * from './utils';
-export * from './notebookActions'
+export * from './notebookActions';
+

@@ -2,8 +2,15 @@ from traitlets import Unicode, List, Bool, Dict
 from ._frontend import module_name, module_version
 from nbtools.basewidget import BaseWidget
 from nbtools.tool_manager import  NBTool
-from .util import GALAXY_SERVER_NAME_BY_URL
+from .util import GALAXY_SERVER_NAME_BY_URL, delete_file
+import base64
+import shutil
+import os
+import glob
+from ipyuploads import Upload
 
+
+Upload = Upload(accept='txt', multiple=False)
 
 class GalaxyUIBuilder(BaseWidget, NBTool):
     """
@@ -37,11 +44,17 @@ class GalaxyUIBuilder(BaseWidget, NBTool):
     
     parameters = None
 
+    chunk_complete = lambda self, name, count, total: None
+    file_complete = lambda self, name: None
+    all_files_complete = lambda self, names: None
+
     def __init__(
         self, galaxy_tool_id=None, history_ids=None, description=None, inputs={}, history_data=[], origin='', **kwargs
     ):
 
         self._apply_defaults()
+        self.on_msg(self.handle_messages)
+        
         self.inputs = inputs
         if history_ids:
             self.history_ids = history_ids
@@ -52,12 +65,14 @@ class GalaxyUIBuilder(BaseWidget, NBTool):
         self.description = description
         
         BaseWidget.__init__(self, **kwargs)
+       
 
     def _apply_defaults(self, function_or_method=None):
         # Set the name based on the function name
 
-        # self.name = f"{self.name} ({GALAXY_SERVER_NAME_BY_URL.get(self.origin, self.origin)})"
         self.name = f"{self.name} ({GALAXY_SERVER_NAME_BY_URL.get(self.origin, self.origin)})"
+        # self.name = f"{self.name} "
+       
         self.id = "galaxy_authentication"  # function_or_method.__qualname__
         # Set the description based on the docstring
 
@@ -67,6 +82,35 @@ class GalaxyUIBuilder(BaseWidget, NBTool):
         # register_tool and collapse are True by default
         self.register_tool = True
         self.collapse = False
+
+    @staticmethod
+    def write_chunk(name, encoded_chunk, first_chunk):
+
+        mode = 'w' if first_chunk else 'a'
+
+        file = os.path.join(os.getcwd(), 'temp', name)
+        # shutil.rmtree("temp/")
+
+        with open(file, mode) as f:
+            f.write(base64.b64decode(encoded_chunk).decode("utf-8"))
+             
+    def handle_messages(self, _, content, buffers):
+        """Handle messages sent from the client-side"""
+        if content.get('event', '') == 'upload':
+            name = content.get('file', '')
+            encoded_chunk = content.get('chunk', '')
+            first_chunk = content.get('count', '') == 1
+            print("example", content.get('type', ''))
+
+            # print(type(base64.b64decode(encoded_chunk).decode("utf-8")))
+            GalaxyUIBuilder.write_chunk(name, encoded_chunk, first_chunk)
+            self.chunk_complete(name=content.get('file', None),
+                                count=content.get('count', None),
+                                total=content.get('total', None))
+        elif content.get('event', '') == 'file_complete':
+            self.file_complete(name=content.get('name', None))
+        elif content.get('event', '') == 'all_files_complete':
+            self.all_files_complete(names=content.get('names', None))
 
     @staticmethod
     def _deprecation_warnings(kwargs):
