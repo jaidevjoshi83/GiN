@@ -592,7 +592,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
     }
 
     un_wrap_repeat1(input, name){
-    
+     
         var self = this
         var out 
 
@@ -1218,7 +1218,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
     //                     if (checking == 'on') {
     //                         if (out[form.children[i].querySelector('.data_collection').name].length < 1 ){
-    //                             fform.children[i].querySelector('.data_collection').style.backgroundColor = 'pink'
+    //                             form.children[i].querySelector('.data_collection').style.backgroundColor = 'pink'
     //                             return 'error'
     //                         }
     //                         else {
@@ -1248,18 +1248,18 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
     //     // }
     // }
 
-    get_form_data(form, checking){
+    async get_form_data(form, checking){
         var self = this
         var out = {}
 
         for(var i = 0 ; i < form.children.length;  i++){
             if($(form.children[i]).is(':visible')){
 
-                if(self.get_form_data(form.children[i], checking) == 'error'){
+                if( await self.get_form_data(form.children[i], checking) == 'error'){
                     return 'error'
                 } else{
 
-                    Object.assign(out, self.get_form_data(form.children[i], checking))
+                    Object.assign(out, await self.get_form_data(form.children[i], checking))
                     if(form.children[i].className == 'InputDataFile'){
                         var input_data = form.children[i].parentNode['data-file']
                         var data_files = []
@@ -1341,8 +1341,20 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                             form.children[i].style.backgroundColor  = 'pink' 
                             return 'error'
                         } else{
-                            out[form.children[i].name]  = form.children[i].value
-
+                            
+                            if(form.children[i].parentNode.querySelector('#variable-checkbox')) {
+                                if(form.children[i].parentNode.querySelector('#variable-checkbox').checked){
+                             
+                                    var variables =  await KernelSideDataObjects(`import IPython.display\nIPython.display.JSON({'value':globals()['${form.children[i].value}']})`)                               
+                                    
+                                    out[form.children[i].name]  = variables.value
+                                }  else{
+                                    out[form.children[i].name]  = form.children[i].value
+                                }
+    
+                            } else{
+                                out[form.children[i].name]  = form.children[i].value
+                            }
                         }
                     }
                 }
@@ -5136,7 +5148,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         });
     }
  
-    activate_run_buttons (){
+    async activate_run_buttons (){
 
         var self  = this;
         this.el.querySelectorAll('.nbtools-run').forEach((button) => button.addEventListener('click', async () => {
@@ -5158,8 +5170,9 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             } else if (this.model.get('name') == 'login'){
                 this.trigger_login()
             }else {
+
                 var form = self.element.querySelector('.Galaxy-form')
-                var inputs = this.get_form_data(form, true)
+                var inputs =  await this.get_form_data(form, true)
 
                 console.log(inputs)
 
