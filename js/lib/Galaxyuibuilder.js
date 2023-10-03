@@ -1966,7 +1966,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         const Tbl = new DOMParser().parseFromString(row1, 'text/html').querySelector('table')
 
-        title.append(Tbl)
+        // title.append(Tbl) Fix: Variable Checkbox
 
         // this.add_variable_widget(title)
 
@@ -2738,7 +2738,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
             });
 
-            row.append(row1)
+            row.append(row1) 
         }
 
         if (this.repeat_del != "" && this.repeat_del['name'] == input_def['name']){
