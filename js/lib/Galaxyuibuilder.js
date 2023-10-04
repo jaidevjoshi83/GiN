@@ -586,9 +586,10 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
     update_metadata_FormState(tool_type, inputs, html){
 
+
         ContextManager.tool_registry.current.content.activeCell.model.metadata.set('tool_type', tool_type)
         ContextManager.tool_registry.current.content.activeCell.model.metadata.set('input_params', inputs)
-        ContextManager.tool_registry.current.content.activeCell.model.metadata.set('html', html)
+        // ContextManager.tool_registry.current.content.activeCell.model.metadata.set('html', html)
     }
 
     un_wrap_repeat1(input, name){
@@ -755,7 +756,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 this.add_boolean_field(input_def, form_parent, name_prefix)
                 break
             case "select":
-
                 this.add_select_field(input_def, form_parent, name_prefix)
                 break
             case "repeat": 
@@ -3105,7 +3105,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             var inputs = await self.get_form_data(children)
 
             var history_id = self.el.querySelector('#dataset-history-list').value
-            // var refine_inputs  = await KernelSideDataObjects(`import json\nimport base64\nfrom GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.updated_form(${JSON.stringify(origin)}, json.loads(base64.b64decode("${btoa(JSON.stringify(inputs))}")), ${JSON.stringify(self.model.get('inputs')['id'])}, ${JSON.stringify(history_id)})`)
           
             var refine_inputs = await KernelSideDataObjects(`import IPython\nfrom GiN.taskwidget  import GalaxyTaskWidget\nclass Temp(object):\n    def Return(self):\n        return IPython.display.JSON(GalaxyTaskWidget.updated_form(${JSON.stringify(origin)}, json.loads(base64.b64decode("${btoa(JSON.stringify(inputs))}")), ${JSON.stringify(self.model.get('inputs')['id'])}, ${JSON.stringify(history_id)}))\na = Temp()\na.Return()`)
             KernelSideDataObjects(`try:\n    del a\nexcept:\n    print("a is not defined")`)
@@ -3115,11 +3114,16 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
             } else{
 
+                var str = this.el.querySelector('.nbtools-title').innerText
+                    
                 FileManu['data-file']['id'] = JSON.parse(Select.value)
 
                 var FormParent = self.el.querySelector('.Galaxy-form')
-                self.removeAllChildNodes(FormParent)
-                self.form_builder(refine_inputs['inputs'])
+
+                if (!str.includes("CustomProDB")) { //Fix Me: Temp fix for CustomDBPro
+                    self.removeAllChildNodes(FormParent)
+                    self.form_builder(refine_inputs['inputs'])
+                }
             }
 
         }, false);
@@ -3130,6 +3134,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
  
     add_select_field(input_def, FormParent, NamePrefix){
 
+       
         if(this.el.querySelector('.tool-migration-select')){
             var origin = this.el.querySelector('.tool-migration-select').value
         }  else{
@@ -3188,6 +3193,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 var history_id = self.el.querySelector('#dataset-history-list').value 
                 var form = self.el.querySelector('.Galaxy-form')
                 var inputs = await self.get_form_data(form)
+
+                console.log(inputs)
                 // var refine_inputs  = await KernelSideDataObjects(`import json\nimport base64\nfrom GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.updated_form(${JSON.stringify(origin)}, json.loads(base64.b64decode("${btoa(JSON.stringify(inputs))}")), ${JSON.stringify(self.model.get('inputs')['id'])}, ${JSON.stringify(history_id)})`)
 
                 var refine_inputs = await KernelSideDataObjects(`import IPython\nfrom GiN.taskwidget  import GalaxyTaskWidget\nclass Temp(object):\n    def Return(self):\n        return IPython.display.JSON(GalaxyTaskWidget.updated_form(${JSON.stringify(origin)}, json.loads(base64.b64decode("${btoa(JSON.stringify(inputs))}")), ${JSON.stringify(self.model.get('inputs')['id'])}, ${JSON.stringify(history_id)}))\na = Temp()\na.Return()`)
@@ -3372,13 +3379,18 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                     // var refine_inputs  = await KernelSideDataObjects(`import json\nimport base64\nfrom GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.updated_form(${JSON.stringify(origin)}, json.loads(base64.b64decode("${btoa(JSON.stringify(inputs))}")), ${JSON.stringify(self.model.get('inputs')['id'])}, ${JSON.stringify(history_id)})`)
                    
                     var refine_inputs = await KernelSideDataObjects(`import IPython\nfrom GiN.taskwidget  import GalaxyTaskWidget\nclass Temp(object):\n    def Return(self):\n        return IPython.display.JSON(GalaxyTaskWidget.updated_form(${JSON.stringify(origin)}, json.loads(base64.b64decode("${btoa(JSON.stringify(inputs))}")), ${JSON.stringify(self.model.get('inputs')['id'])}, ${JSON.stringify(history_id)}))\na = Temp()\na.Return()`)
+                  
                     KernelSideDataObjects(`try:\n    del a\nexcept:\n    print("a is not defined")`)
                    
                     var form_parent = self.el.querySelector('.Galaxy-form')
-    
-                    self.removeAllChildNodes(form_parent)
-                    self.form_builder(refine_inputs['inputs'])
                     let formdata = children.parentNode.parentNode.parentNode.parentNode.parentNode.outerHTML
+                    var str = this.el.querySelector('.nbtools-title').innerText
+                    
+                    if (!str.includes("CustomProDB")) { //Fix: Temp fix to CustomProDB
+                        self.removeAllChildNodes(form_parent)
+                        self.form_builder(refine_inputs['inputs'])
+                    }
+
                     let fint = JSON.stringify(formdata)
                     self.update_metadata_FormState('galaxy_tool', refine_inputs['inputs'], JSON.parse(fint))
                 }

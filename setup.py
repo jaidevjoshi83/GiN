@@ -24,8 +24,6 @@ LONG_DESCRIPTION = 'A Custom Jupyter Widget Library'
 
 # Get GiN version
 version = get_version(pjoin('GiN', '_version.py'))
-
-
 js_dir = pjoin(here, 'js')
 
 # Representative files that should exist after a successful build
