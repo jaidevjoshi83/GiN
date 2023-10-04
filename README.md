@@ -46,7 +46,7 @@ Installation for a user
 ------------
 
 ```
-pip install galaxy-gin
+pip install galaxy-gin==0.1.0a1
 ```
 ```
 jupyter nbextension install --py --symlink --overwrite --sys-prefix GiN
