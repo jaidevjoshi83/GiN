@@ -735,8 +735,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             input_def.id = this.uid()  
         }
 
-       
-
         switch (input_def.type) {
             
             case "conditional":  
@@ -3194,7 +3192,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 var form = self.el.querySelector('.Galaxy-form')
                 var inputs = await self.get_form_data(form)
 
-                console.log(inputs)
                 // var refine_inputs  = await KernelSideDataObjects(`import json\nimport base64\nfrom GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.updated_form(${JSON.stringify(origin)}, json.loads(base64.b64decode("${btoa(JSON.stringify(inputs))}")), ${JSON.stringify(self.model.get('inputs')['id'])}, ${JSON.stringify(history_id)})`)
 
                 var refine_inputs = await KernelSideDataObjects(`import IPython\nfrom GiN.taskwidget  import GalaxyTaskWidget\nclass Temp(object):\n    def Return(self):\n        return IPython.display.JSON(GalaxyTaskWidget.updated_form(${JSON.stringify(origin)}, json.loads(base64.b64decode("${btoa(JSON.stringify(inputs))}")), ${JSON.stringify(self.model.get('inputs')['id'])}, ${JSON.stringify(history_id)}))\na = Temp()\na.Return()`)
@@ -5185,9 +5182,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
                 var form = self.element.querySelector('.Galaxy-form')
                 var inputs =  await this.get_form_data(form, true)
-
-                console.log(inputs)
-
 
                 if (inputs == 'error'){
                     return 
