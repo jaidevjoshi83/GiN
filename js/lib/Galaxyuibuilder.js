@@ -167,8 +167,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         if (this.model.get('galaxy_tool_id') == 'GiN_data_upload_tool') {
             this.data_upload_tool()
         }
-
-
     }
 
     refresh_cells(){
@@ -184,7 +182,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
     }
 
     async add_tool_migration_button(index){
-
 
         var self = this
 
@@ -217,7 +214,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         div.append(Label)
 
         div.style.float = 'left'
-
 
         for (var i = 0; i < servers.length; i++){
             var opt = document.createElement('option')
@@ -589,7 +585,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         ContextManager.tool_registry.current.content.activeCell.model.metadata.set('tool_type', tool_type)
         ContextManager.tool_registry.current.content.activeCell.model.metadata.set('input_params', inputs)
-        // ContextManager.tool_registry.current.content.activeCell.model.metadata.set('html', html)
+        ContextManager.tool_registry.current.content.activeCell.model.metadata.set('html', html)
     }
 
     un_wrap_repeat1(input, name){
@@ -2475,7 +2471,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 var Inputs = await self.get_form_data(form)
                 var refine_inputs = await KernelSideDataObjects(`import IPython\nfrom GiN.taskwidget  import GalaxyTaskWidget\nclass Temp(object):\n    def Return(self):\n        return IPython.display.JSON(GalaxyTaskWidget.updated_form(${JSON.stringify(origin)}, json.loads(base64.b64decode("${btoa(JSON.stringify(Inputs))}")), ${JSON.stringify(self.model.get('inputs')['id'])}, ${JSON.stringify(select.value)}))\na = Temp()\na.Return()`)
                 KernelSideDataObjects(`try:\n    del a\nexcept:\n    print("a is not defined")`)
-
+ 
+                console.log(refine_inputs)
                 var FormParent = self.el.querySelector('.Galaxy-form')    
                 self.removeAllChildNodes(FormParent)
                 var selected_index = {}
@@ -3769,7 +3766,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
             var refine_inputs = await KernelSideDataObjects(`import IPython\nfrom GiN.taskwidget  import GalaxyTaskWidget\nclass Temp(object):\n    def Return(self):\n        return IPython.display.JSON(GalaxyTaskWidget.updated_form(${JSON.stringify(origin)}, json.loads(base64.b64decode("${btoa(JSON.stringify(inputs))}")), ${JSON.stringify(self.model.get('inputs')['id'])}, ${JSON.stringify(history_id)}))\na = Temp()\na.Return()`)
             KernelSideDataObjects(`try:\n    del a\nexcept:\n    print("a is not defined")`)
-
 
             let formdata = form.parentNode.parentNode.parentNode.parentNode.parentNode.outerHTML
 

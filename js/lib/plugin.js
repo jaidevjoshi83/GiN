@@ -18,6 +18,7 @@ import { NotebookActions } from '@jupyterlab/notebook';
 import {  Widget } from '@lumino/widgets';
 
 import { Private,  getRanNotebookIds} from './notebookActions';
+import { type } from 'jquery';
 const module_exports = Object.assign(Object.assign(Object.assign(   {}, galaxyuibuilder_exports), utils_exports));
 
 const EXTENSION_ID = 'GiN:plugin';
@@ -98,49 +99,104 @@ function ReturnOutputArea(i, notebookTracker){
     return utm
 }
 
-
 const initNotebookTracker = (notebookTracker) => {
+    const notebookHasBeenRan = getRanNotebookIds();
 
-    const notebookHasBeenRan = getRanNotebookIds()
+    notebookTracker.currentChanged.connect(async (notebookTracker, notebookPanel) => {
+        const currentWidget = notebookTracker.currentWidget;
 
-    notebookTracker.currentChanged.connect((notebookTracker, notebookPanel) => {
-        if (!notebookTracker.currentWidget) {
+        if (!currentWidget) {
             return;
         }
-        const notebookContext = notebookTracker.currentWidget.context;
 
-        notebookContext.ready.then(() => {
+        const notebookContext = currentWidget.context;
+        await notebookContext.ready;
 
-            const notebook = notebookTracker.currentWidget.content;
-            const notebookSession = notebookTracker.currentWidget.context.sessionContext;
-        
-            if ( notebookHasBeenRan.includes(notebook.id) === false) {
-            //FixME Form Restore insteed cell run
+        const notebook = currentWidget.content;
+        const notebookSession = currentWidget.context.sessionContext;
 
-                Private.ranNotebookIds.push(notebook.id);
-            
-                notebookTracker.currentWidget.sessionContext.ready.then(() =>
-                notebookTracker.currentWidget.revealed).then(async () => {
+        const notebookId = notebook.id;
 
-                var cells = notebookTracker.currentWidget.content.widgets;
+        if (!notebookHasBeenRan.includes(notebookId)) {
+            Private.ranNotebookIds.push(notebookId);
 
-                for (var i = 0; i < cells.length; i++){
-                    if (cells[i].model.metadata.get('galaxy_cell') ){
-                        if (cells[i].model.metadata.get('html') == undefined || cells[i].model.metadata.get('html') == '') {
-                            removeAllChildNodes(cells[i].outputArea.node)
-                            notebook.activeCellIndex = i
-                            await NotebookActions.run(notebook, notebookSession);            
-                       
-                        } else{
-                            // cells[i].inputArea.hide()
-                            removeAllChildNodes(cells[i].outputArea.node)
-                            cells[i].outputArea.node.append(ReturnOutputArea(cells[i].model.metadata.get('html'), notebookTracker))
-                        }
+            await currentWidget.sessionContext.ready;
+            await currentWidget.revealed;
+
+            const cells = currentWidget.content.widgets;
+
+            for (const cell of cells) {
+                if (cell.model.metadata.get('galaxy_cell')) {
+                    const htmlMetadata = cell.model.metadata.get('html');
+
+                    if (htmlMetadata == null || htmlMetadata === '') {
+                        removeAllChildNodes(cell.outputArea.node);
+                        notebook.activeCellIndex = cells.indexOf(cell);
+                        await NotebookActions.run(notebook, notebookSession);
+                    } else if (typeof htmlMetadata === 'string') {
+                        removeAllChildNodes(cell.outputArea.node);
+                        cell.outputArea.node.append(ReturnOutputArea(htmlMetadata, notebookTracker));
                     }
-                 }
-            });
-
+                }
             }
-        });
+        }
     });
 };
+
+// const initNotebookTracker = (notebookTracker) => {
+
+//     const notebookHasBeenRan = getRanNotebookIds()
+
+//     notebookTracker.currentChanged.connect((notebookTracker, notebookPanel) => {
+//         if (!notebookTracker.currentWidget) {
+//             return;
+//         }
+//         const notebookContext = notebookTracker.currentWidget.context;
+
+//         notebookContext.ready.then(() => {
+
+//             const notebook = notebookTracker.currentWidget.content;
+//             const notebookSession = notebookTracker.currentWidget.context.sessionContext;
+        
+//             if ( notebookHasBeenRan.includes(notebook.id) === false) {
+//             //FixME Form Restore insteed cell run
+
+//                 Private.ranNotebookIds.push(notebook.id);
+            
+//                 notebookTracker.currentWidget.sessionContext.ready.then(() =>
+//                 notebookTracker.currentWidget.revealed).then(async () => {
+
+//                 var cells = notebookTracker.currentWidget.content.widgets;
+
+//                 for (var i = 0; i < cells.length; i++){
+//                     console.log()
+
+
+//                     if (cells[i].model.metadata.get('galaxy_cell') ){
+
+//                         if (cells[i].model.metadata.get('html') == undefined || cells[i].model.metadata.get('html') == '') {
+//                             removeAllChildNodes(cells[i].outputArea.node)
+//                             notebook.activeCellIndex = i
+//                             await NotebookActions.run(notebook, notebookSession);            
+                       
+//                         } 
+//                         else{
+//                             // cells[i].inputArea.hide()
+                            
+                        
+//                             if((typeof cells[i].model.metadata.get('html')) == String ) {
+//                                 // cells[i].model
+
+//                                 removeAllChildNodes(cells[i].outputArea.node)
+//                                 cells[i].outputArea.node.append(ReturnOutputArea(cells[i].model.metadata.get('html'), notebookTracker))
+//                             }
+
+//                         }
+//                     }
+//                  }
+//             });
+
+//             }
+//         });
+//     });
+// };
