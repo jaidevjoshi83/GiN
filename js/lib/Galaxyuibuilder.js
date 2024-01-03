@@ -13,17 +13,14 @@ import { MODULE_NAME, MODULE_VERSION } from './version';
 import { unpack_models } from "@jupyter-widgets/base";
 import { BaseWidgetModel, BaseWidgetView } from "@g2nb/nbtools";
 import _ from "underscore";
-import {  is_url, KernelSideDataObjects, show, removeAllChildNodes } from './utils';
+import {  is_url, KernelSideDataObjects, show, removeAllChildNodes, return_kernel_id } from './utils';
 import * as tus from "tus-js-client";
 import axios from "axios";
 import { Data } from '@g2nb/nbtools/lib/dataregistry';
 import { ContextManager } from '@g2nb/nbtools';
 import { NotebookActions } from '@jupyterlab/notebook';
 import { Private,  getRanNotebookIds, getIndex } from './notebookActions';
-import $ from 'jquery'
-import {FileStreamer } from './utils'
-import { UploadModel, UploadView } from '@g2nb/ipyuploads';
-
+import { GalaxyToolbox } from './galaxy_toolbox';
 
 
 export class GalaxyUIBuilderModel extends BaseWidgetModel{
@@ -5231,7 +5228,10 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         }
 
         var jobs = await KernelSideDataObjects(`import json\nimport base64\nfrom GiN.authwidget import GalaxyAuthWidget\na  = GalaxyAuthWidget()\na.login(json.loads(base64.b64decode("${btoa(JSON.stringify(credentials))}")))`)
-           
+        
+
+        console.log(ContextManager.gb.toolbox.galaxy_fill_toolbox(jobs['tools']))
+
         KernelSideDataObjects(`del a`)
 
         if (jobs.state === 'error' ) {

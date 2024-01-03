@@ -277,3 +277,23 @@ export class FileStreamer {
     }
   }
   
+export function return_kernel_id () {
+
+    const currentWidget = ContextManager.notebook_tracker.currentWidget;
+
+    if (currentWidget) {
+        // Access the kernel of the active widget
+        const kernel = currentWidget.context.sessionContext.session?.kernel;
+  
+        if (kernel) {
+            // Get the kernel ID
+            const kernelId = kernel.id;
+            return  kernelId
+        } else {
+            console.error('No kernel associated with the current notebook.');
+        }
+    } else {
+        console.error('No active notebook widget.');
+    }
+
+}

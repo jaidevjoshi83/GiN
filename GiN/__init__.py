@@ -6,14 +6,16 @@
 import json
 from pathlib import Path
 from .settings import load_settings, import_defaults
-# try:
-from .authwidget import GALAXY_SERVERS, GalaxyAuthWidget
-# except:
-#     pass
+try:
+    from .authwidget import GALAXY_SERVERS, GalaxyAuthWidget
+except:
+    pass
+
 from .taskwidget import GalaxyTaskWidget    
 from .sessions import session, get_session
 from .uioutput import GalaxyUIOutput
 from .Galaxyuibuilder import GalaxyUIBuilder
+from .tool_manager import tool, GalaxyToolManager
 # from .galaxyUpload import GalaxyUpload
 from ._version import __version__
 

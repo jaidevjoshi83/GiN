@@ -4,20 +4,16 @@ import { INotebookTracker } from '@jupyterlab/notebook';
 import { IMainMenu } from '@jupyterlab/mainmenu';
 import {DataRegistry} from "@g2nb/nbtools/lib/dataregistry";
 import { ToolRegistry } from '@g2nb/nbtools';
-// import { ContextManager } from '@g2nb/nbtools';
 import { ContextManager } from '@g2nb/nbtools/lib/context';
 import * as galaxyuibuilder_exports from './Galaxyuibuilder';
 import * as utils_exports from './utils'
-import { MODULE_NAME, MODULE_VERSION } from './version';
 import { removeAllChildNodes , KernelSideDataObjects} from './utils';
 import { NotebookActions } from '@jupyterlab/notebook';
-
-
-// import {refresh_cells} from './Galaxyuibuilder';
-
-import {  Widget } from '@lumino/widgets';
-
+import { GalaxyToolBrowser } from './galaxy_toolbox';
 import { Private,  getRanNotebookIds} from './notebookActions';
+import { GalaxyToolRegistry } from './galaxy_registry';
+
+
 const module_exports = Object.assign(Object.assign(Object.assign(   {}, galaxyuibuilder_exports), utils_exports));
 
 const EXTENSION_ID = 'GiN:plugin';
@@ -44,23 +40,44 @@ function activateWidgetExtension(app, registry, mainmenu, restorer, shell, noteb
     // const data_registry = new DataRegistry();
     const tool_registry = new ToolRegistry();
     const data_registry = new DataRegistry();
+    const galaxy_tool_registry = new GalaxyToolRegistry()
+
+
+    
+
+    add_tool_browser(app, restorer)
 
     registry.registerWidget({
         name: 'GiN',
         version: '0.1.0',
         exports: module_exports,
     });
-    return [tool_registry, data_registry]
+    return [tool_registry, data_registry, galaxy_tool_registry]
 }
 
 function init_context(app, notebook_tracker) {
     ContextManager.jupyter_app = app;
     ContextManager.notebook_tracker = notebook_tracker;
     ContextManager.context();
+
+    // ContextManager.gb = new GalaxyToolBrowser();
     notebook_tracker
 
     initNotebookTracker(notebook_tracker)
-    
+}
+
+function add_tool_browser(app, restorer){
+    const galaxy_tool_browser = new GalaxyToolBrowser();
+    galaxy_tool_browser.title.iconClass = 'nbtools-icon fa fa-empire jp-SideBar-tabIcon';
+    galaxy_tool_browser.title.caption = 'galaxy-Toolbox';
+    galaxy_tool_browser.id = 'galaxy-browser'
+
+    if(restorer)
+        restorer.add(galaxy_tool_browser, 'GiN');
+    app.shell.add(galaxy_tool_browser, 'left', {rank: 103});
+
+    ContextManager.gb = galaxy_tool_browser
+
 }
 
 function ReturnOutputArea(i, notebookTracker){

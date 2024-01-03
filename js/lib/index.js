@@ -7,4 +7,6 @@ export * from './version';
 export * from './Galaxyuibuilder';
 export * from './utils';
 export * from './notebookActions';
+export * from './galaxy_toolbox';
+export * from './galaxy_registry';
 
