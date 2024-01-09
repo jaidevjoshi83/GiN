@@ -181,6 +181,16 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
         #return IPython.display.JSON({'api_key': key, 'email': email})
         return {'api_key': key, 'email': email}
     
+
+    @staticmethod
+    def Create_new_history( server, name):
+        a = GiN.sessions.SessionList()
+        gi = a.get(server=server)
+
+        new_history = gi.histories.create(name=name)        
+        return new_history.wrapped
+     
+    
     @staticmethod
     def upload_dataset(
          file_path, upload_method, datatype, genome, server=None, HistoryID=None

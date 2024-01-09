@@ -413,8 +413,6 @@ border-radius: 3px;
 }
 
 
-
-
 .galaxy-uibuilder .job-status-buttons .display-btn {
   background: none;
   color: lightgray;
@@ -429,4 +427,60 @@ border-radius: 3px;
 
 .galaxy-uibuilder .jp-mod-selected .nbtools-form .dataset-list{
   float: left;  
+}
+
+
+.galaxy-uibuilder .dropdown-container {
+  position: relative;
+  display: inline-block;
+  margin-top: 5px;
+  font-size: 15px;
+}
+
+.galaxy-uibuilder .dropdown-icon {
+  cursor: pointer;
+  background: rgb(203,208,216);
+  padding-left: 3px;
+  padding-right: 3px;
+}
+
+.galaxy-uibuilder .dropdown-menu {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background-color: #f9f9f9;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  border: 1px solid #ccc;
+  padding: 8px;
+  z-index: 1;
+  width: 200px;
+}
+
+.galaxy-uibuilder .dropdown-menu li {
+  display: block;
+  padding: 8px;
+  text-decoration: none;
+  color: #333;
+}
+
+.galaxy-uibuilder .dropdown-menu li:hover {
+  background-color: #ddd;
+}
+
+ .galaxy-uibuilder .dropdown-container:hover .dropdown-menu {
+  display: block;
+}
+
+.galaxy-uibuilder #create-history-button {
+  margin-top:  5px;
+  background: white;
+  color: rgb(184,176,176);
+  width: 90px;
+  height: 20px;
+}
+
+
+.galaxy-uibuilder #create-history-button:hover {
+  color: white;
 }

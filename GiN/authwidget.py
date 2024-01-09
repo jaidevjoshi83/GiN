@@ -79,9 +79,6 @@ class GalaxyAuthWidget(GalaxyUIBuilder):
         tool_list['url']  = self.session._notebook_url
         tool_list['email'] = self.session._notebook_email    
 
-        t = {"id": 'GiN_data_upload_tool',  "description": "Upload data files to galaxy server", "name": "Upload Data", 'origin': self.session._notebook_url, 'inputs': [{'type': 'data_upload'}]}
-        t = TaskTool('+', t )
-        ToolManager.instance().register(t)
 
         def register_modules_callback():
             for section in self.session.tools.gi.tools.get_tool_panel():
@@ -101,10 +98,14 @@ class GalaxyAuthWidget(GalaxyUIBuilder):
                                 # tool_list['tools'].append(tool)
                         except:
                             pass
+            
+            t = {"id": 'GiN_data_upload_tool',  "description": "Upload data files to galaxy server", "name": "Upload Data", 'origin': self.session._notebook_url, 'inputs': [{'type': 'data_upload'}]}
+            t = TaskTool('+', t )
+            ToolManager.instance().register(t)
         
         registration_thread = Thread(target=register_modules_callback)
         registration_thread.start()
-                
+
         return IPython.display.JSON({'state':'success'}) 
 
         
