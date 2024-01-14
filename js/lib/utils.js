@@ -172,31 +172,34 @@ export async function executePython(pythonCode, isExpectingOutput){
 
     const notebook = ContextManager.tool_registry.current
 
-    return await new Promise(async (resolve, reject) => {  
+    return await new Promise(async (resolve, reject) => {
+        
+        if (notebook.context.sessionContext.session) {
 
-        var feature = notebook.context.sessionContext.session.kernel.requestExecute({ 'code': pythonCode, 'stop_on_error' : true});
-        feature.onIOPub = (msg) =>{
-            var msgType = msg.header.msg_type;
+            var feature = notebook.context.sessionContext.session.kernel.requestExecute({ 'code': pythonCode, 'stop_on_error' : true});
+            feature.onIOPub = (msg) =>{
+                var msgType = msg.header.msg_type;
 
-            switch (msgType) {
-                case 'error':    	    
-                    var message = msg.content.ename + '\n' + msg.content.evalue;		   	    		   				    
-                    reject(message);
-                    break;						
-                case 'execute_result':
-                    feature.onIOPub  = msg.content;	
-                    resolve(feature.onIOPub.data['application/json']);						
-                    break;
-                case 'display_data':
-                    feature.onIOPub  = msg.content;	
-                    resolve(feature.onIOPub.data['application/json']);											
-                    break;
-                case 'update_display_data':
-                    feature.onIOPub  = msg.content;	
-                    resolve(feature.onIOPub.data['application/json']);											
-                    break;
-            };
-        }; 		 	
+                switch (msgType) {
+                    case 'error':    	    
+                        var message = msg.content.ename + '\n' + msg.content.evalue;		   	    		   				    
+                        reject(message);
+                        break;						
+                    case 'execute_result':
+                        feature.onIOPub  = msg.content;	
+                        resolve(feature.onIOPub.data['application/json']);						
+                        break;
+                    case 'display_data':
+                        feature.onIOPub  = msg.content;	
+                        resolve(feature.onIOPub.data['application/json']);											
+                        break;
+                    case 'update_display_data':
+                        feature.onIOPub  = msg.content;	
+                        resolve(feature.onIOPub.data['application/json']);											
+                        break;
+                };
+            }; 		
+       }
     });	
 }
 
@@ -223,6 +226,16 @@ export function removeAllChildNodes(parent){
     while (parent.firstChild) {
         parent.removeChild(parent.firstChild);
     }
+}
+
+
+export function UUID() {
+    var u='',i=0;
+    while(i++<36) {
+        var c='xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'[i-1],r=Math.random()*16|0,v=c=='x'?r:(r&0x3|0x8);
+        u+=(c=='-'||c=='4')?c:v.toString(16)
+    }
+    return u;
 }
 
 

@@ -12,24 +12,21 @@ import '../style/galaxy-form.css';
 import { MODULE_NAME, MODULE_VERSION } from './version';
 import { unpack_models } from "@jupyter-widgets/base";
 import { BaseWidgetModel, BaseWidgetView } from "@g2nb/nbtools";
+import { GalaxyBaseWidgetModel, GalaxyBaseWidgetView } from './basewidget';
 import _ from "underscore";
-import {  is_url, KernelSideDataObjects, show, removeAllChildNodes } from './utils';
+import {  is_url, KernelSideDataObjects, show, removeAllChildNodes, UUID } from './utils';
 import * as tus from "tus-js-client";
 import axios from "axios";
 import { Data } from '@g2nb/nbtools/lib/dataregistry';
 import { ContextManager } from '@g2nb/nbtools';
 import { NotebookActions } from '@jupyterlab/notebook';
 import { Private,  getRanNotebookIds, getIndex } from './notebookActions';
-import $ from 'jquery'
-import {FileStreamer } from './utils'
 
 
-
-
-export class GalaxyUIBuilderModel extends BaseWidgetModel{
+export class GalaxyUIBuilderModel extends GalaxyBaseWidgetModel{
     
     defaults() {
-        return Object.assign(Object.assign(Object.assign({}, super.defaults()), { _model_name: GalaxyUIBuilderModel.model_name, _model_module: GalaxyUIBuilderModel.model_module, _model_module_version: GalaxyUIBuilderModel.model_module_version, _view_name: GalaxyUIBuilderModel.view_name, _view_module: GalaxyUIBuilderModel.view_module, _view_module_version: GalaxyUIBuilderModel.view_module_version, name: 'Python Function', description: '', origin: '', _parameters: [], parameter_groups: [], function_import: '', register_tool: true, collapse: true, events: {}, buttons: {}, display_header: true, display_footer: true, busy: false, run_label: 'Execute',  output: undefined, inputs:{}, form_output:{}, UI:{}, galaxy_tool_id:'', history_data:[], history_ids:[] }));
+        return Object.assign(Object.assign(Object.assign({}, super.defaults()), { _model_name: GalaxyUIBuilderModel.model_name, _model_module: GalaxyUIBuilderModel.model_module, _model_module_version: GalaxyUIBuilderModel.model_module_version, _view_name: GalaxyUIBuilderModel.view_name, _view_module: GalaxyUIBuilderModel.view_module, _view_module_version: GalaxyUIBuilderModel.view_module_version, name: 'Python Function', description: '', origin: '', _parameters: [], parameter_groups: [], function_import: '', register_tool: true, collapse: true, events: {}, buttons: {}, display_header: true, display_footer: true, busy: false, run_label: 'Execute',  output: undefined, inputs:{}, form_output:{}, UI:{}, galaxy_tool_id:'', history_data:[], history_ids:[], UU_ID:'' }));
     }
 }
  
@@ -43,7 +40,7 @@ GalaxyUIBuilderModel.serializers = Object.assign(Object.assign({}, BaseWidgetMod
         deserialize: (value, manager) => unpack_models(value, manager)
     } });
  
-export class GalaxyUIBuilderView extends BaseWidgetView {
+export class GalaxyUIBuilderView extends GalaxyBaseWidgetView {
     constructor() {
     super(...arguments);
     this.dom_class = 'galaxy-uibuilder';
@@ -53,73 +50,65 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         "info": this.render_info
     };
     this.body = `
-    <div class="nbtools-buttons">
-        <button class="nbtools-run" type="button" data-traitlet="run_label"></button>
-    </div>
-    <div class="nbtools-description" data-traitlet="description"></div>
-    <div class="nbtools-busy">
-        <div>
-            <i class="fas fa-circle-notch fa-spin"></i>
-        </div>
-    </div>
-    <div class="nbtools-error" data-traitlet="error"></div>
-    <div class="nbtools-info" data-traitlet="info"></div>
-    
-    <div class="nbtools-form"> 
-        <div class="Galaxy-form-div" >
-            <div class="data-preview">
+                <div class="nbtools-buttons">
+                    <button class="nbtools-run" type="button" data-traitlet="run_label"></button>
+                </div>
+                <div class="nbtools-description" data-traitlet="description"></div>
+                <div class="nbtools-busy">
+                    <div>
+                        <i class="fas fa-circle-notch fa-spin"></i>
+                    </div>
+                </div>
+                <div class="nbtools-error" data-traitlet="error"></div>
+                <div class="nbtools-info" data-traitlet="info"></div>
+                
+                <div class="nbtools-form"> 
+                    <div class="Galaxy-form-div" >
+                        <div class="data-preview">
+                        </div>
 
-            </div>
+                        <div class="tool-forms" style="border: 1px solid #ddd;flex: 70%; flex: 70%;  box-sizing: border-box;"> 
+                            <form class="Galaxy-form">
+                            </form>
+                        </div>
 
-            <div class="tool-forms"> 
-                <form class="Galaxy-form">
-                </form>
-            </div>
-
-            <div class="dataset-list">
-                <div id="datalist-update" style="width: 100%;" >
-                    <div class='dataset-menu-row' style="width:100%;  display: inline-block;"><span class="ui-form-title-text"><b> History Options</b></span>  <i id="data-history-icon" class="fa fa-refresh" aria-hidden="true" title="Refresh Dataset" style="margin-top:6px;  font:15px; float:right;margin-right:10px;" ></i>
-                   
-                    
-                    <div class="dropdown-container">
-                        <span class="dropdown-icon" title="History Options">▼</span>
-                        <ul class="dropdown-menu">
-                            <li>
-
-                            <div id="create-history-menu">Create History</div>
-                   
-                            <div id="create-history-container" style="display:none">
-                                <input id="create-history-input" class="InputData" type="text" placeholder="Enter History Name">
-                                <button id="create-history-button">Create History</button>
+                        <div class="dataset-list" style="flex: 30%;border: 1px solid #ddd; box-sizing: border-box;">
+                            <div id="datalist-update" style="width: 100%;" >
+                                <div class='dataset-menu-row' style="width:100%;  display: inline-block;"><span class="ui-form-title-text"><b> History Options</b></span>  <i id="data-history-icon" class="fa fa-refresh" aria-hidden="true" title="Refresh Dataset" style="margin-top:6px;  font:15px; float:right;margin-right:10px;" ></i>
+                                    <div class="dropdown-container">
+                                        <span class="dropdown-icon" title="History Options">▼</span>
+                                        <ul class="dropdown-menu">
+                                            <li>
+                                                <div id="create-history-menu">
+                                                    Create New History
+                                                </div>
+                                    
+                                                <div id="create-history-container" style="display:none">
+                                                    <input id="create-history-input" class="InputData" type="text" placeholder="Enter History Name">
+                                                    <button id="create-history-button">Create History</button>
+                                                </div>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
                             </div>
-                   
-                            </li>
-                    
-                        </ul>
+
+                            <div id="history-list" >
+                            </div>
+
+                            <div  class="history-dataset-list">
+                            </div>
+                        </div> 
+
+                        <div class="help-section" >
+                        </div>
                     </div>
-
-                    </div>
-
-    
                 </div>
-                <div id="history-list" >
-
-                </div>
-
-                <div  class="history-dataset-list">
-
-                </div>
-            </div> 
-
-            <div class="help-section" >
-            </div>
-        </div>
-    </div>
-    
-    <div class="nbtools-footer"></div>
-    <div class="nbtools-buttons">
-        <button class="nbtools-run" type="button" data-traitlet="run_label"></button>
-    </div>`;
+                
+                <div class="nbtools-footer"></div>
+                <div class="nbtools-buttons">
+                    <button class="nbtools-run" type="button" data-traitlet="run_label"></button>
+                </div>`;
 
     this.dragged = '';
     this.KernelOutPut = '';
@@ -142,13 +131,13 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
     render() {
 
         super.render();
+
+        // this.el.className = 'galaxy galaxy-uibuilder lm-Widget p-Widget'
         const inputs = this.model.get('inputs')
         //########################
         //########################
         // this.form_builder(inputs['inputs'])
         //########################
-
-
         // // Hide the header or footer, if necessary
         this.display_header_changed();
         this.display_footer_changed();
@@ -174,9 +163,10 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         
         if (this.model.get('name') != 'login' && 'GiN_data_upload_tool') {
 
+            this.add_dataset_table()
             this.generate_tool_form()
             this.add_tool_migration_button(this.model.get('origin'))
-            this.add_dataset_table()
+            
             // this.add_history_list()
             this.add_galaxy_cell_metadata()
         }
@@ -186,6 +176,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         }
 
         this.section = {}
+
+        // this.iterate_over_tool_cells()
     }
 
     refresh_cells(){
@@ -209,6 +201,23 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         
         // if (servers.length > 0) {
 
+        var parent_div = document.createElement('div')
+        parent_div.className  = 'migration-tool'
+        parent_div.style.overflow = 'hidden'
+
+        var button_div = document.createElement('div')
+        button_div.className = 'button-div'
+        button_div.style.width = '20%'
+        button_div.style.float = 'right'
+        button_div.style.height = '35px'
+
+        var btn = document.createElement('button')
+        btn.innerText = 'Restore Form for Current User'
+        btn.style.height = '35px'
+        btn.id = "button-tool-refresh"
+
+        button_div.append(btn)
+
         var refresh_i = document.querySelector('i')
         refresh_i.className = "fa fa-refresh"
         refresh_i.title = "Refresh server list"
@@ -221,11 +230,14 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         var nbtools = this.el.querySelector('.nbtools-form')
         var Select = document.createElement('select')
         Select.className = 'tool-migration-select'
+        Select.style.width = '50%'
 
         var div = document.createElement('div')
         div.className = 'form-restore-div'
+        div.style.width = '78%'
 
         var Label = document.createElement('div')
+    
         Label.id = 'migra-label'
         Label.innerText = 'Select Server'
 
@@ -295,9 +307,26 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             }
         })
 
-        div.append(Select)
-        nbtools.prepend(div)
+        btn.addEventListener('click', ()=>{
 
+            console.log("OK")
+
+            if (!ContextManager.notebook_tracker) return;               
+            if (!ContextManager.notebook_tracker.currentWidget) return; 
+        
+            const cell = ContextManager.notebook_tracker.currentWidget.content.activeCell
+
+            cell.model.metadata.set('clicked', true)
+
+            ContextManager.context().run_cell(cell)
+        
+            // const cells = ContextManager.notebook_tracker.currentWidget.content.widgets;
+        })
+
+        div.append(Select)
+        parent_div.append(div)
+        parent_div.append(button_div)
+        nbtools.prepend(parent_div)
         // }
     }
 
@@ -507,8 +536,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         var  refresh = utm.querySelector('#refresh-button')
 
-        refresh.addEventListener('click', () => {
-            this.runAllGalaxyCells()
+        refresh.addEventListener('click', async () => {
+           this.runAllGalaxyCells()
         })
 
         this.el.querySelector('.form-restore-div').style.display  =  'none';
@@ -553,12 +582,10 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         if (!ContextManager.notebook_tracker) return;               
         if (!ContextManager.notebook_tracker.currentWidget) return; 
-        const cells = ContextManager.notebook_tracker.currentWidget.content.widgets;
-        for(var i = 0; i < cells.length; i++) {
-            if (cells[i]._input.node.querySelector('.lm-Widget.p-Widget.jp-InputPrompt.jp-InputArea-prompt').innerText == '[*]:'){
-                return cells[i].model.metadata.get('input_params')
-            }
-        }
+        const cell = ContextManager.notebook_tracker.currentWidget.content.activeCell
+    
+        return cell.model.metadata.get('input_params')
+  
     }
 
 
@@ -576,17 +603,27 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
     generate_tool_form(){
         // this.section_new = {}
-        var inp = this.iterate_over_tool_cells()
 
-        if (inp != undefined){   
-            if (inp.length == 0 ) {
-                const inputs = this.model.get('inputs')
-                this.form_builder(inputs['inputs'])
-            } else{
+        // var inp = this.iterate_over_tool_cells()
+
+        if (ContextManager.tool_registry.current.content.activeCell.model.metadata.get('clicked')){
+            console.log("clicked")
+            const cell = ContextManager.notebook_tracker.currentWidget.content.activeCell
+            var inp = cell.model.metadata.get('input_params')
+            
+            if (inp != undefined ){   
+                console.log("OK")
                 this.form_builder(inp)
+            } else{
+                    const inputs = this.model.get('inputs')
+                    this.form_builder(inputs['inputs'])
             }
             
+            ContextManager.tool_registry.current.content.activeCell.model.metadata.set('clicked', false)
+
         } else{
+
+            console.log("Un  clicked")
             const inputs = this.model.get('inputs')
             this.form_builder(inputs['inputs'])
 
@@ -594,19 +631,21 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             form_parent.data = this.model.get('origin')
             let form = form_parent.parentNode.parentNode.parentNode.parentNode.parentNode.outerHTML
             let fint = JSON.stringify(form)
-            if (this.model.get('galaxy_tool_id') != "GiN_data_upload_tool" ) {
-                this.update_metadata_FormState('galaxy_tool', inputs['inputs'], JSON.parse(fint))
-            }
+
+
+            // if (this.model.get('galaxy_tool_id') != "GiN_data_upload_tool" ) {
+            //     this.update_metadata_FormState('galaxy_tool', inputs['inputs'], JSON.parse(fint))
+            // }
         }
     }
 
     update_metadata_FormState(tool_type, inputs, html){
 
-
         ContextManager.tool_registry.current.content.activeCell.model.metadata.set('tool_type', tool_type)
         ContextManager.tool_registry.current.content.activeCell.model.metadata.set('input_params', inputs)
         ContextManager.tool_registry.current.content.activeCell.model.metadata.set('html', html)
     }
+
 
     un_wrap_repeat1(input, name){
      
@@ -2481,6 +2520,9 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
                 var form = self.element.querySelector('.Galaxy-form')
                 var Inputs = await self.get_form_data(form)
+
+                console.log(Inputs)
+
                 var refine_inputs = await KernelSideDataObjects(`import IPython\nfrom GiN.taskwidget  import GalaxyTaskWidget\nclass Temp(object):\n    def Return(self):\n        return IPython.display.JSON(GalaxyTaskWidget.updated_form(${JSON.stringify(origin)}, json.loads(base64.b64decode("${btoa(JSON.stringify(Inputs))}")), ${JSON.stringify(self.model.get('inputs')['id'])}, ${JSON.stringify(select.value)}))\na = Temp()\na.Return()`)
                 KernelSideDataObjects(`try:\n    del a\nexcept:\n    print("a is not defined")`)
  
@@ -3453,7 +3495,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
  
     add_boolean_field (input_def, FormParent, NamePrefix ){
 
-
         var self = this
 
         input_def.id = this.uid()
@@ -3470,7 +3511,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             opt.value = options[i][1];
             select.appendChild(opt);
  
-            if(`${options[i][1]}` ==  `${input_def.default_value}`){
+            if(`${options[i][1]}` ==  `${input_def.value}`){
                 opt.selected = true
             }
         }
@@ -5154,6 +5195,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
     }
 
     display_header_changed (){
+
         const display = this.model.get('display_header') ? 'block' : 'none';
         this.element.querySelector('.nbtools-buttons:first-of-type').style.display = display;
         this.element.querySelector('.nbtools-description').style.display = display;
@@ -5187,32 +5229,64 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         });
     }
 
-    runAllGalaxyCells() {
+    async run_cell(cell){
 
         if (!ContextManager.notebook_tracker) return;               
-        if (!ContextManager.notebook_tracker.currentWidget) return;
-    
-        var notebookTracker = ContextManager.notebook_tracker
-    
-        const notebook = notebookTracker.currentWidget.content
-        const notebookSession = notebookTracker.currentWidget.context.sessionContext;
-        const cells = notebook.widgets;
-      
-        notebookTracker.currentWidget.sessionContext.ready.then(() =>
-        notebookTracker.currentWidget.revealed).then(() => {
+        if (!ContextManager.notebook_tracker.currentWidget) return; 
 
-            for (var i = 0; i < cells.length; i++){
-                if (cells[i].model.metadata.get('galaxy_cell')){
-                    if(cells[i].model.metadata.get('tool_type') !=  undefined) {
-                        if(cells[i].model.metadata.get('tool_type') != 'login' ) {
-                            notebook.activeCellIndex = i
-                            removeAllChildNodes(cells[i].outputArea.node)
-                            NotebookActions.run(notebook, notebookSession);
-                        }
-                    }
+        ContextManager.context().run_cell(cell)
+    
+
+    }
+
+    runAllGalaxyCells() {
+
+
+        if (!ContextManager.notebook_tracker) return;               
+        if (!ContextManager.notebook_tracker.currentWidget) return; 
+
+        const cells = ContextManager.notebook_tracker.currentWidget.content.widgets
+
+        for (var i = 0; i < cells.length; i++){
+            if(cells[i].model.metadata.get('tool_type') == 'galaxy_tool'){
+                
+                if(cells[i].node.querySelector('#button-tool-refresh')){
+                    ContextManager.notebook_tracker.currentWidget.content.activeCellIndex = i
+                    cells[i].node.querySelector('#button-tool-refresh').click()
+
                 }
             }
-        });
+        }
+    
+        // const cell = ContextManager.notebook_tracker.currentWidget.content.activeCell
+
+        // ContextManager.context().run_cell(cell)
+
+        // if (!ContextManager.notebook_tracker) return;               
+        // if (!ContextManager.notebook_tracker.currentWidget) return;
+
+    
+        // var notebookTracker = ContextManager.notebook_tracker
+    
+        // const notebook = notebookTracker.currentWidget.content
+        // const notebookSession = notebookTracker.currentWidget.context.sessionContext;
+        // const cells = notebook.widgets;
+      
+        // notebookTracker.currentWidget.sessionContext.ready.then(() =>
+        // notebookTracker.currentWidget.revealed).then(() => {
+
+        //     for (var i = 0; i < cells.length; i++){
+        //         if (cells[i].model.metadata.get('galaxy_cell')){
+        //             if(cells[i].model.metadata.get('tool_type') !=  undefined) {
+        //                 if(cells[i].model.metadata.get('tool_type') != 'login' ) {
+        //                     notebook.activeCellIndex = i
+        //                     removeAllChildNodes(cells[i].outputArea.node)
+        //                     NotebookActions.run(notebook, notebookSession);
+        //                 }
+        //             }
+        //         }
+        //     }
+        // });
     }
  
     async activate_run_buttons (){
@@ -5247,7 +5321,9 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
                 var history_id = self.element.querySelector('#dataset-history-list').value 
 
-                console.log(inputs)
+
+
+
 
                 this.SubmitJob(inputs, history_id)
                 this.hide_run_buttons(true)
