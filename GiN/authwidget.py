@@ -6,16 +6,15 @@ from nbtools import UIBuilder, ToolManager, NBTool, EventManager
 from threading import Thread
 from .sessions import session
 # from .shim import login, system_message
-from .taskwidget import TaskTool
+from .taskwidget import TaskTool, GalaxyTaskWidget
 from .util import DEFAULT_COLOR, DEFAULT_LOGO, GALAXY_SERVERS
 from urllib.error import HTTPError
 from .Galaxyuibuilder import GalaxyUIBuilder
 from ipywidgets import Output
 from nbtools.uioutput import UIOutput
 from nbtools.event_manager import EventManager
-import json
-
-
+import uuid
+import threading
 import IPython
 import IPython.display
 
@@ -80,70 +79,11 @@ class GalaxyAuthWidget(GalaxyUIBuilder):
         tool_list['email'] = self.session._notebook_email    
 
 
-        def register_modules_callback():
-            for section in self.session.tools.gi.tools.get_tool_panel():
-                if section["model_class"] == "ToolSection":
-                    for t in section["elems"]:
-                        try:
-                            tool={'id':None, 'description':None, 'name':None}
-                            if t['model_class'] == 'Tool':
-                            
-                                tool['id'] = t['id']
-                                tool['description'] = t['description']
-                                tool['name'] = t['name']+" ("+t['version']+")"
-                                tool['origin'] = self.session._notebook_url
-                                tool['email'] = self.session._notebook_email
-                                tool = TaskTool(tool['origin'], tool)
-                                ToolManager.instance().register(tool)
-                                # tool_list['tools'].append(tool)
-                        except:
-                            pass
-            
-            t = {"id": 'GiN_data_upload_tool',  "description": "Upload data files to galaxy server", "name": "Upload Data", 'origin': self.session._notebook_url, 'inputs': [{'type': 'data_upload'}]}
-            t = TaskTool('+', t )
-            ToolManager.instance().register(t)
-        
-        registration_thread = Thread(target=register_modules_callback)
-        registration_thread.start()
-
-        return IPython.display.JSON({'state':'success'}) 
-
-        
-
-    # def login(self, credentials):
-
-        """Login to the Galaxy server"""
-
-        tool_list =  {'tools':[]}
-    
-        if credentials['email']:
-            try:
-                self.session = GalaxyInstance(credentials['server'], email=credentials['email'], password=credentials['password'])
-                self.session._notebook_email = credentials['email']
-            except:
-                # tool_list['state'] = 'error'
-                return IPython.display.JSON({'state': 'error'})
-        else:
-            try:
-                self.session = GalaxyInstance(credentials['server'],  api_key=credentials['api_key'], verify=True)
-                self.session._notebook_email = self.session.gi.users.get_current_user()['email']
-            except:
-                # tool_list['state'] = 'error'
-                return IPython.display.JSON({'state': 'error'})
-
-        self.session._notebook_url = credentials['server']
-        self.session._notebook_password = credentials['password']
-        self.session._notebook_key = credentials['api_key']
-
-        self.register_session()
-
-        tool_list['url']  = self.session._notebook_url
-        tool_list['email'] = self.session._notebook_email     
-
-        def register_modules_callback():
-            for section in self.session.tools.gi.tools.get_tool_panel():
-                if section["model_class"] == "ToolSection":
-                    for t in section["elems"]:
+        # def register_modules_callback():
+        for section in self.session.tools.gi.tools.get_tool_panel():
+            if section["model_class"] == "ToolSection":
+                for t in section["elems"]:
+                    try:
                         tool={'id':None, 'description':None, 'name':None}
                         if t['model_class'] == 'Tool':
                         
@@ -152,20 +92,22 @@ class GalaxyAuthWidget(GalaxyUIBuilder):
                             tool['name'] = t['name']+" ("+t['version']+")"
                             tool['origin'] = self.session._notebook_url
                             tool['email'] = self.session._notebook_email
-                            tool_list['tools'].append(tool)
-               
+                            tool = TaskTool(tool['origin'], tool)
+                            ToolManager.instance().register(tool)
+                            # tool_list['tools'].append(tool)
+                    except:
+                        pass
+        
         t = {"id": 'GiN_data_upload_tool',  "description": "Upload data files to galaxy server", "name": "Upload Data", 'origin': self.session._notebook_url, 'inputs': [{'type': 'data_upload'}]}
-       
         t = TaskTool('+', t )
         ToolManager.instance().register(t)
 
-        for i in tool_list['tools']:
-            GalaxyAuthWidget().RegisterMod(i)
 
-        registration_thread = Thread(target=register_modules_callback)
-        registration_thread.start()
+        # registration_thread = Thread(target=register_modules_callback)
+        # registration_thread.start()
 
         return IPython.display.JSON({'state':'success', 'tool_list': tool_list}) 
+
    
     def RegisterMod(self, tool):
 
@@ -241,41 +183,20 @@ def server_name(search_url):
             return name
     return search_url
 
-    output = Output()  # Output widget
-    
-    if message is not None:
-        error_msg = message
-        name = "Tool origin error"
-    else:
-        error_msg = f"Cannot find tool: {origin} | {id}"
-        name = "Cannot find tool"
 
-    placeholder = UIOutput(
-        name= name, 
-        error=error_msg,
-        color= DEFAULT_COLOR,
-        logo= DEFAULT_LOGO,
+def start_login(session, callback):
 
-    )  # Placeholder widget
-    output.append_display_data(placeholder)
+    login_id = str(uuid.uuid4())
+    t = threading.Thread(target=callback)
+    t.start()
 
-    # Callback to see if the placeholder needs replaced after a new widget is registered
-    def check_registration_callback(data):
-        if (
-            "origin" in data
-            and "id" in data
-            and data["origin"] == origin
-            and data["id"] == id
-        ):
-            placeholder.close()
-            with output:
-                display(self.tool(id=id, origin=origin))
+    session.galaxy_login = {}
+    session.galaxy_login[login_id] = t
 
-    # Register the callback with the event manager
-    EventManager.instance().register(
-        "nbtools.register", check_registration_callback
-    )
-    return output
+    return {'id':login_id, 'status':'start'}
+
+    # return IPython.display.JSON({'id':login_id, 'status':'start'})
+
 
 class AuthenticationTool(NBTool):
     """Tool wrapper for the authentication widget"""

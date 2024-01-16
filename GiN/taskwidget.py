@@ -154,7 +154,6 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
         # return IPython.display.JSON(job)
         return job
 
-    
     @staticmethod
     def get_data_type_and_genomes( server=None):
 
@@ -478,7 +477,7 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
             del a.galaxy_upload[upload_id]
 
         return IPython.display.JSON(status)
-
+    
 
     @staticmethod
     def CORS_fallback_upload(
@@ -596,6 +595,21 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
         job_state = gi16.gi.jobs.get_state(job_id=job_id)
 
         return IPython.display.JSON({"job_state": job_state})
+    
+    @staticmethod
+    def check_login(login_id, server):
+        a = GiN.sessions.SessionList()
+        gi = a.get(server=server)
+        t = gi.galaxy_login.get(login_id)
+
+        status = {'id': login_id, 'status':'running'}
+
+        if not t.is_alive():
+            out = t.join()
+            status['status'] = 'finish'
+            del gi.galaxy_login[login_id]
+
+        return IPython.display.JSON(status)
     
 
 class TaskTool(NBTool):

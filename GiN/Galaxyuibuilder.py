@@ -66,7 +66,6 @@ class GalaxyUIBuilder(BaseWidget, NBTool):
         self.origin = origin
         self.description = description
         self.UU_ID = str(uuid.uuid4())
-        print( self.UU_ID)
         
         BaseWidget.__init__(self, **kwargs)
        

@@ -131,8 +131,6 @@ export function show(elem) {
 // }
 
 //     }
-
-
 /**
  * Toggle element visibility
  *
@@ -203,6 +201,7 @@ export async function executePython(pythonCode, isExpectingOutput){
     });	
 }
 
+
 // export async function  KernelSideDataObjects(code) {
 //     var system = await executePython(code);
 //     return system;
@@ -222,8 +221,10 @@ export async function KernelSideDataObjects(code) {
   }
 
 
+
 export function removeAllChildNodes(parent){
     while (parent.firstChild) {
+        console.log(parent.firstChild)
         parent.removeChild(parent.firstChild);
     }
 }

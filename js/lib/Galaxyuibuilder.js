@@ -76,7 +76,7 @@ export class GalaxyUIBuilderView extends GalaxyBaseWidgetView {
                             <div id="datalist-update" style="width: 100%;" >
                                 <div class='dataset-menu-row' style="width:100%;  display: inline-block;"><span class="ui-form-title-text"><b> History Options</b></span>  <i id="data-history-icon" class="fa fa-refresh" aria-hidden="true" title="Refresh Dataset" style="margin-top:6px;  font:15px; float:right;margin-right:10px;" ></i>
                                     <div class="dropdown-container">
-                                        <span class="dropdown-icon" title="History Options">▼</span>
+                                        <div  style="float:right> <span class="dropdown-icon" title="History Options">▼</span></div>
                                         <ul class="dropdown-menu">
                                             <li>
                                                 <div id="create-history-menu">
@@ -177,7 +177,9 @@ export class GalaxyUIBuilderView extends GalaxyBaseWidgetView {
 
         this.section = {}
 
-        // this.iterate_over_tool_cells()
+        /// this.update_metadata_FormState('login', [], '')
+
+        this.add_galaxy_cell_metadata()
     }
 
     refresh_cells(){
@@ -194,58 +196,30 @@ export class GalaxyUIBuilderView extends GalaxyBaseWidgetView {
 
     async add_tool_migration_button(index){
 
+        const form =`<div class="migration-tool" >
+                        <span id="migra-refresh-btn">Select Server<i class="fa fa-refresh" title="Refresh server list" id="migration-tool-button" style="margin-left:10px"></i></span>
+                        <div class="form-restore-div" >
+                            <div class="div-tool-migration">
+                                <select class="tool-migration-select">
+                                </select>
+                            </div>
+
+                            <div class="button-div" >
+                                <button id="button-tool-refresh" >Restore Form for Current User</button>
+                            </div>
+                        </div>
+                    </div>`
+
+        const utm = new DOMParser().parseFromString( form, 'text/html').querySelector('.migration-tool')
+
         var self = this
 
         var servers   = await KernelSideDataObjects(`import GiN\na = GiN.sessions.SessionList()\na.get_servers()`)
         KernelSideDataObjects(`try:\n    del a\nexcept:    print("a is not defined")`)
-        
-        // if (servers.length > 0) {
 
-        var parent_div = document.createElement('div')
-        parent_div.className  = 'migration-tool'
-        parent_div.style.overflow = 'hidden'
-
-        var button_div = document.createElement('div')
-        button_div.className = 'button-div'
-        button_div.style.width = '20%'
-        button_div.style.float = 'right'
-        button_div.style.height = '35px'
-
-        var btn = document.createElement('button')
-        btn.innerText = 'Restore Form for Current User'
-        btn.style.height = '35px'
-        btn.id = "button-tool-refresh"
-
-        button_div.append(btn)
-
-        var refresh_i = document.querySelector('i')
-        refresh_i.className = "fa fa-refresh"
-        refresh_i.title = "Refresh server list"
-        refresh_i.id = "migration-tool-button"
-
-        var d = document.createElement('div')
-        d.id = 'migra-refresh-btn'
-        d.append(refresh_i)
-
-        var nbtools = this.el.querySelector('.nbtools-form')
-        var Select = document.createElement('select')
-        Select.className = 'tool-migration-select'
-        Select.style.width = '50%'
-
-        var div = document.createElement('div')
-        div.className = 'form-restore-div'
-        div.style.width = '78%'
-
-        var Label = document.createElement('div')
+        const Select = utm.querySelector('.tool-migration-select')
+        const btn = utm.querySelector('#button-tool-refresh')
     
-        Label.id = 'migra-label'
-        Label.innerText = 'Select Server'
-
-        div.append(d)
-        div.append(Label)
-
-        div.style.float = 'left'
-
         for (var i = 0; i < servers.length; i++){
             var opt = document.createElement('option')
             opt.value  = servers[i]
@@ -288,7 +262,7 @@ export class GalaxyUIBuilderView extends GalaxyBaseWidgetView {
             }
         })
 
-        refresh_i.addEventListener('click', async () => {
+        utm.querySelector('.fa.fa-refresh').addEventListener('click', async () => {
 
             var servers   = await KernelSideDataObjects(`import GiN\na = GiN.sessions.SessionList()\na.get_servers()`)
             KernelSideDataObjects(`try:\n    del a\nexcept:    print("a is not defined")`)
@@ -309,25 +283,15 @@ export class GalaxyUIBuilderView extends GalaxyBaseWidgetView {
 
         btn.addEventListener('click', ()=>{
 
-            console.log("OK")
-
             if (!ContextManager.notebook_tracker) return;               
             if (!ContextManager.notebook_tracker.currentWidget) return; 
         
             const cell = ContextManager.notebook_tracker.currentWidget.content.activeCell
-
             cell.model.metadata.set('clicked', true)
-
             ContextManager.context().run_cell(cell)
-        
-            // const cells = ContextManager.notebook_tracker.currentWidget.content.widgets;
         })
 
-        div.append(Select)
-        parent_div.append(div)
-        parent_div.append(button_div)
-        nbtools.prepend(parent_div)
-        // }
+        this.el.querySelector('.nbtools-form').prepend(utm)
     }
 
     workflow_explorer(){
@@ -604,15 +568,13 @@ export class GalaxyUIBuilderView extends GalaxyBaseWidgetView {
     generate_tool_form(){
         // this.section_new = {}
 
-        // var inp = this.iterate_over_tool_cells()
-
         if (ContextManager.tool_registry.current.content.activeCell.model.metadata.get('clicked')){
-            console.log("clicked")
+         
             const cell = ContextManager.notebook_tracker.currentWidget.content.activeCell
             var inp = cell.model.metadata.get('input_params')
             
             if (inp != undefined ){   
-                console.log("OK")
+          
                 this.form_builder(inp)
             } else{
                     const inputs = this.model.get('inputs')
@@ -623,7 +585,6 @@ export class GalaxyUIBuilderView extends GalaxyBaseWidgetView {
 
         } else{
 
-            console.log("Un  clicked")
             const inputs = this.model.get('inputs')
             this.form_builder(inputs['inputs'])
 
@@ -644,6 +605,7 @@ export class GalaxyUIBuilderView extends GalaxyBaseWidgetView {
         ContextManager.tool_registry.current.content.activeCell.model.metadata.set('tool_type', tool_type)
         ContextManager.tool_registry.current.content.activeCell.model.metadata.set('input_params', inputs)
         ContextManager.tool_registry.current.content.activeCell.model.metadata.set('html', html)
+        ContextManager.tool_registry.current.content.activeCell.model.metadata.set('galaxy_cell', true)
     }
 
 
@@ -2521,8 +2483,6 @@ export class GalaxyUIBuilderView extends GalaxyBaseWidgetView {
                 var form = self.element.querySelector('.Galaxy-form')
                 var Inputs = await self.get_form_data(form)
 
-                console.log(Inputs)
-
                 var refine_inputs = await KernelSideDataObjects(`import IPython\nfrom GiN.taskwidget  import GalaxyTaskWidget\nclass Temp(object):\n    def Return(self):\n        return IPython.display.JSON(GalaxyTaskWidget.updated_form(${JSON.stringify(origin)}, json.loads(base64.b64decode("${btoa(JSON.stringify(Inputs))}")), ${JSON.stringify(self.model.get('inputs')['id'])}, ${JSON.stringify(select.value)}))\na = Temp()\na.Return()`)
                 KernelSideDataObjects(`try:\n    del a\nexcept:\n    print("a is not defined")`)
  
@@ -2735,14 +2695,20 @@ export class GalaxyUIBuilderView extends GalaxyBaseWidgetView {
         const row = document.createElement('div')
         const title = document.createElement('div')
 
-        title.append(DeleteButton)
+        const InnerTitleDiv = document.createElement('div')
+        InnerTitleDiv.className = 'inner-title-div'
 
         title.className = 'repeat-ui-from-title'
+        
         const TitleSpan = document.createElement('span')
         TitleSpan.className = "ui-form-title-text"
         TitleSpan.textContent = '1: '+input_def['title']
         TitleSpan.style.display = 'inline'
-        title.append(TitleSpan)
+
+        InnerTitleDiv.append(TitleSpan)
+
+        title.append(InnerTitleDiv)
+        title.append(DeleteButton)
 
         const outtitle = document.createElement('div')
         outtitle.className = 'ui-from-title'
@@ -2760,6 +2726,7 @@ export class GalaxyUIBuilderView extends GalaxyBaseWidgetView {
         helpSpan.textContent = input_def['help']
         helpSpan.style.display = 'inline'
         help.append( helpSpan)
+
         help.style.marginBottom = '10px'
         help.style.margin = '10px'
 
@@ -2792,6 +2759,9 @@ export class GalaxyUIBuilderView extends GalaxyBaseWidgetView {
             DeleteButton.className = 'delete-button'
             DeleteButton.type = "button"
 
+            const InnerTitleDiv = document.createElement('div')
+            InnerTitleDiv.className = 'inner-title-div'
+
             const InnerTitle = document.createElement('div')
             InnerTitle.className = 'repeat-ui-from-title'
             InnerTitle.append(DeleteButton)
@@ -2800,7 +2770,9 @@ export class GalaxyUIBuilderView extends GalaxyBaseWidgetView {
             InnerTitleSpan.className = "ui-form-title-text"
             InnerTitleSpan.textContent = `${count+1}: `+input_def['title']
             InnerTitleSpan.style.display = 'inline'
-            InnerTitle.append(InnerTitleSpan)
+
+            InnerTitleDiv.append(InnerTitleSpan )
+            InnerTitle.append(InnerTitleDiv)
 
             row1.append(InnerTitle)
 
@@ -3902,7 +3874,9 @@ export class GalaxyUIBuilderView extends GalaxyBaseWidgetView {
 
         var datasets = await KernelSideDataObjects(`import IPython\nfrom GiN.taskwidget  import GalaxyTaskWidget\nclass Temp(object):\n    def Return(self):\n        return IPython.display.JSON(GalaxyTaskWidget.history_data_list(server=${JSON.stringify(server)}, history_id=${JSON.stringify(history_id)} ))\na = Temp()\na.Return()`) 
 
-        KernelSideDataObjects(`try:\n    del a\nexcept:\n    print("a is not define")`) 
+        // KernelSideDataObjects(`try:\n    del a\nexcept:\n    print("a is not define")`) 
+
+    
 
         for (var i = 0; i < datasets.length; i++){
             if (datasets[i]['history_content_type'] == 'dataset') {
@@ -5235,12 +5209,9 @@ export class GalaxyUIBuilderView extends GalaxyBaseWidgetView {
         if (!ContextManager.notebook_tracker.currentWidget) return; 
 
         ContextManager.context().run_cell(cell)
-    
-
     }
 
     runAllGalaxyCells() {
-
 
         if (!ContextManager.notebook_tracker) return;               
         if (!ContextManager.notebook_tracker.currentWidget) return; 
@@ -5248,45 +5219,10 @@ export class GalaxyUIBuilderView extends GalaxyBaseWidgetView {
         const cells = ContextManager.notebook_tracker.currentWidget.content.widgets
 
         for (var i = 0; i < cells.length; i++){
-            if(cells[i].model.metadata.get('tool_type') == 'galaxy_tool'){
-                
-                if(cells[i].node.querySelector('#button-tool-refresh')){
-                    ContextManager.notebook_tracker.currentWidget.content.activeCellIndex = i
-                    cells[i].node.querySelector('#button-tool-refresh').click()
-
-                }
+            if(cells[i].model.metadata.get('tool_type') == 'galaxy_tool'){  
+             this.run_cell(cells[i])
             }
         }
-    
-        // const cell = ContextManager.notebook_tracker.currentWidget.content.activeCell
-
-        // ContextManager.context().run_cell(cell)
-
-        // if (!ContextManager.notebook_tracker) return;               
-        // if (!ContextManager.notebook_tracker.currentWidget) return;
-
-    
-        // var notebookTracker = ContextManager.notebook_tracker
-    
-        // const notebook = notebookTracker.currentWidget.content
-        // const notebookSession = notebookTracker.currentWidget.context.sessionContext;
-        // const cells = notebook.widgets;
-      
-        // notebookTracker.currentWidget.sessionContext.ready.then(() =>
-        // notebookTracker.currentWidget.revealed).then(() => {
-
-        //     for (var i = 0; i < cells.length; i++){
-        //         if (cells[i].model.metadata.get('galaxy_cell')){
-        //             if(cells[i].model.metadata.get('tool_type') !=  undefined) {
-        //                 if(cells[i].model.metadata.get('tool_type') != 'login' ) {
-        //                     notebook.activeCellIndex = i
-        //                     removeAllChildNodes(cells[i].outputArea.node)
-        //                     NotebookActions.run(notebook, notebookSession);
-        //                 }
-        //             }
-        //         }
-        //     }
-        // });
     }
  
     async activate_run_buttons (){
@@ -5321,15 +5257,82 @@ export class GalaxyUIBuilderView extends GalaxyBaseWidgetView {
 
                 var history_id = self.element.querySelector('#dataset-history-list').value 
 
-
-
-
-
                 this.SubmitJob(inputs, history_id)
                 this.hide_run_buttons(true)
             }
         }));
     }
+
+    // async trigger_login(){
+
+    //     // this.update_metadata_FormState({}, {})
+    //     var logingForm = this.el.querySelector('.login-form-div')
+    //     var formdata = logingForm.parentNode.parentNode.parentNode.parentNode.outerHTML       
+    //     let fint = JSON.stringify(formdata)
+    //     this.el.querySelector('#refresh-galaxy-cells').style.display = 'none'
+    //     this.el.querySelector('.auth-error').style.display = 'none'
+    //     this.el.querySelector('.auth-waiting').style.display = 'none';
+
+    //     var credentials = { 'server':null, 'email':null, 'password':null,  'api_key': null }  
+    //     var inputs = this.$(".tabcontent:visible")[0].querySelectorAll('input')
+
+    //     for (var i = 0; i < inputs.length; i++){
+    //         if (inputs[i].value == '' && inputs[i].style.display == 'block'){
+    //             inputs[i].style.background = 'pink'
+    //             return 
+    //         }else if (inputs[i].value != '' && inputs[i].style.display == 'block'){
+    //             inputs[i].style.background = ''
+    //         }
+    //     }
+
+    //     this.el.querySelector('.auth-waiting').style.display = 'block';
+
+    //     if (inputs[1].style.display == 'none'){
+    //         credentials['server'] = inputs[0].value
+    //         credentials['api_key'] = inputs[2].value
+    //     }else if (inputs[1].style.display == 'block'){
+    //         credentials['server'] = inputs[0].value
+    //         credentials['email'] =  inputs[1].value
+    //         credentials['password'] = inputs[2].value
+    //     }
+
+    //    var jobs =  await KernelSideDataObjects(`import json\nimport base64\nfrom GiN.authwidget import GalaxyAuthWidget\na  = GalaxyAuthWidget()\na.login(json.loads(base64.b64decode("${btoa(JSON.stringify(credentials))}")))`)
+    //     KernelSideDataObjects(`del a`)
+
+    //     if (jobs.state === 'error' ) {
+
+    //         this.el.querySelector('.auth-error').style.display = 'block'
+    //         // this.el.querySelector('.login-form-div').style.display = "none";
+    //         this.el.querySelector('.auth-waiting').style.display = 'none';
+    //         this.el.querySelector('.auth-successful').style.display = 'none';
+
+    //         return 
+    //     }
+
+    //     var a = async () => {
+
+    //         // var out = {'id': '', 'status':'running'}
+
+    //         while (out.status != 'finish'){
+    //             console.log(out)
+    //             setTimeout(8000)
+    //             out  = await KernelSideDataObjects(`from GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.check_login(login_id=${JSON.stringify(jobs.id)}, server=${JSON.stringify(credentials['server'])})`);
+    //         }
+
+    //         this.el.querySelector('.nbtools-subtitle').innerText = credentials['server']
+    //         this.el.querySelector('.auth-successful').style.display = 'block';
+    //         this.el.querySelector('.login-form-div').style.display = "none";
+    //         this.el.querySelector('.auth-waiting').style.display = 'none';
+    //         this.el.querySelector('.auth-error').style.display = 'none'
+    //         this.el.querySelector('#refresh-galaxy-cells').style.display = 'block'
+    //         this.hide_run_buttons(true)
+    //         this.runAllGalaxyCells()
+    //     }
+
+    //     a()
+        
+    //     Private.origins.push(credentials['server']); 
+    // }
 
     async trigger_login(){
 
@@ -5366,6 +5369,12 @@ export class GalaxyUIBuilderView extends GalaxyBaseWidgetView {
 
         var jobs = await KernelSideDataObjects(`import json\nimport base64\nfrom GiN.authwidget import GalaxyAuthWidget\na  = GalaxyAuthWidget()\na.login(json.loads(base64.b64decode("${btoa(JSON.stringify(credentials))}")))`)
            
+        // console.log(ContextManager.jupyter_app.shell._leftHandler._items[1].widget.node.querySelector('.lm-Widget.p-Widget.nbtools-toolbox.nbtools-wrapper'))
+       
+
+        // ContextManager.PrivateData.origins.push(credentials['server'])
+       
+        // this.runAllGalaxyCells()
         KernelSideDataObjects(`del a`)
 
         if (jobs.state === 'error' ) {
@@ -5387,21 +5396,23 @@ export class GalaxyUIBuilderView extends GalaxyBaseWidgetView {
             this.el.querySelector('#refresh-galaxy-cells').style.display = 'block'
             this.hide_run_buttons(true)
 
-            if (this.el.querySelector('#form-restore').checked ){
+            // if (this.el.querySelector('#form-restore').checked ){
 
-                if (!ContextManager.notebook_tracker) return;               
-                if (!ContextManager.notebook_tracker.currentWidget) return;
-                var notebookTracker = ContextManager.notebook_tracker
+            //     if (!ContextManager.notebook_tracker) return;               
+            //     if (!ContextManager.notebook_tracker.currentWidget) return;
+            //     var notebookTracker = ContextManager.notebook_tracker
 
-                const notebook = notebookTracker.currentWidget.content
-                const notebookHasBeenRan = getRanNotebookIds().includes(notebook.id)
-                // if(!notebookHasBeenRan) {
-                    this.runAllGalaxyCells()
-                // }
-            }
+            //     const notebook = notebookTracker.currentWidget.content
+            //     const notebookHasBeenRan = getRanNotebookIds().includes(notebook.id)
+            //     // if(!notebookHasBeenRan) {
+            //         this.runAllGalaxyCells()
+            //     // }
+            // }
         }
         
         Private.origins.push(credentials['server']); 
+
+        console.log(Private)
     }
 
     async SubmitJob(inputs, history_id){
