@@ -3,6 +3,8 @@ Useful things across modules.
 """
 import glob , os
 
+import IPython.display
+
 DEFAULT_COLOR = "#2c3143"
 DEFAULT_LOGO = "https://usegalaxy.org/static/favicon.svg"
 
@@ -25,4 +27,3 @@ def delete_file():
         for i in file_path:
             os.remove(i)
     
-

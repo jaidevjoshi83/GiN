@@ -2,17 +2,15 @@ import { IJupyterWidgetRegistry} from '@jupyter-widgets/base';
 import { ILabShell, ILayoutRestorer } from "@jupyterlab/application";
 import { INotebookTracker } from '@jupyterlab/notebook';
 import { IMainMenu } from '@jupyterlab/mainmenu';
-import {DataRegistry} from "@g2nb/nbtools/lib/dataregistry";
-import { ToolRegistry } from '@g2nb/nbtools';
-import { ContextManager } from '@g2nb/nbtools/lib/context';
+import { GalaxyToolRegistry, IGToolRegistry } from './registry';
+import { ContextManager } from './context';
 import * as galaxyuibuilder_exports from './Galaxyuibuilder';
 import * as utils_exports from './utils'
-import { removeAllChildNodes , KernelSideDataObjects} from './utils';
+import { removeAllChildNodes } from './utils';
 import { NotebookActions } from '@jupyterlab/notebook';
 import { GalaxyToolBrowser } from './galaxy_toolbox';
 import { Private,  getRanNotebookIds} from './notebookActions';
-import { GalaxyToolRegistry } from './galaxy_registry';
-
+import {DataRegistry} from "@g2nb/nbtools/lib/dataregistry";
 
 const module_exports = Object.assign(Object.assign(Object.assign(   {}, galaxyuibuilder_exports), utils_exports));
 
@@ -22,7 +20,7 @@ const EXTENSION_ID = 'GiN:plugin';
  */
  const galaxy_plugin = {
     id: EXTENSION_ID,
-    //provides: IGalaxyTool,
+    provides: [IGToolRegistry],
     requires: [IJupyterWidgetRegistry],
     optional: [IMainMenu, ILayoutRestorer, ILabShell, INotebookTracker],
     activate: activateWidgetExtension,
@@ -37,13 +35,13 @@ function activateWidgetExtension(app, registry, mainmenu, restorer, shell, noteb
 
     init_context(app, notebook_tracker)
 
-    // const data_registry = new DataRegistry();
-    const tool_registry = new ToolRegistry();
+    // const tool_registry = new ToolRegistry();
     const data_registry = new DataRegistry();
     const galaxy_tool_registry = new GalaxyToolRegistry()
 
 
-    
+    // ContextManager.galaxy_tool_registry = galaxy_tool_registry
+
 
     add_tool_browser(app, restorer)
 
@@ -52,7 +50,7 @@ function activateWidgetExtension(app, registry, mainmenu, restorer, shell, noteb
         version: '0.1.0',
         exports: module_exports,
     });
-    return [tool_registry, data_registry, galaxy_tool_registry]
+    return [  galaxy_tool_registry, data_registry ]
 }
 
 function init_context(app, notebook_tracker) {
@@ -60,10 +58,7 @@ function init_context(app, notebook_tracker) {
     ContextManager.notebook_tracker = notebook_tracker;
     ContextManager.context();
 
-    // ContextManager.gb = new GalaxyToolBrowser();
-    notebook_tracker
-
-    initNotebookTracker(notebook_tracker)
+    // initNotebookTracker(notebook_tracker)
 }
 
 function add_tool_browser(app, restorer){
@@ -74,11 +69,11 @@ function add_tool_browser(app, restorer){
 
     if(restorer)
         restorer.add(galaxy_tool_browser, 'GiN');
-    app.shell.add(galaxy_tool_browser, 'left', {rank: 103});
-
-    ContextManager.gb = galaxy_tool_browser
+    app.shell.add(galaxy_tool_browser, 'left', {rank: 104});
 
 }
+
+
 
 function ReturnOutputArea(i, notebookTracker){
     var RestorForm = `<div class="lm-Widget p-Widget lm-Panel p-Panel jp-OutputArea-child">
@@ -96,8 +91,6 @@ function ReturnOutputArea(i, notebookTracker){
 
         e.addEventListener('click', async () => {
             // if ( notebookHasBeenRan === false) {
-
-                console.log("OK")
 
                 const notebookContext = notebookTracker.currentWidget.context;
                 const notebookSession = notebookTracker.currentWidget.context.sessionContext;

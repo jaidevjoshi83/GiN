@@ -17,7 +17,7 @@ import {  is_url, KernelSideDataObjects, show, removeAllChildNodes, return_kerne
 import * as tus from "tus-js-client";
 import axios from "axios";
 import { Data } from '@g2nb/nbtools/lib/dataregistry';
-import { ContextManager } from '@g2nb/nbtools';
+import { ContextManager } from './context';
 import { NotebookActions } from '@jupyterlab/notebook';
 import { Private,  getRanNotebookIds, getIndex } from './notebookActions';
 import { GalaxyToolbox } from './galaxy_toolbox';
@@ -5227,10 +5227,12 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             credentials['password'] = inputs[2].value
         }
 
+       
         var jobs = await KernelSideDataObjects(`import json\nimport base64\nfrom GiN.authwidget import GalaxyAuthWidget\na  = GalaxyAuthWidget()\na.login(json.loads(base64.b64decode("${btoa(JSON.stringify(credentials))}")))`)
-        
-
-        console.log(ContextManager.gb.toolbox.galaxy_fill_toolbox(jobs['tools']))
+       
+        // ContextManager.gb.toolbox.fill_toolbox(jobs['tools'])
+        // ContextManager.galaxy_tool_registry.kernel_galaxy_tool_cache[return_kernel_id()] = jobs['tools']
+        // console.log(ContextManager.galaxy_tool_registry.kernel_galaxy_tool_cache)
 
         KernelSideDataObjects(`del a`)
 

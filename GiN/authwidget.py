@@ -1,4 +1,3 @@
-
 from bioblend.galaxy.objects import GalaxyInstance
 from .display import display
 from nbtools import UIBuilder, ToolManager, NBTool, EventManager
@@ -8,8 +7,11 @@ from .taskwidget import TaskTool
 from .util import DEFAULT_COLOR, DEFAULT_LOGO, GALAXY_SERVERS
 from .Galaxyuibuilder import GalaxyUIBuilder
 from nbtools.event_manager import EventManager
+from .galaxy_tool_manager import GalaxyToolManager
 import IPython
 import IPython.display
+
+
 
 class GalaxyAuthWidget(GalaxyUIBuilder):
     """A widget for authenticating with a Galaxy server"""
@@ -43,8 +45,6 @@ class GalaxyAuthWidget(GalaxyUIBuilder):
 
     def login(self, credentials):
 
-        new_tools = []
-
         """Login to the Galaxy server"""
 
         tool_list =  {'tools':[]}
@@ -73,9 +73,10 @@ class GalaxyAuthWidget(GalaxyUIBuilder):
 
         t = {"id": 'GiN_data_upload_tool',  "description": "Upload data files to galaxy server", "name": "Upload Data", 'origin': self.session._notebook_url, 'inputs': [{'type': 'data_upload'}]}
         t = TaskTool('+', t )
-        ToolManager.instance().register(t)
+        GalaxyToolManager.instance().register(t)
 
         tool_list[self.session._notebook_url] = []
+        new_tools = []
 
         # def register_modules_callback():
         for section in self.session.tools.gi.tools.get_tool_panel():
@@ -84,25 +85,29 @@ class GalaxyAuthWidget(GalaxyUIBuilder):
                     # try:
                     tool={'id':None, 'description':None, 'name':None, 'tags':None, 'version':None}
                     if t['model_class'] == 'Tool':
-                    
                         tool['id'] = t['id']
                         tool['description'] = t['description']
                         tool['name'] = t['name']+" ("+t['version']+")"
                         tool['origin'] = self.session._notebook_url
                         tool['email'] = self.session._notebook_email
-                        # tool = TaskTool(tool['origin'], tool)
-                        # ToolManager.instance().register(tool)
-                        # tool_list['tools'].append(tool)
                         print(tool)
                         new_tools.append(tool)
-                        # except:
-                        #     pass
+                        tool = TaskTool(tool['origin'], tool)
+                        tool_list['tools'].append(tool)
+                        GalaxyToolManager.instance().register(tool)
+                    # except:
+                    #     pass
         
         # registration_thread = Thread(target=register_modules_callback)
         # registration_thread.start()
+        # registration_thread.join()             
+        # GalaxyToolManager.instance().tool_list = new_tools
+
+        print("*****", new_tools)
                 
         return IPython.display.JSON({'state':'success', 'tools':new_tools}) 
-
+    
+        
     def RegisterMod(self, tool):
 
         # def register_modules_callback():
@@ -190,6 +195,9 @@ class AuthenticationTool(NBTool):
 
 # preventing  "jupyter nbextension install", imports need to be fixed 
 # try:
-#
+
+print("OOOOOKK") 
+
+GalaxyToolManager.instance().register(AuthenticationTool())
 # except:
 #     pass

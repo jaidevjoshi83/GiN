@@ -11,6 +11,7 @@ const getOrigins = () => {
 const getIndex = () => {
     return Private.Index;
 };
+
 var Private;
 (function (Private) {
     Private.ranNotebookIds = [];
@@ -19,4 +20,6 @@ var Private;
 })(Private || (Private = {}));
 
 
-export { Private ,  getRanNotebookIds, getOrigins, getIndex };
+const New_tool_list  = {}
+
+export { Private ,  getRanNotebookIds, getOrigins, getIndex, New_tool_list };

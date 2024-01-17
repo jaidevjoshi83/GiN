@@ -3,6 +3,7 @@ import json
 import logging
 import jupyter_core.paths
 from IPython import get_ipython
+from .galaxy_tool_manager import GalaxyToolManager
 
 
 def load_settings():
@@ -38,9 +39,20 @@ def load_settings():
 
 
 def import_defaults():
+    GalaxyToolManager.instance() 
     settings = load_settings()
     for module in settings["load"]:
         if module == "GiN":  # Special case so that GiN import detection works
             get_ipython().run_cell(f"import GiN as _GiN")
         else:
             get_ipython().run_cell(f"import {module}")
+
+
+# def import_defaults():
+#     ToolManager.instance()  # Lazily initialize, if not already done
+#     settings = load_settings()
+#     for module in settings['load']:
+#         if module == 'nbtools':  # Special case so that nbtools import detection works
+#             get_ipython().run_cell(f'import nbtools as _nbtools')
+#         else:
+#             get_ipython().run_cell(f'import {module}')

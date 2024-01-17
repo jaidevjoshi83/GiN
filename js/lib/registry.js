@@ -1,5 +1,5 @@
 import { NotebookPanel } from "@jupyterlab/notebook";
-import { send_notification } from "@g2nb/nbtools";
+import { send_notification } from "./utils";
 import { ContextManager } from "./context";
 import { Token } from "@lumino/coreutils";
 export const IGToolRegistry = new Token("GiN");
@@ -13,14 +13,10 @@ export class GalaxyToolRegistry {
         this.kernel_tool_cache = {}; // Keep a cache of kernels to registered tools
         this.kernel_import_cache = {}; // Keep a cache of whether nbtools has been imported
         // Lazily assign the tool registry to the context
-        console.log("*********")
         if (!ContextManager.galaxy_tool_registry)
-            console.log("*********")
             ContextManager.galaxy_tool_registry = this;
         ContextManager.context().notebook_focus((current_widget) => {
             // Current notebook hasn't changed, no need to do anything, return
-
-            console.log("KKKKK")
             if (this.current === current_widget)
                 return;
             // Otherwise, update the current notebook reference
@@ -43,9 +39,7 @@ export class GalaxyToolRegistry {
      * Initialize the comm between the notebook widget kernel and the ToolManager
      */
     init_comm() {
-        console.log("LODA")
         ContextManager.context().kernel_ready(this.current, () => {
-
             const current = this.current;
             // Create a new comm that connects to the nbtools_comm target
             const connect_comm = () => {

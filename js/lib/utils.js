@@ -1,4 +1,4 @@
-import { ContextManager } from '@g2nb/nbtools/lib/context';
+import { ContextManager } from './context';
 
 /**
  * Send a browser notification
@@ -170,7 +170,7 @@ export function pulse_red(element, count = 0, count_up = true) {
 
 export async function executePython(pythonCode, isExpectingOutput){
 
-    const notebook = ContextManager.tool_registry.current
+    const notebook = ContextManager.galaxy_tool_registry.current
 
     return await new Promise(async (resolve, reject) => {  
 
@@ -283,7 +283,7 @@ export function return_kernel_id () {
 
     if (currentWidget) {
         // Access the kernel of the active widget
-        const kernel = currentWidget.context.sessionContext.session?.kernel;
+        const kernel = currentWidget.context.sessionContext.session.kernel;
   
         if (kernel) {
             // Get the kernel ID

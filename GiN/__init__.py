@@ -10,12 +10,12 @@ try:
     from .authwidget import GALAXY_SERVERS, GalaxyAuthWidget
 except:
     pass
-
+from .galaxy_tool_manager import tool, GalaxyToolManager
 from .taskwidget import GalaxyTaskWidget    
 from .sessions import session, get_session
 from .uioutput import GalaxyUIOutput
 from .Galaxyuibuilder import GalaxyUIBuilder
-from .tool_manager import tool, GalaxyToolManager
+
 # from .galaxyUpload import GalaxyUpload
 from ._version import __version__
 
