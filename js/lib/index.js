@@ -8,6 +8,6 @@ export * from './Galaxyuibuilder';
 export * from './utils';
 export * from './notebookActions';
 export * from './toolbox';
-export * from './galaxy_registry';
+export * from './registry';
 
 
