@@ -6,9 +6,8 @@ import { GalaxyToolRegistry, IGToolRegistry } from './registry';
 import { ContextManager } from './context';
 import * as galaxyuibuilder_exports from './Galaxyuibuilder';
 import * as utils_exports from './utils'
-import { removeAllChildNodes } from './utils';
 import { NotebookActions } from '@jupyterlab/notebook';
-import { GalaxyToolBrowser } from './galaxy_toolbox';
+import { GalaxyToolBrowser } from './toolbox';
 import { Private,  getRanNotebookIds} from './notebookActions';
 import {DataRegistry} from "@g2nb/nbtools/lib/dataregistry";
 
@@ -58,7 +57,7 @@ function init_context(app, notebook_tracker) {
     ContextManager.notebook_tracker = notebook_tracker;
     ContextManager.context();
 
-    // initNotebookTracker(notebook_tracker)
+    initNotebookTracker(notebook_tracker)
 }
 
 function add_tool_browser(app, restorer){
@@ -87,21 +86,26 @@ function ReturnOutputArea(i, notebookTracker){
     const notebookHasBeenRan = getRanNotebookIds().includes(notebook.id)
 
     _.each(utm.querySelectorAll('.nbtools-run'), (e)=>{
-        e.innerText = "Update form for current user"
+        // e.innerText = "Update form for current user"
+        e.style.display = 'none'
+    })
+
+    _.each(utm.querySelectorAll('#button-tool-refresh'), (e)=>{
+        // e.innerText = "Update form for current user"
 
         e.addEventListener('click', async () => {
-            // if ( notebookHasBeenRan === false) {
 
                 const notebookContext = notebookTracker.currentWidget.context;
                 const notebookSession = notebookTracker.currentWidget.context.sessionContext;
 
-                notebookTracker.currentWidget.sessionContext.ready
-                    .then(() => notebookTracker.currentWidget.revealed)
-                    .then(() => {
-                        NotebookActions.run(notebook, notebookSession);
-                });
-                e.parentNode.parentNode.parentNode.parentNode.parentNode.parentElement.removeChild(e.parentNode.parentNode.parentNode.parentNode.parentNode)
-            // }
+            notebookTracker.currentWidget.sessionContext.ready
+                .then(() => notebookTracker.currentWidget.revealed)
+                .then(() => {
+                    NotebookActions.run(notebook, notebookSession);
+                    const form  =  notebookTracker.currentWidget.content.activeCell.node.querySelector('.nbtools.galaxy-uibuilder.lm-Widget.p-Widget')
+                    form.parentElement.removeChild(form)
+                    form.style.display = 'none'
+            });    
         })
     })
 
@@ -124,33 +128,34 @@ const initNotebookTracker = (notebookTracker) => {
             const notebook = notebookTracker.currentWidget.content;
             const notebookSession = notebookTracker.currentWidget.context.sessionContext;
         
-            if ( notebookHasBeenRan.includes(notebook.id) === false) {
+            // if ( notebookHasBeenRan.includes(notebook.id) === false) {
             //FixME Form Restore insteed cell run
 
                 Private.ranNotebookIds.push(notebook.id);
             
                 notebookTracker.currentWidget.sessionContext.ready.then(() =>
-                notebookTracker.currentWidget.revealed).then(async () => {
+                notebookTracker.currentWidget.revealed).then( () => {
 
                 var cells = notebookTracker.currentWidget.content.widgets;
 
                 for (var i = 0; i < cells.length; i++){
                     if (cells[i].model.metadata.get('galaxy_cell') ){
-                        if (cells[i].model.metadata.get('html') == undefined || cells[i].model.metadata.get('html') == '') {
-                            removeAllChildNodes(cells[i].outputArea.node)
-                            notebook.activeCellIndex = i
-                            await NotebookActions.run(notebook, notebookSession);            
-                       
+                        if (cells[i].model.metadata.get('html') != undefined || '' ||  null) {
+                           var  cell = cells[i].outputArea.node.querySelector('.lm-Widget.p-Widget.lm-Panel.p-Panel.jp-OutputArea-child.jp-OutputArea-executeResult')
+                           if(cell){
+                                cell.style.display = 'none'
+                           }
+                            if(cell){
+                                cells[i].outputArea.node.append(ReturnOutputArea(cells[i].model.metadata.get('html'), notebookTracker))
+                            }
                         } else{
-                            // cells[i].inputArea.hide()
-                            removeAllChildNodes(cells[i].outputArea.node)
-                            cells[i].outputArea.node.append(ReturnOutputArea(cells[i].model.metadata.get('html'), notebookTracker))
+                                notebook.activeCellIndex = i
+                                // NotebookActions.run(notebook, notebookSession); 
                         }
                     }
                  }
             });
-
-            }
+            // }
         });
     });
 };

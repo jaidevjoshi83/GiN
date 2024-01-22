@@ -1,4 +1,4 @@
-import { hide, show, toggle } from "@g2nb/nbtools";
+import { hide, show, toggle } from "@g2nb/nbtools/lib/utils";
 import { NotebookPanel } from "@jupyterlab/notebook";
 import { CodeCell } from "@jupyterlab/cells";
 export class ContextManager {

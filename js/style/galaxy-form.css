@@ -280,7 +280,7 @@
   margin-bottom: 5px;
 }
 
-.galaxy-uibuilder .tool-migration-select {
+/* .galaxy-uibuilder .tool-migration-select {
   width: 80%;
   margin: 1px;
   float: right;
@@ -291,14 +291,14 @@
   margin-right: 20px;
   margin-top: 2px;
   margin-left: 10px;
-}
+} */
 
-.galaxy-uibuilder .form-restore-div .fa-refresh {  
+/* .galaxy-uibuilder .form-restore-div .fa-refresh {  
   float: left;
   color: rgb(233, 233, 246);
   font-size: 25px;
   margin-top: 5px;
-}
+} */
 
 .galaxy-uibuilder .job-status-footer div {
   overflow: auto;
@@ -461,12 +461,71 @@
   float: right;
   margin: 5px;
   font-size: 20px;
-  
 }
 
 .galaxy-uibuilder #datalist-update .fa-pulse {
   float: right;
   margin: 5px;
   font-size: 20px;
+}
+
+.galaxy-uibuilder .inner-title-div{
+  margin-top: 10px;
+  padding: 10px
+}
+
+.galaxy-uibuilder .ui-from-title{
+  margin-top: 10px;
+  margin-left: 5px;
+}
+
+/* Migration tool */
+.migration-tool {
+  display: flex;
+  flex-direction: column;
+}
+
+#button-tool-refresh {
+  height: 30px;
+  float: right;
+  margin-right: 10px;
+  min-width: 30%;
+
+}
+
+.migration-tool .form-restore-div {
+  display: flex;
+  flex-wrap: wrap;
+}
+.migration-tool .tool-migration-select {
+  height: 30px;
+  width: 100%;
+  margin-top: 2px   
+}
+
+.migration-tool .div-tool-migration {
+  flex: 1;
+  margin-right: 10px; /* Adjust margin as needed */
   
+}
+
+.button-div {
+  flex-basis: 20%;
+  margin-top: 2px; /* Adjust margin as needed */
+  height: 30px;
+  min-width: 30%;
+  width: 20%;
+}
+
+@media (max-width: 600px) {
+  .div-tool-migration,
+  .button-div {
+      flex: 100%;
+  }
+}
+
+#migra-refresh-btn{
+  color: rgb(16, 16, 16);
+  font-size: 16px ; 
+  margin-bottom: 5px;
 }
