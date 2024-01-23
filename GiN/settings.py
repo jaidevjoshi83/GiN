@@ -44,3 +44,4 @@ def import_defaults():
             get_ipython().run_cell(f"import GiN as _GiN")
         else:
             get_ipython().run_cell(f"import {module}")
+

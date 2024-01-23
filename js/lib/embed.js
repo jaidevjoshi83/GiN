@@ -6,6 +6,5 @@
 
 // Export widget models and views, and the npm package version number.
 module.exports = require('./Galaxyuibuilder')
-module.exports = require('./basewidget')
 module.exports = require('./utils');
 module.exports['version'] = require('../package.json').version;

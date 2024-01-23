@@ -13,8 +13,6 @@ from .Galaxyuibuilder import GalaxyUIBuilder
 from ipywidgets import Output
 from nbtools.uioutput import UIOutput
 from nbtools.event_manager import EventManager
-import uuid
-import threading
 import IPython
 import IPython.display
 
@@ -52,6 +50,8 @@ class GalaxyAuthWidget(GalaxyUIBuilder):
 
         """Login to the Galaxy server"""
 
+        tools = []
+
         tool_list =  {'tools':[]}
     
         if credentials['email']:
@@ -76,51 +76,41 @@ class GalaxyAuthWidget(GalaxyUIBuilder):
         self.register_session()
 
         tool_list['url']  = self.session._notebook_url
-        tool_list['email'] = self.session._notebook_email    
+        tool_list['email'] = self.session._notebook_email   
+        
+    
+        def register_modules_callback():
+            for section in self.session.tools.gi.tools.get_tool_panel():
+                if section["model_class"] == "ToolSection":
+                    for t in section["elems"]:
+                        try:
+                            tool={'id':None, 'description':None, 'name':None}
+                            if t['model_class'] == 'Tool':
+                            
+                                tool['id'] = t['id']
+                                tool['description'] = t['description']
+                                tool['name'] = t['name']+" ("+t['version']+")"
+                                tool['origin'] = self.session._notebook_url
+                                tool['email'] = self.session._notebook_email
+                                tool = TaskTool(tool['origin'], tool)
+                                ToolManager.instance().register(tool)
+                                # tool_list['tools'].append(tool)
+                        except:
+                            pass
 
-
-        # def register_modules_callback():
-        for section in self.session.tools.gi.tools.get_tool_panel():
-            if section["model_class"] == "ToolSection":
-                for t in section["elems"]:
-                    try:
-                        tool={'id':None, 'description':None, 'name':None}
-                        if t['model_class'] == 'Tool':
-                        
-                            tool['id'] = t['id']
-                            tool['description'] = t['description']
-                            tool['name'] = t['name']+" ("+t['version']+")"
-                            tool['origin'] = self.session._notebook_url
-                            tool['email'] = self.session._notebook_email
-                            tool = TaskTool(tool['origin'], tool)
-                            ToolManager.instance().register(tool)
-                            # tool_list['tools'].append(tool)
-                    except:
-                        pass
+        # Run_Threads(all_tools, 2)
         
         t = {"id": 'GiN_data_upload_tool',  "description": "Upload data files to galaxy server", "name": "Upload Data", 'origin': self.session._notebook_url, 'inputs': [{'type': 'data_upload'}]}
         t = TaskTool('+', t )
         ToolManager.instance().register(t)
+         
+        registration_thread = Thread(target=register_modules_callback)
+        registration_thread.start()
+        # registration_thread.join()
+
+        return IPython.display.JSON({'state':'success', 'tool_list':''}) 
 
 
-        # registration_thread = Thread(target=register_modules_callback)
-        # registration_thread.start()
-
-        return IPython.display.JSON({'state':'success', 'tool_list': tool_list}) 
-
-   
-    def RegisterMod(self, tool):
-
-        # def register_modules_callback():
-        #     for i in tools:
-        #         # GalaxyAuthWidget().RegisterMod(i)
-        tool = TaskTool(tool['origin'], tool)
-        ToolManager.instance().register(tool)
-
-        # registration_thread = Thread(target=register_modules_callback)
-        # registration_thread.start()
-        # return "OK"
-        
     def has_credentials(self):
         """Test whether the session object is instantiated and whether an email and password have been provided"""
         if type(self.session) is not GalaxyInstance:
@@ -184,19 +174,10 @@ def server_name(search_url):
     return search_url
 
 
-def start_login(session, callback):
 
-    login_id = str(uuid.uuid4())
-    t = threading.Thread(target=callback)
-    t.start()
 
-    session.galaxy_login = {}
-    session.galaxy_login[login_id] = t
 
-    return {'id':login_id, 'status':'start'}
-
-    # return IPython.display.JSON({'id':login_id, 'status':'start'})
-
+# Print the result
 
 class AuthenticationTool(NBTool):
     """Tool wrapper for the authentication widget"""
