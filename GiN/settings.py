@@ -47,6 +47,7 @@ def import_defaults():
         else:
             get_ipython().run_cell(f"import {module}")
 
+<<<<<<< HEAD
 
 # def import_defaults():
 #     ToolManager.instance()  # Lazily initialize, if not already done
@@ -56,3 +57,5 @@ def import_defaults():
 #             get_ipython().run_cell(f'import nbtools as _nbtools')
 #         else:
 #             get_ipython().run_cell(f'import {module}')
+=======
+>>>>>>> dev

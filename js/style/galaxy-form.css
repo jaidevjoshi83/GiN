@@ -490,6 +490,7 @@
   float: right;
   margin-right: 10px;
   min-width: 30%;
+  border: 0px;
 
 }
 
@@ -500,7 +501,8 @@
 .migration-tool .tool-migration-select {
   height: 30px;
   width: 100%;
-  margin-top: 2px   
+  margin-top: 2px;
+  border: 0px;   
 }
 
 .migration-tool .div-tool-migration {

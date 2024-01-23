@@ -47,6 +47,8 @@ class GalaxyAuthWidget(GalaxyUIBuilder):
 
         """Login to the Galaxy server"""
 
+        tools = []
+
         tool_list =  {'tools':[]}
     
         if credentials['email']:
@@ -103,23 +105,12 @@ class GalaxyAuthWidget(GalaxyUIBuilder):
         # registration_thread.join()             
         # GalaxyToolManager.instance().tool_list = new_tools
 
-        print("*****", new_tools)
+
                 
         return IPython.display.JSON({'state':'success', 'tools':new_tools}) 
     
-        
-    def RegisterMod(self, tool):
+ 
 
-        # def register_modules_callback():
-        #     for i in tools:
-        #         # GalaxyAuthWidget().RegisterMod(i)
-        tool = TaskTool(tool['origin'], tool)
-        ToolManager.instance().register(tool)
-
-        # registration_thread = Thread(target=register_modules_callback)
-        # registration_thread.start()
-        # return "OK"
-        
     def has_credentials(self):
         """Test whether the session object is instantiated and whether an email and password have been provided"""
         if type(self.session) is not GalaxyInstance:
@@ -196,7 +187,7 @@ class AuthenticationTool(NBTool):
 # preventing  "jupyter nbextension install", imports need to be fixed 
 # try:
 
-print("OOOOOKK") 
+
 
 GalaxyToolManager.instance().register(AuthenticationTool())
 # except:

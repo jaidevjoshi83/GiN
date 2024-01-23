@@ -9,5 +9,3 @@ export * from './utils';
 export * from './notebookActions';
 export * from './toolbox';
 export * from './registry';
-
-

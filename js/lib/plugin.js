@@ -75,12 +75,21 @@ function add_tool_browser(app, restorer){
 
 
 function ReturnOutputArea(i, notebookTracker){
-    var RestorForm = `<div class="lm-Widget p-Widget lm-Panel p-Panel jp-OutputArea-child">
-                        <div class="lm-Widget p-Widget jp-OutputPrompt jp-OutputArea-prompt"></div>
-                        <div class="lm-Widget p-Widget lm-Panel p-Panel jupyter-widgets jp-OutputArea-output">${i}</div>
-                    </div>`
+    // var RestorForm = `<div class="lm-Widget p-Widget jp-OutputArea jp-Cell-outputArea">
+    //                     <div class="lm-Widget p-Widget lm-Panel p-Panel jp-OutputArea-child">
+    //                         <div class="lm-Widget p-Widget jp-OutputPrompt jp-OutputArea-prompt"></div>
+    //                         <div class="lm-Widget p-Widget lm-Panel p-Panel jupyter-widgets jp-OutputArea-output"><div id="restored_tool_form">${i}<div></div>
+    //                     </div>
+    //                 </div>`
 
-                    const utm = new DOMParser().parseFromString(RestorForm, 'text/html').querySelector('.lm-Widget.p-Widget.lm-Panel.p-Panel.jp-OutputArea-child')
+
+
+    var RestorForm = `<div class="lm-Widget p-Widget lm-Panel p-Panel jp-OutputArea-child jp-OutputArea-executeResult" style="overflow: visible;">
+                        <div class="lm-Widget p-Widget jp-OutputPrompt jp-OutputArea-prompt"></div>
+                        <div class="lm-Widget p-Widget lm-Panel p-Panel jp-OutputArea-output" style="overflow: visible;">${i}</div>
+                    </div>`       
+
+    const utm = new DOMParser().parseFromString(RestorForm, 'text/html').querySelector('.lm-Widget.p-Widget.lm-Panel.p-Panel.jp-OutputArea-child')
     
     const notebook = notebookTracker.currentWidget.content
     const notebookHasBeenRan = getRanNotebookIds().includes(notebook.id)
@@ -153,7 +162,7 @@ const initNotebookTracker = (notebookTracker) => {
                                 // NotebookActions.run(notebook, notebookSession); 
                         }
                     }
-                 }
+                }
             });
             // }
         });

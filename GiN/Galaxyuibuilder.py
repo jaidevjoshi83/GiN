@@ -36,7 +36,7 @@ class GalaxyUIBuilder(BaseWidget, NBTool):
     origin = Unicode("", sync=True)
     description = Unicode("", sync=True)
     buttons = Dict(sync=True)
-    UU_ID = Unicode('', sync=True)
+    UU_ID = Bool(True, sync=True)
 
     UI = Dict(sync=True)
     galaxy_tool_id = Unicode(sync=True)
@@ -65,7 +65,7 @@ class GalaxyUIBuilder(BaseWidget, NBTool):
         self.history_data = history_data
         self.origin = origin
         self.description = description
-        self.UU_ID = str(uuid.uuid4())
+        self.UU_ID = True
         
         BaseWidget.__init__(self, **kwargs)
        
