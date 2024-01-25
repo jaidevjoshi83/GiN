@@ -36,9 +36,9 @@ function activateWidgetExtension(app, registry, mainmenu, restorer, shell, noteb
 
     init_context(app, notebook_tracker)
 
-    // const data_registry = new DataRegistry();
-    const tool_registry = new ToolRegistry();
     const data_registry = new DataRegistry();
+    const tool_registry = new ToolRegistry();
+    // const data_registry = new DataRegistry();
 
     registry.registerWidget({
         name: 'GiN',
@@ -54,7 +54,7 @@ function init_context(app, notebook_tracker) {
     ContextManager.context();
     
     // ContextManager.PrivateData = Private
-    initNotebookTracker(notebook_tracker)  
+    // initNotebookTracker(notebook_tracker)  
 }
 
 
