@@ -160,16 +160,16 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         
         if (this.model.get('name') != 'login' && 'GiN_data_upload_tool') {
 
-            this.add_history_list()
             this.generate_tool_form()
             this.add_tool_migration_button(this.model.get('origin'))
             this.add_galaxy_cell_metadata()
+            this.add_history_list()
+            
         }
 
         if (this.model.get('galaxy_tool_id') == 'GiN_data_upload_tool') {
             this.data_upload_tool()
         }
-
     }
 
     
@@ -560,6 +560,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
     }
 
     generate_tool_form(){
+
+        // 
         // this.section_new = {}
 
         if (ContextManager.tool_registry.current.content.activeCell.model.metadata.get('clicked')){
@@ -2431,7 +2433,10 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             var origin = this.model.get('origin')
         }
 
-        const options = await KernelSideDataObjects(`import json\nimport base64\nfrom GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.get_histories(server=${JSON.stringify(origin)})`)
+        const options = this.model.get('history_ids')
+
+        // const options = await KernelSideDataObjects(`import json\nimport base64\nfrom GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.get_histories(server=${JSON.stringify(origin)})`)
+       
         const select = document.createElement('select')
 
         if (this.el.querySelector(`#dataset-history-list`)){
@@ -3637,7 +3642,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             var origin = this.model.get('origin')
         }
   
-        const options = await KernelSideDataObjects(`import json\nimport base64\nfrom GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.get_histories(server=${JSON.stringify(origin)})`)
+        // const options = await KernelSideDataObjects(`import json\nimport base64\nfrom GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.get_histories(server=${JSON.stringify(origin)})`)
       
  
         var NewNamePrefix = NamePrefix+input_def['name']+"|"
@@ -3656,12 +3661,9 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
  
         SectionDiv.className = `ui-form-element section-row sections`
 
-        console.log(ContextManager.tool_registry.current.content.activeCell.model.metadata.get('section'))
-
         if (ContextManager.tool_registry.current.content.activeCell.model.metadata.get('section') != undefined){
             this.section_new  =  ContextManager.tool_registry.current.content.activeCell.model.metadata.get('section')
         }
-        console.log(this.section_new)
 
         if(this.section_new[input_def['name']] != undefined){
 
@@ -3701,11 +3703,11 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             }
             e.preventDefault(); 
                       
-            if(!self.el.querySelector('#dataset-history-list')){
-                var history_id = self.el.querySelector('#dataset-history-list').value
-            } else{
-                var history_id = options[0]['id']
-            }
+            // if(!self.el.querySelector('#dataset-history-list')){
+            var history_id = self.el.querySelector('#dataset-history-list').value
+            // } else{
+            //     var history_id = options[0]['id']
+            // }
 
             var form = self.el.querySelector('.Galaxy-form')
             var inputs = await self.get_form_data(form)
@@ -3743,8 +3745,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         var datasets = await KernelSideDataObjects(`import IPython\nfrom GiN.taskwidget  import GalaxyTaskWidget\nclass Temp(object):\n    def Return(self):\n        return IPython.display.JSON(GalaxyTaskWidget.history_data_list(server=${JSON.stringify(server)}, history_id=${JSON.stringify(history_id)} ))\na = Temp()\na.Return()`) 
 
         // KernelSideDataObjects(`try:\n    del a\nexcept:\n    print("a is not define")`) 
-
-    
 
         for (var i = 0; i < datasets.length; i++){
             if (datasets[i]['history_content_type'] == 'dataset') {
@@ -5085,13 +5085,15 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         if (!ContextManager.notebook_tracker.currentWidget) return; 
 
         const cells = ContextManager.notebook_tracker.currentWidget.content.widgets
+        const notebook = ContextManager.notebook_tracker.currentWidget.content;
 
         for (var i = 0; i < cells.length; i++){
-           
             if (cells[i].model.metadata.get('galaxy_cell') && cells[i].model.metadata.get('tool_type') == 'galaxy_tool'){  
-                console.log(cells[i].model.metadata)
+                // console.log(cells[i].model.metadata)
             //  cells[i].node.querySelector('#restored_tool_form').style.display = 'none'
-             this.run_cell(cells[i])
+                 this.run_cell(cells[i])
+                //   notebook.activeCellIndex = i
+                //   NotebookActions.run(notebook, notebookSession);
             }
         }
     }
@@ -5245,8 +5247,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
       
         // ContextManager.PrivateData.origins.push(credentials['server'])
        
-      
-
         KernelSideDataObjects(`del a`)
 
         if (jobs.state === 'error' ) {

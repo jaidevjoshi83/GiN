@@ -12,7 +12,6 @@ import { NotebookActions } from '@jupyterlab/notebook';
 import { Private,  getRanNotebookIds} from './notebookActions';
 
 
-
 const module_exports = Object.assign(Object.assign(Object.assign(  {}, galaxyuibuilder_exports), utils_exports));
 
 const EXTENSION_ID = 'GiN:plugin';
@@ -135,7 +134,6 @@ const initNotebookTracker = (notebookTracker) => {
 
                 for (var i = 0; i < cells.length; i++){
                     if (cells[i].model.metadata.get('galaxy_cell') ){
-    
                         // ContextManager.context().run_cell(cells[i])
                         // notebook.activeCellIndex = i
                         // NotebookActions.run(notebook, notebookSession); 

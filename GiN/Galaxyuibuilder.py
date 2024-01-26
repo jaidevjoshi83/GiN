@@ -69,7 +69,6 @@ class GalaxyUIBuilder(BaseWidget, NBTool):
         
         BaseWidget.__init__(self, **kwargs)
        
-
     def _apply_defaults(self, function_or_method=None):
         # Set the name based on the function name
 

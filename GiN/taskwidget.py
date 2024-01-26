@@ -77,7 +77,7 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
             description=self.tool['description'],
             subtitle=self.tool['origin'],
             history_ids=history_ids,
-            history_data=history_data,
+            # history_data=history_data,
             color = self.default_color,
             logo=self.default_logo,
             origin=self.tool['origin'],
