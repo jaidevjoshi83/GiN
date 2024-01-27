@@ -171,7 +171,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             this.data_upload_tool()
         }
 
-        console.log(this.model.get('inputs'))
     }
 
     add_new_history(){
