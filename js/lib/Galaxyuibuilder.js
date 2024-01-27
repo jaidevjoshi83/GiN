@@ -164,14 +164,46 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             this.add_tool_migration_button(this.model.get('origin'))
             this.add_galaxy_cell_metadata()
             this.add_history_list()
-            
+            this.add_new_history()
         }
 
         if (this.model.get('galaxy_tool_id') == 'GiN_data_upload_tool') {
             this.data_upload_tool()
         }
+
+        console.log(this.model.get('inputs'))
     }
 
+    add_new_history(){
+
+        if(this.el.querySelector('.tool-migration-select')){
+            var origin = this.el.querySelector('.tool-migration-select').value
+        }  else{
+            var origin = this.model.get('origin')
+        }
+
+        this.el.querySelector('#create-history-menu').addEventListener('click', ()=>{
+            this.el.querySelector('#create-history-container').style.display = 'block'
+        })
+
+        this.el.querySelector('#create-history-button').addEventListener('click', async ()=>{
+            // await KernelSideDataObjects(`from GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.Create_new_history(server=${JSON.stringify(origin)}, name=${JSON.stringify(this.el.querySelector('#create-history-input').value)})`)
+            var history = await KernelSideDataObjects(`import IPython\nfrom GiN.taskwidget  import GalaxyTaskWidget\nclass Temp(object):\n    def Return(self):\n        return IPython.display.JSON(GalaxyTaskWidget.Create_new_history(server=${JSON.stringify(origin)}, name=${JSON.stringify(this.el.querySelector('#create-history-input').value)}))\na = Temp()\na.Return()`)
+
+            KernelSideDataObjects(`try:\n    del a\nexcept:\n    print("a is not defined")`)
+            this.el.querySelector('#create-history-input').value = ''
+
+            var opt = this.el.querySelector('#dataset-history-list').options
+
+            this.add_history_list(true)
+
+            for (var i = 0; i < opt.length; i++){
+                if (history['id'] == opt[i].value ){
+                    opt[i].selected = true
+                }
+            }
+        })
+    }
     
     refresh_cells(){
 
@@ -1154,7 +1186,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
                 } else if (form.children[i].querySelector('.InputDataFile')){
 
-                    if (checking == 'on') {
+                    if (checking) {
                         if (form.querySelector('.InputDataFile').options.length  == 0 ){
                             form.querySelector('.InputDataFile').style.backgroundColor = 'pink'
                             return 'error'
@@ -1229,7 +1261,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                             }
                         }
 
-                        if (checking == 'on') {
+                        if (checking) {
                             if (out[form.children[i].querySelector('.data_collection').name].length < 1 ){
                                 form.children[i].querySelector('.data_collection').style.backgroundColor = 'pink'
                                 return 'error'
@@ -2423,7 +2455,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         // this.hide_run_buttons(false)
     }
 
-    async add_history_list(){
+    async add_history_list(updated_list=false){
 
         var self = this
 
@@ -2433,10 +2465,14 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             var origin = this.model.get('origin')
         }
 
-        const options = this.model.get('history_ids')
+        var options
 
-        // const options = await KernelSideDataObjects(`import json\nimport base64\nfrom GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.get_histories(server=${JSON.stringify(origin)})`)
-       
+        if(updated_list){
+            options = await KernelSideDataObjects(`import json\nimport base64\nfrom GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.get_histories(server=${JSON.stringify(origin)})`)
+        } else{
+            options = this.model.get('history_ids')
+        }
+
         const select = document.createElement('select')
 
         if (this.el.querySelector(`#dataset-history-list`)){
@@ -2453,7 +2489,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         }
 
         DataListdiv.append(await this.data_row_list(options[0]['id']))
-    
+
         for (var i = 0; i < options.length; i++) {
             const opt = `${i+1}: ${options[i]['name']}`;
             const el = document.createElement("option");
@@ -2476,6 +2512,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 var Inputs = await self.get_form_data(form)
 
                 var refine_inputs = await KernelSideDataObjects(`import IPython\nfrom GiN.taskwidget  import GalaxyTaskWidget\nclass Temp(object):\n    def Return(self):\n        return IPython.display.JSON(GalaxyTaskWidget.updated_form(${JSON.stringify(origin)}, json.loads(base64.b64decode("${btoa(JSON.stringify(Inputs))}")), ${JSON.stringify(self.model.get('inputs')['id'])}, ${JSON.stringify(select.value)}))\na = Temp()\na.Return()`)
+               
                 KernelSideDataObjects(`try:\n    del a\nexcept:\n    print("a is not defined")`)
  
                 var FormParent = self.el.querySelector('.Galaxy-form')    
@@ -3741,10 +3778,11 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         data_list.style.overflowY = 'scroll'
     
         // var datasets = await KernelSideDataObjects(`from GiN.taskwidget  import GalaxyTaskWidget\nGalaxyTaskWidget.history_data_list(server=${JSON.stringify(server)}, history_id=${JSON.stringify(history_id)} )`) 
+        var datasets = []
+        datasets = await KernelSideDataObjects(`import IPython\nfrom GiN.taskwidget  import GalaxyTaskWidget\nclass Temp(object):\n    def Return(self):\n        return IPython.display.JSON(GalaxyTaskWidget.history_data_list(server=${JSON.stringify(server)}, history_id=${JSON.stringify(history_id)} ))\na = Temp()\na.Return()`) 
 
-        var datasets = await KernelSideDataObjects(`import IPython\nfrom GiN.taskwidget  import GalaxyTaskWidget\nclass Temp(object):\n    def Return(self):\n        return IPython.display.JSON(GalaxyTaskWidget.history_data_list(server=${JSON.stringify(server)}, history_id=${JSON.stringify(history_id)} ))\na = Temp()\na.Return()`) 
+        KernelSideDataObjects(`try:\n    del a\nexcept:\n    print("a is not define")`) 
 
-        // KernelSideDataObjects(`try:\n    del a\nexcept:\n    print("a is not define")`) 
 
         for (var i = 0; i < datasets.length; i++){
             if (datasets[i]['history_content_type'] == 'dataset') {
@@ -3754,6 +3792,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 data_list.append( await this.dataset_collection_row_state (datasets[i], history_id))
             }
         }
+
 
         return data_list
     }
@@ -5113,7 +5152,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 var a = async ()=>{
                     await KernelSideDataObjects(`from GiN.util import delete_file\ndelete_file()`)
                 }
-
                 a()
 
                 this.dataupload_job()
@@ -5129,6 +5167,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 }
 
                 var history_id = self.element.querySelector('#dataset-history-list').value 
+                
+                console.log(inputs)
 
                 this.SubmitJob(inputs, history_id)
                 this.hide_run_buttons(true)
@@ -5316,11 +5356,16 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         this.JobStatusTemplate(toolforms, jobs)
 
     } else {
+
+           
             for (var i = 0; i < jobs['jobs'].length; i++ ) {
                 this.JobStatusTemplate(toolforms, jobs['jobs'][i])
             }
             
             var data_list_div = this.el.querySelector('.history-dataset-list');
+
+            console.log(data_list_div)
+
             var e = this.el.querySelector('.list-item')
             e.parentElement.removeChild(e)
             data_list_div.append(await this.data_row_list( history_id))
