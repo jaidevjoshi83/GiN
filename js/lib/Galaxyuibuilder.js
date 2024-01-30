@@ -285,7 +285,9 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             }
         })
 
-        utm.querySelector('.fa.fa-refresh').addEventListener('click', async () => {
+        utm.querySelector('#migra-refresh-btn').addEventListener('click', async () => {
+
+            console.log("OK")
 
             var servers   = await KernelSideDataObjects(`import GiN\na = GiN.sessions.SessionList()\na.get_servers()`)
             KernelSideDataObjects(`try:\n    del a\nexcept:    print("a is not defined")`)
@@ -447,11 +449,16 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
                                 <div class="auth-waiting" style="display: none;">
                                    <h4> Tools are loading <i class="fa fa-spinner fa-spin" ></i> </h> 
-                                    
+        
                                 </div>
 
                                 <div id="refresh-galaxy-cells" style="display: none; ">
-                                    <button id="refresh-button" type="button" class="tablinks""> Save parameter values </button>
+                                    <button id="refresh-button" type="button" class="tablinks""> Refresh tool cells </button>
+                                </div>
+
+                                <div id="refresh-galaxy-cells-checkbox-dev" style="display: none; ">
+                                    <span class="ui-form-title-text"> <b>Change tool server to current server</b> </span>
+                                    <input id="refresh-galaxy-cells-checkbox" style="margin-top:10px;" type="checkbox" class="InputData" name="server" autocomplete="off">
                                 </div>
 
                                 <div class="login-form-div" style="display:block">
@@ -527,8 +534,12 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         var  refresh = utm.querySelector('#refresh-button')
 
         refresh.addEventListener('click', async () => {
-        
-           this.runAllGalaxyCells()
+            var server = this.el.querySelector('.nbtools-subtitle').innerText
+            if( this.el.querySelector('#refresh-galaxy-cells-checkbox').checked) {
+                this.runAllGalaxyCells(server, true )
+            } else{
+                this.runAllGalaxyCells(false, true )
+            }
         })
 
         this.el.querySelector('.form-restore-div').style.display  =  'none';
@@ -593,7 +604,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
     }
 
     generate_tool_form(){
-
         // 
         // this.section_new = {}
 
@@ -5124,7 +5134,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         ContextManager.context().run_cell(cell)
     }
 
-    runAllGalaxyCells() {
+    runAllGalaxyCells(server,  execute) {
 
         if (!ContextManager.notebook_tracker) return;               
         if (!ContextManager.notebook_tracker.currentWidget) return; 
@@ -5135,8 +5145,25 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         for (var i = 0; i < cells.length; i++){
             if (cells[i].model.metadata.get('galaxy_cell') ){  
                 // console.log(cells[i].model.metadata)
-            //  cells[i].node.querySelector('#restored_tool_form').style.display = 'none'
-                 this.run_cell(cells[i])
+                //  cells[i].node.querySelector('#restored_tool_form').style.display = 'none'
+
+                if (server && !execute) {
+                    var regex = /origin='[^']*'/;
+                    // Replace the URL using the regular expression
+                    var replacedServer = cells[i].model.value.text;
+                    cells[i].model.value.text = replacedServer.replace(regex, "origin='" + server + "'");
+               
+                } else if (server && execute){
+
+                    var regex = /origin='[^']*'/;
+                    // Replace the URL using the regular expression
+                    var replacedServer = cells[i].model.value.text;
+                    cells[i].model.value.text = replacedServer.replace(regex, "origin='" + server + "'");
+                    this.run_cell(cells[i])
+
+                } else if (!server &&  execute){
+                    this.run_cell(cells[i])
+                }
                 //   notebook.activeCellIndex = i
                 //   NotebookActions.run(notebook, notebookSession);
             }
@@ -5218,8 +5245,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         var jobs = await KernelSideDataObjects(`import json\nimport base64\nfrom GiN.authwidget import GalaxyAuthWidget\na  = GalaxyAuthWidget()\na.login(json.loads(base64.b64decode("${btoa(JSON.stringify(credentials))}")))`)
            
         // console.log(ContextManager.jupyter_app.shell._leftHandler._items[1].widget.node.querySelector('.lm-Widget.p-Widget.nbtools-toolbox.nbtools-wrapper'))
-       
-      
         // ContextManager.PrivateData.origins.push(credentials['server'])
        
         KernelSideDataObjects(`del a`)
@@ -5233,25 +5258,21 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         } else if (jobs.state === 'success'){
 
-            // this.runAllGalaxyCells()
+            // this.runAllGalaxyCells(credentials['server'], false)
             // this.add_tools(jobs.tool_list)
-
             this.el.querySelector('.nbtools-subtitle').innerText = credentials['server']
             this.el.querySelector('.auth-successful').style.display = 'block';
             this.el.querySelector('.login-form-div').style.display = "none";
             this.el.querySelector('.auth-waiting').style.display = 'none';
             this.el.querySelector('.auth-error').style.display = 'none'
             this.el.querySelector('#refresh-galaxy-cells').style.display = 'block'
+            this.el.querySelector('#refresh-galaxy-cells-checkbox-dev').style.display  = 'block'
             this.hide_run_buttons(true)
 
-            
-
             // if (this.el.querySelector('#form-restore').checked ){
-
             //     if (!ContextManager.notebook_tracker) return;               
             //     if (!ContextManager.notebook_tracker.currentWidget) return;
             //     var notebookTracker = ContextManager.notebook_tracker
-
             //     const notebook = notebookTracker.currentWidget.content
             //     const notebookHasBeenRan = getRanNotebookIds().includes(notebook.id)
             //     // if(!notebookHasBeenRan) {
