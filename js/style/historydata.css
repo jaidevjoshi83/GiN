@@ -79,7 +79,7 @@
 .galaxy-uibuilder .dataset .details .summary .info{border:1px solid rgba(189,198,208,.5);padding:4px;}
 .galaxy-uibuilder .dataset .details .actions:not(:last-child),.dataset .details .annotation-display,.dataset .details .dataset-peek,.dataset .details .display-applications .display-application:last-child,.dataset .details .summary,.dataset .details .summary .dbkey:after{margin-bottom:8px;}
 .galaxy-uibuilder .dataset .details .summary .datatype .value:after,.list-item .details .prompt{font-weight:400;color:#404862;}
-.galaxy-uibuilder .list-item{border:1px solid #bdc6d0;}
+
 .galaxy-uibuilder .list-item .details .prompt{font-weight:400;color:#404862;}
 .galaxy-uibuilder .list-item .selector{float:left;display:none;width:2.5rem;font-size:80%;color:#2c3143;cursor:pointer;vertical-align:middle;-webkit-touch-callout:none;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;-o-user-select:none;user-select:none;}
 .galaxy-uibuilder .list-item .selector:hover{color:#2077b3;}
@@ -134,7 +134,7 @@
 .galaxy-uibuilder .dataset .details .actions .left .icon-btn:first-child,.dataset .details .actions .right .icon-btn:first-child,.list-item .primary-actions .icon-btn:first-child{margin-right:0;border-top-left-radius:3px;border-bottom-left-radius:3px;}
 .galaxy-uibuilder .dataset .details .actions .left .icon-btn:last-child,.dataset .details .actions .right .icon-btn:last-child,.list-item .primary-actions .icon-btn:last-child{margin-left:0;border-radius:0 3px 3px 0;}
 .galaxy-uibuilder .dataset .details .actions:not(:last-child),.dataset .details .annotation-display,.dataset .details .summary{margin-bottom:8px;}
-.galaxy-uibuilder .list-item{border:1px solid #bdc6d0;}
+
 .galaxy-uibuilder .list-item .selector{float:left;display:none;width:2.5rem;font-size:80%;color:#2c3143;cursor:pointer;vertical-align:middle;-webkit-touch-callout:none;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;-o-user-select:none;user-select:none;}
 .galaxy-uibuilder .list-item .selector:hover{color:#2077b3;}
 .galaxy-uibuilder .list-item .title-bar{cursor:pointer;outline:none;}
@@ -283,14 +283,17 @@ border-radius: 3px;
   margin-left:3px;
   border: 0.5px solid rgb(197,191,191);
   border-radius: 3px;
+  padding: 0px
 }
 
 .galaxy-uibuilder .dataset-list{
   height:100%;
-  overflow:auto;
+  /* overflow:auto; */
   width: 28%;
   background-color: rgb(246,246,246);
-  float: left; 
+  /* float: left;  */
+  min-width: 150px;
+  
 } 
 
 .galaxy-uibuilder .galaxy-history-list{
@@ -413,8 +416,6 @@ border-radius: 3px;
 }
 
 
-
-
 .galaxy-uibuilder .job-status-buttons .display-btn {
   background: none;
   color: lightgray;
@@ -427,6 +428,91 @@ border-radius: 3px;
   color: white;
 }
 
-.galaxy-uibuilder .jp-mod-selected .nbtools-form .dataset-list{
+/* .galaxy-uibuilder .jp-mod-selected .nbtools-form .dataset-list{
   float: left;  
+} */
+
+
+.galaxy-uibuilder .dropdown-container {
+  position: relative;
+  display: inline-block;
+  margin-top: 5px;
+  font-size: 15px;
+}
+
+.galaxy-uibuilder .dropdown-icon {
+  cursor: pointer;
+  background: rgb(203,208,216);
+  padding-left: 3px;
+  padding-right: 3px;
+}
+
+.galaxy-uibuilder .dropdown-menu {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background-color: #f9f9f9;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  border: 1px solid #ccc;
+  padding: 8px;
+  z-index: 1;
+  width: 200px;
+}
+
+.galaxy-uibuilder .dropdown-menu li {
+  display: block;
+  padding: 8px;
+  text-decoration: none;
+  color: #333;
+}
+
+.galaxy-uibuilder .dropdown-menu li:hover {
+  background-color: #ddd;
+}
+
+ .galaxy-uibuilder .dropdown-container:hover .dropdown-menu {
+  display: block;
+}
+
+.galaxy-uibuilder #create-history-button {
+  margin-top:  5px;
+  background: white;
+  color: rgb(184,176,176);
+  width: 90px;
+  height: 20px;
+}
+
+
+.galaxy-uibuilder #create-history-button:hover {
+  color: white;
+}
+
+
+.galaxy-uibuilder .list-item.dataset.history-content.state-ok{
+  margin: 1px;
+  border: 0px;
+  border-radius: 1px;
+}
+
+.galaxy-uibuilder .list-item.dataset_collection.history-content.state-ok{
+ 
+  margin: 1px;
+  border: 0px;
+  border-radius: 1px;
+  padding-bottom: 10px;
+}
+
+.galaxy-uibuilder .list-item.dataset.history-content.state-error{
+    
+  margin: 1px;
+  border: 0px;
+  border-radius: 1px;
+    
+}
+
+.jp-mod-selected .ui-form-title-text b {
+    
+  margin: 5px;
+  
 }

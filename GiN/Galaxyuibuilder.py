@@ -8,6 +8,7 @@ import shutil
 import os
 import glob
 from ipyuploads import Upload
+import uuid
 
 
 Upload = Upload(accept='txt', multiple=False)
@@ -35,6 +36,7 @@ class GalaxyUIBuilder(BaseWidget, NBTool):
     origin = Unicode("", sync=True)
     description = Unicode("", sync=True)
     buttons = Dict(sync=True)
+    UU_ID = Bool(True, sync=True)
 
     UI = Dict(sync=True)
     galaxy_tool_id = Unicode(sync=True)
@@ -49,7 +51,7 @@ class GalaxyUIBuilder(BaseWidget, NBTool):
     all_files_complete = lambda self, names: None
 
     def __init__(
-        self, galaxy_tool_id=None, history_ids=None, description=None, inputs={}, history_data=[], origin='', **kwargs
+        self, galaxy_tool_id=None, history_ids=None, description=None, inputs={}, history_data=[], origin='', UU_ID=None, **kwargs
     ):
 
         self._apply_defaults()
@@ -63,10 +65,10 @@ class GalaxyUIBuilder(BaseWidget, NBTool):
         self.history_data = history_data
         self.origin = origin
         self.description = description
+        self.UU_ID = True
         
         BaseWidget.__init__(self, **kwargs)
        
-
     def _apply_defaults(self, function_or_method=None):
         # Set the name based on the function name
 

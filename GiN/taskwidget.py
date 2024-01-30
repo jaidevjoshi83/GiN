@@ -77,10 +77,11 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
             description=self.tool['description'],
             subtitle=self.tool['origin'],
             history_ids=history_ids,
-            history_data=history_data,
-            color= self.default_color,
+            # history_data=history_data,
+            color = self.default_color,
             logo=self.default_logo,
             origin=self.tool['origin'],
+            # UU_ID=str(uuid.uuid4()),
             **kwargs
         )
 
@@ -153,7 +154,6 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
         # return IPython.display.JSON(job)
         return job
 
-    
     @staticmethod
     def get_data_type_and_genomes( server=None):
 
@@ -180,6 +180,16 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
         
         #return IPython.display.JSON({'api_key': key, 'email': email})
         return {'api_key': key, 'email': email}
+    
+
+    @staticmethod
+    def Create_new_history( server, name):
+        a = GiN.sessions.SessionList()
+        gi = a.get(server=server)
+
+        new_history = gi.histories.create(name=name)        
+        return new_history.wrapped
+     
     
     @staticmethod
     def upload_dataset(
@@ -467,7 +477,7 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
             del a.galaxy_upload[upload_id]
 
         return IPython.display.JSON(status)
-
+    
 
     @staticmethod
     def CORS_fallback_upload(
@@ -585,6 +595,21 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
         job_state = gi16.gi.jobs.get_state(job_id=job_id)
 
         return IPython.display.JSON({"job_state": job_state})
+    
+    @staticmethod
+    def check_login(login_id, server):
+        a = GiN.sessions.SessionList()
+        gi = a.get(server=server)
+        t = gi.galaxy_login.get(login_id)
+
+        status = {'id': login_id, 'status':'running'}
+
+        if not t.is_alive():
+            out = t.join()
+            status['status'] = 'finish'
+            del gi.galaxy_login[login_id]
+
+        return IPython.display.JSON(status)
     
 
 class TaskTool(NBTool):
