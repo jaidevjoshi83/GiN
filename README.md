@@ -3,7 +3,7 @@
 ### Create conda env
 
 ```
-conda create -n GiN python=3.9 jupyterlab=3.4 ipywidgets=7.5.1 nodejs=16  -y
+conda create -n GiN python=3.10 jupyterlab=3.6 ipywidgets=8.0 nodejs=16  -y
 
 ```
 
