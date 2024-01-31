@@ -11,7 +11,12 @@ import { GalaxyToolBrowser } from './toolbox';
 import { Private,  getRanNotebookIds} from './notebookActions';
 import {DataRegistry} from "@g2nb/nbtools/lib/dataregistry";
 
+<<<<<<< HEAD
 const module_exports = Object.assign(Object.assign(Object.assign(   {}, galaxyuibuilder_exports), utils_exports));
+=======
+
+const module_exports = Object.assign(Object.assign(Object.assign(  {}, galaxyuibuilder_exports), utils_exports));
+>>>>>>> master
 
 const EXTENSION_ID = 'GiN:plugin';
 /**
@@ -34,6 +39,7 @@ function activateWidgetExtension(app, registry, mainmenu, restorer, shell, noteb
 
     init_context(app, notebook_tracker)
 
+<<<<<<< HEAD
     // const tool_registry = new ToolRegistry();
     const data_registry = new DataRegistry();
     const galaxy_tool_registry = new GalaxyToolRegistry()
@@ -43,6 +49,11 @@ function activateWidgetExtension(app, registry, mainmenu, restorer, shell, noteb
 
 
     add_tool_browser(app, restorer)
+=======
+    const data_registry = new DataRegistry();
+    const tool_registry = new ToolRegistry();
+    // const data_registry = new DataRegistry();
+>>>>>>> master
 
     registry.registerWidget({
         name: 'GiN',
@@ -56,6 +67,7 @@ function init_context(app, notebook_tracker) {
     ContextManager.jupyter_app = app;
     ContextManager.notebook_tracker = notebook_tracker;
     ContextManager.context();
+<<<<<<< HEAD
 
     initNotebookTracker(notebook_tracker)
 }
@@ -70,6 +82,11 @@ function add_tool_browser(app, restorer){
         restorer.add(galaxy_tool_browser, 'GiN');
     app.shell.add(galaxy_tool_browser, 'left', {rank: 104});
 
+=======
+    
+    // ContextManager.PrivateData = Private
+    // initNotebookTracker(notebook_tracker)  
+>>>>>>> master
 }
 
 
@@ -149,6 +166,7 @@ const initNotebookTracker = (notebookTracker) => {
 
                 for (var i = 0; i < cells.length; i++){
                     if (cells[i].model.metadata.get('galaxy_cell') ){
+<<<<<<< HEAD
                         if (cells[i].model.metadata.get('html') != undefined || '' ||  null) {
                            var  cell = cells[i].outputArea.node.querySelector('.lm-Widget.p-Widget.lm-Panel.p-Panel.jp-OutputArea-child.jp-OutputArea-executeResult')
                            if(cell){
@@ -161,6 +179,11 @@ const initNotebookTracker = (notebookTracker) => {
                                 notebook.activeCellIndex = i
                                 // NotebookActions.run(notebook, notebookSession); 
                         }
+=======
+                        // ContextManager.context().run_cell(cells[i])
+                        // notebook.activeCellIndex = i
+                        // NotebookActions.run(notebook, notebookSession); 
+>>>>>>> master
                     }
                 }
             });
