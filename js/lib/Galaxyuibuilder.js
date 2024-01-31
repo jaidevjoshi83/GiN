@@ -171,7 +171,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             this.data_upload_tool()
         }
 
-<<<<<<< HEAD
         this.section = {}
 
         /// this.update_metadata_FormState('login', [], '')
@@ -186,42 +185,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
     }
 
 
-=======
-        this.model.get('inputs')
-    }
-
-    add_new_history(){
-
-        if(this.el.querySelector('.tool-migration-select')){
-            var origin = this.el.querySelector('.tool-migration-select').value
-        }  else{
-            var origin = this.model.get('origin')
-        }
-
-        this.el.querySelector('#create-history-menu').addEventListener('click', ()=>{
-            this.el.querySelector('#create-history-container').style.display = 'block'
-        })
-
-        this.el.querySelector('#create-history-button').addEventListener('click', async ()=>{
-            // await KernelSideDataObjects(`from GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.Create_new_history(server=${JSON.stringify(origin)}, name=${JSON.stringify(this.el.querySelector('#create-history-input').value)})`)
-            var history = await KernelSideDataObjects(`import IPython\nfrom GiN.taskwidget  import GalaxyTaskWidget\nclass Temp(object):\n    def Return(self):\n        return IPython.display.JSON(GalaxyTaskWidget.Create_new_history(server=${JSON.stringify(origin)}, name=${JSON.stringify(this.el.querySelector('#create-history-input').value)}))\na = Temp()\na.Return()`)
-
-            KernelSideDataObjects(`try:\n    del a\nexcept:\n    print("a is not defined")`)
-            this.el.querySelector('#create-history-input').value = ''
-
-            var opt = this.el.querySelector('#dataset-history-list').options
-
-            this.add_history_list(true)
-
-            for (var i = 0; i < opt.length; i++){
-                if (history['id'] == opt[i].value ){
-                    opt[i].selected = true
-                }
-            }
-        })
-    }
-    
->>>>>>> master
     refresh_cells(){
 
         if (!ContextManager.notebook_tracker) return;               
@@ -657,18 +620,10 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
     update_metadata_FormState(tool_type, inputs){
 
-<<<<<<< HEAD
         ContextManager.galaxy_tool_registry.current.content.activeCell.model.metadata.set('tool_type', tool_type)
         ContextManager.galaxy_tool_registry.current.content.activeCell.model.metadata.set('input_params', inputs)
         ContextManager.galaxy_tool_registry.current.content.activeCell.model.metadata.set('html', html)
         ContextManager.galaxy_tool_registry.current.content.activeCell.model.metadata.set('galaxy_cell', true)
-=======
-        ContextManager.tool_registry.current.content.activeCell.model.metadata.set('tool_type', tool_type)
-        ContextManager.tool_registry.current.content.activeCell.model.metadata.set('input_params', inputs)
-        // ContextManager.tool_registry.current.content.activeCell.model.metadata.set('html', html)
-        ContextManager.tool_registry.current.content.activeCell.model.metadata.set('galaxy_cell', true)
-        ContextManager.tool_registry.current.content.activeCell.model.metadata.set('section', this.section_new)
->>>>>>> master
     }
 
     un_wrap_repeat1(input, name){
@@ -2500,18 +2455,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             var origin = this.model.get('origin')
         }
 
-<<<<<<< HEAD
         var self = this
-=======
-        var options
-
-        if(updated_list){
-            options = await KernelSideDataObjects(`import json\nimport base64\nfrom GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.get_histories(server=${JSON.stringify(origin)})`)
-        } else{
-            options = this.model.get('history_ids')
-        }
-
->>>>>>> master
         const select = document.createElement('select')
 
         if (this.el.querySelector(`#dataset-history-list`)){
@@ -2528,12 +2472,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         }
         const options = await KernelSideDataObjects(`import json\nimport base64\nfrom GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.get_histories(server=${JSON.stringify(origin)})`)
 
-<<<<<<< HEAD
        
-=======
-        DataListdiv.append(await this.data_row_list(options[0]['id']))
-
->>>>>>> master
         for (var i = 0; i < options.length; i++) {
             const opt = `${i+1}: ${options[i]['name']}`;
             const el = document.createElement("option");
@@ -5280,7 +5219,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             credentials['password'] = inputs[2].value
         }
 
-<<<<<<< HEAD
        
         var jobs = await KernelSideDataObjects(`import json\nimport base64\nfrom GiN.authwidget import GalaxyAuthWidget\na  = GalaxyAuthWidget()\na.login(json.loads(base64.b64decode("${btoa(JSON.stringify(credentials))}")))`)
        
@@ -5288,13 +5226,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         // ContextManager.galaxy_tool_registry.kernel_galaxy_tool_cache[return_kernel_id()] = jobs['tools']
         // console.log(ContextManager.galaxy_tool_registry.kernel_galaxy_tool_cache)
 
-=======
-        var jobs = await KernelSideDataObjects(`import json\nimport base64\nfrom GiN.authwidget import GalaxyAuthWidget\na  = GalaxyAuthWidget()\na.login(json.loads(base64.b64decode("${btoa(JSON.stringify(credentials))}")))`)
-           
-        // console.log(ContextManager.jupyter_app.shell._leftHandler._items[1].widget.node.querySelector('.lm-Widget.p-Widget.nbtools-toolbox.nbtools-wrapper'))
-        // ContextManager.PrivateData.origins.push(credentials['server'])
-       
->>>>>>> master
         KernelSideDataObjects(`del a`)
 
         if (jobs.state === 'error' ) {
