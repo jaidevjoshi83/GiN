@@ -2321,13 +2321,14 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         DataListdiv.append(await this.data_row_list(options[0]['id']))
 
-        select.addEventListener("change", async () => {
 
-            this.el.querySelector('#data-history-icon').className = 'fa fa-spinner fa-spin'
+        async function  refresh(){
+
+            self.el.querySelector('#data-history-icon').className = 'fa fa-spinner fa-spin'
             // spn.style.display = 'block'
             // update.style.display = 'none'
      
-            if (this.model.get('galaxy_tool_id') != "GiN_data_upload_tool"){
+            if (self.model.get('galaxy_tool_id') != "GiN_data_upload_tool"){
 
                 self.removeAllChildNodes(DataListdiv)
 
@@ -2343,15 +2344,29 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 var selected_index = {}
                 selected_index['HID'] = select.selectedIndex
                 self.form_builder(refine_inputs['inputs'],  selected_index) 
-                DataListdiv.append(await this.data_row_list(select.value))
+                DataListdiv.append(await self.data_row_list(select.value))
 
             } else {
                 self.removeAllChildNodes(DataListdiv )
-                DataListdiv.append(await this.data_row_list(select.value))
+                DataListdiv.append(await self.data_row_list(select.value))
             }
 
-            this.el.querySelector('#data-history-icon').className = 'fa fa-refresh'
+            self.el.querySelector('#data-history-icon').className = 'fa fa-refresh'
 
+        }
+
+        let isRefreshing = false;
+
+        select.addEventListener("change", async () => {
+
+            if (!isRefreshing) {
+                // Set the flag to true to indicate that a refresh operation is in progress
+                isRefreshing = true;
+               
+                refresh().then(() => {
+                    isRefreshing = false;
+                });
+            }
         });
 
         var hid = select.value
@@ -2363,13 +2378,14 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
     History_refresh(){
 
-        this.el.querySelector('#data-history-icon').addEventListener("click", async ( )=>{
-         
+        var self = this
 
-            if (this.el.querySelector('.tool-migration-select')){
-                var origin = this.el.querySelector('.tool-migration-select').value
+        async function refresh(){
+
+            if (self.el.querySelector('.tool-migration-select')){
+                var origin = self.el.querySelector('.tool-migration-select').value
             } else{
-                var origin = this.model.get('origin')
+                var origin = self.model.get('origin')
             }
 
             var options = await KernelSideDataObjects(`import json\nimport base64\nfrom GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.get_histories(server=${JSON.stringify(origin)})`)
@@ -2380,12 +2396,12 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 history_list.push(options[i]['id'])
             }
 
-            if (history_list.includes(this.el.querySelector('#dataset-history-list').value)){
-               hid = this.el.querySelector('#dataset-history-list').value
+            if (history_list.includes(self.el.querySelector('#dataset-history-list').value)){
+               hid = self.el.querySelector('#dataset-history-list').value
             } else{
                
-                var select = this.el.querySelector(`#dataset-history-list`)
-                this.removeAllChildNodes(this.el.querySelector(`#dataset-history-list`) )
+                var select = self.el.querySelector(`#dataset-history-list`)
+                self.removeAllChildNodes(self.el.querySelector(`#dataset-history-list`) )
 
                 for (var i = 0; i < options.length; i++) {
                     const opt = `${i+1}: ${options[i]['name']}`;
@@ -2398,14 +2414,27 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 hid =  history_list[0]
             }
       
-            this.removeAllChildNodes(this.el.querySelector('.history-dataset-list'))    
-            this.el.querySelector('#data-history-icon').className = 'fa fa-spinner fa-spin'
-            this.el.querySelector('.history-dataset-list').append(await this.data_row_list(hid))
-            this.el.querySelector('#data-history-icon').className = 'fa fa-refresh'
+            self.removeAllChildNodes(self.el.querySelector('.history-dataset-list'))    
+            self.el.querySelector('#data-history-icon').className = 'fa fa-spinner fa-spin'
+            self.el.querySelector('.history-dataset-list').append(await self.data_row_list(hid))
+            self.el.querySelector('#data-history-icon').className = 'fa fa-refresh'
+            self.el.querySelector('#data-history-icon').addEventListener('click', ()=>{})
+        }
+
+        let isRefreshing = false;
+
+        self.el.querySelector('#data-history-icon').addEventListener("click",  ( )=>{
+            if (!isRefreshing) {
+                // Set the flag to true to indicate that a refresh operation is in progress
+                isRefreshing = true;
+               
+                refresh().then(() => {
+                    isRefreshing = false;
+                });
+            }
+        
         })
     }
-
-
 
     AddHelpSection(help){
 
@@ -2918,11 +2947,17 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         Select.addEventListener("drop", function(event) {
 
+            console.log("OKKK")
+
             event.preventDefault();
+
+            console.log(event)
 
             if (event.target.className == "InputDataFile") {
                 event.target.style.background = "";
                 var draged_item = self.dragged
+
+            
 
                 var dataID = JSON.parse(self.dragged.querySelector('.title').getAttribute('data-value'))
                 var name = self.dragged.querySelector('.name').innerText
@@ -2942,6 +2977,10 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 Select.prepend(el);
 
                 Select.selectedIndex = 0
+
+                 row['data-key']['data']['values'] = JSON.parse(el.value)
+
+                 console.log(row['data-key'])
 
             }
         }, false);
@@ -4045,7 +4084,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         }  else{
             var URL = this.model.get('origin')
         }
-
+        
         var row = `<div id="${dataset['type_id']}"   class="list-item ${dataset['history_content_type']} history-content state-${dataset['state']}" >
                         <div class="warnings"></div>
                         <div class="primary-actions"></div>
