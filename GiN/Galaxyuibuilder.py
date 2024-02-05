@@ -88,6 +88,9 @@ class GalaxyUIBuilder(BaseWidget, NBTool):
     @staticmethod
     def write_chunk(name, encoded_chunk, first_chunk):
 
+        if not os.path.exists(os.path.join(os.getcwd(), 'temp')):
+            os.makedirs(os.path.join(os.getcwd(), 'temp'))
+
         mode = 'w' if first_chunk else 'a'
 
         file = os.path.join(os.getcwd(), 'temp', name)

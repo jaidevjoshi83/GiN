@@ -1390,6 +1390,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
     }
 
     async chunk_file (file) {
+
+        
         const chunk_size = 1024 * 1024;
         const chunks_in_file = Math.ceil(file.size / chunk_size);
         const chunk_functions = [];
@@ -1416,9 +1418,10 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                     "chunk": encoded_chunk,
                     "type":file.type
                 });
+              
                 count++;
                 this._chunks_complete++;
-                this.update_upload_label(false, false)
+                // this.update_upload_label(false, false)
                 return {
                     chunk: this._chunks_complete,
                     total: this._chunks_total
@@ -1450,16 +1453,20 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
     //adopted from ipyuploads https://github.com/g2nb/ipyuploads
     async upload_files () {
-
+        // console.log("OKOKO")
         var elm = this.el.querySelector('#inputupload')
+
+        // console.log(elm)
         // Set the widget as busy
-        this.model.set('busy', true);
-        this.model.save();
+        // this.model.set('busy', true);
+        // this.model.save();
 
         // Estimate the number of chunks to upload
         this._chunks_total = 0;
         this._chunks_complete = 0;
         const files = Array.from( elm.files ?? []);
+
+
         files.forEach((file) => this._chunks_total += Math.ceil(file.size / (1024 * 1024)));
 
         // Set the uploading label
@@ -1467,10 +1474,15 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         // Cycle through all files
         const file_functions = [];
+
+        
         files.forEach((file) => {
+
             const file_func = async () => {
                 const chunk_funcs = await this.chunk_file(file);
+               
                 for (const cp of chunk_funcs) await cp();
+
                 this.send({
                     "event": "file_complete",
                     "name": file.name,
@@ -1495,7 +1507,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             value: files_data,
             error: '',
         });
-        this.update_upload_label(false, true);
+        // this.update_upload_label(false, true);
         this.send({
             "event": "all_files_complete",
             "names": files_data
@@ -2057,6 +2069,9 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         data['type_id'] =`dataset-${data['id']}` 
         this.add_dataset(ListItem, this.data_row_list, HistoryID)
     }
+
+
+
  
     async NewTusUpload(data){
 
@@ -2067,8 +2082,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         }
 
         this.el.querySelector('.upload-status-icon .fa-spin').style.display = 'block'
-
-        // var apiKey = await KernelSideDataObjects(`from GiN.taskwidget  import GalaxyTaskWidget\nGalaxyTaskWidget.Return_api_key(${JSON.stringify(origin)})`)
 
         var apiKey =  await KernelSideDataObjects(`import IPython\nfrom GiN.taskwidget  import GalaxyTaskWidget\nclass Temp(object):\n    def Return(self):\n        return IPython.display.JSON(GalaxyTaskWidget.Return_api_key(${JSON.stringify(origin)}))\na = Temp()\na.Return()`)
         KernelSideDataObjects('try:\n    del a\nexcept:    print("a is not defined")')
@@ -2161,11 +2174,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         })
     }
 
-    // async NewTusUpload(data){
 
-    //     await this.upload_files()
-    //     await this.readFile()
-    // }
 
     async readFile() {
 
@@ -2946,18 +2955,11 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         Select.id = `input-data-${this.uid()}`
 
         Select.addEventListener("drop", function(event) {
-
-            console.log("OKKK")
-
             event.preventDefault();
-
-            console.log(event)
 
             if (event.target.className == "InputDataFile") {
                 event.target.style.background = "";
                 var draged_item = self.dragged
-
-            
 
                 var dataID = JSON.parse(self.dragged.querySelector('.title').getAttribute('data-value'))
                 var name = self.dragged.querySelector('.name').innerText
@@ -2978,10 +2980,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
                 Select.selectedIndex = 0
 
-                 row['data-key']['data']['values'] = JSON.parse(el.value)
-
-                 console.log(row['data-key'])
-
+                row['data-key']['data']['values'] = JSON.parse(el.value)
             }
         }, false);
 
@@ -5200,14 +5199,12 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             credentials['password'] = inputs[2].value
         }
 
+
         var jobs = await KernelSideDataObjects(`import json\nimport base64\nfrom GiN.authwidget import GalaxyAuthWidget\na  = GalaxyAuthWidget()\na.login(json.loads(base64.b64decode("${btoa(JSON.stringify(credentials))}")))`)
            
-        // console.log(ContextManager.jupyter_app.shell._leftHandler._items[1].widget.node.querySelector('.lm-Widget.p-Widget.nbtools-toolbox.nbtools-wrapper'))
-        // ContextManager.PrivateData.origins.push(credentials['server'])
-       
+
         KernelSideDataObjects(`del a`)
 
-        console.log(jobs.state, )
 
         if (jobs.state === 'error' ) {
 

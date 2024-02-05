@@ -48,6 +48,7 @@ class GalaxyAuthWidget(GalaxyUIBuilder):
 
     def login(self, credentials):
 
+
         """Login to the Galaxy server"""
 
         tools = []
@@ -72,7 +73,6 @@ class GalaxyAuthWidget(GalaxyUIBuilder):
         self.session._notebook_url = credentials['server']
         self.session._notebook_password = credentials['password']
         self.session._notebook_key = credentials['api_key']
-
         self.register_session()
 
         tool_list['url']  = self.session._notebook_url
