@@ -2337,7 +2337,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             }
 
             self.el.querySelector('#data-history-icon').className = 'fa fa-refresh'
-
         }
 
         let isRefreshing = false;
@@ -2539,6 +2538,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         row.style.display = 'block'
         row.id = input_def.id
 
+        Button['repeat-ref'] = row.id
+
         FormParent.append(outtitle)
         FormParent.append(row)
         FormParent.append(Button)
@@ -2557,6 +2558,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             const row1 = document.createElement('div')
             row1.className = 'internal-ui-repeat section-row'
             row1['data-value'] = JSON.stringify({'count':count, "name":input_def.name})
+         
             row1.id = NamePrefix+SuffixName+`_${count}`
 
             var DeleteButton = document.createElement('button')
@@ -2587,11 +2589,12 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
             DeleteButton.addEventListener("click", async function(e){ 
 
-                self.repeat_del['name'] = JSON.parse(e.target.parentNode.parentNode.parentNode['data-value'])['name']
-                self.repeat_del['index'] = JSON.parse(e.target.parentNode.parentNode.parentNode['data-value'])['count']
-
+                self.repeat_del['name'] = JSON.parse(row1['data-value'])['name']
+                self.repeat_del['index'] = JSON.parse(row1['data-value'])['count']
+ 
                 var history_id = self.element.querySelector('#dataset-history-list')
                 var form = self.element.querySelector('.Galaxy-form')
+
                 var Inputs =  self.clean_param_for_job(self.new_form_data(form), false)
 
                 var refine_inputs = await KernelSideDataObjects(`import IPython\nfrom GiN.taskwidget  import GalaxyTaskWidget\nclass Temp(object):\n    def Return(self):\n        return IPython.display.JSON(GalaxyTaskWidget.updated_form(${JSON.stringify(origin)}, json.loads(base64.b64decode("${btoa(JSON.stringify(Inputs))}")), ${JSON.stringify(self.model.get('inputs')['id'])}, ${JSON.stringify(history_id.value)}))\na = Temp()\na.Return()`)
@@ -2601,8 +2604,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 self.removeAllChildNodes(FormParent)
                 var selected_index = {}
                 selected_index['HID'] = history_id.selectedIndex
-                self.form_builder(refine_inputs['inputs'],  selected_index) 
 
+                self.form_builder(refine_inputs['inputs'],  selected_index) 
                 self.update_metadata_FormState('galaxy_tool', refine_inputs['inputs'])  
 
             });
@@ -2610,7 +2613,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             row.append(row1) 
         }
 
-        if (this.repeat_del != "" && this.repeat_del['name'] == input_def['name']){
+        if (this.repeat_del !== "" && this.repeat_del['name'] === input_def['name']){
 
             delete input_def.cache[this.repeat_del['index']]
 
@@ -2645,8 +2648,9 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         }
 
         Button.addEventListener("click", async (e)=>{ 
+
             var Count = row.children.length
-            add_internal_repeat(input_def['inputs'], Count)
+            add_internal_repeat(input_def['inputs'], Count, row.id)
       
             var history_id = self.el.querySelector('#dataset-history-list').value
             var form = self.el.querySelector('.Galaxy-form')
