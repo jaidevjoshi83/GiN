@@ -174,11 +174,6 @@ def server_name(search_url):
     return search_url
 
 
-
-
-
-# Print the result
-
 class AuthenticationTool(NBTool):
     """Tool wrapper for the authentication widget"""
 
