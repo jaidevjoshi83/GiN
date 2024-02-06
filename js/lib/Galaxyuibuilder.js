@@ -21,7 +21,6 @@ import { ContextManager } from '@g2nb/nbtools';
 import { NotebookActions } from '@jupyterlab/notebook';
 import { Private} from './notebookActions';
 
-
 export class GalaxyUIBuilderModel extends BaseWidgetModel{
     
     defaults() {
@@ -93,7 +92,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
                             <div id="history-list" >
                             </div>
-
                             <div  class="history-dataset-list">
                             </div>
                         </div> 
@@ -119,7 +117,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
     this.toolregistry = {'tools':""};
     this.select_index = null
     this.section_new = {};
- 
+    this.drill_down_expand = {'name':null, expanded_subgroups:[]} 
 
     // this.section_collapse = {'expanded':false, 'name':''}
     // <iframe src="http://localhost:8080/datasets/fa70ae9fc8539e18/display/?preview=True&?api_key=865ad23561f93ec78ed5398e815c1057" title="W3Schools Free Online Web Tutorials"></iframe>
@@ -149,7 +147,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         this.activate_run_buttons();
         // Attach custom buttons
         this.activate_custom_buttons();
-        // this.AddHelpSection(inputs['help'])
+        this.AddHelpSection(inputs['help'])
         // this.iterate_over_tool_cells()
 
         if (this.model.get('name') == 'login'){
@@ -163,23 +161,23 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             this.generate_tool_form()
             this.add_tool_migration_button(this.model.get('origin'))
             this.add_galaxy_cell_metadata()
-            this.add_history_list()
+            this.add_history_list(this.model.get('origin'))
+            this.History_refresh()
             this.add_new_history()
         }
 
         if (this.model.get('galaxy_tool_id') == 'GiN_data_upload_tool') {
             this.data_upload_tool()
         }
-
-        this.model.get('inputs')
     }
 
     add_new_history(){
+        var origin
 
         if(this.el.querySelector('.tool-migration-select')){
-            var origin = this.el.querySelector('.tool-migration-select').value
+            origin = this.el.querySelector('.tool-migration-select').value
         }  else{
-            var origin = this.model.get('origin')
+            origin = this.model.get('origin')
         }
 
         this.el.querySelector('#create-history-menu').addEventListener('click', ()=>{
@@ -195,7 +193,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
             var opt = this.el.querySelector('#dataset-history-list').options
 
-            this.add_history_list(true)
+            this.add_history_list(origin)
 
             for (var i = 0; i < opt.length; i++){
                 if (history['id'] == opt[i].value ){
@@ -203,6 +201,16 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 }
             }
         })
+    }
+
+    async refresh_param(){
+        var inputs =  this.clean_param_for_job(this.new_form_data(form), false)
+        this.removeAllChildNodes(ConditionalDiv)
+        var history_id = this.el.querySelector('#dataset-history-list').value 
+        var refine_inputs = await KernelSideDataObjects(`import IPython\nfrom GiN.taskwidget  import GalaxyTaskWidget\nclass Temp(object):\n    def Return(self):\n        return IPython.display.JSON(GalaxyTaskWidget.updated_form(${JSON.stringify(origin)}, json.loads(base64.b64decode("${btoa(JSON.stringify(inputs))}")), ${JSON.stringify(self.model.get('inputs')['id'])}, ${JSON.stringify(history_id)}))\na = Temp()\na.Return()`)
+        
+        KernelSideDataObjects(`try:\n    del a\nexcept:\n    print("a is not defined")`)
+        return refine_inputs
     }
     
     refresh_cells(){
@@ -281,13 +289,11 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 // this.el.querySelector('#history_ids').parentNode.removeChild(this.el.querySelector('#dataset-history-list'))
                 // this.add_history_list()
                 // this.el.querySelector('#dataset-update-label').parentNode.removeChild(this.el.querySelector('#dataset-update-label'))
-                this.add_history_list()
+                this.add_history_list(e.target.value)
             }
         })
 
         utm.querySelector('#migra-refresh-btn').addEventListener('click', async () => {
-
-            console.log("OK")
 
             var servers   = await KernelSideDataObjects(`import GiN\na = GiN.sessions.SessionList()\na.get_servers()`)
             KernelSideDataObjects(`try:\n    del a\nexcept:    print("a is not defined")`)
@@ -631,7 +637,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             let form = form_parent.parentNode.parentNode.parentNode.parentNode.parentNode.outerHTML
             let fint = JSON.stringify(form)
 
-
             // if (this.model.get('galaxy_tool_id') != "GiN_data_upload_tool" ) {
             //     this.update_metadata_FormState('galaxy_tool', inputs['inputs'], JSON.parse(fint))
             // }
@@ -783,15 +788,13 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
  
     add(input, form_parent, name_prefix, data={}){ 
 
-
         var input_def = input;
 
         if (input_def.id == 'undefined') {
             input_def.id = this.uid()  
         }
 
-        switch (input_def.type) {
-            
+        switch (input_def.type) {            
             case "conditional":  
                 this.add_conditional_section_1(input_def, form_parent, name_prefix, data);
                 break;
@@ -885,31 +888,31 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
                     input_file_param_label.addEventListener("click", async (e)=> {
 
-                    e.target.parentNode.parentNode.querySelector('.fas.fa-spinner.fa-spin').style.display = 'block'
-
-                if (self.file_exist(dataset)){
-                
-                        document.getElementById(`${e.target.id.replace('-label', '')}`).value =  self.file_exist(dataset)
-                        document.getElementById(`${e.target.id.replace('-label', '')}`).dispatchEvent(new Event('change', { bubbles: true }));  
-
-                        e.target.parentNode.parentNode.querySelector('.fas.fa-spinner.fa-spin').style.display = 'none'
-                        e.target.parentNode.parentNode.querySelector('.fas.fa-solid.fa-check').style.display = 'block'
-
-                } else {
-
                         e.target.parentNode.parentNode.querySelector('.fas.fa-spinner.fa-spin').style.display = 'block'
 
-                        uri = await KernelSideDataObjects(`from GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.send_data_to_gp_server(file_name=${JSON.stringify(dataset['name'])}, tool_id=${JSON.stringify(tool_id)}, dataset_id=${JSON.stringify(dataset['id'])}, server=${JSON.stringify(origin)}, ext=${JSON.stringify(dataset['extension'])})`)
-                         
-                        e.target.parentNode.parentNode.querySelector('.fas.fa-spinner.fa-spin').style.display = 'none'
-                        e.target.parentNode.parentNode.querySelector('.fas.fa-solid.fa-check').style.display = 'block'
+                        if (self.file_exist(dataset)){
+                        
+                                document.getElementById(`${e.target.id.replace('-label', '')}`).value =  self.file_exist(dataset)
+                                document.getElementById(`${e.target.id.replace('-label', '')}`).dispatchEvent(new Event('change', { bubbles: true }));  
 
-                        dataset['uri'] = uri['uri']
-                        this.file_cache.push(new Data(origin, dataset['uri'], dataset['id'], dataset['file_ext']));
-                        ContextManager.data_registry.register({ data: this.file_cache[ this.file_cache.length-1] })
-                        document.getElementById(`${e.target.id.replace('-label', '')}`).value =  uri['uri']
-                        document.getElementById(`${e.target.id.replace('-label', '')}`).dispatchEvent(new Event('change', { bubbles: true }));
-                    }
+                                e.target.parentNode.parentNode.querySelector('.fas.fa-spinner.fa-spin').style.display = 'none'
+                                e.target.parentNode.parentNode.querySelector('.fas.fa-solid.fa-check').style.display = 'block'
+
+                        } else {
+
+                                e.target.parentNode.parentNode.querySelector('.fas.fa-spinner.fa-spin').style.display = 'block'
+
+                                uri = await KernelSideDataObjects(`from GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.send_data_to_gp_server(file_name=${JSON.stringify(dataset['name'])}, tool_id=${JSON.stringify(tool_id)}, dataset_id=${JSON.stringify(dataset['id'])}, server=${JSON.stringify(origin)}, ext=${JSON.stringify(dataset['extension'])})`)
+                                
+                                e.target.parentNode.parentNode.querySelector('.fas.fa-spinner.fa-spin').style.display = 'none'
+                                e.target.parentNode.parentNode.querySelector('.fas.fa-solid.fa-check').style.display = 'block'
+
+                                dataset['uri'] = uri['uri']
+                                this.file_cache.push(new Data(origin, dataset['uri'], dataset['id'], dataset['file_ext']));
+                                ContextManager.data_registry.register({ data: this.file_cache[ this.file_cache.length-1] })
+                                document.getElementById(`${e.target.id.replace('-label', '')}`).value =  uri['uri']
+                                document.getElementById(`${e.target.id.replace('-label', '')}`).dispatchEvent(new Event('change', { bubbles: true }));
+                            }
 
                     })
 
@@ -1059,7 +1062,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             if (input_def['is_dynamic'] == true){
 
                 var children = self.el.querySelector('.Galaxy-form')
-                var inputs = await self.get_form_data(children)
+                var inputs = self.clean_param_for_job(self.new_form_data(form), false)
                 var history_id = self.el.querySelector('.galaxy-history-list').querySelector('#dataset-history-list').value
                 // var refine_inputs  = await KernelSideDataObjects(`import json\nimport base64\nfrom GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.updated_form(${JSON.stringify(origin)}, json.loads(base64.b64decode("${btoa(JSON.stringify(inputs))}")), ${JSON.stringify(self.model.get('inputs')['id'])}, ${JSON.stringify(history_id)})`)
                 var refine_inputs = await KernelSideDataObjects(`import IPython\nfrom GiN.taskwidget  import GalaxyTaskWidget\nclass Temp(object):\n    def Return(self):\n        return IPython.display.JSON(GalaxyTaskWidget.updated_form(${JSON.stringify(origin)}, json.loads(base64.b64decode("${btoa(JSON.stringify(inputs))}")), ${JSON.stringify(self.model.get('inputs')['id'])}, ${JSON.stringify(history_id)}))\na = Temp()\na.Return()`)
@@ -1109,317 +1112,50 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         return divElement.offsetWidth > 0 && divElement.offsetHeight > 0;
       }
  
+ 
+    new_form_data(form, params=[]){
 
-    async get_form_data(form, checking){
-
-        var self = this
-        var out = {}
-
-        // var Check = checking
-        
-        for (var i = 0; i < form.children.length; i++){
-            if ((form.children[i].className.includes('pl-2') &&  form.children[i].style.display == 'block' && form.children[i].children.length > 0) ||  form.children[i].className.includes('ui-portlet-section') || form.children[i].className.includes('ui-repeat')  || form.children[i].className.includes('sections')){
-
-                if (await self.get_form_data(form.children[i], checking) == 'error') {
-                    return 'error'
-                } else{
-                    Object.assign(out,  await self.get_form_data(form.children[i], checking))
-                }
-            } else if (form.children[i].className == 'ui-form-element section-row') {
-        
-                if (form.children[i].querySelector('.InputData')){
-
-                    var opt
-        
-                    if (form.children[i].querySelector('.InputData')['data-value']){
-                        opt = form.children[i].querySelector('.InputData')['data-value']
-                    }
-            
-                    if (checking == 'on' && opt == false){
-
-                        if (form.children[i].querySelector('.InputData').value == "") {
-                            form.children[i].querySelector('.InputData').style.backgroundColor = 'pink'
-                            return 'error'
-                        } else {
-                            
-                            form.children[i].querySelector('.InputData').style.backgroundColor = ''
-                            // out[form.children[i].querySelector('.InputData').name] =  form.children[i].querySelector('.InputData').value
-                            if (form.children[i].querySelector('.InputData').parentNode.querySelector('#variable-checkbox') && form.children[i].querySelector('.InputData').parentNode.querySelector('#variable-checkbox').checked) {
-                                // var variables =  await KernelSideDataObjects(`import IPython.display\ntry:\n    IPython.display.JSON({'value':globals()['${form.children[i].querySelector('.InputData').value}']})\nexcept:\n    pass`)
-                                var variables =  await KernelSideDataObjects(`import IPython.display\nIPython.display.JSON({'value':globals()['${form.children[i].querySelector('.InputData').value}']})`)
-                                out[form.children[i].querySelector('.InputData').name] =  variables
-                            } else {
-                                out[form.children[i].querySelector('.InputData').name] =  form.children[i].querySelector('.InputData').value
-                            }
-                        }
-                    } else {
-
-                        if (form.children[i].querySelector('.InputData').parentNode.querySelector('#variable-checkbox') && form.children[i].querySelector('.InputData').parentNode.querySelector('#variable-checkbox').checked) {                           
-                            // var variables =  await KernelSideDataObjects(`import IPython.display\ntry:\n    IPython.display.JSON({'value':globals()['${form.children[i].querySelector('.InputData').value}']})\nexcept:\n    pass`)
-                            var variables =  await KernelSideDataObjects(`import IPython.display\nIPython.display.JSON({'value':globals()['${form.children[i].querySelector('.InputData').value}']})`)
-                            out[form.children[i].querySelector('.InputData').name] =  variables
-                        } else {
-                            out[form.children[i].querySelector('.InputData').name] =  form.children[i].querySelector('.InputData').value
-                        }
-
-                        // out[form.children[i].querySelector('.InputData').name] =  form.children[i].querySelector('.InputData').value
-                    }
-                
-                } else if (form.children[i].querySelector('.outer-checkbox-div')){
-
-                    var select_list = []
-        
-                    if (JSON.parse(form.children[i].querySelector('.outer-checkbox-div')['data-value'])["optional"] == true ) {
-        
-                        for (var k = 0; k < form.children[i].querySelector('.outer-checkbox-div').children.length; k++ ) {
-                            if (form.children[i].querySelector('.outer-checkbox-div').children[k].querySelector('.InputDataCheckbox').checked) {
-                                select_list.push(form.children[i].querySelector('.outer-checkbox-div').children[k].querySelector('.InputDataCheckbox').value)
-                            }
-                        }
-
-                        if(form.children[i].querySelector('.outer-checkbox-div').querySelector('.InputDataCheckbox')){
-
-                            if (select_list.length == 0 ){
-                                out[form.children[i].querySelector('.outer-checkbox-div').querySelector('.InputDataCheckbox').name] = null
-                            }  else{
-                                out[form.children[i].querySelector('.outer-checkbox-div').querySelector('.InputDataCheckbox').name] = select_list
-                            }
-                       }
-        
-                    }  else if ((JSON.parse(form.children[i].querySelector('.outer-checkbox-div')['data-value'])["optional"] == false )){
-                            if (select_list.length == 0){
-                                form.children[i].querySelector('.outer-checkbox-div').children[0].querySelector('.InputDataCheckbox').parentNode.style.backgroundColor = 'pink'
-        
-                            } else if (select_list.length > 0 ){
-                                form.children[i].querySelector('.outer-checkbox-div').children[0].querySelector('.InputDataCheckbox').parentNode.style.backgroundColor = ''
-                                out[form.children[i].querySelector('.outer-checkbox-div').querySelector('.InputDataCheckbox').name] = select_list
-                            }
-                    }
-
-                } else if (form.children[i].querySelector('.InputDataFile')){
-
-                    if (checking) {
-                        if (form.querySelector('.InputDataFile').options.length  == 0 ){
-                            form.querySelector('.InputDataFile').style.backgroundColor = 'pink'
-                            return 'error'
-                        } else{
-                            form.querySelector('.InputDataFile').style.backgroundColor = ''
-        
-                            var input_data = form.querySelector('.InputDataFile').parentElement['data-file']
-                            var input_files = []
-                
-                            for (var i = 0; i < form.querySelector('.InputDataFile').options.length; i++) {
-                                if (form.querySelector('.InputDataFile').options[i].selected == true) {
-                                    input_files.push(JSON.parse(form.querySelector('.InputDataFile').options[i].value))
-                                }
-                            }
-                            
-                            out[form.querySelector('.InputDataFile').name] = input_data 
-            
-                            if (input_files.length == 1 && input_files[0]['id'] == ''){
-                                out[form.querySelector('.InputDataFile').name] = null
-                            } else{
-                                input_data['values'] = input_files
-                                out[form.querySelector('.InputDataFile').name] = input_data
-                            }
-                        }
-        
-                    } else{
-
-                        var input_data = form.children[i].querySelector('.InputDataFile').parentElement['data-file']
-                        var input_files = []
-    
-                        var opts = form.children[i].querySelector('.InputDataFile').options
-    
-                        for (var n = 0; n < opts.length ; n++){
-                            if (opts[n].selected == true){
-                                input_files.push(JSON.parse(opts[n].value))
-                            }
-                        }
-                        
-                        out[form.children[i].querySelector('.InputDataFile').name] = input_data 
-
-                        if (input_files.length == 1 && input_files[0]['id'] == ''){
-                            out[form.children[i].querySelector('.InputDataFile').name] = null
-                        } else if (input_files.length == 0 ) {
-                            out[form.children[i].querySelector('.InputDataFile').name] = {}
-                        }
-                        else{
-                            input_data['values'] = input_files
-                            out[form.children[i].querySelector('.InputDataFile').name] = input_data
-                        }
-                    }
-
-                } else if(form.children[i].querySelector('.drill-down.container')) {
-
-                    var drill_down_inputs = []
-            
-                        for(var n = 0; n < form.children[i].querySelector('.drill-down.container').querySelectorAll('input').length; n++) {
-                            if (form.children[i].querySelector('.drill-down.container').querySelectorAll('input')[n].checked) {
-                                drill_down_inputs.push(form.children[i].querySelector('.drill-down.container').querySelectorAll('input')[n].value)
-                            }
-                        }
-                        out[form.children[i].querySelector('.drill-down.container').name] =  drill_down_inputs
-            
-                } else if (form.children[i].querySelector('.data_collection')){
-                    
-                        var input_files = []  
-            
-                        out[form.children[i].querySelector('.data_collection').name] = input_files  
-            
-                        for (var i = 0; i < form.children[i].querySelector('.data_collection').options.length; i++) {
-                            if (form.children[i].querySelector('.data_collection').options[i].selected == true) {
-                                input_files.push(form.children[i].querySelector('.data_collection').options[i].data)
-                            }
-                        }
-
-                        if (checking) {
-                            if (out[form.children[i].querySelector('.data_collection').name].length < 1 ){
-                                form.children[i].querySelector('.data_collection').style.backgroundColor = 'pink'
-                                return 'error'
-                            }
-                            else {
-                                form.children[i].querySelector('.data_collection').style.backgroundColor = ''
-                                out[form.children[i].querySelector('.data_collection').name] = input_files
-                                form.children[i].querySelector('.data_collection').parentElement['data-file']['values'] = input_files
-                                out[form.children[i].querySelector('.data_collection').name] = form.children[i].querySelector('.data_collection').parentElement['data-file']
-                            }
-                        } else {
-                            if (input_files.length == 0){
-                                form.children[i].querySelector('.data_collection').parentElement['data-file']['values'] = [{}]
-                            } else{
-                                form.children[i].querySelector('.data_collection').parentElement['data-file']['values'] = input_files
-                            }
-                            out[form.children[i].querySelector('.data_collection').name] = form.children[i].querySelector('.data_collection').parentElement['data-file']
-                        }
-                }
-            } else if (form.children[i].className == 'ui-form-element section-row conditional'){
-                if (form.children[i].querySelector('.InputData')){
-                    out[form.children[i].querySelector('.InputData').name] = form.children[i].querySelector('.InputData').value
-                }
+        var self = this;
+        for (var i = 0; i < form.children.length; i++) {
+            if (  form.children[i].className.includes('ui-portlet-section section-row') || (form.children[i].className.includes('pl-2') && form.children[i].style.display == 'block')  || form.children[i].className.includes('ui-repeat section-row') ){
+                params.concat(self.new_form_data(form.children[i], params))
             }
+             else if (form.children[i].className == 'ui-form-element section-row sections' ) {
+                params.concat(self.new_form_data(form.children[i], params))
+            } 
+            else if (form.children[i].className == 'ui-form-element section-row'){
+                params.push(form.children[i]['data-key'])
+            } else if (form.children[i].className == 'ui-form-element section-row conditional' ){
+                params.push(form.children[i]['data-key'])
+            } 
         }
 
-        // if (Object.keys(out).length > 0){
-            return out  
-        // }
+        return params
     }
 
-    // async get_form_data(form, checking){
-    //     var self = this
-    //     var out = {}
+    clean_param_for_job(data, checking){
+        var cleaned_param = {}
 
-    //     for(var i = 0 ; i < form.children.length;  i++){
-    //         if($(form.children[i]).is(':visible')){
+        for (var i in data) {     
+            if(data[i]['tool_type'] === 'input_value' || data[i]['tool_type'] === 'input_data')   {
+                if(checking ){
+                    if(!data[i]['optional']){
+                        if( data[i]['data'] == null || Object.keys(data[i]['data']).length === 0  ){
+                            this.el.querySelector(`#${data[i]['id']}`).style.background = 'pink' 
+                            return 
+                        } else{
+                            this.el.querySelector(`#${data[i]['id']}`).style.background = ''
+                        }
+                    }
+                }
 
-    //             if( await self.get_form_data(form.children[i], checking) == 'error'){
-    //                 return 'error'
-    //             } else{
+            }  
+            cleaned_param[data[i].name] = data[i]['data']
+        }
+       
+        return cleaned_param
+    }
 
-    //                 Object.assign(out, await self.get_form_data(form.children[i], checking))
-    //                 if(form.children[i].className == 'InputDataFile'){
-    //                     var input_data = form.children[i].parentNode['data-file']
-    //                     var data_files = []
-
-    //                     for(var k = 0; k < form.children[i].children.length; k++ ){
-    //                         if(form.children[i].children[k].selected){
-    //                             data_files.push(JSON.parse(form.children[i].children[k].value))
-    //                         }
-    //                     }
-    //                     input_data['values'] = data_files
-    //                     out[form.children[i].name] = input_data
-
-    //                     if (checking) {
-    //                         if (data_files.length == 0){
-    //                             form.children[i].style.backgroundColor = 'pink'
-    //                             return 'error'
-    //                         } else{
-    //                             form.children[i].style.backgroundColor = ''
-    //                         }
-    //                     }
-    //                 }
-
-    //                 if(form.children[i].className == 'outer-checkbox-div'){
-
-    //                     var div_data = JSON.parse(form.children[i]['data-value'])
-
-    //                     var options = []
-
-    //                     for (var j = 0; j < form.childNodes[i].children.length; j++){
-    //                         var name 
-    //                         if ($(form.childNodes[i].children[j]).find('.InputDataCheckbox')[0].checked) {
-    //                             options.push($(form.childNodes[i].children[j]).find('.InputDataCheckbox')[0].value)
-    //                         }
-    //                     }
-
-    //                     if (checking) {
-
-    //                         if(!div_data['optional'] && options.length == 0){
-    //                             form.children[i].style.backgroundColor = 'pink'
-    //                             return 'error'
-    //                         }
-    //                         else if(!div_data['optional'] && options.length > 0){
-    //                             form.children[i].style.backgroundColor = ''
-    //                             out[div_data['name']] = options
-    //                         } else if (div_data['optional'] && options.length == 0 ) {
-    //                             out[div_data['name']] = div_data['value']
-    //                         } else if(div_data['optional']&& options.length > 0) {
-    //                             out[div_data['name']] = options
-    //                         }
-    //                     }
-    //                 }
-
-    //                 if(form.children[i].className == 'drill-down container'){            
-    //                     var drill_down_inputs = []
-
-    //                     for (var n = 0; n < $(form.children[i]).find('input').length; n++){
-    //                         if ($(form.children[i]).find('input')[n].checked) {
-    //                             drill_down_inputs.push($(form.children[i]).find('input')[n].value)
-    //                         }
-    //                     }
-
-    //                     out[form.children[i].name] =  drill_down_inputs
-
-    //                     if (checking) {
-    //                         if ( drill_down_inputs.length == 0){
-    //                             form.children[i].style.backgroundColor = 'pink'
-    //                             return 'error' 
-    //                         } else{
-    //                             form.children[i].style.backgroundColor = ''
-    //                         }
-    //                     }
-    //                 }
-
-    //                 if(form.children[i].className == 'InputData'){
-
-    //                     var div_data = JSON.parse(form.children[i].getAttribute('data-value'))
-
-    //                     if(checking && form.children[i] == "" && div_data['optional']){
-    //                         form.children[i].style.backgroundColor  = 'pink' 
-    //                         return 'error'
-    //                     } else{
-                            
-    //                         if(form.children[i].parentNode.querySelector('#variable-checkbox')) {
-    //                             if(form.children[i].parentNode.querySelector('#variable-checkbox').checked){
-                             
-    //                                 var variables =  await KernelSideDataObjects(`import IPython.display\nIPython.display.JSON({'value':globals()['${form.children[i].value}']})`)                               
-                                    
-    //                                 out[form.children[i].name]  = variables.value
-    //                             }  else{
-    //                                 out[form.children[i].name]  = form.children[i].value
-    //                             }
-    
-    //                         } else{
-    //                             out[form.children[i].name]  = form.children[i].value
-    //                         }
-    //                     }
-    //                 }
-    //             }
-    //         }
-    //     }
-
-    //     return out
-    // }
 
     galaxy_data_verify(file_cache, id) {
 
@@ -1649,6 +1385,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
     }
 
     async chunk_file (file) {
+
+        
         const chunk_size = 1024 * 1024;
         const chunks_in_file = Math.ceil(file.size / chunk_size);
         const chunk_functions = [];
@@ -1675,9 +1413,10 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                     "chunk": encoded_chunk,
                     "type":file.type
                 });
+              
                 count++;
                 this._chunks_complete++;
-                this.update_upload_label(false, false)
+                // this.update_upload_label(false, false)
                 return {
                     chunk: this._chunks_complete,
                     total: this._chunks_total
@@ -1709,27 +1448,26 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
     //adopted from ipyuploads https://github.com/g2nb/ipyuploads
     async upload_files () {
-
+  
         var elm = this.el.querySelector('#inputupload')
-        // Set the widget as busy
-        this.model.set('busy', true);
-        this.model.save();
 
         // Estimate the number of chunks to upload
         this._chunks_total = 0;
         this._chunks_complete = 0;
         const files = Array.from( elm.files ?? []);
+
+
         files.forEach((file) => this._chunks_total += Math.ceil(file.size / (1024 * 1024)));
 
-        // Set the uploading label
-        // this.update_upload_label(true, false);
-
-        // Cycle through all files
         const file_functions = [];
+
         files.forEach((file) => {
+
             const file_func = async () => {
                 const chunk_funcs = await this.chunk_file(file);
+               
                 for (const cp of chunk_funcs) await cp();
+
                 this.send({
                     "event": "file_complete",
                     "name": file.name,
@@ -1754,7 +1492,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             value: files_data,
             error: '',
         });
-        this.update_upload_label(false, true);
+        // this.update_upload_label(false, true);
         this.send({
             "event": "all_files_complete",
             "names": files_data
@@ -1775,7 +1513,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         return false
     }
 
-    drill_down(options){
+    drill_down(options, selected_values){
 
         var OuterDrillDown = document.createElement('div')
 
@@ -1812,7 +1550,14 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             var Input = document.createElement('input')
             Input.type = 'checkbox'
             Input.style.marginRight = '4px'
+         
             Input.value = options[i].value
+
+            if(selected_values){
+                if(selected_values.includes(options[i].value)){
+                    Input.checked = true
+                }
+            }
             
             var InputID = `input-id-${this.uid()}`
 
@@ -1832,6 +1577,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
             var div4 = document.createElement('div')
             div4.className = 'Main'
+            div4['data-key'] = {'optional':null, 'data':null, 'tool_type': 'drill_down'}
             div4.style.marginLeft = '20px'
 
             div4.append(Innerdiv)
@@ -1840,14 +1586,40 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             OuterDrillDown.append(div4)
 
             if (options[i]['options'].length !== 0 ) {
-                subgroup.append(this.drill_down(options[i]['options']))
+                subgroup.append(this.drill_down(options[i]['options'], selected_values))
             }
         }
         return OuterDrillDown
     }
 
-    add_drill_down_section(input_def, FormParent, NamePrefix){
+    return_drill_down_dict(drill_down){
 
+        var self = this
+
+        drill_down.querySelectorAll('input').forEach(function(input) {
+            input.addEventListener('click', async (e)=>{
+                var list = []
+                for(const i in drill_down.querySelectorAll('input')){
+                    if (drill_down.querySelectorAll('input')[i].checked){
+                        list.push(drill_down.querySelectorAll('input')[i].value)
+                    }
+                }
+                drill_down['data-key']['data'] = list
+
+                var form = self.el.querySelector('.Galaxy-form')    
+                var history = self.el.querySelector('#dataset-history-list')
+                var Inputs =  self.clean_param_for_job(self.new_form_data(form), false)
+                var refine_inputs = await KernelSideDataObjects(`import IPython\nfrom GiN.taskwidget  import GalaxyTaskWidget\nclass Temp(object):\n    def Return(self):\n        return IPython.display.JSON(GalaxyTaskWidget.updated_form(${JSON.stringify(self.model.get('origin'))}, json.loads(base64.b64decode("${btoa(JSON.stringify(Inputs))}")), ${JSON.stringify(self.model.get('inputs')['id'])}, ${JSON.stringify(history.value)}))\na = Temp()\na.Return()`)
+                   
+                KernelSideDataObjects(`try:\n    del a\nexcept:\n    print("a is not defined")`)
+                self.removeAllChildNodes(form)
+                self.form_builder(refine_inputs['inputs'], history.value) 
+            })
+        });
+    }
+
+    add_drill_down_section(input_def, FormParent, NamePrefix){
+        
         if(this.el.querySelector('.tool-migration-select')){
             var origin = this.el.querySelector('.tool-migration-select').value
         }  else{
@@ -1883,9 +1655,9 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         select_lable.className = 'select-unselect'
         select_lable.style.marginLeft = '20px'
 
-        Input.addEventListener('change', ()=>{
-
-        })
+        // Input.addEventListener('change', async (e)=>{
+        //     this.return_drill_down_dict(e.target)
+        // })
 
         select_lable.append(Unselect)
         select_lable.append(selectspan)
@@ -1903,16 +1675,22 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         row.append(select_lable)
         row.append(Div2)
 
-        Div2.append(this.drill_down(input_def.options))
+        row['data-key']  = {'optional': input_def.optional, 'name':NamePrefix+input_def['name'], 'data':input_def.value, 'id':input_def.id, 'tool_type':'drill_down'}
+
+        Div2.append(this.drill_down(input_def.options, input_def.value))
 
         selectspan.addEventListener('click', async () => {
+
+            var list = []
 
             for (var i = 0; i < Div2.querySelectorAll('.subgroup').length; i++ ) {
                 Div2.querySelectorAll('.subgroup')[i].style.display = 'block'
             }
 
             for (var i = 0; i < Div2.querySelectorAll('input').length; i++) {
-                Div2.querySelectorAll('input')[i].checked = 'true'
+                Div2.querySelectorAll('input')[i].checked = true
+                list.push(Div2.querySelectorAll('input')[i].value)
+
             }
 
             for (var i = 0; i < Div2.querySelectorAll('span').length; i++ ){
@@ -1922,13 +1700,15 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             var history_id = self.el.querySelector('#dataset-history-list').value
             var form = self.el.querySelector('.Galaxy-form')         
 
-            var inputs = await self.get_form_data(form)
-          //  var refine_inputs  = await KernelSideDataObjects(`import json\nimport base64\nfrom GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.updated_form(${JSON.stringify(origin)}, json.loads(base64.b64decode("${btoa(JSON.stringify(inputs))}")), ${JSON.stringify(self.model.get('inputs')['id'])}, ${JSON.stringify(history_id)})`)
+            var inputs = self.clean_param_for_job(self.new_form_data(form), false)
+            //  var refine_inputs  = await KernelSideDataObjects(`import json\nimport base64\nfrom GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.updated_form(${JSON.stringify(origin)}, json.loads(base64.b64decode("${btoa(JSON.stringify(inputs))}")), ${JSON.stringify(self.model.get('inputs')['id'])}, ${JSON.stringify(history_id)})`)
            
             var refine_inputs = await KernelSideDataObjects(`import IPython\nfrom GiN.taskwidget  import GalaxyTaskWidget\nclass Temp(object):\n    def Return(self):\n        return IPython.display.JSON(GalaxyTaskWidget.updated_form(${JSON.stringify(origin)}, json.loads(base64.b64decode("${btoa(JSON.stringify(inputs))}")), ${JSON.stringify(self.model.get('inputs')['id'])}, ${JSON.stringify(history_id)}))\na = Temp()\na.Return()`)
             KernelSideDataObjects(`try:\n    del a\nexcept:\n    print("a is not defined")`)
 
             self.update_metadata_FormState('galaxy_tool', refine_inputs['inputs'])
+
+            row['data-key']['data'] = list 
         })
 
         Unselect.addEventListener('click', async () => {
@@ -1938,30 +1718,50 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             }
 
             for (var i = 0; i < Div2.querySelectorAll('input').length; i++) {
-                Div2.querySelectorAll('input')[i].checked = 'false'
-                Div2.querySelectorAll('input')[i].click()
+                Div2.querySelectorAll('input')[i].checked = false
+                // Div2.querySelectorAll('input')[i].click()
             }
 
             for (var i = 0; i < Div2.querySelectorAll('span').length; i++ ){
                 Div2.querySelectorAll('span')[i].className = 'icon fa mr-1 fa-plus'
             }
 
-            var history_id = self.el.querySelector('#history_ids').value
+            var history_id = self.el.querySelector('#dataset-history-list').value
             var form = self.el.querySelector('.Galaxy-form')
-            var inputs = await self.get_form_data(form)
+
+
+            var inputs =  self.clean_param_for_job(self.new_form_data(form), false)
             //var refine_inputs  = await KernelSideDataObjects(`import json\nfrom GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.updated_form(${JSON.stringify(origin)}, json.loads(base64.b64decode("${btoa(JSON.stringify(inputs))}")), ${JSON.stringify(self.model.get('inputs')['id'])}, ${JSON.stringify(history_id)})`)
             
             var refine_inputs = await KernelSideDataObjects(`import IPython\nfrom GiN.taskwidget  import GalaxyTaskWidget\nclass Temp(object):\n    def Return(self):\n        return IPython.display.JSON(GalaxyTaskWidget.updated_form(${JSON.stringify(origin)}, json.loads(base64.b64decode("${btoa(JSON.stringify(inputs))}")), ${JSON.stringify(self.model.get('inputs')['id'])}, ${JSON.stringify(history_id)}))\na = Temp()\na.Return()`)
             KernelSideDataObjects(`try:\n    del a\nexcept:\n    print("a is not defined")`)
 
-            let fint = JSON.stringify(formdata)
+            row['data-key']['data'] = []
+
+
             self.update_metadata_FormState('galaxy_tool', refine_inputs['inputs'])
         })
 
         FormParent.append(row)
+        
+        this.return_drill_down_dict(row, input_def.optional)
+        this.expand_drill_down( row)
+
         return row
     }
 
+    expand_drill_down(row){
+
+        row.querySelectorAll('input').forEach(function(input) {
+
+            if(input.checked){
+                if(input.parentNode.parentNode.parentNode.parentNode.className == 'subgroup'){
+                    input.parentNode.parentNode.parentNode.parentNode.style.display  = 'block'
+                    input.parentNode.parentNode.parentNode.parentNode.parentNode.querySelector('span').className = 'icon fa mr-1 fa-minus'
+                }
+            }
+        });
+    }
 
     add_variable_widget(tbl){
 
@@ -1983,6 +1783,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
     }
 
     add_input_value (input_def, FormParent, NamePrefix){
+        
+      
 
         if (this.el.querySelector('.tool-migration-select')){
             var origin = this.el.querySelector('.tool-migration-select').value
@@ -2005,6 +1807,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         input.value = input_def['value']
         input.className = 'InputData'
         const row = document.createElement('div')
+
+        row['data-key'] =  {'name':NamePrefix+input_def['name'], 'data':input_def.value, 'optional':input_def.optional, 'id': input_def.id, 'tool_type': 'input_value' }
 
         const title = document.createElement('div')
         title.className = 'ui-from-title'
@@ -2065,17 +1869,19 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         help.style.marginLeft = '10px'
         help.style.marginBottom = '10px'
 
-        help.append( helpSpan)
+        help.append(helpSpan)
     
         title.append(TitleSpan)
         row.className = 'ui-form-element section-row'
         row.id = input_def.id
         title.style.float = 'left'
 
-        input.addEventListener('input', async () =>{
+        input.addEventListener('input', async (e) =>{
+
+            row['data-key']['data'] = e.target.value
             var history_id = self.el.querySelector('#dataset-history-list').value
             var form = self.el.querySelector('.Galaxy-form')
-            var inputs = await self.get_form_data(form)
+            var inputs =  self.clean_param_for_job(self.new_form_data(form), false)
             //var refine_inputs  = await KernelSideDataObjects(`import json\nimport base64\nfrom GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.updated_form(${JSON.stringify(origin)}, json.loads(base64.b64decode("${btoa(JSON.stringify(inputs))}")), ${JSON.stringify(self.model.get('inputs')['id'])}, ${JSON.stringify(history_id)})`)
           
             var refine_inputs = await KernelSideDataObjects(`import IPython\nfrom GiN.taskwidget  import GalaxyTaskWidget\nclass Temp(object):\n    def Return(self):\n        return IPython.display.JSON(GalaxyTaskWidget.updated_form(${JSON.stringify(origin)}, json.loads(base64.b64decode("${btoa(JSON.stringify(inputs))}")), ${JSON.stringify(self.model.get('inputs')['id'])}, ${JSON.stringify(history_id)}))\na = Temp()\na.Return()`)
@@ -2250,6 +2056,9 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         data['type_id'] =`dataset-${data['id']}` 
         this.add_dataset(ListItem, this.data_row_list, HistoryID)
     }
+
+
+
  
     async NewTusUpload(data){
 
@@ -2260,8 +2069,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         }
 
         this.el.querySelector('.upload-status-icon .fa-spin').style.display = 'block'
-
-        // var apiKey = await KernelSideDataObjects(`from GiN.taskwidget  import GalaxyTaskWidget\nGalaxyTaskWidget.Return_api_key(${JSON.stringify(origin)})`)
 
         var apiKey =  await KernelSideDataObjects(`import IPython\nfrom GiN.taskwidget  import GalaxyTaskWidget\nclass Temp(object):\n    def Return(self):\n        return IPython.display.JSON(GalaxyTaskWidget.Return_api_key(${JSON.stringify(origin)}))\na = Temp()\na.Return()`)
         KernelSideDataObjects('try:\n    del a\nexcept:    print("a is not defined")')
@@ -2354,11 +2161,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         })
     }
 
-    // async NewTusUpload(data){
 
-    //     await this.upload_files()
-    //     await this.readFile()
-    // }
 
     async readFile() {
 
@@ -2437,8 +2240,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         var history_id = this.el.querySelector('#dataset-history-list').value
 
         for (var i = 0; i < upload_method.length; i++ )  {
-            if (upload_method[i].style.display ==  'block'){
-                if (upload_method[i].querySelector('.input_upload').type == 'file') {
+            if (upload_method[i].style.display ===  'block'){
+                if (upload_method[i].querySelector('.input_upload').type === 'file') {
                   
                     this.Upload_callback(upload_method[i].querySelector('.input_upload'))
 
@@ -2466,23 +2269,14 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         // this.hide_run_buttons(false)
     }
 
-    async add_history_list(updated_list=false){
+    async add_history_list(origin){
 
         var self = this
-
-        if (this.el.querySelector('.tool-migration-select')){
-            var origin = this.el.querySelector('.tool-migration-select').value
-        } else{
-            var origin = this.model.get('origin')
-        }
-
         var options
 
-        if(updated_list){
-            options = await KernelSideDataObjects(`import json\nimport base64\nfrom GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.get_histories(server=${JSON.stringify(origin)})`)
-        } else{
-            options = this.model.get('history_ids')
-        }
+        var options = await KernelSideDataObjects(`import json\nimport base64\nfrom GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.get_histories(server=${JSON.stringify(origin)})`)
+
+        this.selected_history = options[0]['id']
 
         const select = document.createElement('select')
 
@@ -2499,8 +2293,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             self.removeAllChildNodes(DataListdiv)
         }
 
-        DataListdiv.append(await this.data_row_list(options[0]['id']))
-
         for (var i = 0; i < options.length; i++) {
             const opt = `${i+1}: ${options[i]['name']}`;
             const el = document.createElement("option");
@@ -2509,18 +2301,25 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             select.appendChild(el);
         }
 
-        select.addEventListener("change", async () => {
+        if (options && options[0] && options[0]['id'] === undefined) {
+            options = this.model.get('history_ids')
+        }
 
-            this.el.querySelector('#data-history-icon').className = 'fa fa-spinner fa-spin'
+        DataListdiv.append(await this.data_row_list(options[0]['id']))
+
+        async function  refresh(){
+
+            self.el.querySelector('#data-history-icon').className = 'fa fa-spinner fa-spin'
             // spn.style.display = 'block'
             // update.style.display = 'none'
      
-            if (this.model.get('galaxy_tool_id') != "GiN_data_upload_tool"){
+            if (self.model.get('galaxy_tool_id') != "GiN_data_upload_tool"){
 
                 self.removeAllChildNodes(DataListdiv)
 
                 var form = self.element.querySelector('.Galaxy-form')
-                var Inputs = await self.get_form_data(form)
+                var Inputs =  self.clean_param_for_job(self.new_form_data(form), false)
+
                 var refine_inputs = await KernelSideDataObjects(`import IPython\nfrom GiN.taskwidget  import GalaxyTaskWidget\nclass Temp(object):\n    def Return(self):\n        return IPython.display.JSON(GalaxyTaskWidget.updated_form(${JSON.stringify(origin)}, json.loads(base64.b64decode("${btoa(JSON.stringify(Inputs))}")), ${JSON.stringify(self.model.get('inputs')['id'])}, ${JSON.stringify(select.value)}))\na = Temp()\na.Return()`)
                
                 KernelSideDataObjects(`try:\n    del a\nexcept:\n    print("a is not defined")`)
@@ -2530,40 +2329,115 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 var selected_index = {}
                 selected_index['HID'] = select.selectedIndex
                 self.form_builder(refine_inputs['inputs'],  selected_index) 
-                DataListdiv.append(await this.data_row_list(select.value))
+                DataListdiv.append(await self.data_row_list(select.value))
 
             } else {
                 self.removeAllChildNodes(DataListdiv )
-                DataListdiv.append(await this.data_row_list(select.value))
+                DataListdiv.append(await self.data_row_list(select.value))
             }
 
-            this.el.querySelector('#data-history-icon').className = 'fa fa-refresh'
+            self.el.querySelector('#data-history-icon').className = 'fa fa-refresh'
 
+        }
+
+        let isRefreshing = false;
+
+        select.addEventListener("change", async (e) => {
+
+            if (!isRefreshing) {
+                // Set the flag to true to indicate that a refresh operation is in progress
+                isRefreshing = true;
+               
+                refresh().then(() => {
+                    isRefreshing = false;
+                });
+            }
         });
 
-        this.el.querySelector('#data-history-icon').addEventListener("click", async ( )=>{
-
-            this.el.querySelector('#data-history-icon').className = 'fa fa-spinner fa-spin'
-            self.removeAllChildNodes( this.el.querySelector('.history-dataset-list'))
-
-
-            this.el.querySelector('.history-dataset-list').append(await this.data_row_list(select.value))
-            this.el.querySelector('#data-history-icon').className = 'fa fa-refresh'
-        })
+        var hid = select.value
 
         var DataList = this.el.querySelector('#history-list')
-
         DataList.append(select)
+   
+    }
+
+    History_refresh(){
+
+        var self = this
+
+        async function historyRefresh(){
+
+            var origin
+
+            if (self.el.querySelector('.tool-migration-select')){
+                origin = self.el.querySelector('.tool-migration-select').value
+            } else{
+                origin = self.model.get('origin')
+            }
+
+            var options = await KernelSideDataObjects(`import json\nimport base64\nfrom GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.get_histories(server=${JSON.stringify(origin)})`)
+
+            var history_list  = []
+            var hid
+
+            for (var i  in options){
+                history_list.push(options[i]['id'])
+            }
+
+            if (history_list.includes(self.el.querySelector('#dataset-history-list').value)){
+               hid = self.el.querySelector('#dataset-history-list').value
+            } else{
+               
+                var select = self.el.querySelector(`#dataset-history-list`)
+                self.removeAllChildNodes(self.el.querySelector(`#dataset-history-list`) )
+
+                for (var i = 0; i < options.length; i++) {
+                    const opt = `${i+1}: ${options[i]['name']}`;
+                    const el = document.createElement("option");
+                    el.textContent = opt;
+ 
+                    el.value =  `${options[i]['id']}`;
+
+                    if(hid == options[i]['id'] ){
+                        el.selected  =  true
+                    }
+
+                    select.appendChild(el);
+                }
+
+                hid =  history_list[0]
+            }
+      
+            self.removeAllChildNodes(self.el.querySelector('.history-dataset-list'))    
+            self.el.querySelector('#data-history-icon').className = 'fa fa-spinner fa-spin'
+            self.el.querySelector('.history-dataset-list').append(await self.data_row_list(hid))
+            self.el.querySelector('#data-history-icon').className = 'fa fa-refresh'
+            self.el.querySelector('#data-history-icon').addEventListener('click', ()=>{})
+        }
+
+        let isRefreshing = false;
+
+        self.el.querySelector('#data-history-icon').addEventListener("click",  ( )=>{
+            if (!isRefreshing) {
+                // Set the flag to true to indicate that a refresh operation is in progress
+                isRefreshing = true;
+               
+                historyRefresh().then(() => {
+                    isRefreshing = false;
+                });
+            }
+        })
     }
 
     AddHelpSection(help){
 
         var self = this
+        var origin
 
         if(this.el.querySelector('.tool-migration-select')){
-            var origin = this.el.querySelector('.tool-migration-select').value
+            origin = this.el.querySelector('.tool-migration-select').value
         }  else{
-            var origin = this.model.get('origin')
+            origin = this.model.get('origin')
         }
         
         var helpSection = this.element.querySelector('.help-section')
@@ -2593,7 +2467,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
             let nextSibling = HelpButton.nextElementSibling;   
 
-            if (nextSibling.style.display == 'none'){
+            if (nextSibling.style.display === 'none'){
                 nextSibling.style.display = 'block'
             } else {
                 nextSibling.style.display = 'none'
@@ -2718,7 +2592,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
                 var history_id = self.element.querySelector('#dataset-history-list')
                 var form = self.element.querySelector('.Galaxy-form')
-                var Inputs = await self.get_form_data(form)
+                var Inputs =  self.clean_param_for_job(self.new_form_data(form), false)
 
                 var refine_inputs = await KernelSideDataObjects(`import IPython\nfrom GiN.taskwidget  import GalaxyTaskWidget\nclass Temp(object):\n    def Return(self):\n        return IPython.display.JSON(GalaxyTaskWidget.updated_form(${JSON.stringify(origin)}, json.loads(base64.b64decode("${btoa(JSON.stringify(Inputs))}")), ${JSON.stringify(self.model.get('inputs')['id'])}, ${JSON.stringify(history_id.value)}))\na = Temp()\na.Return()`)
                 KernelSideDataObjects(`try:\n    del a\nexcept:\n    print("a is not defined")`)
@@ -2776,7 +2650,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
       
             var history_id = self.el.querySelector('#dataset-history-list').value
             var form = self.el.querySelector('.Galaxy-form')
-            var inputs = await self.get_form_data(form)
+            var inputs =  self.clean_param_for_job(self.new_form_data(form), false)
             // var refine_inputs  = await KernelSideDataObjects(`import json\nimport base64\nfrom GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.updated_form(${JSON.stringify(origin)}, json.loads(base64.b64decode("${btoa(JSON.stringify(inputs))}")), ${JSON.stringify(self.model.get('inputs')['id'])}, ${JSON.stringify(history_id)})`)
             var refine_inputs = await KernelSideDataObjects(`import IPython\nfrom GiN.taskwidget  import GalaxyTaskWidget\nclass Temp(object):\n    def Return(self):\n        return IPython.display.JSON(GalaxyTaskWidget.updated_form(${JSON.stringify(origin)}, json.loads(base64.b64decode("${btoa(JSON.stringify(inputs))}")), ${JSON.stringify(self.model.get('inputs')['id'])}, ${JSON.stringify(history_id)}))\na = Temp()\na.Return()`)
             KernelSideDataObjects(`try:\n    del a\nexcept:\n    print("a is not defined")`)
@@ -2788,7 +2662,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             self.el.querySelector('.delete-button').closest('.internal-ui-repeat.section-row').remove()
             var history_id = self.el.querySelector('#dataset-history-list').value
             var form = self.el.querySelector('.Galaxy-form')
-            var inputs = await self.get_form_data(form)
+            var inputs =  self.clean_param_for_job(self.new_form_data(form), false)
             // var refine_inputs  = await KernelSideDataObjects(`import json\nimport base64\nfrom GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.updated_form(${JSON.stringify(origin)}, json.loads(base64.b64decode("${btoa(JSON.stringify(inputs))}")), ${JSON.stringify(self.model.get('inputs')['id'])}, ${JSON.stringify(history_id)})`)
             var refine_inputs = await KernelSideDataObjects(`import IPython\nfrom GiN.taskwidget  import GalaxyTaskWidget\nclass Temp(object):\n    def Return(self):\n        return IPython.display.JSON(GalaxyTaskWidget.updated_form(${JSON.stringify(origin)}, json.loads(base64.b64decode("${btoa(JSON.stringify(inputs))}")), ${JSON.stringify(self.model.get('inputs')['id'])}, ${JSON.stringify(history_id)}))\na = Temp()\na.Return()`)
             KernelSideDataObjects(`try:\n    del a\nexcept:\n    print("a is not defined")`)
@@ -2829,10 +2703,12 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
  
     add_input_data(input_def, FormParent, NamePrefix, call_back_data={}){ 
 
+        var origin
+
         if(this.el.querySelector('.tool-migration-select')){
-            var origin = this.el.querySelector('.tool-migration-select').value
+            origin = this.el.querySelector('.tool-migration-select').value
         }  else{
-            var origin = this.model.get('origin')
+            origin = this.model.get('origin')
         }
 
         if (input_def.optional == true) {
@@ -2853,13 +2729,22 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         var self = this
         const row = document.createElement('div')
         row.className = 'ui-form-element section-row'
-        row.id =  NamePrefix+input_def['name']
+        row.id = input_def.id
 
+        row['data-key']  = {'optional': input_def.optional, 'name':NamePrefix+input_def['name'], 'data': {'batch':false, 'values':[]}, 'id':row.id, 'tool_type':'input_data'}
+
+        if(input_def.value ){
+            row['data-key']['data']['values'] = input_def.value.values  
+        } else if(input_def.default_value){
+            row['data-key']['data']['values'] = input_def.default_value.values
+        }
+        else{
+            row['data-key']['data'] = null
+        }
+  
         var FileManu = document.createElement('div')
         FileManu.className = 'multi-selectbox'
         FileManu.style.width = '100%'
-
-        FileManu['data-file'] =  {"values":[], "batch":false}
 
         var Select = document.createElement('select')
         Select.className = 'InputDataFile'
@@ -2968,10 +2853,10 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         sim.querySelector('#data-file-input').addEventListener('click', (e) => {
 
-            FileManu.querySelector('.data-descriptor-label').style.display = 'none'
-            FileManu['data-file']['batch'] = false
-            Select.multiple = false
+            Select.style.height = '40px'
 
+            FileManu.querySelector('.data-descriptor-label').style.display = 'none'
+            Select.multiple = false
             self.removeAllChildNodes(Select)
 
             for (var i = 0; i < options['hda'].length; i++) {
@@ -2992,9 +2877,14 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         sim.querySelector('#batch-file-input').addEventListener('click', (e) => {
 
+            Select.style.height = '200px'
+
             FileManu.querySelector('.data-descriptor-label').style.display = 'block'
 
-            FileManu['data-file']['batch'] = true
+            if (input_def.value && !input_def.multiple){
+                row['data-key']['data']['batch'] = true
+            } 
+
             Select.multiple = true
 
             self.removeAllChildNodes(Select)
@@ -3012,16 +2902,30 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 }
                 Select.appendChild(el);
             }
+
+            if(Select.children.length > 0){
+                Select.selectedIndex = 0
+                if(!row['data-key']['data']){
+                    row['data-key']['data'] = {'batch':false, 'values':[]}
+                } else{
+                    row['data-key']['data']['values']  = [JSON.parse(Select.value)]
+                }
+            } else{
+                row['data-key']['data'] = null
+            }
+
         })
 
         sim.querySelector('#collection-data-input').addEventListener('click', (e) => {
 
+            row['data-key']['data'] = {'batch':null, 'values':null}
+
+            Select.style.height = '40px'
+
+            // Select.selectedIndex = 0
+
             FileManu.querySelector('.data-descriptor-label').style.display = 'block'
-
             Select.multiple = false
-
-            FileManu['data-file']['batch'] = true
-
             self.removeAllChildNodes(Select)
 
             for (var i = 0; i < options['hdca'].length; i++) {
@@ -3058,7 +2962,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         Select.id = `input-data-${this.uid()}`
 
         Select.addEventListener("drop", function(event) {
-
             event.preventDefault();
 
             if (event.target.className == "InputDataFile") {
@@ -3083,25 +2986,47 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 Select.prepend(el);
 
                 Select.selectedIndex = 0
+
+                row['data-key']['data']  =  {'batch':false, 'values':[JSON.parse(el.value)]}
+
+                if(Select.multiple){
+                    if(row['data-key']['data']['values']){
+                        row['data-key']['data']['values'].push(JSON.parse(el.value))
+                    }
+                }
+
             }
         }, false);
 
         Select.addEventListener("change", async (e) => {
-            var children = self.el.querySelector('.Galaxy-form')
-            var inputs = await self.get_form_data(children)
+
+            row['data-key']['data'] = {'batch': false, 'values': [JSON.parse(e.target.value)] }
+            
+            var form = self.el.querySelector('.Galaxy-form')
+            var inputs =  self.clean_param_for_job(self.new_form_data(form), false)
             var history_id = self.el.querySelector('#dataset-history-list').value
           
             var refine_inputs = await KernelSideDataObjects(`import IPython\nfrom GiN.taskwidget  import GalaxyTaskWidget\nclass Temp(object):\n    def Return(self):\n        return IPython.display.JSON(GalaxyTaskWidget.updated_form(${JSON.stringify(origin)}, json.loads(base64.b64decode("${btoa(JSON.stringify(inputs))}")), ${JSON.stringify(self.model.get('inputs')['id'])}, ${JSON.stringify(history_id)}))\na = Temp()\na.Return()`)
             KernelSideDataObjects(`try:\n    del a\nexcept:\n    print("a is not defined")`)
 
             this.update_metadata_FormState('galaxy', refine_inputs['inputs'])
-            if (Select.multiple == true || FileManu['data-file']['batch'] == 'true'){
+
+            if (Select.multiple === true ){
+                if (input_def.multiple){
+                    row['data-key']['data'] = {'batch': false, 'values': [] }
+                } else{
+                    row['data-key']['data'] = {'batch': true, 'values': [] }
+                }
+
+                for(var i in Select.children){
+                    if(Select.children[i].nodeName == 'OPTION' && Select.children[i].selected){
+                        row['data-key']['data']['values'].push(JSON.parse(Select.children[i].value))
+                    }
+                }
 
             } else{
 
                 var str = this.el.querySelector('.nbtools-title').innerText
-                    
-                FileManu['data-file']['id'] = JSON.parse(Select.value)
                 var FormParent = self.el.querySelector('.Galaxy-form')
 
                 if (!str.includes("CustomProDB")) { //Fix Me: Temp fix for CustomDBPro
@@ -3115,10 +3040,9 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         FormParent.append(row)
         return row
     }
- 
+
     add_select_field(input_def, FormParent, NamePrefix){
 
-       
         if(this.el.querySelector('.tool-migration-select')){
             var origin = this.el.querySelector('.tool-migration-select').value
         }  else{
@@ -3132,15 +3056,20 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         row.className =  'ui-form-element section-row'
         row.id =  this.uid()
 
+        row['data-key'] = {'optional':input_def.optional, 'name': NamePrefix+input_def['name'], 'data':input_def.value  || input_def.default_value, 'id':input_def.id, "tool_type":null}
+
         if (input_def.display == 'checkboxes') {
+
+            row['data-key']['tool_type'] = 'checkbox'
 
             const TitleSpan = document.createElement('span')
             TitleSpan.className = "ui-form-title-text"
             TitleSpan.textContent = input_def.label
     
             const OuterDiv = document.createElement('div')
-            OuterDiv.className =  'outer-checkbox-div'
 
+            OuterDiv.className =  'outer-checkbox-div'
+            
             OuterDiv['data-value'] = JSON.stringify({"optional": input_def.optional, "name":input_def['name'], "value":input_def['value'] })
         
             const selectspan = document.createElement('span')
@@ -3161,44 +3090,55 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             select_lable.className = 'select-unselect'
             select_lable.style.marginLeft = '20px'
 
-            Input.addEventListener('change', () => {
-           
+            Input.addEventListener('click', (e)=>{
+
+                var list = []
+                for(const i in drill_down.querySelectorAll('input')){
+                if (drill_down.querySelectorAll('input')[i].checked){
+                    list.push(drill_down.querySelectorAll('input')[i].value)
+                }
+                }
+                drill_down.querySelector('.Main')['data-key'] = JSON.stringify(list) 
             })
 
             select_lable.append(Unselect)
             select_lable.append(selectspan)
 
             selectspan.addEventListener('click', async () => {
+
+                var list  = []
                 for (var i = 0; i < OuterDiv.querySelectorAll('input').length; i++ ) {
-                    OuterDiv.querySelectorAll('input')[i].checked = 'true'
+                    OuterDiv.querySelectorAll('input')[i].checked = true
+                    list.push(OuterDiv.querySelectorAll('input')[i].value)
                     // OuterDiv.querySelectorAll('input')[i].click()
                 }
 
+                row['data-key']['data'] =  list
+
                 var history_id = self.el.querySelector('#dataset-history-list').value 
                 var form = self.el.querySelector('.Galaxy-form')
-                var inputs = await self.get_form_data(form)
+                var inputs =  self.clean_param_for_job(self.new_form_data(form), false)
                 // var refine_inputs  = await KernelSideDataObjects(`import json\nimport base64\nfrom GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.updated_form(${JSON.stringify(origin)}, json.loads(base64.b64decode("${btoa(JSON.stringify(inputs))}")), ${JSON.stringify(self.model.get('inputs')['id'])}, ${JSON.stringify(history_id)})`)
                 var refine_inputs = await KernelSideDataObjects(`import IPython\nfrom GiN.taskwidget  import GalaxyTaskWidget\nclass Temp(object):\n    def Return(self):\n        return IPython.display.JSON(GalaxyTaskWidget.updated_form(${JSON.stringify(origin)}, json.loads(base64.b64decode("${btoa(JSON.stringify(inputs))}")), ${JSON.stringify(self.model.get('inputs')['id'])}, ${JSON.stringify(history_id)}))\na = Temp()\na.Return()`)
                 KernelSideDataObjects(`try:\n    del a\nexcept:\n    print("a is not defined")`)
 
                 self.update_metadata_FormState('galaxy_tool', refine_inputs['inputs'])
-            
             })
     
             Unselect.addEventListener('click', async () => {
                 for (var i = 0; i < OuterDiv.querySelectorAll('input').length; i++ ) {
-                    OuterDiv.querySelectorAll('input')[i].checked = 'false'
-                    OuterDiv.querySelectorAll('input')[i].click()
+                    OuterDiv.querySelectorAll('input')[i].checked = false
+                    // OuterDiv.querySelectorAll('input')[i].click()
                 }
+
+                row['data-key']['data'] = []
                 var history_id = self.el.querySelector('#dataset-history-list').value
                 
                 var form = self.el.querySelector('.Galaxy-form')
-                var inputs = await self.get_form_data(form)
-                // var refine_inputs  = await KernelSideDataObjects(`import json\nimport base64\nfrom GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.updated_form(${JSON.stringify(origin)}, json.loads(base64.b64decode("${btoa(JSON.stringify(inputs))}")), ${JSON.stringify(self.model.get('inputs')['id'])}, ${JSON.stringify(history_id)})`)
-               
+                var inputs =  self.clean_param_for_job(self.new_form_data(form), false)               
                 var refine_inputs = await KernelSideDataObjects(`import IPython\nfrom GiN.taskwidget  import GalaxyTaskWidget\nclass Temp(object):\n    def Return(self):\n        return IPython.display.JSON(GalaxyTaskWidget.updated_form(${JSON.stringify(origin)}, json.loads(base64.b64decode("${btoa(JSON.stringify(inputs))}")), ${JSON.stringify(self.model.get('inputs')['id'])}, ${JSON.stringify(history_id)}))\na = Temp()\na.Return()`)
+               
                 KernelSideDataObjects(`try:\n    del a\nexcept:\n    print("a is not defined")`)
-
                 self.update_metadata_FormState('galaxy_tool', refine_inputs['inputs'])
             })
 
@@ -3236,19 +3176,30 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
                 CheckBoxInput.checked = input_def.options[i][2]
 
-                CheckBoxInput.addEventListener('change', async () => {
+                CheckBoxInput.addEventListener('click', async (e)=>{
+                    
+                    var inputs = e.target.parentNode.parentNode.querySelectorAll('input')
+                    var list = []
+
+                    for (const i in inputs ){
+                        if(inputs[i].checked){
+                            list.push(inputs[i].value)
+                        }
+                    }
+
+                    row['data-key']['data'] = list
+
                     var history_id = self.element.querySelector('#dataset-history-list').value
                     var form = self.el.querySelector('.Galaxy-form')
-                    var inputs = await self.get_form_data(form)
-
-                    // var refine_inputs  = await KernelSideDataObjects(`import json\nimport base64\nfrom GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.updated_form(${JSON.stringify(origin)}, json.loads(base64.b64decode("${btoa(JSON.stringify(inputs))}")), ${JSON.stringify(self.model.get('inputs')['id'])}, ${JSON.stringify(history_id)})`)
+                    var inputs =  self.clean_param_for_job(self.new_form_data(form), false)
 
                     var refine_inputs = await KernelSideDataObjects(`import IPython\nfrom GiN.taskwidget  import GalaxyTaskWidget\nclass Temp(object):\n    def Return(self):\n        return IPython.display.JSON(GalaxyTaskWidget.updated_form(${JSON.stringify(origin)}, json.loads(base64.b64decode("${btoa(JSON.stringify(inputs))}")), ${JSON.stringify(self.model.get('inputs')['id'])}, ${JSON.stringify(history_id)}))\na = Temp()\na.Return()`)
                     KernelSideDataObjects(`try:\n    del a\nexcept:\n    print("a is not defined")`)
-                    // var refine_inputs  = await KernelSideDataObjects(`import json\nimport base64\nfrom GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.updated_form(${JSON.stringify(origin)}, json.loads(base64.b64decode("${btoa(JSON.stringify(inputs))}")), ${JSON.stringify(self.model.get('inputs')['id'])}, ${JSON.stringify(history_id)})`)
+
                     self.update_metadata_FormState('galaxy_tool', refine_inputs['inputs'])
-                    //  var refine_inputs  = await KernelSideDataObjects(`import json\nimport base64\nfrom GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.updated_form(${JSON.stringify(origin)}, json.loads(base64.b64decode("${btoa(JSON.stringify(inputs))}")), ${JSON.stringify(self.model.get('inputs')['id'])}, ${JSON.stringify(history_id)})`)
                 })
+
+                this.return_drill_down_dict(CheckBoxDiv)
 
                 CheckBoxDiv.append(CheckBoxInput)
                 CheckBoxDiv.append(CheckboxLabel)
@@ -3257,6 +3208,9 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         } 
         else {
             var options 
+
+            row['data-key']['optional'] = true
+            row['data-key']['tool_type'] = 'select_field'
 
             if (input_def['type'] == 'data_collection'){
                 options = input_def['options']['hdca']
@@ -3270,8 +3224,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             select.id = `select-${input_def.id}`  
             select.className = 'InputData'   
             select.name = NamePrefix+input_def['name']
-            select.setAttribute('data-value', JSON.stringify({'optional': input_def.optional, 'value':input_def.value}))
-        
+            // select.setAttribute('data-value', JSON.stringify({'optional': input_def.optional, 'value':input_def.value}))
+
             for(var i = 0; i < options.length; i++) {
 
                 const el = document.createElement("option");
@@ -3338,14 +3292,15 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             help.append( helpSpan)
             row.append(help)
 
-            select.addEventListener("change", async () => {
+            select.addEventListener("change", async (e) => {
 
                 var queryID = select.value
 
                 if (input_def['is_dynamic'] == true){
+                    row['data-key']['data'] =  e.target.value
 
                     var children = self.el.querySelector('.Galaxy-form')
-                    var inputs = await self.get_form_data(children)
+                    var inputs = self.clean_param_for_job(self.new_form_data(children), false)
                     var history_id = self.el.querySelector('#dataset-history-list').value
 
                     // var refine_inputs  = await KernelSideDataObjects(`import json\nimport base64\nfrom GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.updated_form(${JSON.stringify(origin)}, json.loads(base64.b64decode("${btoa(JSON.stringify(inputs))}")), ${JSON.stringify(self.model.get('inputs')['id'])}, ${JSON.stringify(history_id)})`)
@@ -3365,8 +3320,10 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                     self.update_metadata_FormState('galaxy_tool', refine_inputs['inputs'])
                 } else{
 
+                    row['data-key']['data'] =  e.target.value
+
                     var children = self.el.querySelector('.Galaxy-form')
-                    var inputs = await self.get_form_data(children)
+                    var inputs =  self.clean_param_for_job(self.new_form_data(children), false)
                     var history_id = self.el.querySelector('#dataset-history-list').value
 
                     // var refine_inputs  = await KernelSideDataObjects(`import json\nimport base64\nfrom GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.updated_form(${JSON.stringify(origin)}, json.loads(base64.b64decode("${btoa(JSON.stringify(inputs))}")), ${JSON.stringify(self.model.get('inputs')['id'])}, ${JSON.stringify(history_id)})`)
@@ -3405,7 +3362,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         }
 
         select.setAttribute('data-value', JSON.stringify({'optional': input_def.optional, 'value':input_def.value}))
-
+        
         select.id = `input-${input_def.id}`
         select.className = 'InputData' 
         const row = document.createElement('div')
@@ -3418,6 +3375,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         title.append(TitleSpan)
         row.className = 'ui-form-element section-row'
         row.id = input_def.id
+
+        row['data-key'] =  {'name':select.name, 'data':input_def.value, 'optional':input_def.optional, 'id':input_def.id, 'tool_type': 'boolean'}
 
         const help = document.createElement('div')
         help.className = 'ui-from-help'
@@ -3436,9 +3395,11 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         select.addEventListener('change', async (e) => {
 
+            row['data-key'] =  {'name':input_def.name, 'data':e.target.value, 'optional':input_def.optional}
+
             var history_id = self.el.querySelector('#dataset-history-list').value
             var form = self.el.querySelector('.Galaxy-form')
-            var inputs = await self.get_form_data(form)
+            var inputs = self.clean_param_for_job(self.new_form_data(form), false)
             // var refine_inputs  = await KernelSideDataObjects(`import json\nimport base64\nfrom GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.updated_form(${JSON.stringify(origin)}, json.loads(base64.b64decode("${btoa(JSON.stringify(inputs))}")), ${JSON.stringify(self.model.get('inputs')['id'])}, ${JSON.stringify(history_id)})`)
            
             if(this.el.querySelector('.tool-migration-select')){
@@ -3451,7 +3412,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             KernelSideDataObjects(`try:\n    del a\nexcept:\n    print("a is not defined")`)
 
             self.update_metadata_FormState('galaxy_tool', refine_inputs['inputs'])
-
         })
         
         this.el.querySelector('.nbtools-form').append(row)
@@ -3517,7 +3477,9 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         TitleSpan.style.display = 'inline'
         title.append(TitleSpan)
         row.className = 'ui-form-element section-row conditional'
+
         row.id = input_def.id
+        row['data-key'] = {'data': input_def.value, 'optional': input_def.optional}
         row.append(title)
         row.append(select)
         parent.append(row)
@@ -3540,18 +3502,20 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             }
         }
 
-        select.addEventListener("change", async () => {
+        select.addEventListener("change", async (e) => {
 
             var queryID = select.value
             var form = self.element.querySelector('.Galaxy-form')
-            var inputs = await self.get_form_data(form)
+            var inputs =  self.clean_param_for_job(self.new_form_data(form), false)
             self.removeAllChildNodes(ConditionalDiv)
             var history_id = self.element.querySelector('#dataset-history-list').value 
             // var refine_inputs = await KernelSideDataObjects(`import json\nimport base64\nfrom GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.updated_form(${JSON.stringify(origin)}, json.loads(base64.b64decode("${btoa(JSON.stringify(inputs))}")), ${JSON.stringify(self.model.get('inputs')['id'])}, ${JSON.stringify(history_id)})`)
            
+            row['data-key'] = {'data': e.target.value, 'optional': input_def.optional}
            
             var refine_inputs = await KernelSideDataObjects(`import IPython\nfrom GiN.taskwidget  import GalaxyTaskWidget\nclass Temp(object):\n    def Return(self):\n        return IPython.display.JSON(GalaxyTaskWidget.updated_form(${JSON.stringify(origin)}, json.loads(base64.b64decode("${btoa(JSON.stringify(inputs))}")), ${JSON.stringify(self.model.get('inputs')['id'])}, ${JSON.stringify(history_id)}))\na = Temp()\na.Return()`)
             KernelSideDataObjects(`try:\n    del a\nexcept:\n    print("a is not defined")`)
+         
             this.conditional_name = input_def['name']
             var input_def1 = this.un_wrap(refine_inputs['inputs'], this.conditional_name)
 
@@ -3574,10 +3538,13 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
     add_conditional_section_1(input_def, parent, NamePrefix, call_back_data={}){
 
+
+        var origin
+
         if (this.el.querySelector('.tool-migration-select')){
-            var origin = this.el.querySelector('.tool-migration-select').value
+            origin = this.el.querySelector('.tool-migration-select').value
         }  else{
-            var origin = this.model.get('origin')
+            origin = this.model.get('origin')
         }
 
         // // // ########################################################
@@ -3595,7 +3562,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         const select = document.createElement('select')
         select.name = NamePrefix+input_def['name']+"|"+input_def['test_param']['name']
-        select.setAttribute('data-value', JSON.stringify({'optional': input_def['test_param'].optional, 'value':input_def['test_param'].value}))
+        select.setAttribute('data-value', JSON.stringify({'optional': input_def['test_param'].optional, 'name': input_def.name, 'data':input_def['test_param'].value}))
 
         select.id = `select-${input_def.id}`    
         select.className = 'InputData' 
@@ -3633,6 +3600,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         TitleSpan.style.display = 'inline'
         title.append(TitleSpan)
         row.className = 'ui-form-element section-row conditional'
+
+        row['data-key'] =  {'data': input_def['test_param'].value, 'name': NamePrefix+input_def['name']+"|"+input_def['test_param']['name'], 'optional': input_def.test_param.optional, 'id': select.id, "tool_type": 'conditional'}
         row.style.display = 'block'
         row.id = input_def.id
         row.append(title)
@@ -3666,7 +3635,9 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             parent.append(ConditionalDiv)
         }
 
-        select.addEventListener("change", (e) => {
+        select.addEventListener("change", async (e) => {
+
+            row['data-key']['data'] =   select.value
 
             for (var i = 0; i <  options_list.length; i++){
                 if (e.target.value == input_def['cases'][i]['value'] ){
@@ -3677,6 +3648,18 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                     self.el.querySelector(`#${options_list[i]}`).className = 'ui-form-element section-row pl-2'
                 }
             }
+
+            var form = self.element.querySelector('.Galaxy-form')
+            var inputs =  self.clean_param_for_job(self.new_form_data(form), false)
+            var history_id = self.element.querySelector('#dataset-history-list').value            
+            row['data-key']['data'] = e.target.value
+            
+            var refine_inputs = await KernelSideDataObjects(`import IPython\nfrom GiN.taskwidget  import GalaxyTaskWidget\nclass Temp(object):\n    def Return(self):\n        return IPython.display.JSON(GalaxyTaskWidget.updated_form(${JSON.stringify(origin)}, json.loads(base64.b64decode("${btoa(JSON.stringify(inputs))}")), ${JSON.stringify(self.model.get('inputs')['id'])}, ${JSON.stringify(history_id)}))\na = Temp()\na.Return()`)
+           
+            KernelSideDataObjects(`try:\n    del a\nexcept:\n    print("a is not defined")`)
+
+            self.update_metadata_FormState('galaxy_tool', refine_inputs['inputs'])
+
         });
     }
   
@@ -3684,7 +3667,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         var self = this
 
-       
         if(this.el.querySelector('.tool-migration-select')){
             var origin = this.el.querySelector('.tool-migration-select').value
         }  else{
@@ -3692,7 +3674,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         }
   
         // const options = await KernelSideDataObjects(`import json\nimport base64\nfrom GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.get_histories(server=${JSON.stringify(origin)})`)
-      
  
         var NewNamePrefix = NamePrefix+input_def['name']+"|"
         input_def.id = this.uid()
@@ -3759,7 +3740,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             // }
 
             var form = self.el.querySelector('.Galaxy-form')
-            var inputs = await self.get_form_data(form)
+            var inputs =  self.clean_param_for_job(self.new_form_data(form), false)
             // var refine_inputs  = await KernelSideDataObjects(`import json\nimport base64\nfrom GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.updated_form(${JSON.stringify(origin)}, json.loads(base64.b64decode("${btoa(JSON.stringify(inputs))}")), ${JSON.stringify(self.model.get('inputs')['id'])}, ${JSON.stringify(history_id)})`)
             var refine_inputs = await KernelSideDataObjects(`import IPython\nfrom GiN.taskwidget  import GalaxyTaskWidget\nclass Temp(object):\n    def Return(self):\n        return IPython.display.JSON(GalaxyTaskWidget.updated_form(${JSON.stringify(origin)}, json.loads(base64.b64decode("${btoa(JSON.stringify(inputs))}")), ${JSON.stringify(self.model.get('inputs')['id'])}, ${JSON.stringify(history_id)}))\na = Temp()\na.Return()`)
            
@@ -4120,7 +4101,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         }  else{
             var URL = this.model.get('origin')
         }
-
+        
         var row = `<div id="${dataset['type_id']}"   class="list-item ${dataset['history_content_type']} history-content state-${dataset['state']}" >
                         <div class="warnings"></div>
                         <div class="primary-actions"></div>
@@ -4235,6 +4216,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
                 //To fix the Kernel busy issue which is arising because of IPython.display.JSON,  an instance of the Temp class added and deleted once galaxy object returns.
                 var data = await KernelSideDataObjects(`import IPython\nfrom GiN.taskwidget  import GalaxyTaskWidget\nclass Temp(object):\n    def Return(self):\n        return IPython.display.JSON(GalaxyTaskWidget.show_data_set(server=${JSON.stringify(URL)}, dataset_id=${JSON.stringify(dataset['id'])} ))\na = Temp()\na.Return()`)
+              
                 KernelSideDataObjects(`try:\n    del a\nexcept:\n    print("a is not defined")`)
 
                 if ( data['state'] == 'new'  ){
@@ -5175,10 +5157,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         var self  = this;
         this.el.querySelectorAll('.nbtools-run').forEach((button) => button.addEventListener('click', async () => {
             
-            if (inputs == 'error'){
-                return
-            }
-
             var toolid =  "GiN_data_upload_tool"
 
             if (this.model.get('galaxy_tool_id') == toolid) {
@@ -5188,22 +5166,19 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 a()
 
                 this.dataupload_job()
-            } else if (this.model.get('name') == 'login'){
+            }else if (this.model.get('name') == 'login'){
                 this.trigger_login()
             }else {
 
                 var form = self.element.querySelector('.Galaxy-form')
-                var inputs =  await this.get_form_data(form, true)
-
-                if (inputs == 'error'){
+                var history_id = self.element.querySelector('#dataset-history-list').value
+                var job_inputs = this.clean_param_for_job(this.new_form_data(form), true)
+                
+                if(job_inputs == undefined){
                     return 
                 }
-
-                var history_id = self.element.querySelector('#dataset-history-list').value 
                 
-             
-
-                this.SubmitJob(inputs, history_id)
+                this.SubmitJob(job_inputs, history_id)
                 this.hide_run_buttons(true)
             }
         }));
@@ -5242,12 +5217,12 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             credentials['password'] = inputs[2].value
         }
 
+
         var jobs = await KernelSideDataObjects(`import json\nimport base64\nfrom GiN.authwidget import GalaxyAuthWidget\na  = GalaxyAuthWidget()\na.login(json.loads(base64.b64decode("${btoa(JSON.stringify(credentials))}")))`)
            
-        // console.log(ContextManager.jupyter_app.shell._leftHandler._items[1].widget.node.querySelector('.lm-Widget.p-Widget.nbtools-toolbox.nbtools-wrapper'))
-        // ContextManager.PrivateData.origins.push(credentials['server'])
-       
+
         KernelSideDataObjects(`del a`)
+
 
         if (jobs.state === 'error' ) {
 
@@ -5268,6 +5243,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             this.el.querySelector('#refresh-galaxy-cells').style.display = 'block'
             this.el.querySelector('#refresh-galaxy-cells-checkbox-dev').style.display  = 'block'
             this.hide_run_buttons(true)
+
+            // this.runAllGalaxyCells(false, true )
 
             // if (this.el.querySelector('#form-restore').checked ){
             //     if (!ContextManager.notebook_tracker) return;               
@@ -5312,8 +5289,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         this.JobStatusTemplate(toolforms, jobs)
 
     } else {
-
-           
             for (var i = 0; i < jobs['jobs'].length; i++ ) {
                 this.JobStatusTemplate(toolforms, jobs['jobs'][i])
             }

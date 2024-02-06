@@ -512,24 +512,22 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
         gi13 = a.get(server=server_d)
         gi14 = a.get(server=server_u)
 
-        temp_dir = os.path.join(os.getcwd(), "temp1")
+        temp_dir = os.path.join(os.getcwd(), "gtemp")
 
         if not os.path.exists(temp_dir):
             os.mkdir(temp_dir)
 
-        for f in os.listdir(temp_dir):
-            os.remove(os.path.join(temp_dir, f))
+        fs = glob.glob(os.path.join(temp_dir, '*.*'))
+
+        for f  in  fs:
+            os.remove(f)
 
         gi13.gi.datasets.download_dataset(
             dataset_id=dataset_id, file_path=temp_dir, require_ok_state=False
         )
 
         file_name = glob.glob(temp_dir + "/*.*") 
-
-        # file_name = os.path.join(temp_dir, dataset_name)
-
         out = gi14.tools.gi.tools.upload_file(path=file_name[0], history_id=history_id)
-
 
         return IPython.display.JSON(out)
 
