@@ -486,8 +486,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                                                 <li class="server-list-el" data-value="https://usegalaxy.org" > <b> Main</b>  </li>
                                                 <li class="server-list-el" data-value="https://usegalaxy.eu">  <b>Europe</b>   </li>
                                                 <li class="server-list-el" data-value="https://localhost:8080" >  <b>Local Server</b> </li>
-                                                <li class="server-list-el" data-value=" http://10.66.95.3:8080" >  <b>Lab's local for testing</b> </li>
-                                                    
+                                                <li class="server-list-el" data-value=" http://10.66.95.3:8080" >  <b>Lab's local for testing</b> </li>   
                                             </ul>
                                         </div>
 
@@ -793,7 +792,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         if (input_def.id == 'undefined') {
             input_def.id = this.uid()  
         }
-
+ 
         switch (input_def.type) {            
             case "conditional":  
                 this.add_conditional_section_1(input_def, form_parent, name_prefix, data);
@@ -2649,10 +2648,11 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         Button.addEventListener("click", async (e)=>{ 
 
-            var Count = row.children.length
-            add_internal_repeat(input_def['inputs'], Count, row.id)
-      
             var history_id = self.el.querySelector('#dataset-history-list').value
+
+            var Count = row.children.length
+            add_internal_repeat(input_def['inputs'], Count)
+      
             var form = self.el.querySelector('.Galaxy-form')
             var inputs =  self.clean_param_for_job(self.new_form_data(form), false)
             // var refine_inputs  = await KernelSideDataObjects(`import json\nimport base64\nfrom GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.updated_form(${JSON.stringify(origin)}, json.loads(base64.b64decode("${btoa(JSON.stringify(inputs))}")), ${JSON.stringify(self.model.get('inputs')['id'])}, ${JSON.stringify(history_id)})`)
@@ -2748,7 +2748,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
   
         var FileManu = document.createElement('div')
         FileManu.className = 'multi-selectbox'
-        FileManu.style.width = '100%'
+        // FileManu.style.width = '100%'
 
         var Select = document.createElement('select')
         Select.className = 'InputDataFile'
@@ -3060,7 +3060,17 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         row.className =  'ui-form-element section-row'
         row.id =  this.uid()
 
-        row['data-key'] = {'optional':input_def.optional, 'name': NamePrefix+input_def['name'], 'data':input_def.value  || input_def.default_value, 'id':input_def.id, "tool_type":null}
+        var data
+
+        //if only one option availabe in select list and if its not optional param
+  
+        if (!input_def.optional ){
+            data = input_def.options[0][1]
+        } else{
+            data = input_def.value  || input_def.default_value
+        }
+        
+        row['data-key'] = {'optional':input_def.optional, 'name': NamePrefix+input_def['name'], 'data': data, 'id':input_def.id, "tool_type":null}
 
         if (input_def.display == 'checkboxes') {
 

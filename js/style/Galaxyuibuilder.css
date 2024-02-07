@@ -9,30 +9,28 @@
     margin: 5px;
 }
 
-.galaxy-uibuilder .ui-repeat .section-row {
-    border-radius: 20px;
+.galaxy-uibuilder .collapsible {
+  background-color: #777;
+  border: 1px #777 solid;
+  color: white;
+  cursor: pointer;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  border: none;
+  text-align: left;
+  outline: none;
+  font-size: 15px;
+  width: 95%;
+  margin: 0px;
+  margin-left: 0.5%;
+  margin-top: 5px;
+  padding-left: 2%;
+  padding-right: 2%;
+  border-radius: 0px;
+  border-top-left-radius:2px; 
+  border-top-right-radius: 2px; 
 }
 
-.galaxy-uibuilder .collapsible {
-    background-color: #777;
-    color: white;
-    cursor: pointer;
-    padding-top: 10px;
-    padding-bottom: 10px;
-    border: none;
-    text-align: left;
-    outline: none;
-    font-size: 15px;
-    width: 95%;
-    margin: 0px;
-    margin-top: 5px;
-    padding-left: 2.5%;
-    padding-right: 2.5%;
-    border-radius: 0px;
-    border-top-left-radius:2px; 
-    border-top-right-radius: 2px; 
-  }
-  
   .galaxy-uibuilder .active, .collapsible:hover {
     background-color: #555;
   }
@@ -56,10 +54,10 @@
     border-bottom-left-radius: 5px;
 }
 
-.galaxy-uibuilder .internal-ui-repeat .section-row {
+/* .galaxy-uibuilder .internal-ui-repeat .section-row {
     border-color: rgb(32, 156, 156);
     border-width: 5px;
-}
+} */
 
 .galaxy-uibuilder .delete-button {
   
@@ -348,14 +346,7 @@ border-radius: 5px;
   height: 5px;
 }
 
-select#History_IDs.InputData{
-  padding: 0px;
-  margin:0px;
-}
 
-.InputData{
-  background-color: white
-}
 
 .upload-title{
   margin: 10px;
@@ -511,10 +502,48 @@ select#History_IDs.InputData{
 }
 
 [id^="uid-"][id$="-sections"] {
-  border-right: 2px rgb(139,138,138)  solid;
-  border-left: 2px rgb(139,138,138) solid;
-  border-bottom:  2px rgb(139,138,138) solid;
-  border-bottom-left-radius: 2px;
-  border-bottom-right-radius: 2px;
+  background: rgb(227,227,227);
+  border: 1px #777 solid;
+  cursor: pointer;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  border: none;
+  text-align: left;
+  outline: none;
+  font-size: 15px;
+  width: 98%;
+  margin: 0px;
+  margin-left: 0.5%;
+  padding-left: 2%;
+  padding-right: 2%;
+  border-radius: 0px;
+  border-bottom-left-radius:3px; 
+  border-bottom-right-radius: 3px; 
+  border-left: 1px #777 solid;
+  border-bottom:  1px #777 solid;
 }
 
+.galaxy-uibuilder .conditional{
+  margin: 0px;
+  padding: 0px;
+ width: 100%;
+}
+
+.galaxy-uibuilder .conditional select{
+width: 98%;
+margin-left: 0.5%;
+}
+
+[id^="select-uid-"] {
+  width: 99%;
+}
+
+.galaxy-uibuilder [id^="input-uid-"]:not([type="checkbox"]) {
+  width: 99%;
+}
+
+.galaxy-uibuilder .outer-checkbox-div input{
+  width: 10px;
+  height: 10px;
+  
+}

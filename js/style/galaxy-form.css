@@ -12,7 +12,8 @@
 }
 
 .galaxy-uibuilder .Galaxy-form input:not(.fileid, .buttonid, [type='checkbox']){
-  width: 100%;
+
+  width: 99%;
   padding: 12px 20px;
   margin: 8px 0;
   display: inline-block;
@@ -22,7 +23,7 @@
 }
 
 .galaxy-uibuilder .Galaxy-form select{
-  width: 100%;
+  /* width: 100%; */
   padding: 12px 20px;
   margin: 8px 0;
   display: inline-block;
