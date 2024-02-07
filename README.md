@@ -83,17 +83,17 @@ docker run --rm -p 8888:8888 jayadevjoshi12/gin:latest
 
 # Screenshots..
 
-## Login
+## Login tool
 
 ![alt text](https://github.com/jaidevjoshi83/GiN/blob/master/GiN_Screenshot/login_widget.png)
 
 ## Galaxy tool form
 
-![alt text](https://github.com/jaidevjoshi83/GiN/blob/master/GiN_Screenshot/tool_form1.png)
+![alt text](https://github.com/jaidevjoshi83/GiN/blob/master/GiN_Screenshot/tool_form.png)
 
 ## Job status 
 
-![alt text](https://github.com/jaidevjoshi83/GiN/blob/master/GiN_Screenshot/Job_Status.png)
+![alt text](https://github.com/jaidevjoshi83/GiN/blob/master/GiN_Screenshot/JobStatus.png)
 
 ## History Data
 
@@ -102,3 +102,11 @@ docker run --rm -p 8888:8888 jayadevjoshi12/gin:latest
 ## Data sharing widget
 
 ![alt text](https://github.com/jaidevjoshi83/GiN/blob/master/GiN_Screenshot/data_sharing_widget.png)
+
+## Restores form state from the saved parameters from the shared notebook for the current user to reproduce the workflow. 
+
+![alt text](https://github.com/jaidevjoshi83/GiN/blob/master/GiN_Screenshot/restore_form_state.png)
+
+
+
+
