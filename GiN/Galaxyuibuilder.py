@@ -1,17 +1,12 @@
 from traitlets import Unicode, List, Bool, Dict
-from ._frontend import module_name, module_version
+from ._frontend import module_name, module_version 
+from nbtools.tool_manager import NBTool
 from nbtools.basewidget import BaseWidget
-from nbtools.tool_manager import  NBTool
-from .util import GALAXY_SERVER_NAME_BY_URL, delete_file
+from .util import GALAXY_SERVER_NAME_BY_URL
 import base64
-import shutil
 import os
-import glob
-from ipyuploads import Upload
-import uuid
 
 
-Upload = Upload(accept='txt', multiple=False)
 
 class GalaxyUIBuilder(BaseWidget, NBTool):
     """
@@ -94,7 +89,6 @@ class GalaxyUIBuilder(BaseWidget, NBTool):
         mode = 'w' if first_chunk else 'a'
 
         file = os.path.join(os.getcwd(), 'temp', name)
-        # shutil.rmtree("temp/")
 
         with open(file, mode) as f:
             f.write(base64.b64decode(encoded_chunk).decode("utf-8"))
@@ -105,8 +99,7 @@ class GalaxyUIBuilder(BaseWidget, NBTool):
             name = content.get('file', '')
             encoded_chunk = content.get('chunk', '')
             first_chunk = content.get('count', '') == 1
-    
-            # print(type(base64.b64decode(encoded_chunk).decode("utf-8")))
+
             GalaxyUIBuilder.write_chunk(name, encoded_chunk, first_chunk)
             self.chunk_complete(name=content.get('file', None),
                                 count=content.get('count', None),

@@ -79,13 +79,11 @@
   margin-top: 10px
 }
 
-/* .galaxy-uibuilder .ui-repeat.section-row {
-  margin-top: 10px;
-} */
 
 .galaxy-uibuilder .collapsible{
-  border-radius: 1px;
-  margin-bottom: 0px;
+  border-radius: 0px;
+  border-top-left-radius:2px; 
+  border-top-right-radius: 2px; 
 }
 
 .galaxy-uibuilder .internal-ui-repeat.section-row{
@@ -101,15 +99,6 @@
   background-color: rgb(211,207,207);
   height: 40px;
   border-radius: 0px;
-}
-
-.galaxy-uibuilder  .ui-form-element.section-row.sections{
-  margin-left: 5px;
-  border-left:  solid 2px rgb(211,207,207);   
-  border-bottom: solid 2px rgb(211,207,207);
-  border-right: solid 2px rgb(211,207,207);
-  border-bottom-left-radius: 5px;
-  border-bottom-right-radius: 5px;
 }
 
 .galaxy-uibuilder button.RepeatButton { 
@@ -280,25 +269,6 @@
   margin-bottom: 5px;
 }
 
-/* .galaxy-uibuilder .tool-migration-select {
-  width: 80%;
-  margin: 1px;
-  float: right;
-  background: rgb(255,255,255);
-  border: none;
-  height: 30px;
-  position: absolute;
-  margin-right: 20px;
-  margin-top: 2px;
-  margin-left: 10px;
-} */
-
-/* .galaxy-uibuilder .form-restore-div .fa-refresh {  
-  float: left;
-  color: rgb(233, 233, 246);
-  font-size: 25px;
-  margin-top: 5px;
-} */
 
 .galaxy-uibuilder .job-status-footer div {
   overflow: auto;
@@ -315,14 +285,6 @@
 }
 
 
-.galaxy-uibuilder .form-restore-div span {
- 
-
-}
-/* .galaxy-uibuilder .combo-box .fa {
-  margin: 0px;
-} */
-
 .galaxy-uibuilder .combo-box .InputData::-webkit-inner-spin-button {
   margin: 0px;
   border: none;
@@ -334,8 +296,6 @@
   border: 1px rgb(157, 147, 147) solid;
   width: 100%;
 }
-
-
 
 .galaxy-uibuilder .combo-box .InputData:hover {
   border: none;
@@ -475,8 +435,9 @@
 }
 
 .galaxy-uibuilder .ui-from-title{
-  margin-top: 10px;
+
   margin-left: 5px;
+  padding-top: 5px; 
 }
 
 /* Migration tool */

@@ -1,19 +1,12 @@
-from asyncio import constants
-from tkinter import Y
+
 from bioblend.galaxy.objects import GalaxyInstance
 from .display import display
-from nbtools import UIBuilder, ToolManager, NBTool, EventManager
+from nbtools.tool_manager import  ToolManager, NBTool, EventManager
 from threading import Thread
 from .sessions import session
-# from .shim import login, system_message
-from .taskwidget import TaskTool, GalaxyTaskWidget
+from .taskwidget import TaskTool
 from .util import DEFAULT_COLOR, DEFAULT_LOGO, GALAXY_SERVERS
-from urllib.error import HTTPError
 from .Galaxyuibuilder import GalaxyUIBuilder
-from ipywidgets import Output
-from nbtools.uioutput import UIOutput
-from nbtools.event_manager import EventManager
-import IPython
 import IPython.display
 
 class GalaxyAuthWidget(GalaxyUIBuilder):

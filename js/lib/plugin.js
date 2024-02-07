@@ -51,7 +51,6 @@ function init_context(app, notebook_tracker) {
     ContextManager.jupyter_app = app;
     ContextManager.notebook_tracker = notebook_tracker;
     ContextManager.context();
-    
     // ContextManager.PrivateData = Private
     // initNotebookTracker(notebook_tracker)  
 }
@@ -98,6 +97,7 @@ function ReturnOutputArea(i, notebookTracker){
                     NotebookActions.run(notebook, notebookSession);
                     const form  =  notebookTracker.currentWidget.content.activeCell.node.querySelector('.nbtools.galaxy-uibuilder.lm-Widget.p-Widget')
                     form.parentElement.removeChild(form)
+                    
                     form.style.display = 'none'
             });    
         })
@@ -122,25 +122,20 @@ const initNotebookTracker = (notebookTracker) => {
             const notebook = notebookTracker.currentWidget.content;
             const notebookSession = notebookTracker.currentWidget.context.sessionContext;
         
-            if ( notebookHasBeenRan.includes(notebook.id) === false) {
+            // if ( notebookHasBeenRan.includes(notebook.id) === false) {
             //FixME Form Restore insteed cell run
-
                 Private.ranNotebookIds.push(notebook.id);
-            
                 notebookTracker.currentWidget.sessionContext.ready.then(() =>
                 notebookTracker.currentWidget.revealed).then( () => {
 
                 var cells = notebookTracker.currentWidget.content.widgets;
 
                 for (var i = 0; i < cells.length; i++){
-                    if (cells[i].model.metadata.get('galaxy_cell') ){
-                        // ContextManager.context().run_cell(cells[i])
-                        // notebook.activeCellIndex = i
-                        // NotebookActions.run(notebook, notebookSession); 
-                    }
+                    notebook.activeCellIndex = i
+                    ContextManager.context().run_cell(cells[i])
                 }
             });
-            }
+            // }
         });
     });
 };

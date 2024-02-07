@@ -1,21 +1,15 @@
 import os
-import IPython
-from nbtools import NBTool
-from .Galaxyuibuilder import GalaxyUIBuilder
-from .util import DEFAULT_COLOR, DEFAULT_LOGO, GALAXY_SERVER_NAME_BY_URL
-import json5
-import logging
-import IPython.display
 import glob
-from nbtools import UIBuilder
-# from  .GalaxyUpload import GalaxyUpload
-import os
-import re
-import json
-
-from ipyuploads import Upload
 import uuid
 import threading
+import IPython
+from nbtools.tool_manager import NBTool
+from .Galaxyuibuilder import GalaxyUIBuilder
+from .util import DEFAULT_COLOR, DEFAULT_LOGO, GALAXY_SERVER_NAME_BY_URL
+import logging
+import IPython.display
+
+
 
 log = logging.getLogger(__name__)
 
@@ -84,15 +78,6 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
             # UU_ID=str(uuid.uuid4()),
             **kwargs
         )
-
-    def handle_error_task(self, error_message, name="Galaxy Module", **kwargs):
-        """Display an error message if the task is None"""
-        UIBuilder.__init__(self, lambda: None, color=self.default_color, **kwargs)
-
-        self.name = name
-        self.display_header = False
-        self.display_footer = False
-        self.error = error_message
 
     @staticmethod
     def RetrivParm(inputs, prefix=""):

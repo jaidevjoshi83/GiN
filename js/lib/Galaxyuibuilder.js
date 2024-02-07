@@ -647,7 +647,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         ContextManager.tool_registry.current.content.activeCell.model.metadata.set('tool_type', tool_type)
         ContextManager.tool_registry.current.content.activeCell.model.metadata.set('input_params', inputs)
-        // ContextManager.tool_registry.current.content.activeCell.model.metadata.set('html', html)
+        // ContextManager.tool_registry.current.content.activeCell.model.metadata.set('html', JSON.stringify(element))
         ContextManager.tool_registry.current.content.activeCell.model.metadata.set('galaxy_cell', true)
         ContextManager.tool_registry.current.content.activeCell.model.metadata.set('section', this.section_new)
     }
@@ -1785,7 +1785,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
     add_input_value (input_def, FormParent, NamePrefix){
         
       
-
         if (this.el.querySelector('.tool-migration-select')){
             var origin = this.el.querySelector('.tool-migration-select').value
         }  else{
@@ -1886,6 +1885,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
           
             var refine_inputs = await KernelSideDataObjects(`import IPython\nfrom GiN.taskwidget  import GalaxyTaskWidget\nclass Temp(object):\n    def Return(self):\n        return IPython.display.JSON(GalaxyTaskWidget.updated_form(${JSON.stringify(origin)}, json.loads(base64.b64decode("${btoa(JSON.stringify(inputs))}")), ${JSON.stringify(self.model.get('inputs')['id'])}, ${JSON.stringify(history_id)}))\na = Temp()\na.Return()`)
             KernelSideDataObjects(`try:\n    del a\nexcept:\n    print("a is not defined")`)
+           
             self.update_metadata_FormState('galaxy_tool', refine_inputs['inputs'])
         })        
 
@@ -5130,9 +5130,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         for (var i = 0; i < cells.length; i++){
             if (cells[i].model.metadata.get('galaxy_cell') ){  
-                // console.log(cells[i].model.metadata)
-                //  cells[i].node.querySelector('#restored_tool_form').style.display = 'none'
-
                 if (server && !execute) {
                     var regex = /origin='[^']*'/;
                     // Replace the URL using the regular expression

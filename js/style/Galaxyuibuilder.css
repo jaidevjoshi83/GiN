@@ -17,14 +17,20 @@
     background-color: #777;
     color: white;
     cursor: pointer;
-    padding: 12px;
-    width: 96.5%;
+    padding-top: 10px;
+    padding-bottom: 10px;
     border: none;
     text-align: left;
     outline: none;
     font-size: 15px;
-    border-radius: 5px;
-    margin: 5px;
+    width: 95%;
+    margin: 0px;
+    margin-top: 5px;
+    padding-left: 2.5%;
+    padding-right: 2.5%;
+    border-radius: 0px;
+    border-top-left-radius:2px; 
+    border-top-right-radius: 2px; 
   }
   
   .galaxy-uibuilder .active, .collapsible:hover {
@@ -503,3 +509,12 @@ select#History_IDs.InputData{
   border: none;
   
 }
+
+[id^="uid-"][id$="-sections"] {
+  border-right: 2px rgb(139,138,138)  solid;
+  border-left: 2px rgb(139,138,138) solid;
+  border-bottom:  2px rgb(139,138,138) solid;
+  border-bottom-left-radius: 2px;
+  border-bottom-right-radius: 2px;
+}
+
