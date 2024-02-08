@@ -88,11 +88,11 @@
 }
 
 .galaxy-uibuilder .internal-ui-repeat.section-row{
-  
+
   border-radius: 0px;
-  border-left:  solid 2px rgb(211,207,207);
   margin-left: 5px;
   border-bottom-left-radius: 5px;
+  border-left: 2px rgb(168,162,162) solid;
 }
 
 .galaxy-uibuilder .repeat-ui-from-title{
@@ -431,6 +431,7 @@
 }
 
 .galaxy-uibuilder .inner-title-div{
+  background: rgb(174,175,185);
   margin-top: 10px;
   padding: 10px
 }
@@ -481,15 +482,13 @@
   width: 20%;
 }
 
-@media (max-width: 600px) {
-  .div-tool-migration,
-  .button-div {
-      flex: 100%;
-  }
-}
 
 #migra-refresh-btn{
   color: rgb(16, 16, 16);
   font-size: 16px ; 
   margin-bottom: 5px;
+}
+
+.galaxy-uibuilder  .InputDataFile {
+  width: 99%    ;
 }

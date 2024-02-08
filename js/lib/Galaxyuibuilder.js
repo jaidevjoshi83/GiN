@@ -72,7 +72,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
                         <div class="dataset-list" style="flex: 30%;border: 1px solid #ddd; box-sizing: border-box;">
                             
-                            <div class='dataset-menu-row' style="width:100%;  display: inline-block;"><span class="ui-form-title-text"><b> History Options</b></span>  <i id="data-history-icon" class="fa fa-refresh" aria-hidden="true" title="Refresh Dataset" style="margin-top:6px;  font:15px; float:right;margin-right:10px;" ></i>
+                            <div class='dataset-menu-row' style="width:100%"><span class="ui-form-title-text"><b> History Options</b></span>  <i id="data-history-icon" class="fa fa-refresh" aria-hidden="true" title="Refresh Dataset" style="margin-top:6px;  font:15px; float:right;margin-right:10px;" ></i>
                                 <div class="dropdown-container">
                                     <div  style="float:right> <span class="dropdown-icon" title="History Options">▼</span></div>
                                     <ul class="dropdown-menu">
@@ -3047,15 +3047,18 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
     add_select_field(input_def, FormParent, NamePrefix){
 
+         var self = this
+
+        var origin
+   
         if(this.el.querySelector('.tool-migration-select')){
-            var origin = this.el.querySelector('.tool-migration-select').value
+            origin = this.el.querySelector('.tool-migration-select').value
         }  else{
-            var origin = this.model.get('origin')
+            origin = this.model.get('origin')
         }
 
         input_def.id = this.uid()
-        var self = this
-
+       
         const row = document.createElement('div')
         row.className =  'ui-form-element section-row'
         row.id =  this.uid()
@@ -3063,8 +3066,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         var data
 
         //if only one option availabe in select list and if its not optional param
-  
-        if (!input_def.optional ){
+
+        if (!input_def.optional && input_def.options.length > 0  ){
             data = input_def.options[0][1]
         } else{
             data = input_def.value  || input_def.default_value
