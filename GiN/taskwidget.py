@@ -167,7 +167,6 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
     def Return_api_key( server):
  
         gi = GiN.sessions.SessionList().get(server=server)
-
         key = gi.gi.key
         email = gi.gi.users.get_current_user()['email']
         
@@ -178,8 +177,6 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
     @staticmethod
     def Create_new_history( server, name):
         gi = GiN.sessions.SessionList().get(server=server)
-        gi = a.get(server=server)
-
         new_history = gi.histories.create(name=name)        
         return new_history.wrapped
      
@@ -190,7 +187,6 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
           
     ):  
 
-        a = GiN.sessions.SessionList()
         gi = GiN.sessions.SessionList().get(server=server)
 
         history = gi.gi.histories.show_history(history_id=HistoryID)
@@ -210,9 +206,7 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
     @staticmethod
     def TestOut( server=None, JobID=None):
 
-
         gi = GiN.sessions.SessionList().get(server=server)
-
         status = gi.jobs.gi.jobs.show_job(JobID, full_details=True)
        
         return IPython.display.JSON(status)
@@ -224,9 +218,7 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
     @staticmethod
     def OutPutData( server=None, JobID=None):
 
-
         gi = GiN.sessions.SessionList().get(server=server)
-
         showJob = gi.jobs.gi.jobs.show_job(JobID, full_details=True)
 
         DataList = []
@@ -273,10 +265,8 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
         input_data_param=False,
     ):
     
-
         gi = GiN.sessions.SessionList().get(server=server)
 
-        
         if (tool_inputs) and (tool_id):
 
             inputs = gi.tools.gi.tools.build(
@@ -338,7 +328,6 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
     @staticmethod
     def show_data_set(server=None, dataset_id=None):
 
-    
         gi = GiN.sessions.SessionList().get(server=server)
         show_dataset = gi.gi.datasets.gi.datasets.show_dataset(dataset_id=dataset_id)
         
@@ -524,7 +513,6 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
         file_name = glob.glob(temp_dir + "/*.*")
         out = gi.tools.gi.tools.upload_file(path=file_name[0], history_id=history_id)
 
-
         return IPython.display.JSON(out)
 
     @staticmethod
@@ -558,7 +546,6 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
 
     @staticmethod
     def return_job_status(server=None, job_id=None):
-
 
         gi = GiN.sessions.SessionList().get(server=server)
         job_state = gi.gi.jobs.show_job(job_id=job_id, full_details=True)
