@@ -492,3 +492,30 @@
 .galaxy-uibuilder  .InputDataFile {
   width: 99%    ;
 }
+
+.datatypes_options {
+  width: 100%;
+}
+.genomes_options {
+   width: 100%;
+  
+}
+.galaxy-uibuilder #upload {
+  height: 150px;
+}
+
+.galaxy-uibuilder .input_upload{
+  width: 98%;
+  margin-left: 1%;
+  margin-right:  1%;
+  height: 150px; 
+}
+
+.galaxy-uibuilder .upload_tab .tab {
+  margin-top: 10px;
+  margin-left: 10px;
+  margin-bottom: 10px;
+}
+#create_data b {
+  margin-left: 10px;
+}

@@ -72,33 +72,34 @@ class GalaxyAuthWidget(GalaxyUIBuilder):
         tool_list['email'] = self.session._notebook_email   
         
     
-        def register_modules_callback():
-            for section in self.session.tools.gi.tools.get_tool_panel():
-                if section["model_class"] == "ToolSection":
-                    for t in section["elems"]:
-                        try:
-                            tool={'id':None, 'description':None, 'name':None}
-                            if t['model_class'] == 'Tool':
-                            
-                                tool['id'] = t['id']
-                                tool['description'] = t['description']
-                                tool['name'] = t['name']+" ("+t['version']+")"
-                                tool['origin'] = self.session._notebook_url
-                                tool['email'] = self.session._notebook_email
-                                tool = TaskTool(tool['origin'], tool)
-                                ToolManager.instance().register(tool)
+        # def register_modules_callback():
+        for section in self.session.tools.gi.tools.get_tool_panel():
+            if section["model_class"] == "ToolSection":
+                for t in section["elems"]:
+                    # try:
+                        tool={'id':None, 'description':None, 'name':None}
+                        if t['model_class'] == 'Tool':
+                            tool['id'] = t['id']
+                            tool['description'] = t['description']
+                            tool['name'] = t['name']+" ("+t['version']+")"
+                            tool['origin'] = self.session._notebook_url
+                            tool['email'] = self.session._notebook_email
+                            tool = TaskTool(tool['origin'], tool)
+                            ToolManager.instance().register(tool)
                                 # tool_list['tools'].append(tool)
-                        except:
-                            pass
+                        # except:
+                        #     pass
 
         # Run_Threads(all_tools, 2)
+                            
+        print("KKKK")
         
         t = {"id": 'GiN_data_upload_tool',  "description": "Upload data files to galaxy server", "name": "Upload Data", 'origin': self.session._notebook_url, 'inputs': [{'type': 'data_upload'}]}
         t = TaskTool('+', t )
         ToolManager.instance().register(t)
          
-        registration_thread = Thread(target=register_modules_callback)
-        registration_thread.start()
+        # register_modules_callback()
+        # registration_thread.start()
         # registration_thread.join()
 
         return IPython.display.JSON({'state':'success', 'tool_list':''}) 

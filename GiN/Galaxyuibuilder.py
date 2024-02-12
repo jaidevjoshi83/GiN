@@ -24,14 +24,15 @@ class GalaxyUIBuilder(BaseWidget, NBTool):
     register_tool = Bool(True, sync=True)
     collapse = Bool(sync=True)
     run_label = Unicode("Run", sync=True)
-    inputs = Dict().tag(sync=True)
+    inputs = List([]).tag(sync=True)
     form_output = Dict().tag(sync=True)
     history_ids = List([]).tag(sync=True)
-    history_data = List([]).tag(sync=True)
+    # history_data = List([]).tag(sync=True)
     origin = Unicode("", sync=True)
     description = Unicode("", sync=True)
     buttons = Dict(sync=True)
     UU_ID = Bool(True, sync=True)
+    history_id = Unicode("", sync=True)
 
     UI = Dict(sync=True)
     galaxy_tool_id = Unicode(sync=True)
@@ -46,21 +47,24 @@ class GalaxyUIBuilder(BaseWidget, NBTool):
     all_files_complete = lambda self, names: None
 
     def __init__(
-        self, galaxy_tool_id=None, history_ids=None, description=None, inputs={}, history_data=[], origin='', UU_ID=None, **kwargs
+        self, galaxy_tool_id=None, history_ids=None, description=None, inputs=[],  origin='', UU_ID=None, history_id='', **kwargs
     ):
 
         self._apply_defaults()
         self.on_msg(self.handle_messages)
         
         self.inputs = inputs
+        self.history_id = history_id
         if history_ids:
             self.history_ids = history_ids
         if galaxy_tool_id:
             self.galaxy_tool_id = str(galaxy_tool_id)
-        self.history_data = history_data
+
         self.origin = origin
         self.description = description
         self.UU_ID = True
+    
+        
         
         BaseWidget.__init__(self, **kwargs)
        

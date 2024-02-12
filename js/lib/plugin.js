@@ -53,8 +53,8 @@ function init_context(app, notebook_tracker) {
     ContextManager.context();
     // ContextManager.PrivateData = Private
     // initNotebookTracker(notebook_tracker)  
-}
 
+}
 
 function ReturnOutputArea(i, notebookTracker){
     // var RestorForm = `<div class="lm-Widget p-Widget jp-OutputArea jp-Cell-outputArea">
@@ -98,7 +98,7 @@ function ReturnOutputArea(i, notebookTracker){
                     const form  =  notebookTracker.currentWidget.content.activeCell.node.querySelector('.nbtools.galaxy-uibuilder.lm-Widget.p-Widget')
                     form.parentElement.removeChild(form)
                     
-                    form.style.display = 'none'
+                    // form.style.display = 'none'
             });    
         })
     })
@@ -123,16 +123,19 @@ const initNotebookTracker = (notebookTracker) => {
             const notebookSession = notebookTracker.currentWidget.context.sessionContext;
         
             // if ( notebookHasBeenRan.includes(notebook.id) === false) {
-            //FixME Form Restore insteed cell run
+            // FixME Form Restore insteed cell run
                 Private.ranNotebookIds.push(notebook.id);
                 notebookTracker.currentWidget.sessionContext.ready.then(() =>
                 notebookTracker.currentWidget.revealed).then( () => {
+                notebookTracker.currentWidget.content.model.metadata.set('GiN-version', '0.1.0a7')
 
-                var cells = notebookTracker.currentWidget.content.widgets;
+                var cells = notebookTracker.currentWidget.content.widgets
 
                 for (var i = 0; i < cells.length; i++){
-                    notebook.activeCellIndex = i
-                    ContextManager.context().run_cell(cells[i])
+                    if (cells[i].model.metadata.get('galaxy_cell')){
+                        notebook.activeCellIndex = i
+                        ContextManager.context().run_cell(cells[i])
+                    }
                 }
             });
             // }
