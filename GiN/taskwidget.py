@@ -464,9 +464,6 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
         file_path = glob.glob(os.path.join(temp_dir, '*'))[0]
         out = gi.tools.gi.tools.upload_file(path=file_path, history_id=history_id)
 
-        # print(out)
-        # [os.remove(file) for file in glob.glob(os.path.join(temp_dir, '*')) if os.path.isfile(file_path)]
-
         return IPython.display.JSON(out)
 
     @staticmethod

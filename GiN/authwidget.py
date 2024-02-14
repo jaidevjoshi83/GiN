@@ -72,7 +72,6 @@ class GalaxyAuthWidget(GalaxyUIBuilder):
         tool_list['url']  = self.session._notebook_url
         tool_list['email'] = self.session._notebook_email   
 
-
         # def register_modules_callback():
         for section in self.session.tools.gi.tools.get_tool_panel():
             if section["model_class"] == "ToolSection":

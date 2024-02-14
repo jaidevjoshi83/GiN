@@ -52,7 +52,7 @@ function init_context(app, notebook_tracker) {
     ContextManager.notebook_tracker = notebook_tracker;
     ContextManager.context();
     // ContextManager.PrivateData = Private
-    // initNotebookTracker(notebook_tracker)  
+    initNotebookTracker(notebook_tracker)  
 
 }
 
@@ -127,16 +127,16 @@ const initNotebookTracker = (notebookTracker) => {
                 Private.ranNotebookIds.push(notebook.id);
                 notebookTracker.currentWidget.sessionContext.ready.then(() =>
                 notebookTracker.currentWidget.revealed).then( () => {
-                notebookTracker.currentWidget.content.model.metadata.set('GiN-version', '0.1.0a7')
+                notebookTracker.currentWidget.content.model.metadata.set('GiN-version', '0.1.0a8')
 
-                var cells = notebookTracker.currentWidget.content.widgets
+                // var cells = notebookTracker.currentWidget.content.widgets
 
-                for (var i = 0; i < cells.length; i++){
-                    if (cells[i].model.metadata.get('galaxy_cell')){
-                        notebook.activeCellIndex = i
-                        ContextManager.context().run_cell(cells[i])
-                    }
-                }
+                // for (var i = 0; i < cells.length; i++){
+                //     if (cells[i].model.metadata.get('galaxy_cell')){
+                //         notebook.activeCellIndex = i
+                //         ContextManager.context().run_cell(cells[i])
+                //     }
+                // }
             });
             // }
         });
