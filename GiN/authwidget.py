@@ -8,6 +8,8 @@ from .taskwidget import TaskTool
 from .util import DEFAULT_COLOR, DEFAULT_LOGO, GALAXY_SERVERS
 from .Galaxyuibuilder import GalaxyUIBuilder
 import IPython.display
+import GiN
+import threading
 
 class GalaxyAuthWidget(GalaxyUIBuilder):
     """A widget for authenticating with a Galaxy server"""
@@ -41,7 +43,6 @@ class GalaxyAuthWidget(GalaxyUIBuilder):
 
     def login(self, credentials):
 
-
         """Login to the Galaxy server"""
 
         tools = []
@@ -70,13 +71,13 @@ class GalaxyAuthWidget(GalaxyUIBuilder):
 
         tool_list['url']  = self.session._notebook_url
         tool_list['email'] = self.session._notebook_email   
-        
-    
+
+
         # def register_modules_callback():
         for section in self.session.tools.gi.tools.get_tool_panel():
             if section["model_class"] == "ToolSection":
                 for t in section["elems"]:
-                    # try:
+                    try:
                         tool={'id':None, 'description':None, 'name':None}
                         if t['model_class'] == 'Tool':
                             tool['id'] = t['id']
@@ -87,24 +88,21 @@ class GalaxyAuthWidget(GalaxyUIBuilder):
                             tool = TaskTool(tool['origin'], tool)
                             ToolManager.instance().register(tool)
                                 # tool_list['tools'].append(tool)
-                        # except:
-                        #     pass
+                    except:
+                            pass
 
-        # Run_Threads(all_tools, 2)
-                            
-        print("KKKK")
-        
+                                
         t = {"id": 'GiN_data_upload_tool',  "description": "Upload data files to galaxy server", "name": "Upload Data", 'origin': self.session._notebook_url, 'inputs': [{'type': 'data_upload'}]}
+       
         t = TaskTool('+', t )
         ToolManager.instance().register(t)
-         
-        # register_modules_callback()
-        # registration_thread.start()
-        # registration_thread.join()
 
-        return IPython.display.JSON({'state':'success', 'tool_list':''}) 
-
-
+        # thread = threading.Thread(target=register_modules_callback)
+        # thread.start()
+ 
+        return IPython.display.JSON({'state':'success', 'tool_list':''})     
+        # return IPython.display.JSON({'state':'success', 'tool_list':'','email':self.session._notebook_email, 'url':self.session._notebook_url, 'server':credentials['server']}) 
+        
     def has_credentials(self):
         """Test whether the session object is instantiated and whether an email and password have been provided"""
         if type(self.session) is not GalaxyInstance:

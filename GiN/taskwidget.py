@@ -177,8 +177,9 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
     @staticmethod
     def Create_new_history( server, name):
         gi = GiN.sessions.SessionList().get(server=server)
-        new_history = gi.histories.create(name=name)        
-        return new_history.wrapped
+        new_history = gi.histories.create(name=name)  
+        history_ids = gi.gi.histories.get_histories()      
+        return history_ids
      
     
     @staticmethod
