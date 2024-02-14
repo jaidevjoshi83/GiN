@@ -43,7 +43,7 @@ RUN pip install nbtools && \
 #############################################
 
 RUN pip install bioblend && \
-    pip install galaxy-gin && \
+    pip install galaxy-gin==0.1.0a8 && \
     jupyter nbextension install --py --symlink --overwrite --sys-prefix GiN && \
     jupyter nbextension enable --py --sys-prefix GiN
 
