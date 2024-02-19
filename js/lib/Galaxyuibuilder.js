@@ -3074,8 +3074,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             if(options['hdca'].length > 0){
                 row['data-key']['data']['values'] = [options['hdca'][0]]
             }
-
-            console.log(row['data-key']['data']['values'])
         })
         
         if (input_def.value == null && input_def.optional == true){
@@ -3128,15 +3126,12 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
                 Select.selectedIndex = 0
 
-                console.log(Select.multiple, !input_def.multiple)
-
                 if(Select.multiple && input_def.multiple){
                     if(row['data-key']['data']['values']){
                         row['data-key']['data']['values'].push(JSON.parse(el.value))
                         row['data-key']['data']['batch'] = false
                     } 
                 } else if ( Select.multiple && !input_def.multiple){
-                    console.log("OKOKO")
                     if(row['data-key']['data']['values']){
                         row['data-key']['data']['values'].push(JSON.parse(el.value))
                         row['data-key']['data']['batch'] = true
@@ -3146,9 +3141,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                     row['data-key']['data']  =  {'batch':false, 'values':[JSON.parse(el.value)]}
                 }
             }
-
-            console.log(row['data-key'])
-
             var form = self.el.querySelector('.Galaxy-form')
             var inputs =  self.clean_param_for_job(self.new_form_data(form), false)
             var history_id = self.el.querySelector('#dataset-history-list').value
@@ -3209,7 +3201,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
     }
 
  
-    // add_input_data_1(input_def, FormParent, NamePrefix, call_back_data={}){ 
+    // add_input_data_New(input_def, FormParent, NamePrefix, call_back_data={}){ 
 
     //     console.log(input_def)
 
@@ -4442,8 +4434,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 this.add_dataset(data_list, datasets[i], history_id)
             } 
             else if (datasets[i]['history_content_type'] == 'dataset_collection') {
-                // console.log(datasets)
-                // console.log( await this.dataset_collection_row_state (datasets[i], history_id))
+
                 this.dataset_collection_row_state(datasets[i], history_id, data_list)
             }
         }
@@ -5801,10 +5792,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 
                 if(job_inputs == undefined){
                     return 
-                }
-
-                console.log(job_inputs)
-                
+                }                
                 this.SubmitJob(job_inputs, history_id)
                 this.hide_run_buttons(true)
             }
@@ -5916,7 +5904,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         this.JobStatusTemplate(toolforms, jobs)
 
     } else {
-            console.log(jobs)
             for (var i = 0; i < jobs['jobs'].length; i++ ) {
                 this.JobStatusTemplate(toolforms, jobs['jobs'][i])
             }
