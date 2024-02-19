@@ -118,6 +118,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
     this.select_index = null
     this.section_new = {};
     this.drill_down_expand = {'name':null, expanded_subgroups:[]} 
+    this.batch_execution = {}
+    this.selected_file_cache = {}
 
     // this.section_collapse = {'expanded':false, 'name':''}
     // <iframe src="http://localhost:8080/datasets/fa70ae9fc8539e18/display/?preview=True&?api_key=865ad23561f93ec78ed5398e815c1057" title="W3Schools Free Online Web Tutorials"></iframe>
@@ -947,26 +949,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         }
     }
 
-    add_tools(tool_list){
-
-        var a = document.querySelector('.lm-Widget.p-Widget.nbtools-toolbox.nbtools-wrapper')
-        
-        // const list = origin.querySelector('ul');
-        // const tool_wrapper = document.createElement('li');
-        // tool_wrapper.classList.add('nbtools-tool');
-        // tool_wrapper.setAttribute('title', 'Click to add to notebook');
-        // tool_wrapper.innerHTML = `
-        //     <div class="nbtools-add">+</div>
-        //     <div class="nbtools-header">${tool.name}</div>
-        //     <div class="nbtools-description">${tool.description}</div>`;
-        // if (list) list.append(tool_wrapper);
-
-        // // Add the click event
-        // tool_wrapper.addEventListener("click", () => {
-        //     Toolbox.add_tool_cell(tool);
-        // })
-    }
-
     add_origin(name) {
         // Create the HTML DOM element
         const origin_wrapper = document.createElement('div');
@@ -986,100 +968,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         return origin_wrapper;
     }
 
-    add_DataCollectionToolParameter(input_def, FormParent, NamePrefix){
-
-        if(this.el.querySelector('.tool-migration-select')){
-            var origin = this.el.querySelector('.tool-migration-select').value
-        }  else{
-            var origin = this.model.get('origin')
-        }
-
-        input_def.id = this.uid()
-        var self = this
-
-        const row = document.createElement('div')
-        row.className =  'ui-form-element section-row'
-        row.id =  this.uid()
-
-        var options 
-        options = input_def['options']['hdca']
-
-        const select = document.createElement('select')
-        select.id = `select-${input_def.id}`  
-        select.className = 'data_collection'   
-        select.name = NamePrefix+input_def['name']
-    
-        for(var i = 0; i < options.length; i++) {
-
-            const el = document.createElement("option");
-
-            if (input_def['type'] != 'data_collection'){
-                const opt = options[i][0];
-                el.value =  options[i][1];
-                el.textContent = opt;
-            } else{
-                const opt = options[i]['name'];
-                el.value =  JSON.stringify(options[i]);
-                el.textContent = opt;
-            }
-            select.appendChild(el);
-
-            if(input_def.value == options[i][1]){
-                el.selected = 'true'
-            }
-        }
-
-        const title = document.createElement('div')
-        title.className = 'ui-from-title'
-        const TitleSpan = document.createElement('span')
-        TitleSpan.className = "ui-form-title-text"
-        TitleSpan.textContent = input_def['label']
-
-        TitleSpan.style.display = 'inline'
-        title.append(TitleSpan)
-
-        row.className = 'ui-form-element section-row'
-        row.id = input_def.id
-
-        row.append(title)
-        row.append(select)
-
-        const help = document.createElement('div')
-        help.className = 'ui-from-help'
-        const helpSpan = document.createElement('span')
-        helpSpan.className = "ui-form-help-text"
-        helpSpan.innerHTML = `<b> Help:</b> ${input_def['help']}`
-        helpSpan.style.fontWeight = 'normal'
-        helpSpan.style.display = 'inline'
-        help.style.marginBottom = '10px'
-        help.style.marginLeft = '10px'
-
-        help.append( helpSpan)
-        row.append(help)
-
-        select.addEventListener("change", async () => {
-            var queryID = select.value
-
-            if (input_def['is_dynamic'] == true){
-
-                var children = self.el.querySelector('.Galaxy-form')
-                var inputs = self.clean_param_for_job(self.new_form_data(form), false)
-                var history_id = self.el.querySelector('.galaxy-history-list').querySelector('#dataset-history-list').value
-                // var refine_inputs  = await KernelSideDataObjects(`import json\nimport base64\nfrom GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.updated_form(${JSON.stringify(origin)}, json.loads(base64.b64decode("${btoa(JSON.stringify(inputs))}")), ${JSON.stringify(self.model.get('inputs')['id'])}, ${JSON.stringify(history_id)})`)
-                var refine_inputs = await KernelSideDataObjects(`import IPython\nfrom GiN.taskwidget  import GalaxyTaskWidget\nclass Temp(object):\n    def Return(self):\n        return IPython.display.JSON(GalaxyTaskWidget.updated_form(${JSON.stringify(origin)}, json.loads(base64.b64decode("${btoa(JSON.stringify(inputs))}")), ${JSON.stringify(self.model.get('galaxy_tool_id'))}, ${JSON.stringify(history_id)}))\na = Temp()\na.Return()`)
-                KernelSideDataObjects(`try:\n    del a\nexcept:\n    print("a is not defined")`)
-              
-                var form_parent = self.el.querySelector('.Galaxy-form')
-
-                self.removeAllChildNodes(form_parent)
-                self.form_builder(refine_inputs['inputs'])
-            }
-        });
-    
-        FormParent.append(row)
-        return row
-    }
- 
     extract_input_dom(form){
 
         var self = this
@@ -1143,8 +1031,10 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         for (var i in data) {     
             if(data[i]['tool_type'] === 'input_data'){
                 if(data[i]['data']){
-                    if(data[i]['data']['values'][0] == null){
-                        data[i]['data'] = null
+                    if(data[i]['data']['values']){
+                        if(data[i]['data']['values'][0] == null){
+                            data[i]['data'] = null
+                        }
                     }
                 }
             }
@@ -2723,7 +2613,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
                 self.form_builder(refine_inputs['inputs'],  selected_index) 
                 self.update_metadata_FormState('galaxy_tool', refine_inputs['inputs'])  
-
             });
 
             row.append(row1) 
@@ -2821,7 +2710,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             parent.removeChild(parent.firstChild);
         }
     }
- 
+
     add_input_data(input_def, FormParent, NamePrefix, call_back_data={}){ 
 
         var origin
@@ -2983,8 +2872,120 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             }
         }
 
+        if(this.batch_execution[NamePrefix+input_def['name']] != undefined){
+
+            if(this.batch_execution[NamePrefix+input_def['name']] === 'data') {
+
+                row['data-key']['data'] = {'batch':false, 'values':[]}
+
+                this.batch_execution[NamePrefix+input_def['name']] = 'data'
+                sim.querySelector('#data-file-input').style.backgroundColor = '#ffffff'
+                sim.querySelector('#batch-file-input').style.backgroundColor = '#dad9d7'
+                sim.querySelector('#collection-data-input').style.backgroundColor = '#dad9d7'
+    
+                Select.style.height = '40px'
+    
+                FileManu.querySelector('.data-descriptor-label').style.display = 'none'
+                Select.multiple = false
+                self.removeAllChildNodes(Select)
+    
+                for (var i = 0; i < options['hda'].length; i++) {
+                    const el = document.createElement("option");
+                    if (input_def['options']['hda'].length !== 0) {
+                        el.textContent = options['hda'][i].hid+options['hda'][i].name;
+                        delete options['hda'][i].keep
+    
+                        if(options['hda'][i]['id'] == ''  ){
+                            el.data = JSON.stringify("") 
+                        } else{
+                            el.value = JSON.stringify(options['hda'][i])
+                        }
+                    }
+                    Select.appendChild(el);
+                }
+
+                if(options['hda'].length > 0){
+                    row['data-key']['data']['values'] = [options['hda'][0]]
+                }
+
+            } else if(this.batch_execution[NamePrefix+input_def['name']] === 'batch') {
+
+                sim.querySelector('#data-file-input').style.backgroundColor = '#dad9d7'
+                sim.querySelector('#batch-file-input').style.backgroundColor = '#ffffff'
+                sim.querySelector('#collection-data-input').style.backgroundColor = '#dad9d7'
+    
+                Select.style.height = '200px'
+
+                FileManu.querySelector('.data-descriptor-label').style.display = 'block'
+
+                if (input_def.value && !input_def.multiple){
+                    row['data-key']['data']['batch'] = true
+                } 
+
+                Select.multiple = true
+
+                self.removeAllChildNodes(Select)
+
+                for (var i = 0; i < options['hda'].length; i++) {
+                    const el = document.createElement("option");
+                    if (input_def['options']['hda'].length !== 0) {
+                        el.textContent = options['hda'][i].hid+options['hda'][i].name;
+                        delete options['hda'][i].keep 
+                        if (options['hda'][i]['id'] == ''  ){
+                            el.data = JSON.stringify("") 
+                        } else{
+                            el.value = JSON.stringify(options['hda'][i])
+                        }
+                    }
+                    Select.appendChild(el);
+                }
+
+                // if(Select.children.length > 0){
+                //     Select.selectedIndex = 0
+                //     if(!row['data-key']['data']){
+                //         row['data-key']['data'] = {'batch':false, 'values':[]}
+                //     } else{
+                //         row['data-key']['data']['values']  = [JSON.parse(Select.value)]
+                //     }
+                // } else{
+                //     row['data-key']['data'] = null
+                // }
+
+            } else if(this.batch_execution[NamePrefix+input_def['name']] === 'collection') {
+                this.batch_execution[NamePrefix+input_def['name']] = 'collection'
+
+
+                sim.querySelector('#data-file-input').style.backgroundColor = '#dad9d7'
+                sim.querySelector('#batch-file-input').style.backgroundColor = '#dad9d7'
+                sim.querySelector('#collection-data-input').style.backgroundColor = '#ffffff'
+    
+                row['data-key']['data'] = {'batch':false, 'values':[]}
+                
+                Select.style.height = '40px'
+    
+                FileManu.querySelector('.data-descriptor-label').style.display = 'block'
+                Select.multiple = false
+                self.removeAllChildNodes(Select)
+    
+                for (var i = 0; i < options['hdca'].length; i++) {
+                    const el = document.createElement("option");
+                    if (input_def['options']['hdca'].length !== 0) {
+                        el.textContent = options['hdca'][i].hid+" "+options['hdca'][i].name; 
+                        el.value = JSON.stringify(options['hdca'][i])
+                        delete options['hdca'][i].keep 
+                    }
+                    Select.appendChild(el);
+                }
+                if(options['hdca'].length > 0){
+                    row['data-key']['data']['values'] = [options['hdca'][0]]
+                }
+
+            }
+        }
+
         sim.querySelector('#data-file-input').addEventListener('click', (e) => {
 
+            this.batch_execution[NamePrefix+input_def['name']] = 'data'
             Select.style.height = '40px'
 
             FileManu.querySelector('.data-descriptor-label').style.display = 'none'
@@ -3008,7 +3009,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         })
 
         sim.querySelector('#batch-file-input').addEventListener('click', (e) => {
-
+            this.batch_execution[NamePrefix+input_def['name']] = 'batch'
             Select.style.height = '200px'
 
             FileManu.querySelector('.data-descriptor-label').style.display = 'block'
@@ -3050,11 +3051,9 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         sim.querySelector('#collection-data-input').addEventListener('click', (e) => {
 
-            row['data-key']['data'] = {'batch':null, 'values':null}
-            
+            this.batch_execution[NamePrefix+input_def['name']] = 'collection'
+            row['data-key']['data'] = {'batch':false, 'values':[]}
             Select.style.height = '40px'
-
-            // Select.selectedIndex = 0
 
             FileManu.querySelector('.data-descriptor-label').style.display = 'block'
             Select.multiple = false
@@ -3069,22 +3068,30 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 }
                 Select.appendChild(el);
             }
+
+            
+
+            if(options['hdca'].length > 0){
+                row['data-key']['data']['values'] = [options['hdca'][0]]
+            }
+
+            console.log(row['data-key']['data']['values'])
         })
         
         if (input_def.value == null && input_def.optional == true){
             Select.options[Select.options.length-1].selected = true
         } else {
-                if (input_def.value != null) {
-                    for (var i = 0; i < Select.options.length; i++) {
-                        for (var k = 0; k < input_def.value.values.length; k++ ) {   
-                            if (input_def.value.values[k] != null) { 
-                                if (JSON.parse(Select.options[i].value)['id'] == input_def.value.values[k]['id']){
-                                    Select.options[i].selected = true
-                                }
+            if (input_def.value != null) {
+                for (var i = 0; i < Select.options.length; i++) {
+                    for (var k = 0; k < input_def.value.values.length; k++ ) {   
+                        if (input_def.value.values[k] != null) { 
+                            if (JSON.parse(Select.options[i].value)['id'] == input_def.value.values[k]['id']){
+                                Select.options[i].selected = true
                             }
                         }
                     }
                 }
+            }
         } 
 
         Select.addEventListener("dragover", function(event) {
@@ -3121,14 +3128,26 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
                 Select.selectedIndex = 0
 
-                row['data-key']['data']  =  {'batch':false, 'values':[JSON.parse(el.value)]}
+                console.log(Select.multiple, !input_def.multiple)
 
-                if(Select.multiple){
+                if(Select.multiple && input_def.multiple){
                     if(row['data-key']['data']['values']){
                         row['data-key']['data']['values'].push(JSON.parse(el.value))
+                        row['data-key']['data']['batch'] = false
+                    } 
+                } else if ( Select.multiple && !input_def.multiple){
+                    console.log("OKOKO")
+                    if(row['data-key']['data']['values']){
+                        row['data-key']['data']['values'].push(JSON.parse(el.value))
+                        row['data-key']['data']['batch'] = true
                     }
                 }
+                else if(!Select.multiple){
+                    row['data-key']['data']  =  {'batch':false, 'values':[JSON.parse(el.value)]}
+                }
             }
+
+            console.log(row['data-key'])
 
             var form = self.el.querySelector('.Galaxy-form')
             var inputs =  self.clean_param_for_job(self.new_form_data(form), false)
@@ -3188,6 +3207,444 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
         return row
     }
+
+ 
+    // add_input_data_1(input_def, FormParent, NamePrefix, call_back_data={}){ 
+
+    //     console.log(input_def)
+
+
+    //     var self = this
+    //     var origin
+
+    //     if(this.el.querySelector('.tool-migration-select')){
+    //         origin = this.el.querySelector('.tool-migration-select').value
+    //     }  else{
+    //         origin = this.model.get('origin')
+    //     }
+
+    //     if (input_def.optional == true) {
+    //         if (input_def.options.hda.length == 0){
+    //             input_def.options.hda.push({'name':'No dataset is available', 'id':'', 'hid':''})
+    //         } else{
+    //             input_def.options.hda.push({'name':'Nothing selected', 'id': '', 'hid':''})
+    //         }
+
+    //         if (input_def.options.hdca.length == 0) {
+    //             input_def.options.hdca.push({'name':'No dataset collection is available', 'id':'', 'hid':''})
+    //         } else{
+    //             input_def.options.hdca.push({'name':'Nothing selected', 'id':'', 'hid':''})
+    //         }
+    //     }
+
+    //     input_def.id = this.uid()
+    //     var self = this
+    //     const row = document.createElement('div')
+    //     row.className = 'ui-form-element section-row'
+    //     row.id = input_def.id
+
+    //     row['data-key']  = {'multiple':input_def.multiple, 'optional': input_def.optional, 'name':NamePrefix+input_def['name'], 'data': {'batch':false, 'values':[]}, 'id':row.id, 'tool_type':'input_data'}
+
+  
+    //     var FileManu = document.createElement('div')
+    //     FileManu.className = 'multi-selectbox'
+
+    //     var Select = document.createElement('div')
+    //     Select.className = 'multi_select_box';
+    //     Select.style.width  = '100%'
+    //     Select.style.height = '40px'
+
+    //     var MultiSelectOptions =   `<div  class="multiselect-content" style="display:none" >
+    //                                     <ul   class="multiselect-content-list" style="display: inline-block;">
+    //                                     </ul>
+    //                                 </div>`
+
+
+    //     var mso = new DOMParser().parseFromString(MultiSelectOptions, 'text/html').querySelector('.multiselect-content')
+        
+    //     Select.addEventListener('click', ()=>{
+
+    //         if(mso.style.display == 'none' ){
+    //             mso.style.display = 'block' 
+    //         } else {
+    //             mso.style.display = 'none' 
+    //         }
+    //     })
+
+    //     var select_input_mode = `<div class="ui-radiobutton" >
+    //                                 <label id="data-file-input" role="button" class="ui-option" data-original-title="" title=""><i class="fa fa-file-o no-padding"></i><input type="radio" name="uid-64" value="0" style="display: none;" /></label>
+    //                                 <label id="batch-file-input" role="button" class="ui-option" data-original-title="" title=""><i class="fa fa-files-o no-padding"></i><input type="radio" name="uid-64" value="1" style="display: none;" /></label>
+    //                                 <label id="collection-data-input" role="button" class="ui-option" data-original-title="" title=""><i class="fa fa-folder-o no-padding"></i><input type="radio" name="uid-64" value="2" style="display: none;" /></label>
+    //                             </div>`
+
+    //     const sim = new DOMParser().parseFromString(select_input_mode, 'text/html').querySelector('.ui-radiobutton')
+
+    //     sim.querySelector('#data-file-input').style.background = 'white'
+        
+    //     var Label = sim.querySelectorAll('.ui-option')
+
+    //     var options = input_def.options
+
+    //     if (input_def.multiple == true ){
+    //         Select.multiple = true
+    //         Select.style.height = '200px'
+    //         sim.querySelector('#data-file-input').style.display = 'none'
+    //         // this.batch_execution[input_def.name] = 'multiple'
+    //     }  
+
+    //     Label.forEach((button)=> button.addEventListener('click', (e) => {
+
+    //         for (var i = 0; i < Label.length; i++){
+    //             if (Label[i] == button){
+    //                 Label[i].style.background = 'white';
+    //             } else{
+    //                 Label[i].style.background = 'rgb(218,217,215)';
+    //             }
+    //         } 
+    //     }))
+
+    //     if (input_def.type != 'data_collection') {
+    //         Select.style.width = '100%'
+    //         FileManu.append(sim)
+    //     } else{
+            
+    //     }
+
+    //     FileManu.append(Select)
+    //     FileManu.append(mso)
+
+    //     Select.name = NamePrefix+input_def['name']
+    //     Select.value = input_def.value
+
+    //     Select.ondrop="drop(event)"
+    //     Select.ondragover="allowDrop(event)"
+
+    //     const optional_title = document.createElement('span')
+
+    //     if(input_def.optional){
+    //         optional_title.className = 'ui-form-title-message-optional'
+    //         optional_title.textContent = '--optional'
+    //     } else{
+    //         optional_title.className = 'ui-form-title-message-require'
+    //         optional_title.textContent = '--require'          
+    //     }
+
+    //     const title = document.createElement('div')
+    //     title.className = 'ui-from-title'
+    //     const TitleSpan = document.createElement('span')
+    //     TitleSpan.className = "ui-form-title-text"
+    //     TitleSpan.textContent = input_def.label
+    //     TitleSpan.style.display = 'inline'
+    //     title.append(TitleSpan)
+    //     title.append(optional_title)
+
+    //     const help = document.createElement('div')
+    //     help.className = 'ui-from-help'
+    //     const helpSpan = document.createElement('span')
+    //     helpSpan.className = "ui-form-help-text"
+    //     helpSpan.innerHTML = `<b> Help:</b> ${input_def['help']}`
+    //     helpSpan.style.fontWeight = 'normal'
+    //     helpSpan.style.display = 'inline'
+    //     help.style.marginBottom = '10px'
+    //     help.style.marginLeft = '10px'
+    //     help.append( helpSpan)
+
+    //     const data_descriptor = document.createElement('div')
+    //     data_descriptor.className = 'data-descriptor-label'
+    //     data_descriptor.style.display = 'none'
+    //     data_descriptor.style.width = '100%'
+    //     data_descriptor.style.height = '20px'
+    //     data_descriptor.style.marginLeft = '10px'
+    //     data_descriptor.innerHTML = `<div> <i class="fa fa-sitemap"></i> This is a batch mode input field. Separate jobs will be triggered for each dataset selection.</div>`
+    //     FileManu.append(data_descriptor)
+    //     FileManu.style.width = '100%'
+
+    //     row.append(title)
+    //     row.append(FileManu)
+    //     row.append(help)
+
+    //     if(input_def.value){
+    //         var selected_options = input_def.value['values']
+    //     }
+        
+    //     // var list_option = document.querySelector('li')
+    //     // list_option.className = "multiselect-element"
+    //     // var outerSpan = document.querySelector('span')
+    //     // var innerSpan = document.querySelector('span')
+    //     // list_option.append(outerSpan)
+    //     // outerSpan.append(innerSpan)
+        
+    //     // `<li id="form-select-uid-1-0" role="option" class="multiselect__element">
+    //     //     <span data-select="Click to select" data-selected="" data-deselect="" class="multiselect__option multiselect__option--highlight"><span>194: MarkDuplicates on data 122: BAM (as BED)</span></span> <!---->
+    //     // </li>`
+
+        
+    //     if (input_def.type == 'data_collection'){
+    //         for (var i = 0; i < options['hdca'].length; i++) {
+    //             const el = document.createElement("option");
+    //             if (input_def['options']['hdca'].length !== 0) {
+    //                 options['hdca'][i].hid = `${options['hdca'][i].hid}`
+    //                 el.textContent = options['hdca'][i].hid+" "+options['hdca'][i].name;
+    //                 el.value = JSON.stringify(options['hdca'][i])
+    //                 delete options['hdca'][i].keep
+
+    //             }
+    //             Select.appendChild(el);
+    //         }
+    //     } else {
+    //         for (var i = 0; i < options['hda'].length; i++) {
+    //             const opt = document.createElement("option");
+    //             if (input_def['options']['hda'].length !== 0) {
+
+    //                 var list_option = document.createElement('li')
+    //                 list_option.className = 'multiselect-element'
+    //                 list_option.title = ''
+    //                 // list_option.className = "multiselect-element"
+    //                 var innerSpan = document.createElement('span')
+    //                 var outerSpan = document.createElement('span')
+    //                 innerSpan.className = 'inner-span'
+    //                 outerSpan.className = 'outer-span'
+    //                 outerSpan.append(innerSpan)
+    //                 list_option.append(outerSpan)
+    //                 innerSpan.textContent = options['hda'][i].hid+":"+options['hda'][i].name;                   
+    //                 mso.querySelector('.multiselect-content-list').append(list_option)
+    //             }
+    //         }
+    //     }
+ 
+
+    //     console.log(mso.querySelectorAll('li'))
+
+
+    //     mso.querySelectorAll('li').forEach((li) => li.querySelector('.inner-span').addEventListener('click', (e) => {
+    //         self.removeAllChildNodes(mso.parentNode.parentNode.querySelector('.multi_select_box'))
+    //         mso.parentNode.parentNode.querySelector('.multi_select_box').append(e.target.cloneNode(true))
+    //     }));
+        
+   
+    //     sim.querySelector('#data-file-input').addEventListener('click', (e) => {
+
+    //         this.batch_execution[NamePrefix+input_def['name']] = 'single'
+
+    //         Select.style.height = '40px'
+
+    //         FileManu.querySelector('.data-descriptor-label').style.display = 'none'
+    //         Select.multiple = false
+    //         self.removeAllChildNodes(Select)
+
+    //         // for (var i = 0; i < options['hda'].length; i++) {
+    //         //     const el = document.createElement("option");
+    //         //     if (options['hda'].length !== 0) {
+    //         //         if(i === 0){
+    //         //             el.selected = true
+    //         //         }
+    //         //         el.textContent = options['hda'][i].hid+options['hda'][i].name;
+    //         //         delete options['hda'][i].keep
+
+    //         //         if(options['hda'][i]['id'] == ''  ){
+    //         //             el.data = JSON.stringify("") 
+    //         //         } else{
+    //         //             el.value = JSON.stringify(options['hda'][i])
+    //         //         }
+    //         //     }
+    //         //     Select.appendChild(el);
+    //         // }
+    //     })
+
+    //     sim.querySelector('#batch-file-input').addEventListener('click', (e) => {
+            
+    //         this.batch_execution[NamePrefix+input_def['name']] = 'multiple';
+    //         Select.style.height = '200px'
+    //         FileManu.querySelector('.data-descriptor-label').style.display = 'block'
+    //         Select.multiple = true
+
+    //         // self.removeAllChildNodes(Select)
+
+    //         // for (var i = 0; i < options['hda'].length; i++) {
+    //         //     const opt = document.createElement("option");
+    //         //     if (input_def['options']['hda'].length !== 0) {
+    //         //         opt.textContent = options['hda'][i].hid+" "+options['hda'][i].name;
+    //         //         delete options['hda'][i].keep
+    //         //         opt.value = JSON.stringify(options['hda'][i])
+    //         //     }
+    //         //     Select.appendChild(opt);
+    //         // }
+    //     })
+
+    //     sim.querySelector('#collection-data-input').addEventListener('click', async (e) => {   
+
+    //         this.batch_execution[NamePrefix+input_def['name']] = 'collection'
+            
+    //         Select.style.height = '40px'
+
+    //         FileManu.querySelector('.data-descriptor-label').style.display = 'block'
+    //         Select.multiple = false
+    //         self.removeAllChildNodes(Select)
+
+    //         for (var i = 0; i < options['hdca'].length; i++) {
+    //             const el = document.createElement("option");
+    //             if (input_def['options']['hdca'].length !== 0) {
+    //                 el.textContent = options['hdca'][i].hid+" "+options['hdca'][i].name; 
+    //                 el.value = JSON.stringify(options['hdca'][i])
+    //                 delete options['hdca'][i].keep 
+    //             }
+    //             Select.appendChild(el);
+    //         }
+
+    //         Select.selectedIndex = 0
+    //     })
+
+    //     if(this.batch_execution[NamePrefix+input_def['name']]){
+    //         if(this.batch_execution[NamePrefix+input_def['name']] === 'multiple'){
+    //             sim.querySelector('#batch-file-input').click()
+    //             Select.selectedIndex = -1                
+    //         } else if (this.batch_execution[NamePrefix+input_def['name']] === 'collection'){
+    //             sim.querySelector('#collection-data-input').click()
+    //         } else if (this.batch_execution[NamePrefix+input_def['name']] === 'single'){
+    //             sim.querySelector('#data-file-input').click()
+    //         }
+    //     }
+
+    //    if(this.selected_file_cache[NamePrefix+input_def['name']] && input_def.value){
+    //         input_def.value.values = this.selected_file_cache[NamePrefix+input_def['name']]['values']
+    //         row['data-key']['data']['values']  = input_def.value.values
+    //         row['data-key']['data']['batch'] = this.selected_file_cache[NamePrefix+input_def['name']]['batch']
+    //    }
+         
+    //     // if (input_def.value == null && input_def.optional === true){
+    //     //     Select.options[Select.options.length-1].selected = true
+    //     // } else {
+    //     //     if (input_def.value != null) {
+    //     //         for (var i = 0; i < Select.options.length; i++) {
+    //     //             for (var k = 0; k < input_def.value.values.length; k++ ) {   
+    //     //                 if (input_def.value.values[k] != null) { 
+    //     //                     if (JSON.parse(Select.options[i].value)['id'] == input_def.value.values[k]['id']){
+    //     //                         Select.options[i].selected = true
+    //     //                     }
+    //     //                 }
+    //     //             }
+    //     //         }
+    //     //     }
+    //     // } 
+
+
+    //     if(Select.children.length > 0){
+    //         for (var i in Select.children){
+    //             if(Select.children[i].selected){
+    //                 row['data-key']['data']['values'].push(JSON.parse(Select.children[i].value))
+    //             }
+    //         }
+    //     }
+
+    //     Select.addEventListener("dragover", function(event) {
+    //         event.preventDefault();
+    //     }, false);
+
+    //     Select.id = `input-data-${this.uid()}`
+
+    //     Select.addEventListener("drop", async function(event) {
+    //             var draged_item = self.dragged
+
+    //             var dataID = JSON.parse(self.dragged.querySelector('.title').getAttribute('data-value'))
+    //             var name = self.dragged.querySelector('.name').innerText
+    //             var hid = self.dragged.querySelector('.hid').innerText
+
+    //             const opt = `${hid}${name}`
+    //             const el = document.createElement("option");
+
+    //             el.textContent = opt;
+
+    //             if (dataID[1] == 'collection'){
+    //                 el.value = JSON.stringify({"id":dataID[0], "src":"hdca"})
+    //             } else {
+    //                 el.value = JSON.stringify({"id":dataID[0], "src":"hda"}) 
+    //             } 
+
+    //             Select.prepend(el);
+    //             el.selected = true
+              
+    //             self.selected_file_cache[NamePrefix+input_def['name']] = null
+
+    //             for (var i in Select.children){
+    //                 if(Select.children[i].selected){
+    //                     row['data-key']['data']['values'].push(JSON.parse(Select.children[i].value))
+    //                 }
+    //             }
+
+    //             if(input_def.multiple){
+    //                 self.selected_file_cache[NamePrefix+input_def['name']] = {'batch': false, 'values': row['data-key']['data']['values']}
+    //             } else if(!input_def.multiple && Select.multiple) {
+    //                 self.selected_file_cache[NamePrefix+input_def['name']] = {'batch': true, 'values': row['data-key']['data']['values']}
+    //             }
+
+    //             var form = self.el.querySelector('.Galaxy-form')
+    //             var inputs =  self.clean_param_for_job(self.new_form_data(form), false)
+    //             var history_id = self.el.querySelector('#dataset-history-list').value
+    //             var refine_inputs = await KernelSideDataObjects(`import IPython\nfrom GiN.taskwidget  import GalaxyTaskWidget\nclass Temp(object):\n    def Return(self):\n        return IPython.display.JSON(GalaxyTaskWidget.updated_form(${JSON.stringify(origin)}, json.loads(base64.b64decode("${btoa(JSON.stringify(inputs))}")), ${JSON.stringify(self.model.get('galaxy_tool_id'))}, ${JSON.stringify(history_id)}))\na = Temp()\na.Return()`)
+      
+    //             KernelSideDataObjects(`try:\n    del a\nexcept:\n    print("a is not defined")`)
+    //             self.update_metadata_FormState('galaxy', refine_inputs['inputs'])
+    //             self.removeAllChildNodes(form)
+    //             self.form_builder(refine_inputs['inputs'])
+    //         // }
+
+    //     }, false);
+
+    //     Select.addEventListener("change", async (e) => {
+    
+    //         for(var i in Select.children){
+    //             if(Select.children[i].nodeName == 'OPTION' && Select.children[i].selected){
+    //                 row['data-key']['data']['values'].push(JSON.parse(Select.children[i].value))
+    //             }
+    //         }
+
+    //         if(!input_def.multiple && Select.multiple){
+    //             row['data-key']['data']['batch'] = true
+    //         }
+
+    //         console.log(row['data-key'])
+
+    //         var str = this.el.querySelector('.nbtools-title').innerText
+
+    //         self.selected_file_cache[NamePrefix+input_def['name']] = null
+
+
+
+    //         for (var i in Select.children){
+    //             if(Select.children[i].selected){
+    //                 row['data-key']['data']['values'].push(JSON.parse(Select.children[i].value))
+    //             }
+    //         }
+
+    //         if(input_def.multiple){
+    //             self.selected_file_cache[NamePrefix+input_def['name']] = {'batch': false, 'values': row['data-key']['data']['values']}
+    //         } else if(!input_def.multiple && Select.multiple) {
+    //             self.selected_file_cache[NamePrefix+input_def['name']] = {'batch': true, 'values': row['data-key']['data']['values']}
+    //         }
+
+    //         var form = self.el.querySelector('.Galaxy-form')
+    //         var inputs =  self.clean_param_for_job(self.new_form_data(form), false)
+    //         var history_id = self.el.querySelector('#dataset-history-list').value
+          
+    //         var refine_inputs = await KernelSideDataObjects(`import IPython\nfrom GiN.taskwidget  import GalaxyTaskWidget\nclass Temp(object):\n    def Return(self):\n        return IPython.display.JSON(GalaxyTaskWidget.updated_form(${JSON.stringify(origin)}, json.loads(base64.b64decode("${btoa(JSON.stringify(inputs))}")), ${JSON.stringify(self.model.get('galaxy_tool_id'))}, ${JSON.stringify(history_id)}))\na = Temp()\na.Return()`)
+    //         KernelSideDataObjects(`try:\n    del a\nexcept:\n    print("a is not defined")`)
+
+    //         self.update_metadata_FormState('galaxy', refine_inputs['inputs'])
+    //         self.removeAllChildNodes(form)
+    //         self.form_builder(refine_inputs['inputs'])
+
+    //         if (!str.includes("CustomProDB")) { //Fix Me: Temp fix for CustomDBPro
+    //             self.removeAllChildNodes(FormParent)
+    //             self.form_builder(refine_inputs['inputs'])
+    //         }
+
+    //     }, false);
+    //     row['data-key']['tool_type'] = 'input_data'
+
+    //     FormParent.append(row)
+
+    //     return row
+    // }
 
     add_select_field(input_def, FormParent, NamePrefix){
 
@@ -3970,8 +4427,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         // var datasets = await KernelSideDataObjects(`from GiN.taskwidget  import GalaxyTaskWidget\nGalaxyTaskWidget.history_data_list(server=${JSON.stringify(server)}, history_id=${JSON.stringify(history_id)} )`) 
   
         var datasets 
-
-    
         datasets = await KernelSideDataObjects(`import IPython\nfrom GiN.taskwidget  import GalaxyTaskWidget\nclass Temp(object):\n    def Return(self):\n        return IPython.display.JSON(GalaxyTaskWidget.history_data_list(server=${JSON.stringify(server)}, history_id=${JSON.stringify(history_id)} ))\na = Temp()\na.Return()`) 
         
        
@@ -3982,17 +4437,20 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         KernelSideDataObjects(`try:\n    del a\nexcept:\n    print("a is not define")`) 
          
         for (var i = 0; i < datasets.length; i++){
+
             if (datasets[i]['history_content_type'] == 'dataset') {
                 this.add_dataset(data_list, datasets[i], history_id)
             } 
             else if (datasets[i]['history_content_type'] == 'dataset_collection') {
-                data_list.append( await this.dataset_collection_row_state (datasets[i], history_id))
+                // console.log(datasets)
+                // console.log( await this.dataset_collection_row_state (datasets[i], history_id))
+                this.dataset_collection_row_state(datasets[i], history_id, data_list)
             }
         }
         return data_list
     }
  
-    async dataset_collection_row_state (dataset, history_id){
+    async dataset_collection_row_state (dataset, history_id, data_list){
 
         if(this.el.querySelector('.tool-migration-select')){
             var origin = this.el.querySelector('.tool-migration-select').value
@@ -4008,9 +4466,9 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             dataset.collection_type_title =  `a list of ${dataset.element_count} items`
         } else if (dataset.collection_type == 'paired') {
             dataset.collection_type_title =  `a dataset pair with ${dataset.element_count} items`
-        }       
+        }     
 
-        if (dataset['populated_state'] == 'ok'){
+        // if (dataset['populated_state'] == 'ok'){
             var pop_state = dataset['populated_state']
 
             var row = `<div id="${dataset['type_id']}"   class="list-item ${dataset['history_content_type']} history-content state-${pop_state}" >
@@ -4040,68 +4498,58 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                             </div>
                         </div>
                         
-                        <div class="list-items"  style="display: none; border: solid white 2px; margine; margin: 20px; "></div>
+                        <div class="list-items"  style="display: none; "></div>
                     </div>`
             
             const Tbl = new DOMParser().parseFromString(row, 'text/html').querySelector(`.list-item.${dataset['history_content_type']}.history-content.state-${pop_state}`)
 
+            // if()
+            data_list.append(Tbl)
             var exch  = Tbl.querySelector('.fa.fa-exchange')
             var gp_tools = Tbl.querySelector('.gpt')
             var g_tools = Tbl.querySelector('.gt')
 
             Tbl.querySelector('.title').myData = {'jai':0}
 
-            var states = ['new', 'queued', 'running']
-
-            if (states.includes(dataset['populated_state'])){
+            if(dataset['job_source_id']){
                 for (let i = 0; i < Infinity; ++i) {
-                    // var dataset = await KernelSideDataObjects(`from GiN.taskwidget  import GalaxyTaskWidget\nGalaxyTaskWidget.show_dataset_collection(server=${JSON.stringify(origin)}, dataset_id=${JSON.stringify(dataset['id'])} )`)
-
-                    var dataset = await KernelSideDataObjects(`import IPython\nfrom GiN.taskwidget  import GalaxyTaskWidget\nclass Temp(object):\n    def Return(self):\n        return IPython.display.JSON(GalaxyTaskWidget.show_dataset_collection(server=${JSON.stringify(origin)}, dataset_id=${JSON.stringify(dataset['id'])}))\na = Temp()\na.Return()`)
+                    var state = await KernelSideDataObjects(`import IPython\nfrom GiN.taskwidget  import GalaxyTaskWidget\nclass Temp(object):\n    def Return(self):\n        return IPython.display.JSON(GalaxyTaskWidget.return_job_state(server=${JSON.stringify(origin)}, job_id=${JSON.stringify(dataset['job_source_id'])}))\na = Temp()\na.Return()`)
                     KernelSideDataObjects('try:\n    del a\nexcept:\n    print("a is not defined")')
-    
-                    if ( dataset['populated_state'] == 'new'  ){
+
+                
+                    if ( state['job_state'] === 'new'  ){
                         Tbl.className = `list-item ${dataset['history_content_type']} history-content state-new`
                         Tbl.style.background = '#7d959d70'
                     }   
     
-                    else if (dataset['populated_state'] == 'queued' ){
+                    else if ( state['job_state'] === 'queued' ){
                         Tbl.className = `list-item ${dataset['history_content_type']} history-content state-queued`
                         Tbl.style.background = '#7d959d70'
                     } 
     
-                    else if(dataset['populated_state'] == 'running'){
+                    else if( state['job_state'] === 'running'){
                         if(Tbl.querySelector('.fa.fa-clock-o')){
-                            Tbl.querySelector('.fa.fa-clock-o').remove()
+                            Tbl.querySelector('.fa.fa-clock-o').className  = 'fas fa-spinner fa-spin'
                         }
                         
                         Tbl.style.background = '#ffe6cd'
                         Tbl.className = `list-item ${dataset['history_content_type']} history-content state-running`
-                    }
-    
-                    await this.waitforme(5000);
-    
-                    if ( dataset['populated_state'] == 'ok' ) {
+                    }  
+
+                    else if( state['job_state'] === 'ok'){
+
                         Tbl.style.background = '#C2EBC2'
                         Tbl.className = `list-item ${dataset['history_content_type']} history-content state-ok`
-                        
-                        if (Tbl.querySelector('.primary-actions')){
-                            Tbl.querySelector('.primary-actions').innerHTML = `<a class="icon-btn display-btn" title="" target="_blank" href="${URL}/datasets/${dataset['id']}/preview" data-original-title="View data"><span class="fas fa-eye" style="" title="View Data" ></span></a><a class="icon-btn edit-btn" target="_blank"  href="${URL}/datasets/${dataset['id']}/edit" data-original-title="Edit attributes"><span class="fa fa-pencil" title="Edit data"></span></a><a class="icon-btn delete-btn" title="" href="javascript:void(0);" data-original-title="Delete"><span class="fa fa-times" style="" title="Delete" ></span></a><a class="icon-btn display-btn" title="" target="" href="javascript:void(0);" data-original-title="View data"><span class="fa fa-download" style="" title="Download data to JupyterLab Server" ></span></a><a class="icon-btn display-btn"  target="" href="javascript:void(0);" data-original-title="View data"><span class="fa fa-exchange" style="" title="Send data to available tools"></span></a>`
-                        }                                                                                         
                         break;
-                    }  
-                    
-                    else if (dataset['populated_state'] == 'error'){
-                        Tbl.style.background = '#f4a3a5'
-                        Tbl.className = `list-item ${dataset['history_content_type']} history-content state-error`
-                    
-                        if (Tbl.querySelector('.primary-actions')){
-                            Tbl.querySelector('.primary-actions').innerHTML = `<a class="icon-btn display-btn" title="" target="_blank" href="${URL}/datasets/${dataset['id']}/preview" data-original-title="View data"><span class="fas fa-eye" style="" title="View Data" ></span></a><a class="icon-btn edit-btn" target="_blank"  href="${URL}/datasets/${dataset['id']}/edit" data-original-title="Edit attributes"><span class="fa fa-pencil" title="Edit data"></span></a><a class="icon-btn delete-btn" title="" href="javascript:void(0);" data-original-title="Delete"><span class="fa fa-times" style="" title="Delete" ></span></a>`
-                        }
-                        break;
-                    }     
-                }
+                    }
 
+                    else if(  state['job_state'] === 'error'){
+                        // Tbl.style.background = '#f4a3a5'
+                        // Tbl.className = `list-item ${dataset['history_content_type']} history-content state-error`
+                        break;
+                    }
+                    await this.waitforme(5000);
+                }
             }
 
             if (exch){
@@ -4201,9 +4649,9 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 }
             });
 
-        var title = Tbl.querySelector('.title-bar.clear')
+            var title = Tbl.querySelector('.title-bar.clear')
 
-        var dragged
+            var dragged
 
             title.addEventListener("dragstart", (event) => {
                 this.dragged = event.target;
@@ -4220,12 +4668,12 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             self.delete_dataset(Tbl, dataset['id'],  history_id, 'collection')
             return Tbl
 
-        } else{
-            //Need to be fixed: a separate dataaset_collection error widget  
-            dataset['populated_state'] = 'error'
-            dataset['history_content_type'] = 'dataset'
-            // return this.dataset_row_error_state(dataset, history_id)
-        }
+        // } else{
+        //     //Need to be fixed: a separate dataaset_collection error widget  
+        //     dataset['populated_state'] = 'error'
+        //     dataset['history_content_type'] = 'dataset'
+            // return self.dataset_row_error_state(dataset, history_id)
+        // }
     } 
  
     add_data_share_menu ( ){
@@ -4297,6 +4745,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         }  else{
             var URL = this.model.get('origin')
         }
+
         
         var row = `<div id="${dataset['type_id']}"   class="list-item ${dataset['history_content_type']} history-content state-${dataset['state']}" >
                         <div class="warnings"></div>
@@ -4336,7 +4785,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             spn.style.color = 'red'
             Tbl.querySelector('.title-bar.clear').prepend(spn)
             }
-
         } else if (dataset['state'] == 'ok') {
             if (Tbl.querySelector('.primary-actions')){
                 Tbl.querySelector('.primary-actions').innerHTML = `<a class="icon-btn display-btn" title="" data-original-title="View data"><span class="fas fa-eye" style="" title="View Data" ></span></a><a class="icon-btn edit-btn" target="_blank"  href="${URL}/datasets/${dataset['id']}/edit" data-original-title="Edit attributes"><span class="fa fa-pencil" title="Edit data"></span></a><a class="icon-btn delete-btn" title="" href="javascript:void(0);" data-original-title="Delete"><span class="fa fa-times" style="" title="Delete" ></span></a><a class="icon-btn display-btn" title="" target="" href="javascript:void(0);" data-original-title="View data"><span class="fa fa-download" style="" title="Download data to JupyterLab Server" ></span></a><a class="icon-btn display-btn"  target="" href="javascript:void(0);" data-original-title="View data"><span class="fa fa-exchange" style="" title="Send data to available tools"></span></a>`
@@ -4412,7 +4860,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
 
                 //To fix the Kernel busy issue which is arising because of IPython.display.JSON,  an instance of the Temp class added and deleted once galaxy object returns.
                 var data = await KernelSideDataObjects(`import IPython\nfrom GiN.taskwidget  import GalaxyTaskWidget\nclass Temp(object):\n    def Return(self):\n        return IPython.display.JSON(GalaxyTaskWidget.show_data_set(server=${JSON.stringify(URL)}, dataset_id=${JSON.stringify(dataset['id'])} ))\na = Temp()\na.Return()`)
-              
                 KernelSideDataObjects(`try:\n    del a\nexcept:\n    print("a is not defined")`)
 
                 if ( data['state'] == 'new'  ){
@@ -4471,7 +4918,9 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                     }
 
                     break;
-                }     
+                } else if(!this.el.querySelector(`#${dataset['type_id']}`)) {
+                    break;
+                }
             }
         }
 
@@ -4904,7 +5353,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
             }
         })
 
-        var Table = `<div id ="${job['id']}" class="donemessagelarge">
+        var Table = `<div id ="job-id-${job['id']}" class="donemessagelarge">
                         <p> Executed <b>${this.model.get('name')}</b> and successfully added 1 job to the queue. </p>
                         <p>The tool uses this input:</p>
                         <ul class="inputs">
@@ -4941,7 +5390,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 inputs.append(ili)
             }
     
-            for (var k =0; k < Object.keys(jb['outputs']).length; k++){
+            for (var k = 0; k < Object.keys(jb['outputs']).length; k++){
                 var oli  = document.createElement('li')
                 var ob = document.createElement('b')
                 
@@ -5045,7 +5494,6 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         var states = ['ok', 'error']
 
         for (let i = 0; i < Infinity; ++i) {
-
             // var job  = await KernelSideDataObjects(`from GiN.taskwidget import GalaxyTaskWidget\nGalaxyTaskWidget.show_job(server=${JSON.stringify(origin)}, job_id=${JSON.stringify(job_1['id'])})`)
             var job = await KernelSideDataObjects(`import IPython\nfrom GiN.taskwidget  import GalaxyTaskWidget\nclass Temp(object):\n    def Return(self):\n        return IPython.display.JSON(GalaxyTaskWidget.show_job(server=${JSON.stringify(origin)}, job_id=${JSON.stringify(job_1['id'])}))\na = Temp()\na.Return()`)
             KernelSideDataObjects(`try:\n    del a\nexcept:\n    print("a is not defined")`)
@@ -5105,18 +5553,17 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 StdError.style.background = '#f4a3a5'
 
                 // parent.querySelector('.job-id').style.color = "red"
-            }
+            } 
 
             await this.waitforme(5000);
 
-            if (states.includes(job_state) === true ) {
+            if (states.includes(job_state) === true || this.el.querySelector(`#job-id-${job_1['id']}`) == null ) {
                 break;
             }      
         }
     }
 
     async dataset_collection_list_item (show_dataset){
-
 
         if(this.el.querySelector('.tool-migration-select')){
             var origin = this.el.querySelector('.tool-migration-select').value
@@ -5355,6 +5802,8 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                 if(job_inputs == undefined){
                     return 
                 }
+
+                console.log(job_inputs)
                 
                 this.SubmitJob(job_inputs, history_id)
                 this.hide_run_buttons(true)
@@ -5467,6 +5916,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         this.JobStatusTemplate(toolforms, jobs)
 
     } else {
+            console.log(jobs)
             for (var i = 0; i < jobs['jobs'].length; i++ ) {
                 this.JobStatusTemplate(toolforms, jobs['jobs'][i])
             }

@@ -533,3 +533,45 @@
   color: red;
   
 }
+
+.galaxy-uibuilder  .visible .multi-selectbox{
+  display: grid;
+  grid-template-rows: auto auto; 
+}
+
+.galaxy-uibuilder .multiselect-content-list{
+  width: 100%;
+  background: rgb(255,255,255);
+  list-style-type: none;
+  padding: 0; 
+  margin: 0; 
+  height: 200px; 
+  overflow-y: auto; 
+  color: rgb(24,4,4);
+  font-size: 12px; 
+}
+
+.galaxy-uibuilder .multiselect-element{
+  background: #ffffff;
+  margin-top: rgb(207,207,229);
+  padding-top: 5px;
+  padding-bottom: 5px;
+  margin-bottom: 1px;
+  margin-top: 1px;
+  margin-left: 2px;
+}
+
+.galaxy-uibuilder .multiselect-element:hover{
+  background: #25537b;
+  margin-top: rgb(8,6,159);
+  padding-top: 5px;
+  padding-bottom: 5px;
+  margin-bottom: 1px;
+  margin-top: 1px;
+  margin-left: 2px;
+  color: white;
+}
+
+.galaxy-uibuilder .multi_select_box{
+ background: rgb(233,231,231);
+}
