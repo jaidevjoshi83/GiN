@@ -222,8 +222,6 @@
   margin-right: 2px;
 }
 
-
-
 .galaxy-uibuilder  .list-item{
   padding-left: 0;
 }
@@ -483,36 +481,40 @@ border-radius: 3px;
   height: 20px;
 }
 
-
 .galaxy-uibuilder #create-history-button:hover {
   color: white;
 }
 
-
 .galaxy-uibuilder .list-item.dataset.history-content.state-ok{
-  margin: 1px;
+  margin-top: 3px;
+  margin-bottom: 3px;
   border: 0px;
-  border-radius: 1px;
+  border-radius: 5px;
 }
 
 .galaxy-uibuilder .list-item.dataset_collection.history-content.state-ok{
  
-  margin: 1px;
+  margin-top: 3px;
+  margin-bottom:  3px;
   border: 0px;
-  border-radius: 1px;
-  padding-bottom: 10px;
+  border-radius: 5px;
 }
 
 .galaxy-uibuilder .list-item.dataset.history-content.state-error{
-    
-  margin: 1px;
+  margin-top: 3px;
+  margin-bottom:  3px;
   border: 0px;
-  border-radius: 1px;
-    
+  border-radius: 5px;
 }
 
 .jp-mod-selected .ui-form-title-text b {
-    
   margin: 5px;
-  
+}
+
+
+.galaxy-uibuilder .list-items {
+  padding: 5px;
+  margin-left: 5px;
+  margin-left: 5px;
+  border: solid white 1px;  
 }

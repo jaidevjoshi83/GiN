@@ -556,7 +556,7 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
         gi = GiN.sessions.SessionList().get(server=server)
         job_state = gi.gi.jobs.get_state(job_id=job_id)
 
-        return IPython.display.JSON({"job_state": job_state})
+        return {"job_state": job_state}
     
     @staticmethod
     def check_login(login_id, server):

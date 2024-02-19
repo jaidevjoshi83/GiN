@@ -38,7 +38,6 @@ class GalaxyAuthWidget(GalaxyUIBuilder):
             **kwargs
         )
 
-
 ## Registering tools in treads, Login fast but tool loading slow. 
 
     def login(self, credentials):
@@ -79,20 +78,19 @@ class GalaxyAuthWidget(GalaxyUIBuilder):
                     try:
                         tool={'id':None, 'description':None, 'name':None}
                         if t['model_class'] == 'Tool':
-                            tool['id'] = t['id']
-                            tool['description'] = t['description']
-                            tool['name'] = t['name']+" ("+t['version']+")"
-                            tool['origin'] = self.session._notebook_url
-                            tool['email'] = self.session._notebook_email
-                            tool = TaskTool(tool['origin'], tool)
-                            ToolManager.instance().register(tool)
+                                tool['id'] = t['id']
+                                tool['description'] = t['description']
+                                tool['name'] = t['name']+" ("+t['version']+")"
+                                tool['origin'] = self.session._notebook_url
+                                tool['email'] = self.session._notebook_email
+                                tool = TaskTool(tool['origin'], tool)
+                                ToolManager.instance().register(tool)
                                 # tool_list['tools'].append(tool)
                     except:
                             pass
 
                                 
         t = {"id": 'GiN_data_upload_tool',  "description": "Upload data files to galaxy server", "name": "Upload Data", 'origin': self.session._notebook_url, 'inputs': [{'type': 'data_upload'}]}
-       
         t = TaskTool('+', t )
         ToolManager.instance().register(t)
 
