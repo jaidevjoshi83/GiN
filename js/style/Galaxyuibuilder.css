@@ -387,7 +387,8 @@ border-radius: 5px;
 
 .job-status-footer{
   /* background: hsl(240, 4%, 22%); */
-  background: #2c3143
+  background: #2c3143;
+  margin-top: 2px;
 }
 
 .footer-txt{
@@ -407,10 +408,6 @@ border-radius: 5px;
   /* width: 74%; */
   float: left;
   height: 100%;
-}
-
-.job-status-footer {
-  margin-top: 2px;
 }
 
 .preview{

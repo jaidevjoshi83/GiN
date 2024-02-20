@@ -255,8 +255,6 @@
   height: 50px;
 }
 
-
-
 .galaxy-uibuilder  .form-restore-div{
   background: rgb(53, 53, 54);
   padding-left: 10px;
@@ -269,17 +267,6 @@
   padding-bottom: 2px;
   margin-bottom: 5px;
 }
-
-
-/* .galaxy-uibuilder .job-status-footer div {
-  overflow: auto;
-}
-.galaxy-uibuilder .job-status-footer {
-  overflow: auto;
-} */
-/* .galaxy-uibuilder .job-header {
-   overflow: auto;
-} */
 
 .galaxy-uibuilder .jp-mod-selected .form-restore-div {
   background: rgb(15, 16, 20);
