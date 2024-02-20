@@ -141,10 +141,15 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
     def show_job( server, job_id):
 
         gi = GiN.sessions.SessionList().get(server=server)
-        job = gi.jobs.gi.jobs.show_job(job_id=job_id)
+
+        try:
+            job = gi.jobs.gi.jobs.show_job(job_id=job_id)
+            return job
+        except:
+            {"state":"request_failed"}
 
         # return IPython.display.JSON(job)
-        return job
+        # return job
 
     @staticmethod
     def get_data_type_and_genomes( server=None):
