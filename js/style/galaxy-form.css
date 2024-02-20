@@ -271,15 +271,15 @@
 }
 
 
-.galaxy-uibuilder .job-status-footer div {
+/* .galaxy-uibuilder .job-status-footer div {
   overflow: auto;
 }
 .galaxy-uibuilder .job-status-footer {
   overflow: auto;
-}
-.galaxy-uibuilder .job-header {
+} */
+/* .galaxy-uibuilder .job-header {
    overflow: auto;
-}
+} */
 
 .galaxy-uibuilder .jp-mod-selected .form-restore-div {
   background: rgb(15, 16, 20);
@@ -534,6 +534,7 @@
   
 }
 
+.galaxy-uibuilder mjult
 .galaxy-uibuilder  .visible .multi-selectbox{
   display: grid;
   grid-template-rows: auto auto; 
@@ -572,6 +573,18 @@
   color: white;
 }
 
-.galaxy-uibuilder .multi_select_box{
- background: rgb(233,231,231);
+.galaxy-uibuilder .job-done-text {
+  width: 90%;
+}
+
+.galaxy-uibuilder .job-status-buttons {
+
+  font-size: 16px;
+  width: 10%;
+  float: right;
+}
+
+.galaxy-uibuilder .job-header{
+  color: white;
+  background: rgb(83,79,79);   
 }

@@ -47,7 +47,7 @@ class GalaxyAuthWidget(GalaxyUIBuilder):
         tools = []
 
         tool_list =  {'tools':[]}
-    
+
         if credentials['email']:
             try:
                 self.session = GalaxyInstance(credentials['server'], email=credentials['email'], password=credentials['password'])
@@ -62,6 +62,7 @@ class GalaxyAuthWidget(GalaxyUIBuilder):
             except:
                 # tool_list['state'] = 'error'
                 return IPython.display.JSON({'state': 'error'})
+            
 
         self.session._notebook_url = credentials['server']
         self.session._notebook_password = credentials['password']

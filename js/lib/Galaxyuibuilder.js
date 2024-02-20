@@ -5323,9 +5323,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
  
     async JobStatusTemplate (parent, job){
 
-        
-
-
+    
         var origin
 
         if (this.el.querySelector('.tool-migration-select')){
@@ -5337,27 +5335,28 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
         var self = this
 
         var job_status = `<div class="job-status-widget" id ="job-id-${job['id']}">
-                            <div class="job-header">
-                                <div class="indicator" style="float:left;">
+                            <div class="job-header" style="display: flex; align-items: center">
+                                <div class="indicator">
                                     <div class="gear-rotate-icon">
-                                        <i class="fas fa-cog fa-spin" ></i>
+                                        <i class="fas fa-cog fa-spin"></i>
                                     </div>
                                     <div class="job-done-icon">
-                                        <i class="fa fa-check-circle"> </i>
+                                        <i class="fa fa-check-circle"></i>
                                     </div>
                                     <div class="job-error-icon">
                                         <i class="fa fa-times-circle" style="font-size: 25px; margin-top: 5px; border-radius: 22px"></i>
                                     </div>
                                 </div>
-                                <div class="job-done-text" style="width:80%; float:left;">
-                                    <div class="job-state-text" style="float:left;">
-                                        Job queued                                        
-                                    </div>
-                                </div> 
-                                
-                                <div class="job-status-buttons" style="margin-top:3px; float:right;" >
-                                    <a class="icon-btn display-btn" title=""  data-original-title="View data"><span class="fas fa-eye" style="" title="View job details" ></span></a><a class="icon-btn display-btn" title=""  data-original-title="View data"><span class="fa fa-refresh" style="" title="Reset tool form" ></span></a>
+                             <div class="job-done-text" style="display: flex; justify-content: space-between;">
+                                <div class="job-state-text">
+                                    Job queued
                                 </div>
+           
+                            </div>
+                            <div class="job-status-buttons" >
+                                <span class="fas fa-eye" title="View job details"></span>
+                                <span class="fa fa-refresh" title="Reset tool form"></span>
+                            </div>
                             </div>
 
                             <div class="job-output-files" style="display: none">
@@ -5376,7 +5375,7 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
                                 </div>
                             </div>
 
-                            <div class="job-status-footer" style="width:100%; height: 30px; color:white;" >
+                            <div class="job-status-footer" style=" color:white;" >
                            
                             </div>
 
