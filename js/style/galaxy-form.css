@@ -588,3 +588,8 @@
   color: white;
   background: rgb(83,79,79);   
 }
+
+.galaxy-uibuilder .job-widget-icons{
+  float: right;
+  margin: 4px;
+}

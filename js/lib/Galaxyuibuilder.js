@@ -5354,8 +5354,10 @@ export class GalaxyUIBuilderView extends BaseWidgetView {
            
                             </div>
                             <div class="job-status-buttons" >
+                               <div class='job-widget-icons'>
                                 <span class="fas fa-eye" title="View job details"></span>
                                 <span class="fa fa-refresh" title="Reset tool form"></span>
+                               </div>
                             </div>
                             </div>
 
