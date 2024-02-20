@@ -256,13 +256,14 @@ width: 350px;
 
 .job-done-text {
   text-align: center;
-  font-size: 15px;
+  font-size: 13px;
   color: #ffffff;
   display: block;
   width: 10%;
   float: left;
   /* background: hsl(240, 4%, 22%); */
   height: 100%;
+  margin-left: 10px;
 }
 
 .job-state-text{
@@ -292,15 +293,15 @@ width: 350px;
   font-size: 22px;
 }
   
-  .gear-rotate-icon{
+.gear-rotate-icon{
   display: none;
   width: 100%;
   height: 100%;
   display: block;
   float: left;
   margin-left: 3px;
-  font-size: 28px;
-  color: rgb(233,230,146);
+  font-size: 25px;
+  color: rgb(129, 131, 144);
 } 
 
 .rbtn {
