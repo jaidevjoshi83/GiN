@@ -1,6 +1,6 @@
 # GiN: Installation
 
-### Create conda env
+###  Create conda env
 
 ```
 conda create -n GiN python=3.10 jupyterlab=3.6 ipywidgets=8.0 nodejs=16  -y
