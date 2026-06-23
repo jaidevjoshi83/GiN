@@ -47,13 +47,13 @@ class GalaxyUIBuilder(BaseWidget, NBTool):
     all_files_complete = lambda self, names: None
 
     def __init__(
-        self, galaxy_tool_id=None, history_ids=None, description=None, inputs=[],  origin='', UU_ID=None, history_id='', **kwargs
+        self, galaxy_tool_id=None, history_ids=None, description=None, inputs=None, origin='', UU_ID=None, history_id='', **kwargs
     ):
 
         self._apply_defaults()
         self.on_msg(self.handle_messages)
-        
-        self.inputs = inputs
+
+        self.inputs = inputs if inputs is not None else []
         self.history_id = history_id
         if history_ids:
             self.history_ids = history_ids
@@ -84,15 +84,18 @@ class GalaxyUIBuilder(BaseWidget, NBTool):
         self.register_tool = True
         self.collapse = False
 
+    # Directory used for chunked file uploads from the browser
+    _upload_dir = os.path.join(os.path.expanduser("~"), ".gin_uploads")
+
     @staticmethod
     def write_chunk(name, encoded_chunk, first_chunk):
+        upload_dir = GalaxyUIBuilder._upload_dir
+        os.makedirs(upload_dir, exist_ok=True)
 
-        if not os.path.exists(os.path.join(os.getcwd(), 'temp')):
-            os.makedirs(os.path.join(os.getcwd(), 'temp'))
-
+        # Prevent path traversal: strip any directory component from the filename
+        safe_name = os.path.basename(name)
         mode = 'w' if first_chunk else 'a'
-
-        file = os.path.join(os.getcwd(), 'temp', name)
+        file = os.path.join(upload_dir, safe_name)
 
         with open(file, mode) as f:
             f.write(base64.b64decode(encoded_chunk).decode("utf-8"))

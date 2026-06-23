@@ -1,5 +1,6 @@
 
 from bioblend.galaxy.objects import GalaxyInstance
+from bioblend import ConnectionError as BioBlendConnectionError
 from .display import display
 from nbtools.tool_manager import  ToolManager, NBTool, EventManager
 from threading import Thread
@@ -9,7 +10,10 @@ from .util import DEFAULT_COLOR, DEFAULT_LOGO, GALAXY_SERVERS
 from .Galaxyuibuilder import GalaxyUIBuilder
 import IPython.display
 import GiN
+import logging
 import threading
+
+log = logging.getLogger(__name__)
 
 class GalaxyAuthWidget(GalaxyUIBuilder):
     """A widget for authenticating with a Galaxy server"""
@@ -52,19 +56,27 @@ class GalaxyAuthWidget(GalaxyUIBuilder):
             try:
                 self.session = GalaxyInstance(credentials['server'], email=credentials['email'], password=credentials['password'])
                 self.session._notebook_email = credentials['email']
-            except:
-                # tool_list['state'] = 'error'
-                return IPython.display.JSON({'state': 'error'})
+            except BioBlendConnectionError as e:
+                log.warning("Galaxy login failed (connection error): %s", e)
+                return IPython.display.JSON({'state': 'error', 'message': 'Could not connect to Galaxy server'})
+            except Exception as e:
+                log.warning("Galaxy login failed: %s", e)
+                return IPython.display.JSON({'state': 'error', 'message': 'Login failed'})
         else:
             try:
                 self.session = GalaxyInstance(credentials['server'],  api_key=credentials['api_key'], verify=True)
                 self.session._notebook_email = self.session.gi.users.get_current_user()['email']
-            except:
-                # tool_list['state'] = 'error'
-                return IPython.display.JSON({'state': 'error'})
+            except BioBlendConnectionError as e:
+                log.warning("Galaxy API key login failed (connection error): %s", e)
+                return IPython.display.JSON({'state': 'error', 'message': 'Could not connect to Galaxy server'})
+            except Exception as e:
+                log.warning("Galaxy API key login failed: %s", e)
+                return IPython.display.JSON({'state': 'error', 'message': 'Login failed'})
             
 
         self.session._notebook_url = credentials['server']
+        # Passwords are kept only as long as required by session registration;
+        # avoid logging or persisting them beyond this point.
         self.session._notebook_password = credentials['password']
         self.session._notebook_key = credentials['api_key']
         self.register_session()
@@ -87,8 +99,8 @@ class GalaxyAuthWidget(GalaxyUIBuilder):
                                 tool = TaskTool(tool['origin'], tool)
                                 ToolManager.instance().register(tool)
                                 # tool_list['tools'].append(tool)
-                    except:
-                            pass
+                    except Exception as e:
+                        log.warning("Failed to register tool '%s': %s", t.get('id'), e)
 
                                 
         t = {"id": 'GiN_data_upload_tool',  "description": "Upload data files to galaxy server", "name": "Upload Data", 'origin': self.session._notebook_url, 'inputs': [{'type': 'data_upload'}]}
@@ -120,13 +132,8 @@ class GalaxyAuthWidget(GalaxyUIBuilder):
         try:
             if session is not None and session.gi.key:
                 return True
-        except:
-            pass
-        # except HTTPError:
-        #     self.error = 'Invalid username or password. Please try again.'
-        #     return False
-        # except BaseException as e:
-        #     self.error = str(e)
+        except Exception as e:
+            log.warning("Credential validation error: %s", e)
         return False
 
     def replace_widget(self):
@@ -174,8 +181,8 @@ class AuthenticationTool(NBTool):
     load = lambda x: GalaxyAuthWidget()
 
 
-# preventing  "jupyter nbextension install", imports need to be fixed 
+# preventing  "jupyter nbextension install", imports need to be fixed
 try:
     ToolManager.instance().register(AuthenticationTool())
-except:
-    pass
+except Exception as e:
+    log.warning("Failed to register AuthenticationTool: %s", e)

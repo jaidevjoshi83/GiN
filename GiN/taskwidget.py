@@ -1,6 +1,7 @@
 import os
 import glob
 import uuid
+import tempfile
 import threading
 import IPython
 from nbtools.tool_manager import NBTool
@@ -14,9 +15,8 @@ log = logging.getLogger(__name__)
 
 try:
     from genepattern import authwidget
-except:
-    print("need to be fixed...!")
-    pass
+except ImportError:
+    authwidget = None
 
 try:
     from gp import GPTask
@@ -145,8 +145,9 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
         try:
             job = gi.jobs.gi.jobs.show_job(job_id=job_id)
             return job
-        except:
-            {"state":"request_failed"}
+        except Exception as e:
+            log.warning("show_job failed for job_id=%s: %s", job_id, e)
+            return {"state": "request_failed", "message": str(e)}
 
         # return IPython.display.JSON(job)
         # return job
@@ -257,8 +258,9 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
         try:
             a = GiN.sessions.SessionList()
             return a.get_servers()
-        except:
-             IPython.display.JSON([])
+        except Exception as e:
+            log.warning("return_session_list failed: %s", e)
+            return IPython.display.JSON([])
 
 
     @staticmethod
@@ -326,9 +328,8 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
             #return IPython.display.JSON(history_data)
             return history_data
 
-        except:
-
-            #return IPython.display.JSON([])
+        except Exception as e:
+            log.warning("history_data_list failed for history_id=%s: %s", history_id, e)
             return []
 
     @staticmethod
@@ -426,34 +427,36 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
         return IPython.display.JSON(out)
     
 
+    @staticmethod
     def start_upload(server, history_id):
 
         upload_id = str(uuid.uuid4())
-     
+
         gi = GiN.sessions.SessionList().get(server=server)
 
-        temp_dir = os.path.join(os.getcwd(), "temp")
-        if not os.path.exists(temp_dir):
-            os.mkdir(temp_dir)
+        temp_dir = tempfile.mkdtemp(prefix="gin_upload_")
         file_path = glob.glob(os.path.join(temp_dir, '*'))[0]
 
-        t = threading.Thread(target=gi.tools.gi.tools.upload_file, kwargs={'path':file_path, 'history_id':history_id})
-    
+        t = threading.Thread(
+            target=gi.tools.gi.tools.upload_file,
+            kwargs={'path': file_path, 'history_id': history_id},
+            daemon=True,
+        )
         t.start()
         GiN.sessions.SessionList().galaxy_upload[upload_id] = t
-    
-        return IPython.display.JSON({'id':upload_id, 'status':'start'})
 
+        return IPython.display.JSON({'id': upload_id, 'status': 'start'})
+
+    @staticmethod
     def check_upload(upload_id):
         a = GiN.sessions.SessionList()
-        # gi = a.get(server=server)
         t = a.galaxy_upload.get(upload_id)
 
-        status = {'id': upload_id, 'status':'running'}
-        if not t.is_alive():
-            out = t.join()
+        status = {'id': upload_id, 'status': 'running'}
+        if t is not None and not t.is_alive():
+            t.join()
             status['status'] = 'finish'
-            del a.galaxy_upload[upload_id]
+            a.galaxy_upload.pop(upload_id, None)
 
         return IPython.display.JSON(status)
     
@@ -500,22 +503,18 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
             dataset_id=dataset_id, file_path=temp_dir, require_ok_state=False
         )
 
-        file_name = glob.glob(temp_dir + "/*.*") 
+        file_name = glob.glob(os.path.join(temp_dir, "*.*"))
         out = gi2.tools.gi.tools.upload_file(path=file_name[0], history_id=history_id)
 
         return IPython.display.JSON(out)
 
     
     @staticmethod
-    def upload_fallback(
-        server_u=None,
-        file_name=None,
-    ):
-
-        gi = GiN.sessions.SessionList().get(server=server)
-        file_name = glob.glob(temp_dir + "/*.*")
+    def upload_fallback(server_u=None, history_id=None):
+        gi = GiN.sessions.SessionList().get(server=server_u)
+        temp_dir = tempfile.mkdtemp(prefix="gin_upload_")
+        file_name = glob.glob(os.path.join(temp_dir, "*.*"))
         out = gi.tools.gi.tools.upload_file(path=file_name[0], history_id=history_id)
-
         return IPython.display.JSON(out)
 
     @staticmethod
@@ -539,6 +538,8 @@ class GalaxyTaskWidget(GalaxyUIBuilder):
             "data." + ext,
         )
         os.rename(file_name[0], new_file)
+        if authwidget is None or GPTask is None:
+            raise RuntimeError("GenePattern integration is not available")
         ####################
         task = GPTask(authwidget.session.sessions[0], tool_id)
         uri = task.server_data.upload_file(
