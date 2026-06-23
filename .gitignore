@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+*.egg
+.eggs/
+dist/
+build/
+*.so
+
+# Jupyter build artifacts
+GiN/labextension/
+GiN/nbextension/
+
+# JavaScript
+js/node_modules/
+js/dist/
+js/yarn.lock
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*~
+
+# OS
+.DS_Store
+Thumbs.db
